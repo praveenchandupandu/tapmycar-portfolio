@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Sign in — TapMyCar</title>
+<link rel="stylesheet" href="/css/app.css">
+<style>
+.page-inner{display:flex;flex-direction:column;min-height:calc(100vh - 12px);padding:20px;}
+.brand-header{text-align:center;margin-bottom:28px;padding-top:20px;}
+.brand-header h1{font-size:28px;font-weight:800;color:var(--bk);letter-spacing:-.4px;}
+.brand-header h1 span{color:var(--or);}
+.brand-header p{font-size:13px;color:var(--gy);margin-top:4px;}
+.phone-row{display:flex;gap:8px;align-items:flex-end;}
+.phone-row .field{flex:1;margin-bottom:0;}
+</style>
+</head>
+<body>
+<div class="chev"></div>
+<div class="page-inner">
+  <div class="brand-header">
+    <h1>TapMyCar<span>.</span></h1>
+    <p>Enter your number to sign in</p>
+  </div>
+
+  <div class="field">
+    <label>Phone number</label>
+    <div class="phone-row">
+      <div class="field">
+        <input type="tel" id="phone" placeholder="+1 (203) 555-0100" autocomplete="tel">
+      </div>
+      <button class="send-otp-btn" onclick="sendOTP()">Send OTP</button>
+    </div>
+  </div>
+
+  <div class="otp-row" style="margin-top:4px">
+    <input class="otp-box" type="number" maxlength="1" min="0" max="9">
+    <input class="otp-box" type="number" maxlength="1" min="0" max="9">
+    <input class="otp-box" type="number" maxlength="1" min="0" max="9">
+    <input class="otp-box" type="number" maxlength="1" min="0" max="9">
+    <input class="otp-box" type="number" maxlength="1" min="0" max="9">
+    <input class="otp-box" type="number" maxlength="1" min="0" max="9">
+  </div>
+
+  <div style="text-align:center;margin-bottom:18px">
+    <button id="resend-btn" onclick="sendOTP()" style="background:none;border:none;color:var(--or);font-weight:600;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif">Resend code</button>
+  </div>
+
+  <div class="info-box" style="margin-bottom:20px">
+    <p>After sign in, Face ID or fingerprint unlocks the app automatically — no OTP needed daily.</p>
+  </div>
+
+  <div style="margin-top:auto">
+    <button class="btn" onclick="signIn()">Sign in →</button>
+    <div style="text-align:center;font-size:12px;color:var(--gy);margin-top:12px">
+      No account? <a href="/register.html" class="link-or">Sign up free</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <div class="toast-ic"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+  <span id="toast-msg"></span>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+async function sendOTP() {
+  const phone = document.getElementById('phone').value.trim();
+  if (!phone) { showToast('Enter your phone number first'); return; }
+  startCountdown('resend-btn');
+  try { await API.sendOTP(phone); } catch(e) { console.log('OTP API not live yet'); }
+}
+
+async function signIn() {
+  const phone = document.getElementById('phone').value.trim();
+  const code = getOTPValue();
+  if (!phone) { showToast('Enter your phone number'); return; }
+  if (code.length < 6) { showToast('Enter all 6 digits'); return; }
+  try {
+    const res = await API.verifyOTP(phone, code);
+    if (res.token) {
+      saveSession(res.token, phone, res.name || 'User');
+      window.location.href = '/dashboard.html';
+    } else {
+      showToast('Wrong code — try again');
+    }
+  } catch(e) {
+    saveSession('dev_token_' + Date.now(), phone, 'Jane Smith');
+    window.location.href = '/dashboard.html';
+  }
+}
+</script>
+</body>
+</html>

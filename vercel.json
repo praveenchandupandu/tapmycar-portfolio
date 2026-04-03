@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/tag/(.*)", "dest": "/public/contact.html" },
+    { "src": "/(.*)", "dest": "/public/$1" }
+  ]
+}
