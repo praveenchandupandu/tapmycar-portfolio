@@ -6,13 +6,12 @@
       "maxDuration": 10
     }
   },
-  "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/tag/(.*)", "dest": "/public/contact.html" },
-    { "src": "/app.css", "dest": "/public/app.css" },
-    { "src": "/app.js", "dest": "/public/app.js" },
-    { "src": "/(.*)\\.html", "dest": "/public/$1.html" },
-    { "src": "/", "dest": "/public/index.html" },
-    { "src": "/(.*)", "dest": "/public/$1" }
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/:path*" },
+    { "source": "/tag/:token", "destination": "/public/contact.html" },
+    { "source": "/app.css", "destination": "/public/app.css" },
+    { "source": "/app.js", "destination": "/public/app.js" },
+    { "source": "/:path*.html", "destination": "/public/:path*.html" },
+    { "source": "/", "destination": "/public/index.html" }
   ]
 }
