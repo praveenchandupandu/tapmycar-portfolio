@@ -103,17 +103,38 @@ async function loadTag() {
     showInvalid();
   }
 }
-
 function showVerified(tag) {
   document.getElementById('loading').style.display = 'none';
   document.getElementById('verified').style.display = 'block';
 
   document.getElementById('call-btn').onclick = () => {
-    showToast('Masked call coming Day 4...');
+    const callerNumber = prompt('Enter your phone number to connect the call:');
+    if (!callerNumber) return;
+    initiateCall(callerNumber);
   };
+
   document.getElementById('text-btn').onclick = () => {
-    showToast('Text messaging coming Day 4...');
+    showToast('Text messaging coming soon');
   };
+}
+
+async function initiateCall(callerNumber) {
+  showToast('Connecting masked call...');
+  try {
+    const res = await fetch('/api/proxy-call', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, caller_number: callerNumber })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Call connected! Check your phone.');
+    } else {
+      showToast(data.error || 'Call failed — try again');
+    }
+  } catch(e) {
+    showToast('Network error — try again');
+  }
 }
 
 function showInvalid() {
