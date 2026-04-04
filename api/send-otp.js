@@ -1,14 +1,8 @@
 const twilio = require('twilio');
-const { createClient } = require('@supabase/supabase-js');
 
-const twil = twilio(
+const client = twilio(
   process.env.TWILIO_ACCOUNT_SID,
   process.env.TWILIO_AUTH_TOKEN
-);
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
 );
 
 module.exports = async function handler(req, res) {
@@ -24,32 +18,18 @@ module.exports = async function handler(req, res) {
   const cleaned = phone.replace(/\D/g, '');
   const formatted = cleaned.startsWith('1') ? '+' + cleaned : '+1' + cleaned;
 
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
-
-  await supabase
-    .from('otp_codes')
-    .delete()
-    .eq('phone', formatted);
-
-  const { error } = await supabase
-    .from('otp_codes')
-    .insert({ phone: formatted, code });
-
-  if (error) {
-    console.error('Supabase error:', error);
-    return res.status(500).json({ error: 'Failed to save OTP' });
-  }
-
   try {
-    await twil.messages.create({
-      body: `Your TapMyCar code is: ${code}. Valid for 10 minutes.`,
-      from: process.env.TWILIO_PHONE_NUMBER,
-      to: formatted
-    });
-    console.log('OTP sent to:', formatted);
+    await client.verify.v2
+      .services(process.env.TWILIO_VERIFY_SID)
+      .verifications.create({
+        to: formatted,
+        channel: 'sms'
+      });
+
+    console.log('Verify OTP sent to:', formatted);
     res.json({ success: true });
   } catch (err) {
-    console.error('Twilio error:', err.message);
+    console.error('Twilio Verify error:', err.message);
     res.status(500).json({ error: err.message });
   }
 };

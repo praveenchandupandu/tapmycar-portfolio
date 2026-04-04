@@ -1,4 +1,10 @@
+const twilio = require('twilio');
 const { createClient } = require('@supabase/supabase-js');
+
+const client = twilio(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+);
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -18,50 +24,58 @@ module.exports = async function handler(req, res) {
   const cleaned = phone.replace(/\D/g, '');
   const formatted = cleaned.startsWith('1') ? '+' + cleaned : '+1' + cleaned;
 
-  const { data: otps } = await supabase
-    .from('otp_codes')
-    .select('*')
-    .eq('phone', formatted)
-    .eq('code', code)
-    .eq('used', false)
-    .gte('expires_at', new Date().toISOString())
-    .limit(1);
-
-  if (!otps || otps.length === 0) {
-    return res.status(400).json({ error: 'Invalid or expired code' });
-  }
-
-  await supabase
-    .from('otp_codes')
-    .update({ used: true })
-    .eq('id', otps[0].id);
-
-  let { data: user } = await supabase
-    .from('users')
-    .select('*')
-    .eq('phone', formatted)
-    .single();
-
-  if (!user) {
-    const { data: newUser } = await supabase
-      .from('users')
-      .insert({ phone: formatted, name: name || 'User' })
-      .select()
-      .single();
-    user = newUser;
-
-    await supabase
-      .from('tags')
-      .insert({
-        user_id: user.id,
-        vehicle_label: 'My Vehicle',
-        status: 'inactive'
+  try {
+    // Verify the code with Twilio
+    const check = await client.verify.v2
+      .services(process.env.TWILIO_VERIFY_SID)
+      .verificationChecks.create({
+        to: formatted,
+        code: code
       });
-  }
 
-  res.json({
-    token: user.id,
-    name: user.name,
-    phone: user.phone
-  });
+    if (check.status !== 'approved') {
+      return res.status(400).json({ error: 'Invalid or expired code' });
+    }
+
+    // Find or create user in Supabase
+    let { data: user } = await supabase
+      .from('users')
+      .select('*')
+      .eq('phone', formatted)
+      .single();
+
+    if (!user) {
+      const { data: newUser, error: insertError } = await supabase
+        .from('users')
+        .insert({ phone: formatted, name: name || 'User' })
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error('User insert error:', insertError);
+        return res.status(500).json({ error: 'Failed to create user' });
+      }
+
+      user = newUser;
+
+      // Create first tag automatically
+      await supabase
+        .from('tags')
+        .insert({
+          user_id: user.id,
+          vehicle_label: 'My Vehicle',
+          status: 'inactive'
+        });
+    }
+
+    res.json({
+      token: user.id,
+      name: user.name,
+      phone: user.phone
+    });
+
+  } catch (err) {
+    console.error('Verify check error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
 };
