@@ -25,7 +25,6 @@ module.exports = async function handler(req, res) {
   const formatted = cleaned.startsWith('1') ? '+' + cleaned : '+1' + cleaned;
 
   try {
-    // Verify the code with Twilio
     const check = await client.verify.v2
       .services(process.env.TWILIO_VERIFY_SID)
       .verificationChecks.create({
@@ -37,7 +36,6 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'Invalid or expired code' });
     }
 
-    // Find or create user in Supabase
     let { data: user } = await supabase
       .from('users')
       .select('*')
@@ -58,7 +56,6 @@ module.exports = async function handler(req, res) {
 
       user = newUser;
 
-      // Create first tag automatically
       await supabase
         .from('tags')
         .insert({
@@ -75,7 +72,7 @@ module.exports = async function handler(req, res) {
     });
 
   } catch (err) {
-    console.error('Verify check error:', err.message);
+    console.error('Verify error:', err.message);
     res.status(500).json({ error: err.message });
   }
 };

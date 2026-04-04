@@ -26,10 +26,10 @@ module.exports = async function handler(req, res) {
         channel: 'sms'
       });
 
-    console.log('Verify OTP sent to:', formatted);
+    console.log('OTP sent to:', formatted);
     res.json({ success: true });
   } catch (err) {
-    console.error('Twilio Verify error:', err.message);
+    console.error('Twilio error:', err.message);
     res.status(500).json({ error: err.message });
   }
 };
