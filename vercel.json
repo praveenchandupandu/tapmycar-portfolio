@@ -7,11 +7,7 @@
     }
   },
   "rewrites": [
-    { "source": "/api/:path*", "destination": "/api/:path*" },
-    { "source": "/tag/:token", "destination": "/public/contact.html" },
-    { "source": "/app.css", "destination": "/public/app.css" },
-    { "source": "/app.js", "destination": "/public/app.js" },
-    { "source": "/:path*.html", "destination": "/public/:path*.html" },
-    { "source": "/", "destination": "/public/index.html" }
+    { "source": "/tag/:token", "destination": "/contact.html" },
+    { "source": "/api/:path*", "destination": "/api/:path*" }
   ]
 }

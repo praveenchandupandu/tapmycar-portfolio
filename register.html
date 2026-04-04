@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Create account — TapMyCar</title>
+<link rel="stylesheet" href="/app.css">
+<style>
+.page-inner{display:flex;flex-direction:column;min-height:calc(100vh - 12px);}
+.phone-row{display:flex;gap:8px;align-items:flex-end;}
+.phone-row .fi-wrap{flex:1;}
+</style>
+</head>
+<body>
+<div class="chev"></div>
+<div class="page-inner" id="step1" style="padding:20px">
+  <div style="margin-bottom:18px">
+    <div style="font-size:24px;font-weight:800;color:var(--bk);margin-bottom:4px">Create account</div>
+    <div style="font-size:13px;color:var(--gy)">Stay reachable without sharing your number</div>
+  </div>
+  <div class="prog"><div class="ps on"></div><div class="ps"></div></div>
+  <div class="field">
+    <label>Full name</label>
+    <input type="text" id="name" placeholder="Jane Smith" autocomplete="name">
+  </div>
+  <div class="field">
+    <label>Phone number</label>
+    <div class="phone-row">
+      <div class="fi-wrap">
+        <input type="tel" id="phone" placeholder="+1 (203) 555-0100" autocomplete="tel">
+      </div>
+      <button class="send-otp-btn" onclick="sendOTP()">Send OTP</button>
+    </div>
+    <div class="hint">A 6-digit code will be sent to verify your number</div>
+  </div>
+  <div style="margin-top:auto">
+    <button class="btn" onclick="goToOTP()">Continue →</button>
+    <div style="text-align:center;font-size:12px;color:var(--gy);margin-top:12px">
+      Have account? <a href="/signin.html" class="link-or">Sign in</a>
+    </div>
+  </div>
+</div>
+
+<div class="page-inner" id="step2" style="display:none;padding:20px">
+  <a class="bk" onclick="backToStep1()" style="margin-bottom:18px;display:flex;cursor:pointer">
+    <div class="bkb"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+    <span class="bk-label" style="margin-left:8px">Verify phone</span>
+  </a>
+  <div style="margin-bottom:14px">
+    <div style="font-size:24px;font-weight:800;color:var(--bk);margin-bottom:4px">Enter your code</div>
+    <div style="font-size:13px;color:var(--gy)" id="otp-subtitle">Sent to your number</div>
+  </div>
+  <div class="prog"><div class="ps dn"></div><div class="ps on"></div></div>
+  <div class="otp-row">
+    <input class="otp-box" type="tel" maxlength="1">
+    <input class="otp-box" type="tel" maxlength="1">
+    <input class="otp-box" type="tel" maxlength="1">
+    <input class="otp-box" type="tel" maxlength="1">
+    <input class="otp-box" type="tel" maxlength="1">
+    <input class="otp-box" type="tel" maxlength="1">
+  </div>
+  <div style="text-align:center;margin-bottom:18px">
+    <button id="resend-btn" onclick="sendOTP()" style="background:none;border:none;color:var(--or);font-weight:600;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif">Resend code</button>
+  </div>
+  <div class="info-box" style="margin-bottom:20px">
+    <p>After verification Face ID or fingerprint unlocks the app automatically.</p>
+  </div>
+  <div style="margin-top:auto">
+    <button class="btn" onclick="verifyOTP()">Verify and create account →</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <div class="toast-ic"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+  <span id="toast-msg"></span>
+</div>
+
+<script src="/app.js"></script>
+<script>
+async function sendOTP() {
+  const phone = document.getElementById('phone').value.trim();
+  if (!phone) { showToast('Enter your phone number first'); return; }
+  document.getElementById('step1').style.display = 'none';
+  document.getElementById('step2').style.display = 'flex';
+  document.getElementById('step2').style.flexDirection = 'column';
+  document.getElementById('otp-subtitle').textContent = 'Sent to ' + phone;
+  startCountdown('resend-btn');
+  try {
+    const res = await API.sendOTP(phone);
+    if (!res.success) showToast(res.error || 'Failed to send OTP');
+  } catch(e) { showToast('Network error — try again'); }
+}
+
+function goToOTP() {
+  const name = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  if (!name) { showToast('Please enter your name'); return; }
+  if (!phone) { showToast('Please enter your phone number'); return; }
+  sendOTP();
+}
+
+function backToStep1() {
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('step1').style.display = 'flex';
+  document.getElementById('step1').style.flexDirection = 'column';
+}
+
+async function verifyOTP() {
+  const code = getOTPValue();
+  if (code.length < 6) { showToast('Enter all 6 digits'); return; }
+  const phone = document.getElementById('phone').value.trim();
+  const name = document.getElementById('name').value.trim();
+  try {
+    const res = await API.verifyOTP(phone, code, name);
+    if (res.token) {
+      saveSession(res.token, res.phone || phone, res.name || name);
+      window.location.href = '/etag.html';
+    } else {
+      showToast(res.error || 'Wrong code — try again');
+    }
+  } catch(e) { showToast('Network error — try again'); }
+}
+</script>
+</body>
+</html>

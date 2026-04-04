@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Admin — TapMyCar</title>
+<link rel="stylesheet" href="/app.css">
+<style>
+body{background:#0D1B35;color:#fff;}
+.an{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#0D1B35;border-bottom:.5px solid rgba(255,255,255,.06);}
+.al{font-size:16px;font-weight:800;color:#fff;}
+.al span{color:#FF6B00;}
+.pb{font-size:9px;background:rgba(220,38,38,.2);color:#FCA5A5;padding:3px 8px;border-radius:4px;font-weight:600;}
+.sc{background:#1E2D4A;border-radius:14px;padding:14px 10px;text-align:center;}
+.sn{font-size:26px;font-weight:800;color:#FF6B00;line-height:1;}
+.sl2{font-size:10px;color:#94A3B8;margin-top:4px;}
+.asl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#64748B;padding:10px 20px 6px;background:#0F1E38;}
+.ar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:.5px solid rgba(255,255,255,.05);}
+.un{font-size:13px;font-weight:600;color:#fff;}
+.us{font-size:10px;color:#64748B;margin-top:2px;}
+.ba{background:rgba(22,163,74,.15);color:#4ADE80;padding:3px 8px;border-radius:99px;font-size:9px;font-weight:700;}
+.bw{background:rgba(234,179,8,.15);color:#FDE047;padding:3px 8px;border-radius:99px;font-size:9px;font-weight:700;}
+.db{font-size:9px;color:#FCA5A5;border:.5px solid rgba(220,38,38,.3);padding:3px 8px;border-radius:4px;background:none;cursor:pointer;font-family:Inter,sans-serif;}
+</style>
+</head>
+<body>
+<div class="an"><div class="al">TapMyCar<span>.</span> <span style="font-size:12px;font-weight:500;color:#64748B">Admin</span></div><span class="pb">Private</span></div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px 20px">
+  <div class="sc"><div class="sn" id="u-count">0</div><div class="sl2">Users</div></div>
+  <div class="sc"><div class="sn" id="t-count">0</div><div class="sl2">Tags</div></div>
+  <div class="sc"><div class="sn">$0</div><div class="sl2">Revenue</div></div>
+</div>
+<div class="asl">Recent Users</div>
+<div id="user-list"><div style="padding:20px;text-align:center;color:#64748B;font-size:13px">Loading...</div></div>
+<script src="/app.js"></script>
+<script>
+if(!localStorage.getItem('tmc_token')){window.location.href='/signin.html';}
+// Load real users from Supabase — Day 8
+document.getElementById('user-list').innerHTML = '<div style="padding:20px;text-align:center;color:#64748B;font-size:13px">Admin data loads on Day 8</div>';
+</script>
+</body>
+</html>
