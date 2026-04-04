@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>TapMyCar — Privacy-first vehicle contact</title>
-<link rel="stylesheet" href="/css/app.css">
+<link rel="stylesheet" href="/app.css">
 <style>
 body{background:#FF6B00;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;max-width:100%;}
 .splash{text-align:center;padding:40px 30px;}
@@ -12,7 +12,6 @@ body{background:#FF6B00;display:flex;flex-direction:column;align-items:center;ju
 .shield svg{width:40px;height:40px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 .brand{font-size:38px;font-weight:800;color:#fff;letter-spacing:-.6px;margin-bottom:8px;line-height:1;}
 .brand s{color:rgba(255,255,255,.72);text-decoration:none;font-style:normal;}
-.brand-dot{display:inline-block;width:8px;height:8px;background:rgba(255,255,255,.7);border-radius:50%;margin-left:2px;vertical-align:middle;margin-bottom:8px;}
 .tagline{font-size:14px;color:rgba(255,255,255,.65);letter-spacing:.05em;font-weight:500;margin-bottom:40px;}
 .splash-btn{background:#fff;color:#FF6B00;font-size:15px;font-weight:800;padding:15px 40px;border-radius:14px;text-decoration:none;display:inline-block;margin-bottom:14px;box-shadow:0 8px 24px rgba(0,0,0,.15);}
 .splash-signin{color:rgba(255,255,255,.75);font-size:13px;font-weight:600;}
@@ -24,16 +23,11 @@ body{background:#FF6B00;display:flex;flex-direction:column;align-items:center;ju
   <div class="shield">
     <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
   </div>
-  <div class="brand">Tap<s>My</s>Car<span class="brand-dot"></span></div>
+  <div class="brand">TapMyCar<span style="display:inline-block;width:8px;height:8px;background:rgba(255,255,255,.7);border-radius:50%;margin-left:2px;vertical-align:middle;margin-bottom:8px"></span></div>
   <div class="tagline">Privacy-first vehicle contact</div>
   <a href="/register.html" class="splash-btn">Get started free</a><br>
   <span class="splash-signin">Already have an account? <a href="/signin.html">Sign in</a></span>
 </div>
-<script>
-  // If already logged in go to dashboard
-  if (localStorage.getItem('tmc_token')) {
-    window.location.href = '/dashboard.html';
-  }
-</script>
+<script>if(localStorage.getItem('tmc_token')){window.location.href='/dashboard.html';}</script>
 </body>
 </html>

@@ -4,85 +4,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Contact vehicle owner — TapMyCar</title>
-<link rel="stylesheet" href="/css/app.css">
+<link rel="stylesheet" href="/app.css">
 </head>
 <body>
-<div class="nav" style="padding:8px 20px">
-  <a href="/" class="logo" style="font-size:15px">Tap<span>My</span>Car<span class="logo-dot"></span></a>
-  <div style="font-size:11px;color:var(--gy)">Official tag</div>
-</div>
+<div class="nav" style="padding:8px 20px"><a href="/" class="logo" style="font-size:15px">Tap<span>My</span>Car<span class="logo-dot"></span></a><div style="font-size:11px;color:var(--gy)">Official tag</div></div>
 <div class="chev"></div><div class="tape"></div>
-
-<div id="verified-state">
-  <div style="background:var(--gnl);padding:22px 20px 16px;text-align:center;border-bottom:1.5px solid #BBF7D0">
-    <div style="width:64px;height:64px;border-radius:50%;border:2.5px solid var(--gn);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;background:#fff">
-      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--gn)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-    </div>
-    <div style="display:inline-flex;align-items:center;gap:4px;background:var(--gn);color:#fff;font-size:10px;font-weight:700;padding:3px 12px;border-radius:99px;margin-bottom:8px">
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      Verified TapMyCar tag
-    </div>
-    <div style="font-size:18px;font-weight:800;color:var(--bk);margin-bottom:3px">Vehicle Owner</div>
-    <div style="font-size:11px;color:var(--gn);font-weight:500">Ready to receive your call</div>
-  </div>
-
-  <div style="padding:14px 20px;display:flex;flex-direction:column;gap:10px">
-    <div class="info-box">
-      <p>🔒 Your number stays private — all calls go through our secure proxy.</p>
-    </div>
-
-    <button onclick="initiateCall()" style="display:flex;align-items:center;justify-content:space-between;background:var(--gn);border-radius:14px;padding:16px;border:none;cursor:pointer;width:100%">
-      <div style="display:flex;align-items:center;gap:12px">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.91-.91a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.73 16.92z"/></svg>
-        <div style="text-align:left">
-          <div style="font-size:15px;font-weight:700;color:#fff">Call vehicle owner</div>
-          <div style="font-size:10px;color:rgba(255,255,255,.72)">Masked · your number never shown</div>
-        </div>
-      </div>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-    </button>
-
-    <button onclick="initiateText()" style="display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:14px;padding:15px;border:1.5px solid var(--bd);cursor:pointer;width:100%">
-      <div style="display:flex;align-items:center;gap:12px">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bk)" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        <div style="font-size:14px;font-weight:700;color:var(--bk)">Send text message</div>
-      </div>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--sv)" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-    </button>
-
-    <div class="warn-box">
-      <p style="font-size:11px;font-weight:600;color:var(--rd);text-align:center">🚨 Life-threatening emergency? Call 911 immediately</p>
-    </div>
-  </div>
+<div style="background:var(--gnl);padding:22px 20px 16px;text-align:center;border-bottom:1.5px solid #BBF7D0">
+  <div style="width:64px;height:64px;border-radius:50%;border:2.5px solid var(--gn);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;background:#fff"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--gn)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+  <div style="display:inline-flex;align-items:center;gap:4px;background:var(--gn);color:#fff;font-size:10px;font-weight:700;padding:3px 12px;border-radius:99px;margin-bottom:8px"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Verified TapMyCar tag</div>
+  <div style="font-size:18px;font-weight:800;color:var(--bk);margin-bottom:3px">Vehicle Owner</div>
+  <div style="font-size:11px;color:var(--gn);font-weight:500">Ready to receive your call</div>
 </div>
-
-<div class="toast" id="toast">
-  <div class="toast-ic"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-  <span id="toast-msg"></span>
+<div style="padding:14px 20px;display:flex;flex-direction:column;gap:10px">
+  <div class="info-box"><p>🔒 Your number stays private — all calls go through our secure proxy.</p></div>
+  <button onclick="showToast('Connecting masked call...')" style="display:flex;align-items:center;justify-content:space-between;background:var(--gn);border-radius:14px;padding:16px;border:none;cursor:pointer;width:100%">
+    <div style="display:flex;align-items:center;gap:12px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.91-.91a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.73 16.92z"/></svg>
+    <div style="text-align:left"><div style="font-size:15px;font-weight:700;color:#fff">Call vehicle owner</div><div style="font-size:10px;color:rgba(255,255,255,.72)">Masked · your number never shown</div></div></div>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+  <button onclick="showToast('Opening text...')" style="display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:14px;padding:15px;border:1.5px solid var(--bd);cursor:pointer;width:100%">
+    <div style="display:flex;align-items:center;gap:12px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bk)" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><div style="font-size:14px;font-weight:700;color:var(--bk)">Send text message</div></div>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--sv)" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+  <div class="warn-box"><p style="font-size:11px;font-weight:600;color:var(--rd);text-align:center">🚨 Life-threatening emergency? Call 911 immediately</p></div>
 </div>
-
-<script src="/js/app.js"></script>
-<script>
-function initiateCall() {
-  showToast('Connecting masked call...');
-  // Twilio proxy call — Day 6
-}
-function initiateText() {
-  showToast('Opening text...');
-  // Twilio text — Day 6
-}
-
-// Token from URL: tapmycar.io/tag/TOKEN
-const token = window.location.pathname.split('/tag/')[1] || 
-              new URLSearchParams(window.location.search).get('t');
-if (!token) {
-  document.getElementById('verified-state').innerHTML = `
-    <div style="padding:40px 20px;text-align:center">
-      <div style="font-size:18px;font-weight:800;color:var(--rd);margin-bottom:8px">Invalid tag</div>
-      <div style="font-size:13px;color:var(--gy)">This tag is not registered or has been disabled.</div>
-    </div>
-  `;
-}
-</script>
+<div class="toast" id="toast"><div class="toast-ic"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span id="toast-msg"></span></div>
+<script src="/app.js"></script>
 </body>
 </html>

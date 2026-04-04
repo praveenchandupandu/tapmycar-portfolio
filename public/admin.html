@@ -4,67 +4,39 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Admin — TapMyCar</title>
-<link rel="stylesheet" href="/css/app.css">
+<link rel="stylesheet" href="/app.css">
 <style>
 body{background:#0D1B35;color:#fff;}
-.admin-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#0D1B35;border-bottom:.5px solid rgba(255,255,255,.06);}
-.admin-logo{font-size:16px;font-weight:800;color:#fff;}
-.admin-logo span{color:var(--or);}
-.private-badge{font-size:9px;background:rgba(220,38,38,.2);color:#FCA5A5;padding:3px 8px;border-radius:4px;font-weight:600;}
-.stat-card{background:#1E2D4A;border-radius:14px;padding:14px 10px;text-align:center;}
-.stat-num{font-size:26px;font-weight:800;color:var(--or);line-height:1;}
-.stat-label{font-size:10px;color:#94A3B8;margin-top:4px;}
-.admin-sl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#64748B;padding:10px 20px 6px;background:#0F1E38;}
-.admin-row{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:.5px solid rgba(255,255,255,.05);}
-.user-name{font-size:13px;font-weight:600;color:#fff;}
-.user-sub{font-size:10px;color:#64748B;margin-top:2px;}
-.badge-active{background:rgba(22,163,74,.15);color:#4ADE80;padding:3px 8px;border-radius:99px;font-size:9px;font-weight:700;}
-.badge-warn{background:rgba(234,179,8,.15);color:#FDE047;padding:3px 8px;border-radius:99px;font-size:9px;font-weight:700;}
-.dis-btn{font-size:9px;color:#FCA5A5;border:.5px solid rgba(220,38,38,.3);padding:3px 8px;border-radius:4px;background:none;cursor:pointer;font-family:'Inter',sans-serif;}
+.an{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#0D1B35;border-bottom:.5px solid rgba(255,255,255,.06);}
+.al{font-size:16px;font-weight:800;color:#fff;}
+.al span{color:#FF6B00;}
+.pb{font-size:9px;background:rgba(220,38,38,.2);color:#FCA5A5;padding:3px 8px;border-radius:4px;font-weight:600;}
+.sc{background:#1E2D4A;border-radius:14px;padding:14px 10px;text-align:center;}
+.sn{font-size:26px;font-weight:800;color:#FF6B00;line-height:1;}
+.sl2{font-size:10px;color:#94A3B8;margin-top:4px;}
+.asl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#64748B;padding:10px 20px 6px;background:#0F1E38;}
+.ar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:.5px solid rgba(255,255,255,.05);}
+.un{font-size:13px;font-weight:600;color:#fff;}
+.us{font-size:10px;color:#64748B;margin-top:2px;}
+.ba{background:rgba(22,163,74,.15);color:#4ADE80;padding:3px 8px;border-radius:99px;font-size:9px;font-weight:700;}
+.bw{background:rgba(234,179,8,.15);color:#FDE047;padding:3px 8px;border-radius:99px;font-size:9px;font-weight:700;}
+.db{font-size:9px;color:#FCA5A5;border:.5px solid rgba(220,38,38,.3);padding:3px 8px;border-radius:4px;background:none;cursor:pointer;font-family:Inter,sans-serif;}
 </style>
 </head>
 <body>
-<div class="admin-nav">
-  <div class="admin-logo">TapMyCar<span>.</span> <span style="font-size:12px;font-weight:500;color:#64748B">Admin</span></div>
-  <span class="private-badge">Private</span>
-</div>
-
+<div class="an"><div class="al">TapMyCar<span>.</span> <span style="font-size:12px;font-weight:500;color:#64748B">Admin</span></div><span class="pb">Private</span></div>
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px 20px">
-  <div class="stat-card"><div class="stat-num" id="stat-users">—</div><div class="stat-label">Users</div></div>
-  <div class="stat-card"><div class="stat-num" id="stat-tags">—</div><div class="stat-label">Tags</div></div>
-  <div class="stat-card"><div class="stat-num" id="stat-rev">$—</div><div class="stat-label">Revenue</div></div>
+  <div class="sc"><div class="sn" id="u-count">0</div><div class="sl2">Users</div></div>
+  <div class="sc"><div class="sn" id="t-count">0</div><div class="sl2">Tags</div></div>
+  <div class="sc"><div class="sn">$0</div><div class="sl2">Revenue</div></div>
 </div>
-
-<div class="admin-sl">Users</div>
-<div class="admin-row">
-  <div><div class="user-name">Jane Smith</div><div class="user-sub">#TMC-00123 · Standard · 7 scans</div></div>
-  <div style="display:flex;gap:6px;align-items:center"><span class="badge-active">Active</span><button class="dis-btn">Disable</button></div>
-</div>
-<div class="admin-row">
-  <div><div class="user-name">Mike Johnson</div><div class="user-sub">#TMC-00124 · Premium · 12 scans</div></div>
-  <div style="display:flex;gap:6px;align-items:center"><span class="badge-active">Active</span><button class="dis-btn">Disable</button></div>
-</div>
-<div class="admin-row">
-  <div><div class="user-name">Sarah Lee</div><div class="user-sub">#TMC-00125 · Standard · 34 scans</div></div>
-  <div style="display:flex;gap:6px;align-items:center"><span class="badge-warn">High</span><button class="dis-btn">Disable</button></div>
-</div>
-
-<div class="admin-sl">Recent scans</div>
-<div class="admin-row">
-  <div><div class="user-name">TMC-00125</div><div class="user-sub">Today 4:22 PM · Hartford CT · View</div></div>
-  <span class="badge-warn">34th</span>
-</div>
-<div class="admin-row">
-  <div><div class="user-name">TMC-00123</div><div class="user-sub">Today 2:14 PM · New Britain · Call</div></div>
-  <span class="badge-active">Normal</span>
-</div>
-
-<script src="/js/app.js"></script>
+<div class="asl">Recent Users</div>
+<div id="user-list"><div style="padding:20px;text-align:center;color:#64748B;font-size:13px">Loading...</div></div>
+<script src="/app.js"></script>
 <script>
-// Admin access check — simple for now
-if (!localStorage.getItem('tmc_token')) {
-  window.location.href = '/signin.html';
-}
+if(!localStorage.getItem('tmc_token')){window.location.href='/signin.html';}
+// Load real users from Supabase — Day 8
+document.getElementById('user-list').innerHTML = '<div style="padding:20px;text-align:center;color:#64748B;font-size:13px">Admin data loads on Day 8</div>';
 </script>
 </body>
 </html>
