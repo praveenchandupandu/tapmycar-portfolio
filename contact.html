@@ -108,7 +108,7 @@ function showVerified(tag) {
   document.getElementById('verified').style.display = 'block';
 
   document.getElementById('call-btn').onclick = () => {
-    const callerNumber = prompt('Enter your phone number to connect the call:');
+    const callerNumber = prompt('Enter your phone number:');
     if (!callerNumber) return;
     initiateCall(callerNumber);
   };
@@ -118,6 +118,24 @@ function showVerified(tag) {
   };
 }
 
+async function initiateCall(callerNumber) {
+  showToast('Connecting masked call...');
+  try {
+    const res = await fetch('/api/proxy-call', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({token, caller_number: callerNumber})
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Call connected! Check your phone.');
+    } else {
+      showToast(data.error || 'Call failed');
+    }
+  } catch(e) {
+    showToast('Network error');
+  }
+}
 async function initiateCall(callerNumber) {
   showToast('Connecting masked call...');
   try {
