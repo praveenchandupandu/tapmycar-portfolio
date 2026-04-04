@@ -5,13 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Dashboard — TapMyCar</title>
 <link rel="stylesheet" href="/app.css">
-<style>@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.75)}}</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.75)}}
+.qr-wrap{background:#fff;border:2px solid var(--or);border-radius:12px;width:80px;height:80px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.qr-wrap canvas{width:70px !important;height:70px !important;}
+</style>
 </head>
 <body>
 <div class="nav">
   <a href="/dashboard.html" class="logo">Tap<span>My</span>Car<span class="logo-dot"></span></a>
   <div class="nav-r">
-    <button class="gear" onclick="window.location.href='/settings.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    <button class="gear" onclick="window.location.href='/settings.html'">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
     <button class="av" id="av-btn" onclick="window.location.href='/settings.html'">J</button>
   </div>
 </div>
@@ -21,36 +28,152 @@
     <div style="margin-bottom:10px">
       <div style="font-size:11px;color:var(--gy);margin-bottom:3px">Welcome back</div>
       <div style="display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:20px;font-weight:800;color:var(--bk)" id="greeting-name">User</div>
+        <div style="font-size:20px;font-weight:800;color:var(--bk)" id="greeting-name">...</div>
         <div style="background:var(--orl);border:.5px solid var(--orl2);border-radius:99px;padding:4px 11px;font-size:10px;font-weight:600;color:var(--or)">⭐ Standard</div>
       </div>
     </div>
-    <div class="hero-card" onclick="window.location.href='/settings.html'">
+
+    <div class="hero-card" onclick="window.location.href='/etag.html'">
       <div class="hero-ring1"></div><div class="hero-ring2"></div>
-      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.85);margin-bottom:5px;display:flex;align-items:center;gap:5px"><div style="width:7px;height:7px;border-radius:50%;background:#fff;animation:pulse 1.6s ease-in-out infinite"></div>Tag active</div>
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.85);margin-bottom:5px;display:flex;align-items:center;gap:5px">
+        <div style="width:7px;height:7px;border-radius:50%;background:#fff;animation:pulse 1.6s ease-in-out infinite"></div>
+        Tag active
+      </div>
       <h2>Your tag is live</h2>
-      <p id="tag-subtitle">Tap to manage your tag</p>
-      <div style="background:#fff;color:var(--or);font-size:11px;font-weight:700;padding:7px 14px;border-radius:99px;display:inline-flex;align-items:center;gap:4px">Manage <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <p id="hero-sub">Loading...</p>
+      <div style="background:#fff;color:var(--or);font-size:11px;font-weight:700;padding:7px 14px;border-radius:99px;display:inline-flex;align-items:center;gap:4px">
+        Manage <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
     </div>
+
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
-      <div class="card" style="text-align:center;padding:12px 8px"><div style="font-size:26px;font-weight:800;color:var(--or);line-height:1">0</div><div style="font-size:9px;color:var(--gy);margin-top:3px">Scans</div></div>
-      <div class="card" style="text-align:center;padding:12px 8px"><div style="font-size:26px;font-weight:800;color:var(--or);line-height:1">0</div><div style="font-size:9px;color:var(--gy);margin-top:3px">This week</div></div>
-      <div class="card" style="text-align:center;padding:12px 8px"><div style="font-size:18px;font-weight:800;color:var(--gn);line-height:1">ON</div><div style="font-size:9px;color:var(--gy);margin-top:3px">Status</div></div>
+      <div class="card" style="text-align:center;padding:12px 8px">
+        <div style="font-size:26px;font-weight:800;color:var(--or);line-height:1" id="stat-scans">0</div>
+        <div style="font-size:9px;color:var(--gy);margin-top:3px">Scans</div>
+      </div>
+      <div class="card" style="text-align:center;padding:12px 8px">
+        <div style="font-size:26px;font-weight:800;color:var(--or);line-height:1" id="stat-week">0</div>
+        <div style="font-size:9px;color:var(--gy);margin-top:3px">This week</div>
+      </div>
+      <div class="card" style="text-align:center;padding:12px 8px">
+        <div style="font-size:18px;font-weight:800;color:var(--gn);line-height:1" id="stat-status">ON</div>
+        <div style="font-size:9px;color:var(--gy);margin-top:3px">Status</div>
+      </div>
     </div>
-    <div style="text-align:center;padding:20px;color:var(--gy);font-size:13px">No scans yet — place your tag on your vehicle to get started.</div>
+
+    <div class="card card-or" style="margin-bottom:14px" id="tag-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--bk)" id="vehicle-label">My Vehicle</div>
+          <div style="font-size:10px;color:var(--gy);margin-top:2px" id="tag-token">Loading...</div>
+        </div>
+        <span class="sp sp-on">Active</span>
+      </div>
+      <div class="qr-wrap" id="qr-container"></div>
+      <div style="text-align:center;font-size:10px;color:var(--gy);margin-bottom:12px" id="tag-url">Generating your tag URL...</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" style="font-size:11px;padding:10px 0" onclick="copyTagURL()">Copy tag URL</button>
+        <button class="btn-o" style="font-size:11px;padding:10px 0" onclick="window.location.href='/etag.html'">Download PDF</button>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:14px;font-weight:700;color:var(--bk)">Recent activity</div>
+    </div>
+    <div id="activity-list">
+      <div style="text-align:center;padding:20px;color:var(--gy);font-size:13px">No scans yet — share your tag URL to get started.</div>
+    </div>
   </div>
 </div>
+
 <nav class="bnav">
   <a href="/dashboard.html" class="bni active"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span><div class="bni-dot"></div></a>
   <a href="/etag.html" class="bni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Tag</span></a>
-  <a href="#" class="bni"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Activity</span></a>
+  <a href="/activity.html" class="bni"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Activity</span></a>
   <a href="/settings.html" class="bni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></a>
 </nav>
+
+<div class="toast" id="toast"><div class="toast-ic"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span id="toast-msg"></span></div>
+
 <script src="/app.js"></script>
 <script>
 requireAuth();
 const s = getSession();
-if (s.name) { document.getElementById('greeting-name').textContent = s.name; document.getElementById('av-btn').textContent = s.name[0].toUpperCase(); }
+if (s.name) {
+  document.getElementById('greeting-name').textContent = s.name;
+  document.getElementById('av-btn').textContent = s.name[0].toUpperCase();
+}
+
+let tagToken = '';
+let tagURL = '';
+
+async function loadDashboard() {
+  try {
+    const res = await fetch(`/api/get-dashboard?user_id=${s.token}`);
+    const data = await res.json();
+
+    if (data.scanCount !== undefined) {
+      document.getElementById('stat-scans').textContent = data.scanCount;
+      document.getElementById('stat-week').textContent = data.weekCount;
+    }
+
+    if (data.tags && data.tags.length > 0) {
+      const tag = data.tags[0];
+      tagToken = tag.token;
+      tagURL = `${window.location.origin}/tag/${tag.token}`;
+
+      document.getElementById('vehicle-label').textContent = tag.vehicle_label || 'My Vehicle';
+      document.getElementById('tag-token').textContent = '#TMC-' + tag.id.slice(0,6).toUpperCase();
+      document.getElementById('tag-url').textContent = tagURL;
+      document.getElementById('hero-sub').textContent = `Scanned ${data.scanCount}× · tap to manage`;
+
+      // Generate QR code
+      document.getElementById('qr-container').innerHTML = '';
+      new QRCode(document.getElementById('qr-container'), {
+        text: tagURL,
+        width: 70,
+        height: 70,
+        colorDark: '#111111',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
+    // Recent activity
+    if (data.recentScans && data.recentScans.length > 0) {
+      const list = data.recentScans.map(scan => {
+        const date = new Date(scan.scanned_at);
+        const timeStr = date.toLocaleString('en-US', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'});
+        return `
+          <div class="row">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:36px;height:36px;border-radius:11px;background:var(--orl);display:flex;align-items:center;justify-content:center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </div>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--bk)">${timeStr}</div>
+                <div style="font-size:10px;color:var(--gy)">${scan.action}</div>
+              </div>
+            </div>
+            <span class="sp sp-or">View</span>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('activity-list').innerHTML = list;
+    }
+  } catch(e) {
+    console.error('Dashboard load error:', e);
+  }
+}
+
+function copyTagURL() {
+  if (!tagURL) return;
+  navigator.clipboard.writeText(tagURL).then(() => {
+    showToast('Tag URL copied to clipboard!');
+  });
+}
+
+loadDashboard();
 </script>
 </body>
 </html>
