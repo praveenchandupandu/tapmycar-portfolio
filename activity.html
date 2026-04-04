@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Activity — TapMyCar</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<div class="nav">
+  <div class="bk" onclick="history.back()">
+    <div class="bkb"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+    <span class="bk-label">Scan history</span>
+  </div>
+  <button class="gear" onclick="window.location.href='/settings.html'">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  </button>
+</div>
+<div class="chev"></div>
+<div class="page">
+  <div class="page-inner">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px">
+      <div class="card" style="text-align:center"><div style="font-size:28px;font-weight:800;color:var(--or)" id="total-scans">0</div><div style="font-size:9px;color:var(--gy);margin-top:2px">Total scans</div></div>
+      <div class="card" style="text-align:center"><div style="font-size:28px;font-weight:800;color:var(--or)" id="total-calls">0</div><div style="font-size:9px;color:var(--gy);margin-top:2px">Calls made</div></div>
+    </div>
+    <div id="scan-list">
+      <div style="text-align:center;padding:30px 20px;color:var(--gy);font-size:13px">No scans yet — share your QR code to get started.</div>
+    </div>
+  </div>
+</div>
+<nav class="bnav">
+  <a href="/dashboard.html" class="bni"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></a>
+  <a href="/etag.html" class="bni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Tag</span></a>
+  <a href="/activity.html" class="bni active"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Activity</span><div class="bni-dot"></div></a>
+  <a href="/settings.html" class="bni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></a>
+</nav>
+<script src="/app.js"></script>
+<script>
+requireAuth();
+const s = getSession();
+
+async function loadActivity() {
+  try {
+    const res = await fetch(`/api/get-dashboard?user_id=${s.token}`);
+    const data = await res.json();
+    document.getElementById('total-scans').textContent = data.scanCount || 0;
+
+    if (data.recentScans && data.recentScans.length > 0) {
+      const list = data.recentScans.map(scan => {
+        const date = new Date(scan.scanned_at);
+        const timeStr = date.toLocaleString('en-US', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'});
+        return `
+          <div class="row">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:36px;height:36px;border-radius:11px;background:var(--orl);display:flex;align-items:center;justify-content:center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </div>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--bk)">${timeStr}</div>
+                <div style="font-size:10px;color:var(--gy)">${scan.action}</div>
+              </div>
+            </div>
+            <span class="sp sp-or">View</span>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('scan-list').innerHTML = list;
+    }
+  } catch(e) { console.error(e); }
+}
+
+loadActivity();
+</script>
+</body>
+</html>
