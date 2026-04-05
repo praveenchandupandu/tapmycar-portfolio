@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Payment successful — TapMyCar</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<div class="chev"></div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 6px);padding:30px 24px;text-align:center;gap:16px">
+  <div style="width:80px;height:80px;border-radius:50%;background:var(--gnl);border:3px solid var(--gn);display:flex;align-items:center;justify-content:center;margin-bottom:8px">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gn)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <div style="font-size:26px;font-weight:800;color:var(--bk)">Payment successful!</div>
+  <div style="font-size:14px;color:var(--gy);line-height:1.6;max-width:300px">Your eTag is now active. Your physical NFC + QR sticker will ship to your address within 60 days.</div>
+  <div style="background:var(--orl);border-radius:14px;padding:16px 20px;border:.5px solid var(--orl2);width:100%;max-width:320px">
+    <div style="font-size:12px;font-weight:700;color:#9A3800;margin-bottom:4px">What happens next</div>
+    <div style="font-size:12px;color:#78350F;line-height:1.6">Day 1-60: Your digital eTag is active and working. Day 60: We charge $9.99 and ship your physical sticker.</div>
+  </div>
+  <a href="/dashboard.html" class="btn" style="width:100%;max-width:320px;text-decoration:none;display:block;padding:14px 0;margin-top:8px">Go to dashboard →</a>
+</div>
+<script src="/app.js"></script>
+<script>
+// Mark tag as active in session
+const s = getSession();
+if (s.token) {
+  localStorage.setItem('tmc_activated', 'true');
+}
+</script>
+</body>
+</html>

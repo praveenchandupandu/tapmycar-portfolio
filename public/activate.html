@@ -35,11 +35,36 @@ function toggleConsent(el) {
   if (agreed) { box.style.background='var(--or)'; box.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>'; btn.style.opacity='1'; btn.disabled=false; }
   else { box.style.background='#fff'; box.innerHTML=''; btn.style.opacity='.3'; btn.disabled=true; }
 }
-function pay() {
+async function pay() {
   if (!agreed) return;
-  showToast('Redirecting to payment...');
-  setTimeout(() => window.location.href = '/dashboard.html', 1500);
-}
-</script>
+  const btn = document.getElementById('pay-btn');
+  btn.textContent = 'Processing...';
+  btn.disabled = true;
+  const address = document.getElementById('address').value;
+  const s = getSession();
+  try {
+    const res = await fetch('/api/create-checkout', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        user_id: s.token,
+        plan: 'etag',
+        address: address
+      })
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      showToast(data.error || 'Payment failed');
+      btn.textContent = 'Pay $1 — activate eTag';
+      btn.disabled = false;
+    }
+  } catch(e) {
+    showToast('Network error');
+    btn.textContent = 'Pay $1 — activate eTag';
+    btn.disabled = false;
+  }
+}</script>
 </body>
 </html>
