@@ -1,8 +1,8 @@
 module.exports = async function handler(req, res) {
-  if (req.method !== 'POST') {
+ if (req.method !== 'POST' && req.method !== 'GET') {
     return res.status(405).send('Method not allowed');
   }
-
+  
   const callerNumber = req.body.From || '';
   const baseUrl = `https://${req.headers.host}`;
 
