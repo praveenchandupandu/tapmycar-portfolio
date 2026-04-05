@@ -28,6 +28,14 @@ module.exports = async function handler(req, res) {
     await supabase
       .from('scan_logs')
       .insert({ tag_id: tag.id, action: 'view' });
+// Notify owner via SMS
+try {
+  await fetch(`https://${req.headers.host}/api/notify-owner`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tag_id: tag.id })
+  });
+} catch(e) { console.error('Notify error:', e); }
 
     return res.json({ tag });
   }
