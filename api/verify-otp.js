@@ -1,10 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
 
-const supabaseAuth = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
-
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
@@ -20,66 +15,68 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Email and code required' });
   }
 
-  try {
-    // Verify OTP with Supabase
-    const { data, error } = await supabaseAuth.auth.verifyOtp({
-      email,
-      token: code,
-      type: 'email'
-    });
+  // Find OTP
+  const { data: otps } = await supabase
+    .from('otp_codes')
+    .select('*')
+    .eq('phone', email)
+    .eq('code', code)
+    .eq('used', false)
+    .gte('expires_at', new Date().toISOString())
+    .limit(1);
 
-    if (error) {
-      console.error('Verify error:', error.message);
-      return res.status(400).json({ error: 'Invalid or expired code' });
-    }
+  if (!otps || otps.length === 0) {
+    return res.status(400).json({ error: 'Invalid or expired code' });
+  }
 
-    const supabaseUserId = data.user.id;
+  // Mark as used
+  await supabase
+    .from('otp_codes')
+    .update({ used: true })
+    .eq('id', otps[0].id);
 
-    // Find or create user in our users table
-    let { data: user } = await supabase
+  // Find or create user
+  let { data: user } = await supabase
+    .from('users')
+    .select('*')
+    .eq('email', email)
+    .single();
+
+  if (!user) {
+    const cleaned = (phone || '').replace(/\D/g, '');
+    const formatted = cleaned.startsWith('1') ? '+' + cleaned : '+1' + cleaned;
+
+    const { data: newUser, error: insertError } = await supabase
       .from('users')
-      .select('*')
-      .eq('email', email)
+      .insert({
+        email,
+        phone: formatted,
+        name: name || 'User'
+      })
+      .select()
       .single();
 
-    if (!user) {
-      const { data: newUser, error: insertError } = await supabase
-        .from('users')
-        .insert({
-          email,
-          phone: phone || '',
-          name: name || 'User',
-          supabase_id: supabaseUserId
-        })
-        .select()
-        .single();
-
-      if (insertError) {
-        console.error('User insert error:', insertError);
-        return res.status(500).json({ error: 'Failed to create user' });
-      }
-
-      user = newUser;
-
-      // Create first tag
-      await supabase
-        .from('tags')
-        .insert({
-          user_id: user.id,
-          vehicle_label: 'My Vehicle',
-          status: 'inactive'
-        });
+    if (insertError) {
+      console.error('User insert error:', insertError);
+      return res.status(500).json({ error: 'Failed to create user' });
     }
 
-    res.json({
-      token: user.id,
-      name: user.name,
-      email: user.email,
-      phone: user.phone
-    });
+    user = newUser;
 
-  } catch (err) {
-    console.error('Verify OTP error:', err.message);
-    res.status(500).json({ error: err.message });
+    // Create first tag
+    await supabase
+      .from('tags')
+      .insert({
+        user_id: user.id,
+        vehicle_label: 'My Vehicle',
+        status: 'inactive'
+      });
   }
+
+  res.json({
+    token: user.id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone
+  });
 };
