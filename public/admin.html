@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#FF6B00">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="TapMyCar">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Admin — TapMyCar</title>
@@ -37,6 +42,11 @@ body{background:#0D1B35;color:#fff;}
 if(!localStorage.getItem('tmc_token')){window.location.href='/signin.html';}
 // Load real users from Supabase — Day 8
 document.getElementById('user-list').innerHTML = '<div style="padding:20px;text-align:center;color:#64748B;font-size:13px">Admin data loads on Day 8</div>';
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js');
+}
 </script>
 </body>
 </html>

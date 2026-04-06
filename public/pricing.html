@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#FF6B00">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="TapMyCar">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Pricing — TapMyCar</title>
@@ -16,5 +21,10 @@
   <div style="border:1.5px solid var(--bd);border-radius:18px;padding:18px;background:#fff;margin-bottom:12px"><div style="display:flex;align-items:baseline;gap:8px;margin-bottom:5px"><div style="font-size:17px;font-weight:800;color:var(--bk)">Premium</div><div style="font-size:22px;font-weight:800;color:var(--or)">$24.99 <span style="font-size:12px;color:var(--gy);font-weight:400">+ $9.99/yr</span></div></div><div style="font-size:12px;color:var(--gy);margin-bottom:12px">3 vehicles · unlimited calls</div><div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px"><div style="font-size:12px;color:var(--bk);display:flex;gap:7px"><div style="width:7px;height:7px;border-radius:1px;background:var(--or);flex-shrink:0;margin-top:3px"></div>Unlimited masked calls</div><div style="font-size:12px;color:var(--bk);display:flex;gap:7px"><div style="width:7px;height:7px;border-radius:1px;background:var(--or);flex-shrink:0;margin-top:3px"></div>Scan history + emergency contact</div></div><button class="btn-o" onclick="window.location.href='/register.html'">Get Premium</button></div>
   <div style="border:1.5px solid var(--bd);border-radius:18px;padding:18px;background:#fff;margin-bottom:24px"><div style="display:flex;align-items:baseline;gap:8px;margin-bottom:5px"><div style="font-size:17px;font-weight:800;color:var(--bk)">Business</div><div style="font-size:22px;font-weight:800;color:var(--or)">$49 <span style="font-size:12px;color:var(--gy);font-weight:400">/month</span></div></div><div style="font-size:12px;color:var(--gy);margin-bottom:12px">Fleet dashboard · bulk stickers with logo</div><button class="btn-o">Contact us</button></div>
 </div>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js');
+}
+</script>
 </body>
 </html>
