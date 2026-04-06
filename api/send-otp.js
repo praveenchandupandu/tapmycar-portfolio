@@ -16,13 +16,13 @@ module.exports = async function handler(req, res) {
   try {
     // Send OTP via Supabase email — completely free
     const { error } = await supabase.auth.signInWithOtp({
-      email: email,
-      options: {
-        shouldCreateUser: true,
-        data: { name, phone }
-      }
-    });
-
+  email: email,
+  options: {
+    shouldCreateUser: true,
+    emailRedirectTo: null,
+    data: { name, phone }
+  }
+});
     if (error) {
       console.error('Supabase OTP error:', error.message);
       return res.status(500).json({ error: error.message });
