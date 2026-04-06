@@ -24,17 +24,17 @@
     <input type="text" id="name" placeholder="Jane Smith" autocomplete="name">
   </div>
   <div class="field">
-    <label>Phone number</label>
-    <div class="phone-row">
-      <div class="fi-wrap">
-        <input type="tel" id="phone" placeholder="+1 (203) 555-0100" autocomplete="tel">
-      </div>
-      <button class="send-otp-btn" onclick="sendOTP()">Send OTP</button>
-    </div>
-    <div class="hint">A 6-digit code will be sent to verify your number</div>
+    <label>Email address</label>
+    <input type="email" id="email" placeholder="jane@example.com" autocomplete="email">
+    <div class="hint">A 6-digit code will be sent to your email — free, no SMS needed</div>
+  </div>
+  <div class="field">
+    <label>Phone number <span style="color:var(--gy);font-weight:400">(for call forwarding)</span></label>
+    <input type="tel" id="phone" placeholder="+1 (203) 555-0100" autocomplete="tel">
+    <div class="hint">Used only for masked call forwarding — never shared</div>
   </div>
   <div style="margin-top:auto">
-    <button class="btn" onclick="goToOTP()">Continue →</button>
+    <button class="btn" onclick="sendOTP()">Send verification code →</button>
     <div style="text-align:center;font-size:12px;color:var(--gy);margin-top:12px">
       Have account? <a href="/signin.html" class="link-or">Sign in</a>
     </div>
@@ -44,11 +44,11 @@
 <div class="page-inner" id="step2" style="display:none;padding:20px">
   <a class="bk" onclick="backToStep1()" style="margin-bottom:18px;display:flex;cursor:pointer">
     <div class="bkb"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
-    <span class="bk-label" style="margin-left:8px">Verify phone</span>
+    <span class="bk-label" style="margin-left:8px">Verify email</span>
   </a>
   <div style="margin-bottom:14px">
-    <div style="font-size:24px;font-weight:800;color:var(--bk);margin-bottom:4px">Enter your code</div>
-    <div style="font-size:13px;color:var(--gy)" id="otp-subtitle">Sent to your number</div>
+    <div style="font-size:24px;font-weight:800;color:var(--bk);margin-bottom:4px">Check your email</div>
+    <div style="font-size:13px;color:var(--gy)" id="otp-subtitle">Sent to your email</div>
   </div>
   <div class="prog"><div class="ps dn"></div><div class="ps on"></div></div>
   <div class="otp-row">
@@ -63,7 +63,7 @@
     <button id="resend-btn" onclick="sendOTP()" style="background:none;border:none;color:var(--or);font-weight:600;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif">Resend code</button>
   </div>
   <div class="info-box" style="margin-bottom:20px">
-    <p>After verification Face ID or fingerprint unlocks the app automatically.</p>
+    <p>Check your spam folder if you don't see the email within 1 minute.</p>
   </div>
   <div style="margin-top:auto">
     <button class="btn" onclick="verifyOTP()">Verify and create account →</button>
@@ -78,25 +78,28 @@
 <script src="/app.js"></script>
 <script>
 async function sendOTP() {
-  const phone = document.getElementById('phone').value.trim();
-  if (!phone) { showToast('Enter your phone number first'); return; }
-  document.getElementById('step1').style.display = 'none';
-  document.getElementById('step2').style.display = 'flex';
-  document.getElementById('step2').style.flexDirection = 'column';
-  document.getElementById('otp-subtitle').textContent = 'Sent to ' + phone;
-  startCountdown('resend-btn');
-  try {
-    const res = await API.sendOTP(phone);
-    if (!res.success) showToast(res.error || 'Failed to send OTP');
-  } catch(e) { showToast('Network error — try again'); }
-}
-
-function goToOTP() {
+  const email = document.getElementById('email').value.trim();
   const name = document.getElementById('name').value.trim();
   const phone = document.getElementById('phone').value.trim();
   if (!name) { showToast('Please enter your name'); return; }
+  if (!email) { showToast('Please enter your email'); return; }
   if (!phone) { showToast('Please enter your phone number'); return; }
-  sendOTP();
+
+  document.getElementById('step1').style.display = 'none';
+  document.getElementById('step2').style.display = 'flex';
+  document.getElementById('step2').style.flexDirection = 'column';
+  document.getElementById('otp-subtitle').textContent = 'Sent to ' + email;
+  startCountdown('resend-btn');
+
+  try {
+    const res = await fetch('/api/send-otp', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email, name, phone })
+    });
+    const data = await res.json();
+    if (!data.success) showToast(data.error || 'Failed to send code');
+  } catch(e) { showToast('Network error'); }
 }
 
 function backToStep1() {
@@ -108,17 +111,25 @@ function backToStep1() {
 async function verifyOTP() {
   const code = getOTPValue();
   if (code.length < 6) { showToast('Enter all 6 digits'); return; }
-  const phone = document.getElementById('phone').value.trim();
+  const email = document.getElementById('email').value.trim();
   const name = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+
   try {
-    const res = await API.verifyOTP(phone, code, name);
-    if (res.token) {
-      saveSession(res.token, res.phone || phone, res.name || name);
+    const res = await fetch('/api/verify-otp', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email, code, name, phone })
+    });
+    const data = await res.json();
+    if (data.token) {
+      saveSession(data.token, data.phone || phone, data.name || name);
+      localStorage.setItem('tmc_email', email);
       window.location.href = '/etag.html';
     } else {
-      showToast(res.error || 'Wrong code — try again');
+      showToast(data.error || 'Wrong code — try again');
     }
-  } catch(e) { showToast('Network error — try again'); }
+  } catch(e) { showToast('Network error'); }
 }
 </script>
 </body>

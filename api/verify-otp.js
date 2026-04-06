@@ -1,9 +1,8 @@
-const twilio = require('twilio');
 const { createClient } = require('@supabase/supabase-js');
 
-const client = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
+const supabaseAuth = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
 );
 
 const supabase = createClient(
@@ -16,36 +15,42 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { phone, code, name } = req.body;
-  if (!phone || !code) {
-    return res.status(400).json({ error: 'Phone and code required' });
+  const { email, code, name, phone } = req.body;
+  if (!email || !code) {
+    return res.status(400).json({ error: 'Email and code required' });
   }
 
-  const cleaned = phone.replace(/\D/g, '');
-  const formatted = cleaned.startsWith('1') ? '+' + cleaned : '+1' + cleaned;
-
   try {
-    const check = await client.verify.v2
-      .services(process.env.TWILIO_VERIFY_SID)
-      .verificationChecks.create({
-        to: formatted,
-        code: code
-      });
+    // Verify OTP with Supabase
+    const { data, error } = await supabaseAuth.auth.verifyOtp({
+      email,
+      token: code,
+      type: 'email'
+    });
 
-    if (check.status !== 'approved') {
+    if (error) {
+      console.error('Verify error:', error.message);
       return res.status(400).json({ error: 'Invalid or expired code' });
     }
 
+    const supabaseUserId = data.user.id;
+
+    // Find or create user in our users table
     let { data: user } = await supabase
       .from('users')
       .select('*')
-      .eq('phone', formatted)
+      .eq('email', email)
       .single();
 
     if (!user) {
       const { data: newUser, error: insertError } = await supabase
         .from('users')
-        .insert({ phone: formatted, name: name || 'User' })
+        .insert({
+          email,
+          phone: phone || '',
+          name: name || 'User',
+          supabase_id: supabaseUserId
+        })
         .select()
         .single();
 
@@ -56,6 +61,7 @@ module.exports = async function handler(req, res) {
 
       user = newUser;
 
+      // Create first tag
       await supabase
         .from('tags')
         .insert({
@@ -68,11 +74,12 @@ module.exports = async function handler(req, res) {
     res.json({
       token: user.id,
       name: user.name,
+      email: user.email,
       phone: user.phone
     });
 
   } catch (err) {
-    console.error('Verify error:', err.message);
+    console.error('Verify OTP error:', err.message);
     res.status(500).json({ error: err.message });
   }
 };

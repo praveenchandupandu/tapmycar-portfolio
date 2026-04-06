@@ -1,8 +1,8 @@
-const twilio = require('twilio');
+const { createClient } = require('@supabase/supabase-js');
 
-const client = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
 );
 
 module.exports = async function handler(req, res) {
@@ -10,26 +10,27 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { phone } = req.body;
-  if (!phone) {
-    return res.status(400).json({ error: 'Phone number required' });
-  }
-
-  const cleaned = phone.replace(/\D/g, '');
-  const formatted = cleaned.startsWith('1') ? '+' + cleaned : '+1' + cleaned;
+  const { email, phone, name } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email required' });
 
   try {
-    await client.verify.v2
-      .services(process.env.TWILIO_VERIFY_SID)
-      .verifications.create({
-        to: formatted,
-        channel: 'sms'
-      });
+    // Send OTP via Supabase email — completely free
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email,
+      options: {
+        shouldCreateUser: true,
+        data: { name, phone }
+      }
+    });
 
-    console.log('OTP sent to:', formatted);
+    if (error) {
+      console.error('Supabase OTP error:', error.message);
+      return res.status(500).json({ error: error.message });
+    }
+
     res.json({ success: true });
   } catch (err) {
-    console.error('Twilio error:', err.message);
+    console.error('Send OTP error:', err.message);
     res.status(500).json({ error: err.message });
   }
 };
