@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --or:#FF6B00;--orl:#FFF3EC;--orl2:#FFE4CC;
@@ -33,9 +33,8 @@ body{font-family:'Inter',sans-serif;background:var(--wh);color:var(--bk);max-wid
 .field input:focus{border-color:var(--or);}
 .field input::placeholder{color:var(--sv);}
 .otp-row{display:flex;gap:8px;margin-bottom:10px;}
-.otp-box{flex:1;height:54px;border:1.5px solid var(--bd);border-radius:11px;background:var(--gbl);text-align:center;font-size:22px;font-weight:700;outline:none;transition:border-color .2s;font-family:'Inter',sans-serif;}
-.otp-box:focus,.otp-box.filled{border-color:var(--or);background:var(--orl);}
-.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--wh);border-top:.5px solid var(--bd);padding:10px 8px 20px;display:flex;justify-content:space-around;z-index:100;}
+.otp-box{flex:1;max-width:46px;height:46px;border:1.5px solid var(--bd);border-radius:11px;background:var(--gbl);text-align:center;font-size:18px;font-weight:700;outline:none;transition:border-color .2s;font-family:'Inter',sans-serif;}
+.otp-box:focus,.otp-box.filled{border-color:var(--or);background:var(--orl);}.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--wh);border-top:.5px solid var(--bd);padding:10px 8px 20px;display:flex;justify-content:space-around;z-index:100;}
 .bni{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:2px 12px;text-decoration:none;}
 .bni svg{width:22px;height:22px;stroke:var(--sv);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s;}
 .bni.active svg{stroke:var(--or);}
@@ -89,3 +88,9 @@ body{font-family:'Inter',sans-serif;background:var(--wh);color:var(--bk);max-wid
 .sticker-chev{height:7px;background:repeating-linear-gradient(-45deg,var(--or) 0,var(--or) 4px,#111 4px,#111 8px);}
 .sticker-tape{height:3px;background:repeating-linear-gradient(90deg,var(--yl) 0,var(--yl) 9px,var(--sv) 9px,var(--sv) 18px);}
 .sticker-body{background:#fff;padding:14px;}
+
+/* OTP BOXES */
+.otp-row{display:flex;gap:6px;margin-bottom:16px;}
+.otp-box{width:42px;height:46px;max-width:46px;border:1.5px solid #E5E7EB;border-radius:11px;text-align:center;font-size:18px;font-weight:700;font-family:'Inter',sans-serif;background:#F9FAFB;outline:none;flex:1;}
+.otp-box:focus{border-color:#FF6B00;background:#FFF3EC;}
+.otp-box.filled{border-color:#FF6B00;}
