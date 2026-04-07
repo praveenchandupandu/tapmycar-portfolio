@@ -7,11 +7,11 @@ const supabase = createClient(
 
 function generateToken() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let token = '';
-  for (let i = 0; i < 8; i++) {
-    token += chars[Math.floor(Math.random() * chars.length)];
+  let random = '';
+  for (let i = 0; i < 6; i++) {
+    random += chars[Math.floor(Math.random() * chars.length)];
   }
-  return token;
+  return 'TMC' + random;
 }
 
 module.exports = async function handler(req, res) {
