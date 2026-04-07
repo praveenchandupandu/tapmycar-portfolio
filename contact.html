@@ -1,105 +1,400 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#FF6B00">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="TapMyCar">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Contact vehicle owner � TapMyCar</title>
+<title>TapMyCar Tag</title>
 <link rel="stylesheet" href="/app.css">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#FF6B00">
+<style>
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .4s ease forwards}
+.page{min-height:100vh;display:flex;flex-direction:column;}
+</style>
 </head>
 <body>
-<div id="loading" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:12px">
-  <div style="width:40px;height:40px;border:3px solid var(--orl2);border-top-color:var(--or);border-radius:50%;animation:spin .8s linear infinite"></div>
-  <div style="font-size:13px;color:var(--gy)">Verifying tag...</div>
+
+<!-- LOADING -->
+<div id="state-loading" class="page" style="align-items:center;justify-content:center;gap:16px">
+  <div style="width:44px;height:44px;border:3px solid #FFE4CC;border-top-color:#FF6B00;border-radius:50%;animation:spin .8s linear infinite"></div>
+  <div style="font-size:13px;color:#6B7280">Verifying tag...</div>
 </div>
-<div id="verified" style="display:none">
+
+<!-- INVALID -->
+<div id="state-invalid" class="page" style="display:none;background:#DC2626">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;gap:16px">
+    <div style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </div>
+    <div style="font-size:28px;font-weight:800;color:#fff">Invalid Tag</div>
+    <div style="font-size:14px;color:rgba(255,255,255,.75);max-width:280px;line-height:1.6">This tag is not registered in the TapMyCar system.</div>
+    <a href="https://tapmycar.io" style="background:#fff;color:#DC2626;font-size:14px;font-weight:700;padding:14px 32px;border-radius:13px;text-decoration:none;margin-top:8px">Visit tapmycar.io</a>
+  </div>
+</div>
+
+<!-- DISABLED -->
+<div id="state-disabled" class="page" style="display:none;background:#DC2626">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;gap:16px">
+    <div style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+    </div>
+    <div style="font-size:28px;font-weight:800;color:#fff">Tag Disabled</div>
+    <div style="font-size:14px;color:rgba(255,255,255,.75);max-width:280px;line-height:1.6">This tag has been disabled by the vehicle owner.</div>
+    <a href="https://tapmycar.io" style="background:#fff;color:#DC2626;font-size:14px;font-weight:700;padding:14px 32px;border-radius:13px;text-decoration:none;margin-top:8px">Visit tapmycar.io</a>
+  </div>
+</div>
+
+<!-- UNCLAIMED -->
+<div id="state-unclaimed" class="page" style="display:none">
+  <div style="background:#FF6B00;padding:32px 24px;text-align:center">
+    <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:4px">TapMyCar<span style="color:rgba(255,255,255,.7)">.</span></div>
+    <div style="font-size:11px;color:rgba(255,255,255,.7)">Privacy-first vehicle contact</div>
+  </div>
+  <div class="chev"></div>
+  <div style="flex:1;padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap:20px">
+    <div style="width:72px;height:72px;border-radius:50%;background:#FFF3EC;border:2px solid #FFE4CC;display:flex;align-items:center;justify-content:center">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#FF6B00" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    </div>
+    <div style="text-align:center">
+      <div style="font-size:22px;font-weight:800;color:#111;margin-bottom:8px">Tag not activated yet</div>
+      <div style="font-size:13px;color:#6B7280;line-height:1.6;max-width:280px">This TapMyCar tag has not been claimed by a vehicle owner yet.</div>
+    </div>
+    <div style="width:100%;display:flex;flex-direction:column;gap:10px;margin-top:8px">
+      <button onclick="showActivateFlow()" style="background:#FF6B00;color:#fff;font-size:15px;font-weight:700;padding:16px 0;border-radius:13px;border:none;cursor:pointer;width:100%">
+        I am the vehicle owner — Activate this tag
+      </button>
+      <button onclick="showNotOwner()" style="background:#fff;color:#111;font-size:14px;font-weight:600;padding:15px 0;border-radius:13px;border:1.5px solid #E5E7EB;cursor:pointer;width:100%">
+        I need to contact the vehicle owner
+      </button>
+    </div>
+    <div id="not-owner-msg" style="display:none;background:#FEE2E2;border-radius:11px;padding:14px;border:.5px solid #FECACA;width:100%">
+      <p style="font-size:12px;color:#B91C1C;line-height:1.6;text-align:center">This tag is not yet active. Please ask the vehicle owner to activate it at <strong>tapmycar.io</strong></p>
+    </div>
+  </div>
+</div>
+
+<!-- ACTIVE -->
+<div id="state-active" class="page" style="display:none">
   <div class="nav" style="padding:8px 20px">
-    <a href="/" class="logo" style="font-size:15px">Tap<span>My</span>Car<span class="logo-dot"></span></a>
-    <div style="font-size:11px;color:var(--gy)">Official tag</div>
+    <a href="https://tapmycar.io" class="logo" style="font-size:15px">Tap<span>My</span>Car<span class="logo-dot"></span></a>
+    <div style="font-size:11px;color:#6B7280">Official tag</div>
   </div>
   <div class="chev"></div><div class="tape"></div>
-  <div style="background:var(--gnl);padding:22px 20px 16px;text-align:center;border-bottom:1.5px solid #BBF7D0">
-    <div style="width:64px;height:64px;border-radius:50%;border:2.5px solid var(--gn);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;background:#fff">
-      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--gn)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+
+  <div style="background:#DCFCE7;padding:24px 20px;text-align:center;border-bottom:1.5px solid #BBF7D0">
+    <div style="width:64px;height:64px;border-radius:50%;border:2.5px solid #16A34A;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;background:#fff">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
-    <div style="display:inline-flex;align-items:center;gap:4px;background:var(--gn);color:#fff;font-size:10px;font-weight:700;padding:3px 12px;border-radius:99px;margin-bottom:8px">
+    <div style="display:inline-flex;align-items:center;gap:4px;background:#16A34A;color:#fff;font-size:10px;font-weight:700;padding:3px 12px;border-radius:99px;margin-bottom:8px">
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      Verified TapMyCar tag
+      Official TapMyCar Verified Tag
     </div>
-    <div style="font-size:18px;font-weight:800;color:var(--bk);margin-bottom:3px">Vehicle Owner</div>
-    <div style="font-size:11px;color:var(--gn);font-weight:500">Ready to receive your call</div>
+    <div style="font-size:20px;font-weight:800;color:#111;margin-bottom:4px">Contact this vehicle owner privately</div>
+    <div style="font-size:12px;color:#16A34A;font-weight:500">Your phone number will never be shared</div>
   </div>
-  <div style="padding:14px 20px;display:flex;flex-direction:column;gap:10px">
-    <div class="info-box"><p>Your number stays private � all calls route through our secure proxy.</p></div>
-    <button id="call-btn" style="display:flex;align-items:center;justify-content:space-between;background:var(--gn);border-radius:14px;padding:16px;border:none;cursor:pointer;width:100%">
+
+  <!-- Location permission notice -->
+  <div id="location-notice" style="background:#FFF3EC;padding:10px 20px;border-bottom:.5px solid #FFE4CC;display:none">
+    <p style="font-size:11px;color:#92400E;text-align:center">TapMyCar may request your approximate location to help the vehicle owner. Your identity is never shared.</p>
+  </div>
+
+  <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+    <button id="call-btn" onclick="handleCall()" style="display:flex;align-items:center;justify-content:space-between;background:#16A34A;border-radius:14px;padding:18px 16px;border:none;cursor:pointer;width:100%">
       <div style="display:flex;align-items:center;gap:12px">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.91-.91a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.73 16.92z"/></svg>
         <div style="text-align:left">
-          <div style="font-size:15px;font-weight:700;color:#fff">Call vehicle owner</div>
-          <div style="font-size:10px;color:rgba(255,255,255,.72)">Masked - your number never shown</div>
+          <div style="font-size:16px;font-weight:700;color:#fff">CALL</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.8)">Masked · your number never shown</div>
         </div>
       </div>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
-    <button id="text-btn" style="display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:14px;padding:15px;border:1.5px solid var(--bd);cursor:pointer;width:100%">
+
+    <button id="text-btn" onclick="handleText()" style="display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:14px;padding:17px 16px;border:1.5px solid #E5E7EB;cursor:pointer;width:100%">
       <div style="display:flex;align-items:center;gap:12px">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bk)" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        <div style="font-size:14px;font-weight:700;color:var(--bk)">Send text message</div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <div style="text-align:left">
+          <div style="font-size:16px;font-weight:700;color:#111">TEXT</div>
+          <div style="font-size:10px;color:#6B7280">Send a message to the owner</div>
+        </div>
       </div>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--sv)" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
-    <div class="warn-box"><p style="font-size:11px;font-weight:600;color:var(--rd);text-align:center">Life-threatening emergency? Call 911 immediately</p></div>
-    <div style="text-align:center;font-size:10px;color:var(--gy);padding:8px 0">Powered by TapMyCar - Praman Tech LLC</div>
+
+    <div style="background:#FEE2E2;border-radius:11px;padding:12px;border:.5px solid #FECACA">
+      <p style="font-size:11px;font-weight:600;color:#DC2626;text-align:center">🚨 Life-threatening emergency? Call 911 immediately</p>
+    </div>
+
+    <div style="text-align:center;font-size:10px;color:#9CA3AF;padding:4px 0">
+      Official TapMyCar tag · Praman Tech LLC · <a href="https://tapmycar.io" style="color:#FF6B00;text-decoration:none">tapmycar.io</a>
+    </div>
   </div>
 </div>
-<div id="invalid" style="display:none;flex-direction:column;min-height:100vh">
-  <div class="nav" style="padding:8px 20px"><a href="/" class="logo" style="font-size:15px">Tap<span>My</span>Car<span class="logo-dot"></span></a></div>
-  <div class="chev"></div><div class="tape"></div>
-  <div style="padding:40px 20px;text-align:center;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px">
-    <div style="font-size:20px;font-weight:800;color:var(--rd)">Invalid tag</div>
-    <div style="font-size:13px;color:var(--gy);text-align:center;max-width:280px">This tag is not registered or has been disabled.</div>
-    <a href="/" class="btn" style="width:200px;text-decoration:none;display:block;text-align:center;padding:14px 0">Learn about TapMyCar</a>
+
+<!-- ACTIVATE FLOW -->
+<div id="state-activate" class="page" style="display:none">
+  <div style="background:#FF6B00;padding:20px 24px;display:flex;align-items:center;gap:12px">
+    <button onclick="showUnclaimed()" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div style="font-size:16px;font-weight:700;color:#fff">Activate your tag</div>
+  </div>
+  <div class="chev"></div>
+  <div style="flex:1;padding:24px;display:flex;flex-direction:column;gap:14px">
+    <div style="font-size:13px;color:#6B7280;margin-bottom:4px">Enter your details to claim this tag and create your account.</div>
+    <div class="field">
+      <label>Full name</label>
+      <input type="text" id="act-name" placeholder="Jane Smith" autocomplete="name">
+    </div>
+    <div class="field">
+      <label>Phone number</label>
+      <input type="tel" id="act-phone" placeholder="+1 (203) 555-0100" autocomplete="tel">
+      <div class="hint">Used for masked call forwarding only — never shared</div>
+    </div>
+    <div class="field">
+      <label>Email address</label>
+      <input type="email" id="act-email" placeholder="jane@example.com" autocomplete="email">
+      <div class="hint">Verification code will be sent here — free</div>
+    </div>
+    <div style="margin-top:auto">
+      <button class="btn" onclick="sendActivationOTP()">Send verification code →</button>
+    </div>
   </div>
 </div>
-<style>@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>
+
+<!-- OTP VERIFY FLOW -->
+<div id="state-otp" class="page" style="display:none">
+  <div style="background:#FF6B00;padding:20px 24px;display:flex;align-items:center;gap:12px">
+    <button onclick="showActivateFlow()" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div style="font-size:16px;font-weight:700;color:#fff">Verify your email</div>
+  </div>
+  <div class="chev"></div>
+  <div style="flex:1;padding:24px;display:flex;flex-direction:column;gap:14px">
+    <div style="font-size:15px;font-weight:700;color:#111">Check your email</div>
+    <div style="font-size:13px;color:#6B7280" id="otp-sent-to">Code sent to your email</div>
+    <div class="otp-row">
+      <input class="otp-box" type="tel" maxlength="1">
+      <input class="otp-box" type="tel" maxlength="1">
+      <input class="otp-box" type="tel" maxlength="1">
+      <input class="otp-box" type="tel" maxlength="1">
+      <input class="otp-box" type="tel" maxlength="1">
+      <input class="otp-box" type="tel" maxlength="1">
+    </div>
+    <div style="text-align:center">
+      <button id="resend-btn" onclick="sendActivationOTP(true)" style="background:none;border:none;color:#FF6B00;font-weight:600;font-size:12px;cursor:pointer;font-family:Inter,sans-serif">Resend code</button>
+    </div>
+    <div class="info-box">
+      <p>Check your spam folder if you don't see the email within 1 minute.</p>
+    </div>
+    <div style="margin-top:auto">
+      <button class="btn" onclick="verifyActivationOTP()">Verify and activate tag →</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div id="state-success" class="page" style="display:none">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;gap:16px">
+    <div style="width:80px;height:80px;border-radius:50%;background:#DCFCE7;border:3px solid #16A34A;display:flex;align-items:center;justify-content:center">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div style="font-size:26px;font-weight:800;color:#111">Your tag is now active!</div>
+    <div style="font-size:14px;color:#6B7280;line-height:1.6;max-width:280px">Place your sticker on the inside of your rear window. Strangers can now contact you privately.</div>
+    <a href="/dashboard.html" class="btn" style="width:100%;max-width:320px;text-decoration:none;display:block;text-align:center;padding:14px 0;margin-top:8px">Go to my dashboard →</a>
+  </div>
+</div>
+
 <div class="toast" id="toast"><div class="toast-ic"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span id="toast-msg"></span></div>
+
 <script src="/app.js"></script>
 <script>
+let currentToken = '';
+let currentScanId = '';
+let activationData = {};
+
+// Get token from URL
 const pathParts = window.location.pathname.split('/');
-const token = pathParts[pathParts.length - 1] || new URLSearchParams(window.location.search).get('t');
+currentToken = pathParts[pathParts.length - 1];
+
+// Show state helper
+function showState(id) {
+  const states = ['loading','invalid','disabled','unclaimed','active','activate','otp','success'];
+  states.forEach(s => {
+    const el = document.getElementById('state-' + s);
+    if (el) el.style.display = s === id ? (s === 'invalid' || s === 'disabled' ? 'flex' : 'flex') : 'none';
+  });
+  const el = document.getElementById('state-' + id);
+  if (el) el.style.display = 'flex';
+  if (el) el.style.flexDirection = 'column';
+}
+
+function showNotOwner() {
+  document.getElementById('not-owner-msg').style.display = 'block';
+}
+
+function showUnclaimed() { showState('unclaimed'); }
+function showActivateFlow() { showState('activate'); }
+
+// Load tag on page load
 async function loadTag() {
-  if (!token || token === 'contact.html') { showInvalid(); return; }
+  if (!currentToken || currentToken === 'contact.html' || currentToken === 'tag') {
+    showState('invalid');
+    return;
+  }
+
   try {
-    const res = await fetch('/api/get-tag?token=' + token);
+    const res = await fetch('/api/get-tag?token=' + currentToken);
     const data = await res.json();
-    if (data.error || !data.tag) { showInvalid(); return; }
-    showVerified(data.tag);
-  } catch(e) { showInvalid(); }
+
+    if (!data.tag) {
+      showState('invalid');
+      return;
+    }
+
+    const tag = data.tag;
+
+    if (tag.status === 'disabled') {
+      showState('disabled');
+    } else if (tag.status === 'unclaimed') {
+      showState('unclaimed');
+    } else if (tag.status === 'active') {
+      showState('active');
+      currentScanId = data.scan_id || '';
+      requestLocation();
+    } else {
+      showState('invalid');
+    }
+  } catch(e) {
+    console.error(e);
+    showState('invalid');
+  }
 }
-function showVerified(tag) {
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('verified').style.display = 'block';
-  document.getElementById('call-btn').onclick = function() {
-    window.location.href = 'tel:+18605158987';
-  };
-  document.getElementById('text-btn').onclick = function() {
-    showToast('Text messaging coming soon');
-  };
+
+// Request location permission
+function requestLocation() {
+  const notice = document.getElementById('location-notice');
+  notice.style.display = 'block';
+
+  setTimeout(() => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          saveLocation(pos.coords.latitude, pos.coords.longitude);
+          notice.style.display = 'none';
+        },
+        () => { notice.style.display = 'none'; }
+      );
+    } else {
+      notice.style.display = 'none';
+    }
+  }, 2000);
 }
-function showInvalid() {
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('invalid').style.display = 'flex';
+
+// Save location to scan log
+async function saveLocation(lat, lng) {
+  if (!currentScanId) return;
+  try {
+    await fetch('/api/update-scan', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ scan_id: currentScanId, latitude: lat, longitude: lng })
+    });
+  } catch(e) { console.error(e); }
 }
+
+// Handle call button
+function handleCall() {
+  updateScanAction('call');
+  window.location.href = 'tel:+18605158987';
+}
+
+// Handle text button
+function handleText() {
+  updateScanAction('text');
+  showToast('Text messaging coming soon');
+}
+
+// Update scan action
+async function updateScanAction(action) {
+  if (!currentScanId) return;
+  try {
+    await fetch('/api/update-scan', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ scan_id: currentScanId, contact_action: action })
+    });
+  } catch(e) { console.error(e); }
+}
+
+// Send OTP for activation
+async function sendActivationOTP(isResend = false) {
+  const name = document.getElementById('act-name')?.value.trim();
+  const phone = document.getElementById('act-phone')?.value.trim();
+  const email = document.getElementById('act-email')?.value.trim();
+
+  if (!isResend) {
+    if (!name) { showToast('Please enter your name'); return; }
+    if (!phone) { showToast('Please enter your phone number'); return; }
+    if (!email) { showToast('Please enter your email'); return; }
+    activationData = { name, phone, email };
+  }
+
+  try {
+    const res = await fetch('/api/send-otp', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email: activationData.email, phone: activationData.phone, name: activationData.name })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      showState('otp');
+      document.getElementById('otp-sent-to').textContent = 'Code sent to ' + activationData.email;
+      startCountdown('resend-btn');
+    } else {
+      showToast(data.error || 'Failed to send code');
+    }
+  } catch(e) {
+    showToast('Network error');
+  }
+}
+
+// Verify OTP and activate tag
+async function verifyActivationOTP() {
+  const code = getOTPValue();
+  if (code.length < 6) { showToast('Enter all 6 digits'); return; }
+
+  try {
+    const res = await fetch('/api/verify-otp', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        email: activationData.email,
+        code,
+        name: activationData.name,
+        phone: activationData.phone,
+        token: currentToken
+      })
+    });
+    const data = await res.json();
+
+    if (data.token) {
+      saveSession(data.token, data.phone || activationData.phone, data.name || activationData.name);
+      localStorage.setItem('tmc_email', activationData.email);
+      showState('success');
+    } else {
+      showToast(data.error || 'Wrong code — try again');
+    }
+  } catch(e) {
+    showToast('Network error');
+  }
+}
+
 loadTag();
-</script>
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js');
-}
 </script>
 </body>
 </html>

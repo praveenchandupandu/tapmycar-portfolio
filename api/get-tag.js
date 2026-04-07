@@ -12,40 +12,44 @@ module.exports = async function handler(req, res) {
 
   const { token, user_id } = req.query;
 
-  // Get tag by token (for contact page)
   if (token) {
     const { data: tag, error } = await supabase
       .from('tags')
       .select('*, users(name, phone)')
-      .eq('token', token)
+      .eq('token', token.toUpperCase())
       .single();
 
     if (error || !tag) {
       return res.status(404).json({ error: 'Tag not found' });
     }
 
-    // Log the scan
-    await supabase
-      .from('scan_logs')
-      .insert({ tag_id: tag.id, action: 'view' });
-// Notify owner via SMS
-try {
-  await fetch(`https://${req.headers.host}/api/notify-owner`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ tag_id: tag.id })
-  });
-} catch(e) { console.error('Notify error:', e); }
+    // Log scan if tag is active
+    let scan_id = null;
+    if (tag.status === 'active') {
+      const userAgent = req.headers['user-agent'] || '';
+      const deviceType = /mobile|android|iphone|ipad/i.test(userAgent) ? 'mobile' : 'desktop';
 
-    return res.json({ tag });
+      const { data: scan } = await supabase
+        .from('scan_logs')
+        .insert({
+          tag_id: tag.id,
+          action: 'view',
+          device_type: deviceType
+        })
+        .select()
+        .single();
+
+      scan_id = scan?.id;
+    }
+
+    return res.json({ tag, scan_id });
   }
 
-  // Get tag by user_id (for dashboard)
   if (user_id) {
     const { data: tags, error } = await supabase
       .from('tags')
       .select('*')
-      .eq('user_id', user_id);
+      .eq('owner_id', user_id);
 
     if (error) {
       return res.status(500).json({ error: error.message });
