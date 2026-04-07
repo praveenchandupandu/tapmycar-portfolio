@@ -17,10 +17,14 @@
 </style>
 </head>
 <body>
+
+<!-- LOADING -->
 <div id="state-loading" class="page" style="align-items:center;justify-content:center;gap:16px">
   <div style="width:44px;height:44px;border:3px solid #FFE4CC;border-top-color:#FF6B00;border-radius:50%;animation:spin .8s linear infinite"></div>
   <div style="font-size:13px;color:#6B7280">Verifying tag...</div>
 </div>
+
+<!-- INVALID -->
 <div id="state-invalid" class="page" style="display:none;background:#DC2626">
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;gap:16px">
     <div style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
@@ -29,6 +33,8 @@
     <a href="https://tapmycar.io" style="background:#fff;color:#DC2626;font-size:14px;font-weight:700;padding:14px 32px;border-radius:13px;text-decoration:none;margin-top:8px">Visit tapmycar.io</a>
   </div>
 </div>
+
+<!-- DISABLED -->
 <div id="state-disabled" class="page" style="display:none;background:#DC2626">
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;gap:16px">
     <div style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div>
@@ -37,6 +43,8 @@
     <a href="https://tapmycar.io" style="background:#fff;color:#DC2626;font-size:14px;font-weight:700;padding:14px 32px;border-radius:13px;text-decoration:none;margin-top:8px">Visit tapmycar.io</a>
   </div>
 </div>
+
+<!-- UNCLAIMED -->
 <div id="state-unclaimed" class="page" style="display:none">
   <div style="background:#FF6B00;padding:40px 24px 32px;text-align:center;position:relative;overflow:hidden">
     <div style="position:absolute;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.06);right:-40px;top:-40px"></div>
@@ -68,11 +76,49 @@
       </div>
     </div>
     <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px">
-      <button class="btn" onclick="showState('step1')">Activate your tag →</button>
+      <button class="btn" onclick="startActivation()">Activate your tag →</button>
       <a href="/signin.html" style="text-align:center;font-size:13px;color:#6B7280;text-decoration:none;padding:8px 0">Already have an account? <span style="color:#FF6B00;font-weight:600">Sign in</span></a>
     </div>
   </div>
 </div>
+
+<!-- VERIFY EXISTING USER (returning user OTP only) -->
+<div id="state-verify-existing" class="page" style="display:none">
+  <div class="step-header">
+    <button class="back-btn" onclick="showState('unclaimed')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <div class="step-title">Verify it's you</div>
+  </div>
+  <div style="flex:1;padding:20px 24px;display:flex;flex-direction:column;gap:14px">
+    <div style="font-size:15px;font-weight:700;color:#111">Welcome back!</div>
+    <div style="font-size:13px;color:#6B7280">We already have your details. Just verify it's really you.</div>
+    <div style="background:#F9FAFB;border-radius:14px;padding:16px;border:.5px solid #E5E7EB">
+      <div style="font-size:12px;color:#6B7280;margin-bottom:8px">Sending verification code to</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF6B00" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.91-.91a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.73 16.92z"/></svg>
+        <div style="font-size:15px;font-weight:700;color:#111" id="existing-phone-masked"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <div style="font-size:12px;color:#9CA3AF" id="existing-email-masked"></div>
+      </div>
+    </div>
+    <div class="otp-row">
+      <input class="otp-box" type="tel" maxlength="1">
+      <input class="otp-box" type="tel" maxlength="1">
+      <input class="otp-box" type="tel" maxlength="1">
+      <input class="otp-box" type="tel" maxlength="1">
+      <input class="otp-box" type="tel" maxlength="1">
+      <input class="otp-box" type="tel" maxlength="1">
+    </div>
+    <div style="text-align:center">
+      <button id="resend-existing-btn" onclick="resendExistingOTP()" style="background:none;border:none;color:#FF6B00;font-weight:600;font-size:12px;cursor:pointer;font-family:inherit">Resend code</button>
+    </div>
+    <div class="info-box"><p>Enter the 6-digit code sent to your phone via SMS.</p></div>
+    <div style="margin-top:auto"><button class="btn" onclick="verifyExistingAndContinue()">Verify →</button></div>
+  </div>
+</div>
+
+<!-- STEP 1 — Personal details (new users only) -->
 <div id="state-step1" class="page" style="display:none">
   <div class="step-header">
     <button class="back-btn" onclick="showState('unclaimed')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
@@ -92,9 +138,11 @@
     <div style="margin-top:auto"><button class="btn" onclick="goToStep2()">Continue →</button></div>
   </div>
 </div>
+
+<!-- STEP 2 — Vehicle details -->
 <div id="state-step2" class="page" style="display:none">
   <div class="step-header">
-    <button class="back-btn" onclick="showState('step1')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <button class="back-btn" onclick="backFromStep2()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
     <div class="step-title">Your vehicle</div>
   </div>
   <div style="display:flex;gap:4px;padding:12px 24px 0">
@@ -115,6 +163,8 @@
     <div style="margin-top:auto"><button class="btn" onclick="goToStep3()">Continue →</button></div>
   </div>
 </div>
+
+<!-- STEP 3 — Verify phone -->
 <div id="state-step3" class="page" style="display:none">
   <div class="step-header">
     <button class="back-btn" onclick="showState('step2')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
@@ -137,11 +187,13 @@
       <input class="otp-box" type="tel" maxlength="1">
       <input class="otp-box" type="tel" maxlength="1">
     </div>
-    <div style="text-align:center"><button id="resend-btn" onclick="resendOTP()" style="background:none;border:none;color:#FF6B00;font-weight:600;font-size:12px;cursor:pointer;font-family:Inter,sans-serif">Resend code</button></div>
+    <div style="text-align:center"><button id="resend-btn" onclick="resendOTP()" style="background:none;border:none;color:#FF6B00;font-weight:600;font-size:12px;cursor:pointer;font-family:inherit">Resend code</button></div>
     <div class="info-box"><p>Enter the 6-digit code sent to your phone via SMS.</p></div>
     <div style="margin-top:auto"><button class="btn" onclick="verifyAndContinue()">Verify →</button></div>
   </div>
 </div>
+
+<!-- STEP 4 — Activate & pay -->
 <div id="state-step4" class="page" style="display:none">
   <div class="step-header">
     <button class="back-btn" onclick="showState('step3')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
@@ -168,6 +220,8 @@
     <div style="margin-top:auto"><button class="btn" id="pay-btn" onclick="activateAndPay()" style="opacity:.3" disabled>Pay $1 — activate tag</button></div>
   </div>
 </div>
+
+<!-- ACTIVE TAG (someone scanning your tag) -->
 <div id="state-active" class="page" style="display:none">
   <div class="nav" style="padding:8px 20px"><a href="https://tapmycar.io" class="logo" style="font-size:15px">Tap<span>My</span>Car<span class="logo-dot"></span></a><div style="font-size:11px;color:#6B7280">Official tag</div></div>
   <div class="chev"></div><div class="tape"></div>
@@ -191,6 +245,8 @@
     <div style="text-align:center;font-size:10px;color:#9CA3AF;padding:4px 0">Official TapMyCar tag - Praman Tech LLC - <a href="https://tapmycar.io" style="color:#FF6B00;text-decoration:none">tapmycar.io</a></div>
   </div>
 </div>
+
+<!-- SUCCESS -->
 <div id="state-success" class="page" style="display:none">
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;gap:16px">
     <div style="width:80px;height:80px;border-radius:50%;background:#DCFCE7;border:3px solid #16A34A;display:flex;align-items:center;justify-content:center"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
@@ -199,122 +255,196 @@
     <a href="/dashboard.html" class="btn" style="width:100%;max-width:320px;text-decoration:none;display:block;text-align:center;padding:14px 0;margin-top:8px">Go to my dashboard</a>
   </div>
 </div>
+
+<!-- TOAST -->
 <div class="toast" id="toast"><div class="toast-ic"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span id="toast-msg"></span></div>
+
 <script src="/app.js"></script>
 <script>
-let currentToken='',currentScanId='',registrationData={};
-const pathParts=window.location.pathname.split('/');
-currentToken=pathParts[pathParts.length-1];
+let currentToken='', currentScanId='', registrationData={};
+const pathParts = window.location.pathname.split('/');
+currentToken = pathParts[pathParts.length - 1];
+
 function showState(id){
-  ['loading','invalid','disabled','unclaimed','step1','step2','step3','step4','active','success'].forEach(s=>{
-    const el=document.getElementById('state-'+s);
-    if(el)el.style.display='none';
+  ['loading','invalid','disabled','unclaimed','verify-existing','step1','step2','step3','step4','active','success'].forEach(s=>{
+    const el = document.getElementById('state-'+s);
+    if(el) el.style.display='none';
   });
-  const el=document.getElementById('state-'+id);
-  if(el){el.style.display='flex';el.style.flexDirection='column';}
+  const el = document.getElementById('state-'+id);
+  if(el){ el.style.display='flex'; el.style.flexDirection='column'; }
 }
+
 async function loadTag(){
-  if(!currentToken||currentToken==='contact.html'||currentToken==='tag'){showState('invalid');return;}
+  if(!currentToken || currentToken==='contact.html' || currentToken==='tag'){ showState('invalid'); return; }
   try{
-    const res=await fetch('/api/get-tag?token='+currentToken);
-    const data=await res.json();
-    if(!data.tag){showState('invalid');return;}
-    const tag=data.tag;
-    if(tag.status==='disabled'){showState('disabled');}
-    else if(tag.status==='unclaimed'){document.getElementById('unclaimed-token').textContent=tag.token;showState('unclaimed');}
-    else if(tag.status==='active'){showState('active');currentScanId=data.scan_id||'';requestLocation();}
-    else{showState('invalid');}
-  }catch(e){showState('invalid');}
+    const res  = await fetch('/api/get-tag?token='+currentToken);
+    const data = await res.json();
+    if(!data.tag){ showState('invalid'); return; }
+    const tag = data.tag;
+    if(tag.status==='disabled')       { showState('disabled'); }
+    else if(tag.status==='unclaimed') { document.getElementById('unclaimed-token').textContent=tag.token; showState('unclaimed'); }
+    else if(tag.status==='active')    { showState('active'); currentScanId=data.scan_id||''; requestLocation(); }
+    else                              { showState('invalid'); }
+  }catch(e){ showState('invalid'); }
 }
+
+// ── Helpers ──────────────────────────────────────────────
+function maskPhone(p){ return p.slice(0,-4).replace(/\d/g,'*')+p.slice(-4); }
+function maskEmail(e){ const[a,b]=e.split('@'); return a.slice(0,2)+'***@'+b; }
+
+// ── Activation entry point ────────────────────────────────
+async function startActivation(){
+  const token = localStorage.getItem('tmc_token');
+  const phone = localStorage.getItem('tmc_phone');
+  const name  = localStorage.getItem('tmc_name');
+  const email = localStorage.getItem('tmc_email');
+
+  if(token && phone && name && email){
+    // Existing user — just verify with OTP, no data entry
+    registrationData = { name, email, phone, userId: token };
+    document.getElementById('existing-phone-masked').textContent = maskPhone(phone);
+    document.getElementById('existing-email-masked').textContent  = maskEmail(email);
+    await resendExistingOTP();
+    showState('verify-existing');
+  } else {
+    // New user — full Step 1 form
+    showState('step1');
+  }
+}
+
+// ── Existing user OTP ─────────────────────────────────────
+async function resendExistingOTP(){
+  try{
+    const res  = await fetch('/api/send-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:registrationData.phone,type:'phone'})});
+    const data = await res.json();
+    if(data.success){ startCountdown('resend-existing-btn'); }
+    else{ showToast(data.error||'Failed to send code'); }
+  }catch(e){ showToast('Network error'); }
+}
+
+async function verifyExistingAndContinue(){
+  const boxes = document.querySelectorAll('#state-verify-existing .otp-box');
+  const code  = Array.from(boxes).map(b=>b.value).join('');
+  if(code.length<6){ showToast('Enter all 6 digits'); return; }
+  try{
+    const res  = await fetch('/api/verify-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:registrationData.phone,email:registrationData.email,code,name:registrationData.name,token:currentToken,type:'phone'})});
+    const data = await res.json();
+    if(data.token){
+      saveSession(data.token, data.phone||registrationData.phone, data.name||registrationData.name);
+      localStorage.setItem('tmc_email', registrationData.email);
+      registrationData.userId = data.token;
+      showState('step2');
+    } else { showToast(data.error||'Wrong code'); }
+  }catch(e){ showToast('Network error'); }
+}
+
+// ── Back from Step 2 ──────────────────────────────────────
+function backFromStep2(){
+  const token = localStorage.getItem('tmc_token');
+  // If existing user, go back to verify screen; otherwise go to step1
+  showState(token ? 'verify-existing' : 'step1');
+}
+
+// ── Location ──────────────────────────────────────────────
 function requestLocation(){
-  const notice=document.getElementById('location-notice');
-  notice.style.display='block';
+  const notice = document.getElementById('location-notice');
+  notice.style.display = 'block';
   setTimeout(()=>{
-    if('geolocation'in navigator){
+    if('geolocation' in navigator){
       navigator.geolocation.getCurrentPosition(
-        (pos)=>{saveLocation(pos.coords.latitude,pos.coords.longitude);notice.style.display='none';},
-        ()=>{notice.style.display='none';}
+        (pos)=>{ saveLocation(pos.coords.latitude,pos.coords.longitude); notice.style.display='none'; },
+        ()=>{ notice.style.display='none'; }
       );
-    }else{notice.style.display='none';}
+    } else { notice.style.display='none'; }
   },2000);
 }
 async function saveLocation(lat,lng){
-  if(!currentScanId)return;
-  try{await fetch('/api/update-scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scan_id:currentScanId,latitude:lat,longitude:lng})});}catch(e){}
+  if(!currentScanId) return;
+  try{ await fetch('/api/update-scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scan_id:currentScanId,latitude:lat,longitude:lng})}); }catch(e){}
 }
-function handleCall(){updateScanAction('call');window.location.href='tel:+18605158987';}
-function handleText(){updateScanAction('text');showToast('Text messaging coming soon');}
+
+function handleCall(){ updateScanAction('call'); window.location.href='tel:+18605158987'; }
+function handleText(){ updateScanAction('text'); showToast('Text messaging coming soon'); }
 async function updateScanAction(action){
-  if(!currentScanId)return;
-  try{await fetch('/api/update-scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scan_id:currentScanId,contact_action:action})});}catch(e){}
+  if(!currentScanId) return;
+  try{ await fetch('/api/update-scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scan_id:currentScanId,contact_action:action})}); }catch(e){}
 }
+
+// ── New user Step 1 ───────────────────────────────────────
 function goToStep2(){
-  const name=document.getElementById('s1-name').value.trim();
-  const email=document.getElementById('s1-email').value.trim();
-  const phone=document.getElementById('s1-phone').value.trim();
-  if(!name){showToast('Please enter your name');return;}
-  if(!email){showToast('Please enter your email');return;}
-  if(!phone){showToast('Please enter your phone number');return;}
-  registrationData={...registrationData,name,email,phone};
+  const name  = document.getElementById('s1-name').value.trim();
+  const email = document.getElementById('s1-email').value.trim();
+  const phone = document.getElementById('s1-phone').value.trim();
+  if(!name)  { showToast('Please enter your name'); return; }
+  if(!email) { showToast('Please enter your email'); return; }
+  if(!phone) { showToast('Please enter your phone number'); return; }
+  registrationData = {...registrationData, name, email, phone};
   showState('step2');
 }
+
+// ── Step 2 → Step 3 ───────────────────────────────────────
 function goToStep3(){
-  const plate=document.getElementById('s2-plate').value.trim();
-  if(!plate){showToast('License plate is required');return;}
-  registrationData.license_plate=plate.toUpperCase();
-  registrationData.car_make=document.getElementById('s2-make').value.trim();
-  registrationData.car_model=document.getElementById('s2-model').value.trim();
-  registrationData.car_year=document.getElementById('s2-year').value.trim();
-  registrationData.car_color=document.getElementById('s2-color').value.trim();
+  const plate = document.getElementById('s2-plate').value.trim();
+  if(!plate){ showToast('License plate is required'); return; }
+  registrationData.license_plate = plate.toUpperCase();
+  registrationData.car_make      = document.getElementById('s2-make').value.trim();
+  registrationData.car_model     = document.getElementById('s2-model').value.trim();
+  registrationData.car_year      = document.getElementById('s2-year').value.trim();
+  registrationData.car_color     = document.getElementById('s2-color').value.trim();
   sendPhoneOTP();
 }
 async function sendPhoneOTP(){
   try{
-    const res=await fetch('/api/send-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:registrationData.phone,type:'phone'})});
-    const data=await res.json();
-    if(data.success){showState('step3');document.getElementById('otp-sent-to').textContent='Code sent to '+registrationData.phone;startCountdown('resend-btn');}
-    else{showToast(data.error||'Failed to send code');}
-  }catch(e){showToast('Network error');}
+    const res  = await fetch('/api/send-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:registrationData.phone,type:'phone'})});
+    const data = await res.json();
+    if(data.success){ showState('step3'); document.getElementById('otp-sent-to').textContent='Code sent to '+registrationData.phone; startCountdown('resend-btn'); }
+    else{ showToast(data.error||'Failed to send code'); }
+  }catch(e){ showToast('Network error'); }
 }
-async function resendOTP(){await sendPhoneOTP();}
+async function resendOTP(){ await sendPhoneOTP(); }
+
+// ── Step 3 verify (new user) ──────────────────────────────
 async function verifyAndContinue(){
-  const code=getOTPValue();
-  if(code.length<6){showToast('Enter all 6 digits');return;}
+  const code = getOTPValue();
+  if(code.length<6){ showToast('Enter all 6 digits'); return; }
   try{
-    const res=await fetch('/api/verify-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:registrationData.email,phone:registrationData.phone,code,name:registrationData.name,token:currentToken,type:'phone'})});
-    const data=await res.json();
+    const res  = await fetch('/api/verify-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:registrationData.email,phone:registrationData.phone,code,name:registrationData.name,token:currentToken,type:'phone'})});
+    const data = await res.json();
     if(data.token){
-      saveSession(data.token,data.phone||registrationData.phone,data.name||registrationData.name);
-      localStorage.setItem('tmc_email',registrationData.email);
-      registrationData.userId=data.token;
+      saveSession(data.token, data.phone||registrationData.phone, data.name||registrationData.name);
+      localStorage.setItem('tmc_email', registrationData.email);
+      registrationData.userId = data.token;
       await saveVehicleDetails(data.token);
       showState('step4');
-    }else{showToast(data.error||'Wrong code');}
-  }catch(e){showToast('Network error');}
+    } else { showToast(data.error||'Wrong code'); }
+  }catch(e){ showToast('Network error'); }
 }
 async function saveVehicleDetails(userId){
-  try{await fetch('/api/update-tag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:currentToken,user_id:userId,license_plate:registrationData.license_plate,car_make:registrationData.car_make,car_model:registrationData.car_model,car_year:registrationData.car_year,car_color:registrationData.car_color})});}
-  catch(e){console.error(e);}
+  try{ await fetch('/api/update-tag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:currentToken,user_id:userId,license_plate:registrationData.license_plate,car_make:registrationData.car_make,car_model:registrationData.car_model,car_year:registrationData.car_year,car_color:registrationData.car_color})}); }
+  catch(e){ console.error(e); }
 }
-let agreed=false;
+
+// ── Step 4 consent & pay ──────────────────────────────────
+let agreed = false;
 function toggleConsent(el){
-  agreed=!agreed;
-  const box=document.getElementById('consent-box');
-  const btn=document.getElementById('pay-btn');
-  if(agreed){box.style.background='#FF6B00';box.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>';btn.style.opacity='1';btn.disabled=false;}
-  else{box.style.background='#fff';box.innerHTML='';btn.style.opacity='.3';btn.disabled=true;}
+  agreed = !agreed;
+  const box = document.getElementById('consent-box');
+  const btn = document.getElementById('pay-btn');
+  if(agreed){ box.style.background='#FF6B00'; box.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>'; btn.style.opacity='1'; btn.disabled=false; }
+  else      { box.style.background='#fff'; box.innerHTML=''; btn.style.opacity='.3'; btn.disabled=true; }
 }
 async function activateAndPay(){
-  if(!agreed)return;
-  const btn=document.getElementById('pay-btn');
-  btn.textContent='Redirecting...';btn.disabled=true;
+  if(!agreed) return;
+  const btn = document.getElementById('pay-btn');
+  btn.textContent='Redirecting...'; btn.disabled=true;
   try{
-    const res=await fetch('/api/create-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:registrationData.userId,plan:'etag',token:currentToken})});
-    const data=await res.json();
-    if(data.url){window.location.href=data.url;}
-    else{showToast(data.error||'Payment failed');btn.textContent='Pay $1 — activate tag';btn.disabled=false;}
-  }catch(e){showToast('Network error');btn.textContent='Pay $1 — activate tag';btn.disabled=false;}
+    const res  = await fetch('/api/create-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:registrationData.userId,plan:'etag',token:currentToken})});
+    const data = await res.json();
+    if(data.url){ window.location.href=data.url; }
+    else{ showToast(data.error||'Payment failed'); btn.textContent='Pay $1 — activate tag'; btn.disabled=false; }
+  }catch(e){ showToast('Network error'); btn.textContent='Pay $1 — activate tag'; btn.disabled=false; }
 }
+
 loadTag();
 </script>
 </body>
