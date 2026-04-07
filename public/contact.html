@@ -92,55 +92,47 @@
     <div style="font-size:15px;font-weight:700;color:#111">Welcome back!</div>
     <div style="font-size:13px;color:#6B7280">Verify both to continue — no need to re-enter your details.</div>
 
-    <!-- PHONE OTP BOX -->
-    <div style="background:#F9FAFB;border-radius:14px;padding:16px;border:.5px solid #E5E7EB">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div>
-          <div style="font-size:11px;color:#6B7280;margin-bottom:2px">Phone</div>
-          <div style="font-size:14px;font-weight:700;color:#111" id="existing-phone-masked"></div>
-        </div>
-        <div id="phone-verified-badge" style="display:none;background:#DCFCE7;color:#16A34A;font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px">✓ Verified</div>
-      </div>
-      <div class="otp-row" id="phone-otp-row">
-        <input class="otp-box" type="tel" maxlength="1">
-        <input class="otp-box" type="tel" maxlength="1">
-        <input class="otp-box" type="tel" maxlength="1">
-        <input class="otp-box" type="tel" maxlength="1">
-        <input class="otp-box" type="tel" maxlength="1">
-        <input class="otp-box" type="tel" maxlength="1">
-      </div>
-      <button id="verify-phone-btn" onclick="verifyPhoneOTP()" style="background:#FF6B00;color:#fff;font-size:12px;font-weight:700;padding:8px 16px;border:none;border-radius:9px;cursor:pointer;font-family:inherit">Verify phone →</button>
+<!-- PHONE OTP BOX -->
+<div style="background:#F9FAFB;border-radius:14px;padding:16px;border:.5px solid #E5E7EB">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div>
+      <div style="font-size:11px;color:#6B7280;margin-bottom:2px">Phone</div>
+      <div style="font-size:14px;font-weight:700;color:#111" id="existing-phone-masked"></div>
     </div>
-
-    <!-- EMAIL OTP BOX -->
-    <div style="background:#F9FAFB;border-radius:14px;padding:16px;border:.5px solid #E5E7EB">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div>
-          <div style="font-size:11px;color:#6B7280;margin-bottom:2px">Email</div>
-          <div style="font-size:13px;font-weight:700;color:#111" id="existing-email-masked"></div>
-        </div>
-        <div id="email-verified-badge" style="display:none;background:#DCFCE7;color:#16A34A;font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px">✓ Verified</div>
-      </div>
-      <div class="otp-row" id="email-otp-row">
-        <input class="otp-box" type="tel" maxlength="1">
-        <input class="otp-box" type="tel" maxlength="1">
-        <input class="otp-box" type="tel" maxlength="1">
-        <input class="otp-box" type="tel" maxlength="1">
-        <input class="otp-box" type="tel" maxlength="1">
-        <input class="otp-box" type="tel" maxlength="1">
-      </div>
-      <button id="verify-email-btn" onclick="verifyEmailOTP()" style="background:#111;color:#fff;font-size:12px;font-weight:700;padding:8px 16px;border:none;border-radius:9px;cursor:pointer;font-family:inherit">Verify email →</button>
-    </div>
-
-    <div style="text-align:center">
-      <button id="resend-existing-btn" onclick="resendExistingOTP()" style="background:none;border:none;color:#FF6B00;font-weight:600;font-size:12px;cursor:pointer;font-family:inherit">Resend codes</button>
-    </div>
-    <div style="margin-top:auto">
-      <button class="btn" id="existing-continue-btn" onclick="showState('step2')" style="opacity:.3" disabled>Continue →</button>
-    </div>
+    <div id="phone-verified-badge" style="display:none;background:#DCFCE7;color:#16A34A;font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px">✓ Verified</div>
   </div>
+  <button id="send-phone-btn" onclick="sendPhoneCode()" style="background:#FF6B00;color:#fff;font-size:12px;font-weight:700;padding:8px 14px;border:none;border-radius:9px;cursor:pointer;font-family:inherit;margin-bottom:10px">Send code</button>
+  <div class="otp-row" id="phone-otp-row" style="display:none">
+    <input class="otp-box" type="tel" maxlength="1">
+    <input class="otp-box" type="tel" maxlength="1">
+    <input class="otp-box" type="tel" maxlength="1">
+    <input class="otp-box" type="tel" maxlength="1">
+    <input class="otp-box" type="tel" maxlength="1">
+    <input class="otp-box" type="tel" maxlength="1">
+  </div>
+  <button id="verify-phone-btn" onclick="verifyPhoneOTP()" style="display:none;background:#111;color:#fff;font-size:12px;font-weight:700;padding:8px 16px;border:none;border-radius:9px;cursor:pointer;font-family:inherit">Verify →</button>
 </div>
 
+<!-- EMAIL OTP BOX -->
+<div style="background:#F9FAFB;border-radius:14px;padding:16px;border:.5px solid #E5E7EB">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div>
+      <div style="font-size:11px;color:#6B7280;margin-bottom:2px">Email</div>
+      <div style="font-size:13px;font-weight:700;color:#111" id="existing-email-masked"></div>
+    </div>
+    <div id="email-verified-badge" style="display:none;background:#DCFCE7;color:#16A34A;font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px">✓ Verified</div>
+  </div>
+  <button id="send-email-btn" onclick="sendEmailCode()" style="background:#FF6B00;color:#fff;font-size:12px;font-weight:700;padding:8px 14px;border:none;border-radius:9px;cursor:pointer;font-family:inherit;margin-bottom:10px">Send code</button>
+  <div class="otp-row" id="email-otp-row" style="display:none">
+    <input class="otp-box" type="tel" maxlength="1">
+    <input class="otp-box" type="tel" maxlength="1">
+    <input class="otp-box" type="tel" maxlength="1">
+    <input class="otp-box" type="tel" maxlength="1">
+    <input class="otp-box" type="tel" maxlength="1">
+    <input class="otp-box" type="tel" maxlength="1">
+  </div>
+  <button id="verify-email-btn" onclick="verifyEmailOTP()" style="display:none;background:#111;color:#fff;font-size:12px;font-weight:700;padding:8px 16px;border:none;border-radius:9px;cursor:pointer;font-family:inherit">Verify →</button>
+</div>
 <!-- STEP 1 — Personal details (new users only) -->
 <div id="state-step1" class="page" style="display:none">
   <div class="step-header">
@@ -329,21 +321,59 @@ async function startActivation(){
     document.getElementById('existing-continue-btn').disabled=true;
     document.getElementById('phone-verified-badge').style.display='none';
     document.getElementById('email-verified-badge').style.display='none';
-    document.getElementById('verify-phone-btn').style.display='block';
-    document.getElementById('verify-email-btn').style.display='block';
-    await resendExistingOTP();
+    document.getElementById('send-phone-btn').style.display='block';
+    document.getElementById('send-email-btn').style.display='block';
+    document.getElementById('phone-otp-row').style.display='none';
+    document.getElementById('email-otp-row').style.display='none';
+    document.getElementById('verify-phone-btn').style.display='none';
+    document.getElementById('verify-email-btn').style.display='none';
     showState('verify-existing');
   } else {
     showState('step1');
   }
 }
 
-async function resendExistingOTP(){
+async function sendPhoneCode(){
+  const btn=document.getElementById('send-phone-btn');
+  btn.textContent='Sending...';btn.disabled=true;
   try{
-    await fetch('/api/send-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:registrationData.phone,type:'phone'})});
-    await fetch('/api/send-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:registrationData.email,type:'email'})});
-    startCountdown('resend-existing-btn');
-  }catch(e){showToast('Network error');}
+    const res=await fetch('/api/send-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:registrationData.phone,type:'phone'})});
+    const data=await res.json();
+    if(data.success){
+      btn.style.display='none';
+      document.getElementById('phone-otp-row').style.display='flex';
+      document.getElementById('verify-phone-btn').style.display='block';
+      showToast('Code sent to your phone');
+    }else{showToast(data.error||'Failed to send');btn.textContent='Send code';btn.disabled=false;}
+  }catch(e){showToast('Network error');btn.textContent='Send code';btn.disabled=false;}
+}
+
+async function sendEmailCode(){
+  const btn=document.getElementById('send-email-btn');
+  btn.textContent='Sending...';btn.disabled=true;
+  try{
+    const res=await fetch('/api/send-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:registrationData.email,type:'email'})});
+    const data=await res.json();
+    if(data.success){
+      btn.style.display='none';
+      document.getElementById('email-otp-row').style.display='flex';
+      document.getElementById('verify-email-btn').style.display='block';
+      showToast('Code sent to your email');
+    }else{showToast(data.error||'Failed to send');btn.textContent='Send code';btn.disabled=false;}
+  }catch(e){showToast('Network error');btn.textContent='Send code';btn.disabled=false;}
+}
+
+async function resendExistingOTP(){
+  document.getElementById('send-phone-btn').style.display='block';
+  document.getElementById('send-phone-btn').textContent='Send code';
+  document.getElementById('send-phone-btn').disabled=false;
+  document.getElementById('send-email-btn').style.display='block';
+  document.getElementById('send-email-btn').textContent='Send code';
+  document.getElementById('send-email-btn').disabled=false;
+  document.getElementById('phone-otp-row').style.display='none';
+  document.getElementById('email-otp-row').style.display='none';
+  document.getElementById('verify-phone-btn').style.display='none';
+  document.getElementById('verify-email-btn').style.display='none';
 }
 
 async function verifyPhoneOTP(){
@@ -358,10 +388,11 @@ async function verifyPhoneOTP(){
     if(data.token){
       phoneVerified=true;
       document.getElementById('phone-verified-badge').style.display='block';
+      document.getElementById('phone-otp-row').style.display='none';
       btn.style.display='none';
       checkBothVerified();
-    }else{showToast(data.error||'Wrong code');btn.textContent='Verify phone →';btn.disabled=false;}
-  }catch(e){showToast('Network error');btn.textContent='Verify phone →';btn.disabled=false;}
+    }else{showToast(data.error||'Wrong code');btn.textContent='Verify →';btn.disabled=false;}
+  }catch(e){showToast('Network error');btn.textContent='Verify →';btn.disabled=false;}
 }
 
 async function verifyEmailOTP(){
@@ -376,19 +407,20 @@ async function verifyEmailOTP(){
     if(data.token){
       emailVerified=true;
       document.getElementById('email-verified-badge').style.display='block';
+      document.getElementById('email-otp-row').style.display='none';
       btn.style.display='none';
       checkBothVerified();
-    }else{showToast(data.error||'Wrong code');btn.textContent='Verify email →';btn.disabled=false;}
-  }catch(e){showToast('Network error');btn.textContent='Verify email →';btn.disabled=false;}
+    }else{showToast(data.error||'Wrong code');btn.textContent='Verify →';btn.disabled=false;}
+  }catch(e){showToast('Network error');btn.textContent='Verify →';btn.disabled=false;}
 }
 
 function checkBothVerified(){
   if(phoneVerified&&emailVerified){
     const btn=document.getElementById('existing-continue-btn');
     btn.style.opacity='1';btn.disabled=false;
+    showToast('Both verified! Tap Continue →');
   }
 }
-
 // ── Back from Step 2 ──────────────────────────────────────
 function backFromStep2(){
   const token = localStorage.getItem('tmc_token');
