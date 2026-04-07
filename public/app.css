@@ -90,7 +90,7 @@ body{font-family:'Inter',sans-serif;background:var(--wh);color:var(--bk);max-wid
 .sticker-body{background:#fff;padding:14px;}
 
 /* OTP BOXES */
-.otp-row{display:flex;gap:6px;margin-bottom:16px;}
+.otp-row{display:flex;gap:6px;margin-bottom:16px;justify-content:center;}
 .otp-box{width:42px;height:46px;max-width:46px;border:1.5px solid #E5E7EB;border-radius:11px;text-align:center;font-size:18px;font-weight:700;font-family:'Inter',sans-serif;background:#F9FAFB;outline:none;flex:1;}
 .otp-box:focus{border-color:#FF6B00;background:#FFF3EC;}
 .otp-box.filled{border-color:#FF6B00;}

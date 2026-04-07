@@ -435,26 +435,23 @@ function goToStep2(){
 
 // ── Step 2 → Step 3 ───────────────────────────────────────
 function goToStep3(){
-  const plate = document.getElementById('s2-plate').value.trim();
-  if(!plate){ showToast('License plate is required'); return; }
-  registrationData.license_plate = plate.toUpperCase();
-  registrationData.car_make      = document.getElementById('s2-make').value.trim();
-  registrationData.car_model     = document.getElementById('s2-model').value.trim();
-  registrationData.car_year      = document.getElementById('s2-year').value.trim();
-  registrationData.car_color     = document.getElementById('s2-color').value.trim();
-  sendPhoneOTP();
-}
-async function sendPhoneOTP(){
-  try{
-    const res  = await fetch('/api/send-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:registrationData.phone,type:'phone'})});
-    const data = await res.json();
-    if(data.success){ showState('step3'); document.getElementById('otp-sent-to').textContent='Code sent to '+registrationData.phone; startCountdown('resend-btn'); }
-    else{ showToast(data.error||'Failed to send code'); }
-  }catch(e){ showToast('Network error'); }
-}
-async function resendOTP(){ await sendPhoneOTP(); }
+  const plate=document.getElementById('s2-plate').value.trim();
+  if(!plate){showToast('License plate is required');return;}
+  registrationData.license_plate=plate.toUpperCase();
+  registrationData.car_make=document.getElementById('s2-make').value.trim();
+  registrationData.car_model=document.getElementById('s2-model').value.trim();
+  registrationData.car_year=document.getElementById('s2-year').value.trim();
+  registrationData.car_color=document.getElementById('s2-color').value.trim();
 
-// ── Step 3 verify (new user) ──────────────────────────────
+  if(localStorage.getItem('tmc_token')){
+    // Existing user — save vehicle and go straight to dashboard
+    saveVehicleDetails(registrationData.userId||localStorage.getItem('tmc_token'));
+    showState('success');
+  } else {
+    // New user — needs phone OTP then payment
+    sendPhoneOTP();
+  }
+}// ── Step 3 verify (new user) ──────────────────────────────
 async function verifyAndContinue(){
   const code = getOTPValue();
   if(code.length<6){ showToast('Enter all 6 digits'); return; }
