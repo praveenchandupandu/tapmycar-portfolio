@@ -3,9 +3,6 @@
 <head>
   <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#FF6B00">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="TapMyCar">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Admin — TapMyCar</title>
@@ -16,36 +13,237 @@ body{background:#0D1B35;color:#fff;}
 .al{font-size:16px;font-weight:800;color:#fff;}
 .al span{color:#FF6B00;}
 .pb{font-size:9px;background:rgba(220,38,38,.2);color:#FCA5A5;padding:3px 8px;border-radius:4px;font-weight:600;}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px 20px;}
 .sc{background:#1E2D4A;border-radius:14px;padding:14px 10px;text-align:center;}
-.sn{font-size:26px;font-weight:800;color:#FF6B00;line-height:1;}
-.sl2{font-size:10px;color:#94A3B8;margin-top:4px;}
-.asl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#64748B;padding:10px 20px 6px;background:#0F1E38;}
-.ar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:.5px solid rgba(255,255,255,.05);}
-.un{font-size:13px;font-weight:600;color:#fff;}
-.us{font-size:10px;color:#64748B;margin-top:2px;}
-.ba{background:rgba(22,163,74,.15);color:#4ADE80;padding:3px 8px;border-radius:99px;font-size:9px;font-weight:700;}
-.bw{background:rgba(234,179,8,.15);color:#FDE047;padding:3px 8px;border-radius:99px;font-size:9px;font-weight:700;}
-.db{font-size:9px;color:#FCA5A5;border:.5px solid rgba(220,38,38,.3);padding:3px 8px;border-radius:4px;background:none;cursor:pointer;font-family:Inter,sans-serif;}
+.sn{font-size:24px;font-weight:800;color:#FF6B00;line-height:1;}
+.sl2{font-size:9px;color:#94A3B8;margin-top:4px;}
+.tabs{display:flex;gap:0;padding:0 20px;border-bottom:.5px solid rgba(255,255,255,.08)}
+.tab{flex:1;text-align:center;padding:12px 0;font-size:11px;font-weight:600;color:#64748B;cursor:pointer;border-bottom:2px solid transparent}
+.tab.active{color:#FF6B00;border-bottom-color:#FF6B00}
+.panel{display:none;padding:14px 20px}
+.panel.active{display:block}
+.asl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#64748B;margin-bottom:10px}
+.ar{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:.5px solid rgba(255,255,255,.05)}
+.un{font-size:13px;font-weight:600;color:#fff}
+.us{font-size:10px;color:#64748B;margin-top:2px}
+.ba{background:rgba(22,163,74,.15);color:#4ADE80;padding:3px 8px;border-radius:99px;font-size:9px;font-weight:700}
+.bw{background:rgba(234,179,8,.15);color:#FDE047;padding:3px 8px;border-radius:99px;font-size:9px;font-weight:700}
+.br{background:rgba(220,38,38,.15);color:#FCA5A5;padding:3px 8px;border-radius:99px;font-size:9px;font-weight:700}
+.gen-box{background:#1E2D4A;border-radius:14px;padding:16px;margin-bottom:16px}
+.gen-box h3{font-size:13px;font-weight:700;color:#fff;margin-bottom:10px}
+.gen-row{display:flex;gap:8px;align-items:flex-end}
+.gen-input{flex:1;height:42px;border:1.5px solid #334155;border-radius:10px;padding:0 12px;font-size:14px;font-family:'Inter',sans-serif;background:#0F1F3D;color:#fff;outline:none}
+.gen-input:focus{border-color:#FF6B00}
+.gen-btn{background:#FF6B00;color:#fff;font-size:12px;font-weight:700;padding:0 18px;border-radius:10px;height:42px;border:none;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap}
+.gen-result{margin-top:12px;max-height:200px;overflow-y:auto}
+.gen-token{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:.5px solid rgba(255,255,255,.05)}
+.gen-token-id{font-size:12px;font-weight:700;color:#FF6B00;font-family:monospace}
+.gen-token-url{font-size:9px;color:#64748B}
+.empty{text-align:center;padding:30px 20px;color:#64748B;font-size:13px}
+/* Login overlay */
+.login-overlay{position:fixed;inset:0;background:#0D1B35;z-index:300;display:flex;align-items:center;justify-content:center}
+.login-box{text-align:center;padding:24px}
+.login-box h2{font-size:20px;font-weight:800;color:#fff;margin-bottom:4px}
+.login-box p{font-size:12px;color:#64748B;margin-bottom:20px}
+.login-input{width:100%;max-width:280px;height:46px;border:1.5px solid #334155;border-radius:11px;padding:0 14px;font-size:14px;font-family:'Inter',sans-serif;background:#0F1F3D;color:#fff;outline:none;text-align:center;margin-bottom:12px}
+.login-input:focus{border-color:#FF6B00}
+.login-btn{background:#FF6B00;color:#fff;font-size:14px;font-weight:700;padding:14px 40px;border-radius:13px;border:none;cursor:pointer;font-family:'Inter',sans-serif}
 </style>
 </head>
 <body>
-<div class="an"><div class="al">TapMyCar<span>.</span> <span style="font-size:12px;font-weight:500;color:#64748B">Admin</span></div><span class="pb">Private</span></div>
-<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px 20px">
-  <div class="sc"><div class="sn" id="u-count">0</div><div class="sl2">Users</div></div>
-  <div class="sc"><div class="sn" id="t-count">0</div><div class="sl2">Tags</div></div>
-  <div class="sc"><div class="sn">$0</div><div class="sl2">Revenue</div></div>
+
+<!-- LOGIN -->
+<div class="login-overlay" id="login-overlay">
+  <div class="login-box">
+    <div style="font-size:24px;font-weight:800;color:#fff;margin-bottom:2px">TapMyCar<span style="color:#FF6B00">.</span></div>
+    <p>Admin access only</p>
+    <input type="password" class="login-input" id="admin-key" placeholder="Enter admin key"><br>
+    <button class="login-btn" onclick="adminLogin()">Access Dashboard</button>
+    <div id="login-err" style="color:#FCA5A5;font-size:11px;margin-top:10px"></div>
+  </div>
 </div>
-<div class="asl">Recent Users</div>
-<div id="user-list"><div style="padding:20px;text-align:center;color:#64748B;font-size:13px">Loading...</div></div>
+
+<!-- ADMIN DASHBOARD -->
+<div id="admin-content" style="display:none">
+<div class="an"><div class="al">TapMyCar<span>.</span> <span style="font-size:12px;font-weight:500;color:#64748B">Admin</span></div><span class="pb">Private</span></div>
+
+<div class="stats">
+  <div class="sc"><div class="sn" id="s-users">-</div><div class="sl2">Users</div></div>
+  <div class="sc"><div class="sn" id="s-tags">-</div><div class="sl2">Tags</div></div>
+  <div class="sc"><div class="sn" id="s-scans">-</div><div class="sl2">Scans</div></div>
+</div>
+<div class="stats" style="padding-top:0">
+  <div class="sc"><div class="sn" id="s-active">-</div><div class="sl2">Active</div></div>
+  <div class="sc"><div class="sn" id="s-unclaimed">-</div><div class="sl2">Unclaimed</div></div>
+  <div class="sc"><div class="sn" id="s-revenue">$0</div><div class="sl2">Revenue</div></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('users')">Users</div>
+  <div class="tab" onclick="showTab('tags')">Tags</div>
+  <div class="tab" onclick="showTab('generate')">Generate</div>
+  <div class="tab" onclick="showTab('scans')">Scans</div>
+</div>
+
+<!-- USERS TAB -->
+<div class="panel active" id="panel-users">
+  <div class="asl">All Users</div>
+  <div id="user-list"><div class="empty">Loading...</div></div>
+</div>
+
+<!-- TAGS TAB -->
+<div class="panel" id="panel-tags">
+  <div class="asl">All Tags</div>
+  <div id="tag-list"><div class="empty">Loading...</div></div>
+</div>
+
+<!-- GENERATE TAB -->
+<div class="panel" id="panel-generate">
+  <div class="gen-box">
+    <h3>Generate New Tokens</h3>
+    <div class="gen-row">
+      <input type="number" class="gen-input" id="gen-count" placeholder="How many?" value="1" min="1" max="500">
+      <input type="number" class="gen-input" id="gen-batch" placeholder="Batch #" style="max-width:90px">
+      <button class="gen-btn" onclick="generateTokens()" id="gen-btn">Generate</button>
+    </div>
+    <div class="gen-result" id="gen-result"></div>
+  </div>
+  <div class="asl">Generated tokens appear above. Max 500 per batch.</div>
+</div>
+
+<!-- SCANS TAB -->
+<div class="panel" id="panel-scans">
+  <div class="asl">Recent Scans</div>
+  <div id="scan-list"><div class="empty">Loading...</div></div>
+</div>
+
+</div>
+
+<div class="toast" id="toast"><div class="toast-ic"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span id="toast-msg"></span></div>
+
 <script src="/app.js"></script>
 <script>
-if(!localStorage.getItem('tmc_token')){window.location.href='/signin.html';}
-// Load real users from Supabase — Day 8
-document.getElementById('user-list').innerHTML = '<div style="padding:20px;text-align:center;color:#64748B;font-size:13px">Admin data loads on Day 8</div>';
-</script>
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js');
+let adminKey = '';
+
+function adminLogin() {
+  adminKey = document.getElementById('admin-key').value.trim();
+  if (!adminKey) { document.getElementById('login-err').textContent = 'Enter admin key'; return; }
+
+  document.getElementById('login-err').textContent = 'Verifying...';
+
+  fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey))
+    .then(r => r.json())
+    .then(data => {
+      if (data.admin) {
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('admin-content').style.display = 'block';
+        localStorage.setItem('tmc_admin_key', adminKey);
+        renderDashboard(data);
+      } else {
+        document.getElementById('login-err').textContent = 'Invalid admin key';
+      }
+    })
+    .catch(() => {
+      document.getElementById('login-err').textContent = 'Network error';
+    });
+}
+
+// Auto-login if key saved
+const savedKey = localStorage.getItem('tmc_admin_key');
+if (savedKey) {
+  adminKey = savedKey;
+  document.getElementById('admin-key').value = savedKey;
+  adminLogin();
+}
+
+function renderDashboard(data) {
+  document.getElementById('s-users').textContent = data.userCount;
+  document.getElementById('s-tags').textContent = data.tagCount;
+  document.getElementById('s-scans').textContent = data.scanCount;
+  document.getElementById('s-active').textContent = data.activeTagCount;
+  document.getElementById('s-unclaimed').textContent = data.unclaimedTagCount;
+  document.getElementById('s-revenue').textContent = '$' + (data.revenue / 100).toFixed(2);
+
+  // Users
+  if (data.users.length > 0) {
+    document.getElementById('user-list').innerHTML = data.users.map(u => {
+      const date = new Date(u.created_at).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'});
+      return `<div class="ar"><div><div class="un">${u.name || 'Unknown'}</div><div class="us">${u.email || u.phone || '—'} · ${date}</div></div><span class="${u.plan === 'standard' ? 'ba' : 'bw'}">${u.plan || 'etag'}</span></div>`;
+    }).join('');
+  } else {
+    document.getElementById('user-list').innerHTML = '<div class="empty">No users yet</div>';
+  }
+
+  // Tags
+  if (data.tags.length > 0) {
+    document.getElementById('tag-list').innerHTML = data.tags.map(t => {
+      const statusClass = t.status === 'active' ? 'ba' : t.status === 'unclaimed' ? 'bw' : 'br';
+      const label = t.vehicle_label || '—';
+      return `<div class="ar"><div><div class="un" style="font-family:monospace">#${t.token}</div><div class="us">${label} · ${t.license_plate || 'No plate'}</div></div><span class="${statusClass}">${t.status}</span></div>`;
+    }).join('');
+  } else {
+    document.getElementById('tag-list').innerHTML = '<div class="empty">No tags yet</div>';
+  }
+
+  // Scans
+  if (data.recentScans.length > 0) {
+    document.getElementById('scan-list').innerHTML = data.recentScans.map(s => {
+      const date = new Date(s.scanned_at).toLocaleString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+      const action = s.contact_action || s.action || 'view';
+      return `<div class="ar"><div><div class="un">${date}</div><div class="us">${s.device_type || 'unknown'} · ${action}</div></div><span class="bw">${action}</span></div>`;
+    }).join('');
+  } else {
+    document.getElementById('scan-list').innerHTML = '<div class="empty">No scans yet</div>';
+  }
+}
+
+function showTab(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+async function generateTokens() {
+  const count = parseInt(document.getElementById('gen-count').value) || 1;
+  const batch = document.getElementById('gen-batch').value || null;
+  const btn = document.getElementById('gen-btn');
+
+  if (count > 500) { showToast('Max 500 per batch'); return; }
+
+  btn.textContent = 'Generating...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/generate-tokens', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-key': adminKey
+      },
+      body: JSON.stringify({ count, batch_number: batch ? parseInt(batch) : null })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      showToast(data.generated + ' tokens generated!');
+      document.getElementById('gen-result').innerHTML = data.tokens.map(t =>
+        `<div class="gen-token"><div><div class="gen-token-id">#${t.token}</div><div class="gen-token-url">${t.url}</div></div><span class="bw">unclaimed</span></div>`
+      ).join('');
+
+      // Refresh dashboard
+      const refreshRes = await fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey));
+      const refreshData = await refreshRes.json();
+      if (refreshData.admin) renderDashboard(refreshData);
+    } else {
+      showToast(data.error || 'Failed to generate');
+    }
+  } catch(e) {
+    showToast('Network error');
+  }
+
+  btn.textContent = 'Generate';
+  btn.disabled = false;
 }
 </script>
 </body>

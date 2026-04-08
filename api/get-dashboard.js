@@ -29,28 +29,95 @@ module.exports = async function handler(req, res) {
     return res.json({ success: true });
   }
 
-  // ── GET — load dashboard data ──
+  // ── GET ──
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { user_id } = req.query;
+  const { user_id, admin } = req.query;
+
+  // ── ADMIN MODE — return all data ──
+  if (admin === process.env.ADMIN_SECRET_KEY) {
+    const { data: users, count: userCount } = await supabase
+      .from('users')
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    const { data: tags, count: tagCount } = await supabase
+      .from('tags')
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    const { count: scanCount } = await supabase
+      .from('scan_logs')
+      .select('*', { count: 'exact', head: true });
+
+    const { count: activeTagCount } = await supabase
+      .from('tags')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'active');
+
+    const { count: unclaimedTagCount } = await supabase
+      .from('tags')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'unclaimed');
+
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const { count: weekScans } = await supabase
+      .from('scan_logs')
+      .select('*', { count: 'exact', head: true })
+      .gte('scanned_at', weekAgo.toISOString());
+
+    const { data: recentScans } = await supabase
+      .from('scan_logs')
+      .select('*')
+      .order('scanned_at', { ascending: false })
+      .limit(20);
+
+    const { data: orders } = await supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    let revenue = 0;
+    if (orders) {
+      revenue = orders.reduce((sum, o) => sum + (o.amount || 0), 0);
+    }
+
+    return res.json({
+      admin: true,
+      users: users || [],
+      userCount: userCount || 0,
+      tags: tags || [],
+      tagCount: tagCount || 0,
+      activeTagCount: activeTagCount || 0,
+      unclaimedTagCount: unclaimedTagCount || 0,
+      scanCount: scanCount || 0,
+      weekScans: weekScans || 0,
+      recentScans: recentScans || [],
+      orders: orders || [],
+      revenue
+    });
+  }
+
+  // ── NORMAL USER MODE ──
   if (!user_id) return res.status(400).json({ error: 'user_id required' });
 
-  // Get user
   const { data: user } = await supabase
     .from('users')
     .select('*')
     .eq('id', user_id)
     .single();
 
-  // Get tags — column is owner_id
   const { data: tags } = await supabase
     .from('tags')
     .select('*')
     .eq('owner_id', user_id);
 
-  // Get scan count
   let scanCount = 0;
   let weekCount = 0;
 
@@ -76,7 +143,6 @@ module.exports = async function handler(req, res) {
     weekCount = wc || 0;
   }
 
-  // Get recent scans
   const { data: recentScans } = await supabase
     .from('scan_logs')
     .select('*')
