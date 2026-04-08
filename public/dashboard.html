@@ -32,6 +32,7 @@
   <div class="page-inner">
     <div style="margin-bottom:10px">
       <div style="font-size:11px;color:var(--gy);margin-bottom:3px">Welcome back</div>
+      <div style="font-size:9px;color:var(--gy);margin-bottom:2px">Privacy for you. Safety for your car.</div>
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div style="font-size:20px;font-weight:800;color:var(--bk)" id="greeting-name">...</div>
         <div style="background:var(--orl);border:.5px solid var(--orl2);border-radius:99px;padding:4px 11px;font-size:10px;font-weight:600;color:var(--or)">⭐ Standard</div>
@@ -90,7 +91,11 @@
     </div>
   </div>
 </div>
-
+<div style="margin:14px 20px;background:#111;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+  <div style="width:40px;height:40px;border-radius:10px;background:var(--or);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+  <div style="flex:1"><div style="font-size:12px;font-weight:700;color:#fff">Share TapMyCar</div><div style="font-size:10px;color:#9CA3AF">Tell friends about privacy + safety for their car</div></div>
+  <button onclick="navigator.share?navigator.share({title:'TapMyCar',text:'Privacy for you. Safety for your car.',url:'https://tapmycar.io'}):navigator.clipboard.writeText('https://tapmycar.io').then(()=>showToast('Link copied!'))" style="background:var(--or);color:#fff;font-size:11px;font-weight:700;padding:7px 14px;border-radius:9px;border:none;cursor:pointer;font-family:Inter,sans-serif">Share</button>
+</div>
 <nav class="bnav">
   <a href="/dashboard.html" class="bni active"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span><div class="bni-dot"></div></a>
   <a href="/etag.html" class="bni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Tag</span></a>
