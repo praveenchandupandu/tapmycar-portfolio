@@ -6,6 +6,30 @@ const supabase = createClient(
 );
 
 module.exports = async function handler(req, res) {
+
+  // ── POST — update user profile ──
+  if (req.method === 'POST') {
+    const { user_id, name, phone, email } = req.body;
+    if (!user_id) return res.status(400).json({ error: 'user_id required' });
+
+    const updates = {};
+    if (name) updates.name = name;
+    if (phone) updates.phone = phone;
+    if (email) updates.email = email;
+
+    const { error } = await supabase
+      .from('users')
+      .update(updates)
+      .eq('id', user_id);
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.json({ success: true });
+  }
+
+  // ── GET — load dashboard data ──
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -20,7 +44,7 @@ module.exports = async function handler(req, res) {
     .eq('id', user_id)
     .single();
 
-  // Get tags
+  // Get tags — column is owner_id
   const { data: tags } = await supabase
     .from('tags')
     .select('*')

@@ -10,30 +10,193 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Settings — TapMyCar</title>
 <link rel="stylesheet" href="/app.css">
+<style>
+.edit-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center}
+.edit-overlay.show{display:flex}
+.edit-sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:24px 20px 34px;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.edit-sheet h3{font-size:16px;font-weight:800;color:#111;margin-bottom:16px}
+.edit-field{margin-bottom:14px}
+.edit-field label{display:block;font-size:11px;font-weight:600;color:#111;margin-bottom:5px}
+.edit-field input{width:100%;height:46px;border:1.5px solid #E5E7EB;border-radius:11px;padding:0 14px;font-size:14px;font-family:'Inter',sans-serif;background:#F9FAFB;outline:none}
+.edit-field input:focus{border-color:#FF6B00}
+</style>
 </head>
 <body>
 <div class="nav"><div class="bk" onclick="history.back()"><div class="bkb"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><span class="bk-label">Settings</span></div></div>
 <div class="chev"></div>
 <div class="page">
-  <div style="padding:20px 20px 14px;text-align:center"><div style="width:68px;height:68px;border-radius:50%;background:var(--or);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff" id="profile-av">U</div><div style="font-size:18px;font-weight:800;color:var(--bk);margin-bottom:3px" id="profile-name">User</div><div style="font-size:12px;color:var(--gy);margin-bottom:10px" id="profile-phone">—</div><div style="display:inline-flex;align-items:center;gap:4px;background:var(--orl);border:.5px solid var(--orl2);border-radius:99px;padding:4px 14px;font-size:11px;font-weight:600;color:var(--or)">⭐ Standard plan</div></div>
+  <!-- Profile header -->
+  <div style="padding:20px 20px 14px;text-align:center">
+    <div style="width:68px;height:68px;border-radius:50%;background:var(--or);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff" id="profile-av">U</div>
+    <div style="font-size:18px;font-weight:800;color:var(--bk);margin-bottom:3px" id="profile-name">Loading...</div>
+    <div style="font-size:12px;color:var(--gy);margin-bottom:4px" id="profile-email">—</div>
+    <div style="font-size:12px;color:var(--gy);margin-bottom:10px" id="profile-phone">—</div>
+    <div style="display:inline-flex;align-items:center;gap:4px;background:var(--orl);border:.5px solid var(--orl2);border-radius:99px;padding:4px 14px;font-size:11px;font-weight:600;color:var(--or)" id="profile-plan">Loading...</div>
+  </div>
+
+  <!-- Edit profile -->
+  <div class="sl">Profile</div>
+  <div class="set-row" onclick="openEditProfile()"><div class="set-l"><div class="set-ic" style="background:var(--orl)"><svg viewBox="0 0 24 24" stroke="var(--or)"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="set-t">Edit profile</div><div class="set-s">Name, phone, email</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+
+  <!-- Tag -->
   <div class="sl">Tag</div>
-  <div class="set-row" onclick="window.location.href='/etag.html'"><div class="set-l"><div class="set-ic" style="background:var(--orl)"><svg viewBox="0 0 24 24" stroke="var(--or)"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div><div><div class="set-t">Manage tag</div><div class="set-s">View your eTag</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+  <div class="set-row" onclick="window.location.href='/etag.html'"><div class="set-l"><div class="set-ic" style="background:var(--orl)"><svg viewBox="0 0 24 24" stroke="var(--or)"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div><div><div class="set-t">Manage tag</div><div class="set-s" id="tag-info">View your eTag</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+
+  <!-- Notifications -->
   <div class="sl">Notifications</div>
-  <div class="set-row"><div class="set-l"><div class="set-ic" style="background:var(--orl)"><svg viewBox="0 0 24 24" stroke="var(--or)"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div><div class="set-t">SMS alerts</div><div class="set-s">When tag is scanned</div></div></div><button class="tog on" onclick="this.classList.toggle('on')"><div class="tog-d"></div></button></div>
+  <div class="set-row"><div class="set-l"><div class="set-ic" style="background:var(--orl)"><svg viewBox="0 0 24 24" stroke="var(--or)"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div><div class="set-t">SMS alerts</div><div class="set-s">When tag is scanned</div></div></div><button class="tog on" id="sms-tog" onclick="toggleSMS()"><div class="tog-d"></div></button></div>
+
+  <!-- Plan -->
   <div class="sl">Plan & billing</div>
-  <div class="set-row" onclick="window.location.href='/pricing.html'"><div class="set-l"><div class="set-ic" style="background:var(--orl)"><svg viewBox="0 0 24 24" stroke="var(--or)"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div><div><div class="set-t">Manage plan</div><div class="set-s">View pricing</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+  <div class="set-row" onclick="window.location.href='/pricing.html'"><div class="set-l"><div class="set-ic" style="background:var(--orl)"><svg viewBox="0 0 24 24" stroke="var(--or)"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div><div><div class="set-t">Manage plan</div><div class="set-s" id="plan-info">View pricing</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+
+  <!-- App -->
+  <div class="sl">App</div>
+  <div class="set-row" onclick="window.location.href='/landing.html'"><div class="set-l"><div class="set-ic" style="background:var(--orl)"><svg viewBox="0 0 24 24" stroke="var(--or)"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><div class="set-t">About TapMyCar</div><div class="set-s">Privacy for you. Safety for your car.</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+
+  <!-- Support -->
   <div class="sl">Support</div>
-  <div class="set-row"><div class="set-l"><div class="set-ic" style="background:var(--gb)"><svg viewBox="0 0 24 24" stroke="var(--gy)"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div><div class="set-t">Help & FAQ</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+  <div class="set-row" onclick="window.location.href='mailto:pramantechllc@gmail.com'"><div class="set-l"><div class="set-ic" style="background:var(--gb)"><svg viewBox="0 0 24 24" stroke="var(--gy)"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div><div class="set-t">Help & FAQ</div><div class="set-s">pramantechllc@gmail.com</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+
+  <!-- Sign out -->
   <div class="set-row" onclick="signOut()"><div class="set-l"><div class="set-ic" style="background:var(--rdl)"><svg viewBox="0 0 24 24" stroke="var(--rd)"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div><div><div class="set-t" style="color:var(--rd)">Sign out</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+
   <div style="padding:20px;text-align:center"><div style="font-size:11px;color:#CCC">TapMyCar v1.0.0 · Praman Tech LLC · Connecticut</div></div>
 </div>
+
+<!-- Edit Profile Sheet -->
+<div class="edit-overlay" id="edit-overlay" onclick="if(event.target===this)closeEdit()">
+  <div class="edit-sheet">
+    <h3>Edit Profile</h3>
+    <div class="edit-field">
+      <label>Full name</label>
+      <input type="text" id="edit-name" placeholder="Your name">
+    </div>
+    <div class="edit-field">
+      <label>Phone number</label>
+      <input type="tel" id="edit-phone" placeholder="+1 (203) 555-0100">
+    </div>
+    <div class="edit-field">
+      <label>Email address</label>
+      <input type="email" id="edit-email" placeholder="jane@example.com">
+    </div>
+    <button class="btn" onclick="saveProfile()" id="save-btn">Save changes</button>
+    <button class="btn-o" style="margin-top:8px" onclick="closeEdit()">Cancel</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"><div class="toast-ic"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span id="toast-msg"></span></div>
+
 <script src="/app.js"></script>
 <script>
 requireAuth();
 const s = getSession();
-if(s.name){document.getElementById('profile-name').textContent=s.name;document.getElementById('profile-av').textContent=s.name[0].toUpperCase();}
-if(s.phone){document.getElementById('profile-phone').textContent=s.phone;}
-function signOut(){localStorage.clear();window.location.href='/signin.html';}
+let userData = null;
+let tagData = null;
+
+async function loadSettings() {
+  try {
+    const res = await fetch('/api/get-dashboard?user_id=' + s.token);
+    const data = await res.json();
+
+    if (data.user) {
+      userData = data.user;
+      document.getElementById('profile-name').textContent = data.user.name || 'User';
+      document.getElementById('profile-av').textContent = (data.user.name || 'U')[0].toUpperCase();
+      document.getElementById('profile-phone').textContent = data.user.phone || '—';
+      document.getElementById('profile-email').textContent = data.user.email || '—';
+
+      const plan = data.user.plan || 'etag';
+      const planNames = { etag: 'eTag (Free)', standard: 'Standard', premium: 'Premium', business: 'Business' };
+      document.getElementById('profile-plan').textContent = '⭐ ' + (planNames[plan] || plan);
+      document.getElementById('plan-info').textContent = (planNames[plan] || plan) + ' plan';
+    }
+
+    if (data.tags && data.tags.length > 0) {
+      tagData = data.tags[0];
+      document.getElementById('tag-info').textContent = '#' + tagData.token + ' · ' + (tagData.status || 'unknown');
+    }
+  } catch(e) {
+    console.error('Settings load error:', e);
+  }
+}
+
+function openEditProfile() {
+  if (userData) {
+    document.getElementById('edit-name').value = userData.name || '';
+    document.getElementById('edit-phone').value = userData.phone || '';
+    document.getElementById('edit-email').value = userData.email || '';
+  }
+  document.getElementById('edit-overlay').classList.add('show');
+}
+
+function closeEdit() {
+  document.getElementById('edit-overlay').classList.remove('show');
+}
+
+async function saveProfile() {
+  const name = document.getElementById('edit-name').value.trim();
+  const phone = document.getElementById('edit-phone').value.trim();
+  const email = document.getElementById('edit-email').value.trim();
+
+  if (!name) { showToast('Name is required'); return; }
+
+  const btn = document.getElementById('save-btn');
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/get-dashboard', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        user_id: s.token,
+        name: name,
+        phone: phone,
+        email: email
+      })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      // Update localStorage
+      localStorage.setItem('tmc_name', name);
+      localStorage.setItem('tmc_phone', phone);
+      localStorage.setItem('tmc_email', email);
+
+      // Update display
+      document.getElementById('profile-name').textContent = name;
+      document.getElementById('profile-av').textContent = name[0].toUpperCase();
+      document.getElementById('profile-phone').textContent = phone || '—';
+      document.getElementById('profile-email').textContent = email || '—';
+
+      closeEdit();
+      showToast('Profile updated!');
+    } else {
+      showToast(data.error || 'Failed to save');
+    }
+  } catch(e) {
+    showToast('Network error');
+  }
+
+  btn.textContent = 'Save changes';
+  btn.disabled = false;
+}
+
+function toggleSMS() {
+  const tog = document.getElementById('sms-tog');
+  tog.classList.toggle('on');
+  const isOn = tog.classList.contains('on');
+  showToast(isOn ? 'SMS alerts enabled' : 'SMS alerts disabled');
+}
+
+function signOut() {
+  localStorage.clear();
+  window.location.href = '/signin.html';
+}
+
+loadSettings();
 </script>
 <script>
 if ('serviceWorker' in navigator) {
