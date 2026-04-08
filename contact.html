@@ -520,7 +520,7 @@ async function verifyAndContinue(){
 }
 
 async function saveVehicleDetails(userId){
-  try{await fetch('/api/update-tag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:currentToken,user_id:userId,license_plate:registrationData.license_plate,car_make:registrationData.car_make,car_model:registrationData.car_model,car_year:registrationData.car_year,car_color:registrationData.car_color})});}
+  try{await fetch('/api/get-tag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:currentToken,user_id:userId,license_plate:registrationData.license_plate,car_make:registrationData.car_make,car_model:registrationData.car_model,car_year:registrationData.car_year,car_color:registrationData.car_color})});}
   catch(e){console.error(e);}
 }
 
