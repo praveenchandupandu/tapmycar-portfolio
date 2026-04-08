@@ -32,8 +32,9 @@
   <div onclick="window.location.href='/dashboard.html'" style="width:100%;text-align:center;font-size:13px;color:var(--gy);cursor:pointer;padding:8px">Go to Dashboard</div>
 </div>
 
-<!-- Hidden elements for PDF generation -->
+<!-- Hidden elements for PDF -->
 <div id="qr-hidden" style="position:absolute;left:-9999px;top:-9999px"></div>
+<div id="qr-app" style="position:absolute;left:-9999px;top:-9999px"></div>
 <canvas id="sticker-canvas" style="display:none"></canvas>
 <img id="template-img" src="/tapmycarintialstage.png" crossorigin="anonymous" style="display:none">
 
@@ -57,7 +58,6 @@ async function loadTagData() {
       document.getElementById('tag-name').textContent = label + ' · #' + tag.token;
       document.getElementById('sticker-token').textContent = '#' + tag.token;
 
-      // QR for preview
       document.getElementById('qr-preview').innerHTML = '';
       new QRCode(document.getElementById('qr-preview'), {
         text: tagURL, width: 90, height: 90,
@@ -65,10 +65,17 @@ async function loadTagData() {
         correctLevel: QRCode.CorrectLevel.M
       });
 
-      // QR for PDF (larger)
       document.getElementById('qr-hidden').innerHTML = '';
       new QRCode(document.getElementById('qr-hidden'), {
         text: tagURL, width: 400, height: 400,
+        colorDark: '#111111', colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
+
+      // App download QR
+      document.getElementById('qr-app').innerHTML = '';
+      new QRCode(document.getElementById('qr-app'), {
+        text: 'https://tapmycar.io', width: 300, height: 300,
         colorDark: '#111111', colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.H
       });
@@ -77,43 +84,39 @@ async function loadTagData() {
 }
 
 function buildStickerImage() {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const templateImg = document.getElementById('template-img');
     const canvas = document.getElementById('sticker-canvas');
     const ctx = canvas.getContext('2d');
 
-    // Original image is 1200x1200, crop to chevron: (18,39)-(1170,1147) = 1152x1108
     const cropX=18, cropY=39, cropW=1152, cropH=1108;
     canvas.width = cropW;
     canvas.height = cropH;
 
-    // Draw cropped template
     ctx.drawImage(templateImg, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
 
-    // Draw QR code at position (adjusted for crop offset)
-    // Original: x=403,y=514 → cropped: x=385,y=475
     const qrCanvas = document.querySelector('#qr-hidden canvas');
     if (qrCanvas) {
       ctx.drawImage(qrCanvas, 385, 475, 355, 355);
     }
 
-    // Draw tag ID text
-    // Original: x=694,y=125 → cropped: x=676,y=86
-    ctx.font = 'bold 34px Arial Black, Impact, sans-serif';
+    ctx.font = 'bold 34px Arial, sans-serif';
     ctx.fillStyle = '#FFFFFF';
-    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowColor = 'rgba(0,0,0,0.6)';
     ctx.shadowBlur = 4;
-    ctx.fillText('#' + tagToken, 676, 86 + 30);
+    ctx.shadowOffsetX = 1;
+    ctx.shadowOffsetY = 1;
+    ctx.fillText('#' + tagToken, 676, 116);
     ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
 
-    // Apply rounded corners by clipping
+    // Rounded corners
     const radius = 50;
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = cropW;
     tempCanvas.height = cropH;
     const tCtx = tempCanvas.getContext('2d');
-
-    // Draw rounded rect path
     tCtx.beginPath();
     tCtx.moveTo(radius, 0);
     tCtx.lineTo(cropW - radius, 0);
@@ -126,260 +129,273 @@ function buildStickerImage() {
     tCtx.quadraticCurveTo(0, 0, radius, 0);
     tCtx.closePath();
     tCtx.clip();
-
-    // Draw the sticker inside the clip
     tCtx.drawImage(canvas, 0, 0);
 
     resolve(tempCanvas.toDataURL('image/png'));
   });
 }
 
+function getAppQRData() {
+  const c = document.querySelector('#qr-app canvas');
+  return c ? c.toDataURL('image/png') : null;
+}
+
 async function downloadEtag() {
+  if (!tagToken) { showToast('Tag data not loaded yet — try again'); return; }
+
   const btn = document.getElementById('dl-btn');
   btn.innerHTML = 'Generating PDF...';
   btn.disabled = true;
 
-  // Wait for template image to load
   const templateImg = document.getElementById('template-img');
   if (!templateImg.complete) {
     await new Promise(r => { templateImg.onload = r; });
   }
 
-  setTimeout(async () => {
-    try {
-      const stickerDataURL = await buildStickerImage();
-      const { jsPDF } = window.jspdf;
+  // Small delay for QR canvases to render
+  await new Promise(r => setTimeout(r, 600));
 
-      // Page 1 — Sticker (letter size: 215.9 x 279.4 mm)
-      const doc = new jsPDF({ unit: 'mm', format: 'letter' });
-      const pw = 215.9, ph = 279.4;
+  try {
+    const stickerDataURL = await buildStickerImage();
+    const appQR = getAppQRData();
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'letter' });
+    const pw = 215.9, ph = 279.4;
+    const margin = 24;
 
-      // Sticker 4x4 inches = 101.6mm, aspect ratio 1108/1152
-      const sW = 101.6;
-      const sH = 101.6 * (1108/1152);
-      const sX = (pw - sW) / 2;
-      const sY = (ph - sH) / 2 - 10;
-      doc.addImage(stickerDataURL, 'PNG', sX, sY, sW, sH);
+    // ═══ PAGE 1 — STICKER ═══
+    const sW = 101.6;
+    const sH = 101.6 * (1108/1152);
+    const sX = (pw - sW) / 2;
+    const sY = (ph - sH) / 2 - 10;
+    doc.addImage(stickerDataURL, 'PNG', sX, sY, sW, sH);
+    doc.setTextColor(107,114,128); doc.setFontSize(8);
+    doc.text('Print at actual size · Cut to 4×4 inches · Place inside rear windshield facing outward', pw/2, sY + sH + 8, {align:'center'});
+    doc.setFontSize(7);
+    doc.text('Get the TapMyCar app: tapmycar.io', pw/2, sY + sH + 15, {align:'center'});
 
-      doc.setTextColor(107, 114, 128);
-      doc.setFontSize(8);
-      doc.text('Print at actual size  ·  Cut to 4×4 inches  ·  Place inside rear windshield facing outward', pw/2, sY + sH + 8, {align:'center'});
+    // ═══ PAGE 2 — WELCOME ═══
+    doc.addPage();
+    doc.setFillColor(255,107,0); doc.rect(0, 0, pw, 30, 'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(22); doc.setFont('helvetica','bold');
+    doc.text('Welcome to TapMyCar!', pw/2, 13, {align:'center'});
+    doc.setFontSize(10); doc.setFont('helvetica','normal');
+    doc.text('Privacy for you. Safety for your car.', pw/2, 22, {align:'center'});
+    doc.setFillColor(17,17,17); doc.rect(0, 30, pw, 1.5, 'F');
 
-      // Page 2 — Welcome
-      doc.addPage();
-      doc.setFillColor(255,107,0);
-      doc.rect(0, 0, pw, 30, 'F');
-      doc.setTextColor(255,255,255);
-      doc.setFontSize(24);
-      doc.setFont('helvetica','bold');
-      doc.text('Welcome to TapMyCar!', pw/2, 14, {align:'center'});
-      doc.setFontSize(11);
-      doc.setFont('helvetica','normal');
-      doc.text('Privacy for you. Safety for your car.', pw/2, 23, {align:'center'});
-      doc.setFillColor(17,17,17);
-      doc.rect(0, 30, pw, 1.5, 'F');
+    var y = 42;
+    doc.setTextColor(17,17,17); doc.setFontSize(13); doc.setFont('helvetica','bold');
+    doc.text('Thank you for choosing TapMyCar!', pw/2, y, {align:'center'}); y += 10;
 
-      let y = 42;
-      doc.setTextColor(17,17,17);
-      doc.setFontSize(14);
-      doc.setFont('helvetica','bold');
-      doc.text('Thank you for choosing TapMyCar!', pw/2, y, {align:'center'});
-      y += 12;
+    doc.setFontSize(9.5); doc.setFont('helvetica','normal'); doc.setTextColor(55,65,81);
+    var wLines = [
+      'You just made the smartest decision for your vehicle.',
+      '',
+      'Every day, millions of cars sit parked with no way for anyone to reach the',
+      'owner. Someone hits your car — they drive away. Your headlights are on —',
+      'your battery dies. You\'re blocking someone — they get frustrated.',
+      '',
+      'TapMyCar changes that. Now anyone can reach you instantly about your vehicle',
+      '— without ever seeing your real phone number. Your identity stays completely',
+      'private. Your car stays completely protected.',
+      '',
+      'Think of it as a safety precaution you never knew you needed — until now.'
+    ];
+    wLines.forEach(function(line) { doc.text(line, pw/2, y, {align:'center'}); y += 5; });
 
-      doc.setFontSize(10);
-      doc.setFont('helvetica','normal');
-      doc.setTextColor(55,65,81);
-      const welcomeLines = [
-        'You just made the smartest decision for your vehicle.',
-        '',
-        'Every day, millions of cars sit parked with no way for anyone to reach',
-        'the owner. Someone hits your car — they drive away. Your headlights are',
-        'on — your battery dies. You\'re blocking someone — they get frustrated.',
-        '',
-        'TapMyCar changes that. Now anyone can reach you instantly about your',
-        'vehicle — without ever seeing your real phone number. Your identity',
-        'stays completely private. Your car stays completely protected.',
-        '',
-        'Think of it as a safety precaution you never knew you needed — until now.'
-      ];
-      welcomeLines.forEach(line => { doc.text(line, pw/2, y, {align:'center'}); y += 5.5; });
+    y += 4;
+    doc.setDrawColor(255,107,0); doc.setLineWidth(0.6);
+    doc.line(pw/2 - 30, y, pw/2 + 30, y); y += 8;
 
-      y += 5;
-      doc.setDrawColor(255,107,0); doc.setLineWidth(0.7);
-      doc.line(pw/2 - 30, y, pw/2 + 30, y);
-      y += 10;
+    doc.setTextColor(255,107,0); doc.setFontSize(11); doc.setFont('helvetica','bold');
+    doc.text('Your Tag Details', pw/2, y, {align:'center'}); y += 7;
 
-      doc.setTextColor(255,107,0);
-      doc.setFontSize(11);
-      doc.setFont('helvetica','bold');
-      doc.text('Your Tag Details', pw/2, y, {align:'center'});
-      y += 8;
+    doc.setTextColor(17,17,17); doc.setFontSize(9.5); doc.setFont('helvetica','normal');
+    doc.text('Tag ID: #' + tagToken, pw/2, y, {align:'center'}); y += 5.5;
+    doc.text('Scan URL: ' + tagURL, pw/2, y, {align:'center'}); y += 5.5;
+    doc.text('Status: Active & Protected', pw/2, y, {align:'center'});
 
-      doc.setTextColor(17,17,17);
-      doc.setFontSize(10);
-      doc.setFont('helvetica','normal');
-      doc.text('Tag ID: #' + tagToken, pw/2, y, {align:'center'}); y += 6;
-      doc.text('Scan URL: ' + tagURL, pw/2, y, {align:'center'}); y += 6;
-      doc.text('Status: Active & Protected', pw/2, y, {align:'center'});
-
-      doc.setTextColor(107,114,128);
-      doc.setFontSize(7);
-      doc.text('Praman Tech LLC  ·  New Britain, CT  ·  tapmycar.io', pw/2, ph - 8, {align:'center'});
-
-      // Page 3 — Instructions
-      doc.addPage();
-      doc.setFillColor(255,107,0);
-      doc.rect(0, 0, pw, 24, 'F');
-      doc.setTextColor(255,255,255);
-      doc.setFontSize(18);
-      doc.setFont('helvetica','bold');
-      doc.text('How to Use Your eTag', pw/2, 15, {align:'center'});
-      doc.setFillColor(17,17,17);
-      doc.rect(0, 24, pw, 1.5, 'F');
-
-      y = 36;
-      doc.setTextColor(55,65,81);
-      doc.setFontSize(9);
-      doc.setFont('helvetica','normal');
-      doc.text('Setting up takes 2 minutes. Here\'s everything you need to know.', pw/2, y, {align:'center'});
-      y += 10;
-
-      const steps = [
-        ['1','Print your eTag','Print page 1 of this PDF at actual size on a color printer. For a premium look, use glossy photo paper or sticker paper.'],
-        ['2','Cut to 4×4 inches','Carefully cut your eTag to size. The rounded edges give it a clean, professional finish.'],
-        ['3','Place inside your rear windshield','Stick it on the INSIDE of your rear window, QR code facing outward. This protects the tag from weather while keeping it scannable.'],
-        ['4','You\'re now protected','That\'s it. Your car now has a private safety line. Anyone who needs your attention simply scans the QR with their phone camera — no app needed.'],
-        ['5','You stay in control','When someone scans and calls, you hear an automated voice first. Press 1 to send them an auto-reply. Press 2 to talk directly. You decide.'],
-        ['6','Your privacy is guaranteed','The caller never sees your real number. You never see theirs. Every interaction is masked, logged, and secure.']
-      ];
-
-      steps.forEach(([num, title, desc]) => {
-        doc.setFillColor(255,107,0);
-        doc.circle(28, y - 1.5, 4, 'F');
-        doc.setTextColor(255,255,255);
-        doc.setFontSize(10);
-        doc.setFont('helvetica','bold');
-        doc.text(num, 28, y, {align:'center'});
-
-        doc.setTextColor(17,17,17);
-        doc.setFontSize(10);
-        doc.setFont('helvetica','bold');
-        doc.text(title, 37, y);
-        y += 6;
-
-        doc.setTextColor(55,65,81);
-        doc.setFontSize(8);
-        doc.setFont('helvetica','normal');
-        const splitDesc = doc.splitTextToSize(desc, 150);
-        doc.text(splitDesc, 37, y);
-        y += splitDesc.length * 4 + 8;
-      });
-
-      doc.setTextColor(107,114,128);
-      doc.setFontSize(7);
-      doc.text('Praman Tech LLC  ·  New Britain, CT  ·  tapmycar.io', pw/2, ph - 8, {align:'center'});
-
-      // Page 4 — Why TapMyCar
-      doc.addPage();
-      doc.setFillColor(255,107,0);
-      doc.rect(0, 0, pw, 24, 'F');
-      doc.setTextColor(255,255,255);
-      doc.setFontSize(18);
-      doc.setFont('helvetica','bold');
-      doc.text('Why TapMyCar?', pw/2, 12, {align:'center'});
-      doc.setFontSize(9);
-      doc.setFont('helvetica','normal');
-      doc.text('Privacy for you. Safety for your car.', pw/2, 20, {align:'center'});
-      doc.setFillColor(17,17,17);
-      doc.rect(0, 24, pw, 1.5, 'F');
-
-      y = 36;
-      doc.setTextColor(17,17,17);
-      doc.setFontSize(11);
-      doc.setFont('helvetica','bold');
-      doc.text('Without TapMyCar:', 24, y); y += 7;
-
-      doc.setFontSize(8);
-      doc.setFont('helvetica','normal');
-      doc.setTextColor(220,38,38);
-      [
-        'Someone hits your parked car — they leave. You find out hours later.',
-        'You leave your number on the dashboard — strangers now have your personal info.',
-        'Your headlights are on overnight — dead battery, no one could warn you.',
-        'You\'re double-parked for 5 minutes — your car gets towed before anyone can reach you.',
-        'A pet or child is locked in a hot car — bystanders waste minutes trying to find you.'
-      ].forEach(line => { doc.text('✗  ' + line, 28, y); y += 5.5; });
-
-      y += 6;
-      doc.setTextColor(17,17,17);
-      doc.setFontSize(11);
-      doc.setFont('helvetica','bold');
-      doc.text('With TapMyCar:', 24, y); y += 7;
-
-      doc.setFontSize(8);
-      doc.setFont('helvetica','normal');
-      doc.setTextColor(22,163,74);
-      [
-        'Anyone can reach you in seconds — scan, tap, done.',
-        'Your real number is never shown — zero privacy risk.',
-        'You screen every call before speaking — full control.',
-        'Every scan is logged with time and location — full awareness.',
-        'Works 24/7 on any phone — no app needed to contact you.'
-      ].forEach(line => { doc.text('✓  ' + line, 28, y); y += 5.5; });
-
-      y += 6;
-      doc.setDrawColor(255,107,0); doc.setLineWidth(0.5);
-      doc.line(24, y, pw - 24, y); y += 8;
-
-      doc.setTextColor(17,17,17);
-      doc.setFontSize(11);
-      doc.setFont('helvetica','bold');
-      doc.text('Plans', 24, y); y += 7;
-
-      [
-        ['eTag (Free)','$1 activation','3 masked calls/month · digital QR · instant setup'],
-        ['Standard','$9.99 + $4.99/yr','10 masked calls/month · physical NFC+QR sticker shipped · SMS alerts'],
-        ['Premium','$24.99 + $9.99/yr','Unlimited calls · 3 vehicles · scan history · emergency contact'],
-        ['Business','$49/month','Fleet dashboard · unlimited vehicles · bulk stickers with logo']
-      ].forEach(([name, price, feat]) => {
-        doc.setTextColor(255,107,0); doc.setFont('helvetica','bold'); doc.setFontSize(9);
-        doc.text(name, 28, y);
-        doc.setTextColor(17,17,17); doc.setFontSize(9);
-        doc.text(price, 75, y); y += 5;
-        doc.setTextColor(55,65,81); doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
-        doc.text(feat, 28, y); y += 8;
-      });
-
-      y += 4;
-      doc.setDrawColor(255,107,0); doc.line(24, y, pw - 24, y); y += 8;
-      doc.setTextColor(55,65,81); doc.setFontSize(8); doc.setFont('helvetica','normal');
-      doc.text('Website: tapmycar.io', 28, y); y += 5;
-      doc.text('Email: pramantechllc@gmail.com', 28, y); y += 5;
-      doc.text('Dashboard: tapmycar.io/dashboard.html', 28, y);
-
-      doc.setTextColor(107,114,128); doc.setFontSize(7);
-      doc.text('© 2026 Praman Tech LLC  ·  New Britain, CT  ·  tapmycar.io', pw/2, ph - 8, {align:'center'});
-
-      // Save
-      doc.save('TapMyCar-eTag-' + tagToken + '.pdf');
-
-      btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Downloaded!';
-      btn.style.background = 'var(--gn)';
-      showToast('eTag PDF saved! Check your Downloads folder.');
-
-      setTimeout(() => {
-        btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download free eTag PDF';
-        btn.style.background = 'var(--gn)';
-        btn.disabled = false;
-      }, 4000);
-
-    } catch(e) {
-      console.error('PDF error:', e);
-      showToast('Error generating PDF — try again');
-      btn.innerHTML = 'Download free eTag PDF';
-      btn.disabled = false;
+    // App promo box
+    y += 15;
+    doc.setFillColor(255,243,236); doc.roundedRect(margin, y, pw - margin*2, 35, 3, 3, 'F');
+    doc.setDrawColor(255,107,0); doc.setLineWidth(0.4);
+    doc.roundedRect(margin, y, pw - margin*2, 35, 3, 3, 'S');
+    doc.setTextColor(154,56,0); doc.setFontSize(10); doc.setFont('helvetica','bold');
+    doc.text('Download the TapMyCar App', margin + 10, y + 10);
+    doc.setFontSize(8); doc.setFont('helvetica','normal');
+    doc.text('Manage your tag, view scan history, and control your privacy settings.', margin + 10, y + 17);
+    doc.setTextColor(255,107,0); doc.setFont('helvetica','bold');
+    doc.text('Visit tapmycar.io on your phone to install', margin + 10, y + 24);
+    if (appQR) {
+      doc.addImage(appQR, 'PNG', pw - margin - 30, y + 3, 28, 28);
     }
-  }, 800);
+
+    doc.setTextColor(107,114,128); doc.setFontSize(7);
+    doc.text('Praman Tech LLC · New Britain, CT · tapmycar.io', pw/2, ph - 8, {align:'center'});
+
+    // ═══ PAGE 3 — INSTRUCTIONS ═══
+    doc.addPage();
+    doc.setFillColor(255,107,0); doc.rect(0, 0, pw, 24, 'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(17); doc.setFont('helvetica','bold');
+    doc.text('How to Use Your eTag', pw/2, 15, {align:'center'});
+    doc.setFillColor(17,17,17); doc.rect(0, 24, pw, 1.5, 'F');
+
+    y = 35;
+    doc.setTextColor(55,65,81); doc.setFontSize(9); doc.setFont('helvetica','normal');
+    doc.text('Setting up takes 2 minutes. Here\'s everything you need to know.', pw/2, y, {align:'center'});
+    y += 10;
+
+    var steps = [
+      ['1','Print your eTag','Print page 1 of this PDF at actual size on a color printer. For a premium look, use glossy photo paper or sticker paper.'],
+      ['2','Cut to 4×4 inches','Carefully cut your eTag to size. The rounded edges give it a clean, professional finish.'],
+      ['3','Place inside your rear windshield','Stick it on the INSIDE of your rear window, QR code facing outward. This protects the tag from weather while keeping it scannable.'],
+      ['4','You\'re now protected','That\'s it. Your car now has a private safety line. Anyone who needs your attention simply scans the QR with their phone camera — no app needed.'],
+      ['5','You stay in control','When someone scans and calls, you hear an automated voice first. Press 1 to send them an auto-reply. Press 2 to talk directly. You decide.'],
+      ['6','Your privacy is guaranteed','The caller never sees your real number. You never see theirs. Every interaction is masked, logged, and secure.']
+    ];
+
+    steps.forEach(function(step) {
+      var num = step[0], title = step[1], desc = step[2];
+      doc.setFillColor(255,107,0); doc.circle(margin + 4, y, 3.5, 'F');
+      doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont('helvetica','bold');
+      doc.text(num, margin + 4, y + 1, {align:'center'});
+      doc.setTextColor(17,17,17); doc.setFontSize(10); doc.setFont('helvetica','bold');
+      doc.text(title, margin + 12, y + 1);
+      y += 6;
+      doc.setTextColor(55,65,81); doc.setFontSize(8); doc.setFont('helvetica','normal');
+      var splitDesc = doc.splitTextToSize(desc, pw - margin*2 - 12);
+      doc.text(splitDesc, margin + 12, y);
+      y += splitDesc.length * 3.8 + 7;
+    });
+
+    // App promo
+    y += 5;
+    doc.setFillColor(255,243,236); doc.roundedRect(margin, y, pw - margin*2, 25, 3, 3, 'F');
+    doc.setDrawColor(255,107,0); doc.setLineWidth(0.4);
+    doc.roundedRect(margin, y, pw - margin*2, 25, 3, 3, 'S');
+    doc.setTextColor(154,56,0); doc.setFontSize(9); doc.setFont('helvetica','bold');
+    doc.text('Manage everything from the TapMyCar app', margin + 10, y + 9);
+    doc.setFontSize(7.5); doc.setFont('helvetica','normal');
+    doc.text('View scans, control your tag, update settings — all from your phone.', margin + 10, y + 16);
+    doc.setTextColor(255,107,0); doc.setFont('helvetica','bold');
+    doc.text('tapmycar.io', margin + 10, y + 22);
+
+    doc.setTextColor(107,114,128); doc.setFontSize(7);
+    doc.text('Praman Tech LLC · New Britain, CT · tapmycar.io', pw/2, ph - 8, {align:'center'});
+
+    // ═══ PAGE 4 — WHY TAPMYCAR + PLANS ═══
+    doc.addPage();
+    doc.setFillColor(255,107,0); doc.rect(0, 0, pw, 28, 'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(17); doc.setFont('helvetica','bold');
+    doc.text('Why TapMyCar?', pw/2, 12, {align:'center'});
+    doc.setFontSize(9); doc.setFont('helvetica','normal');
+    doc.text('Privacy for you. Safety for your car.', pw/2, 21, {align:'center'});
+    doc.setFillColor(17,17,17); doc.rect(0, 28, pw, 1.5, 'F');
+
+    y = 38;
+
+    // Without section
+    doc.setTextColor(17,17,17); doc.setFontSize(10); doc.setFont('helvetica','bold');
+    doc.text('Without TapMyCar:', margin, y); y += 6;
+
+    doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(220,38,38);
+    var problems = [
+      'Someone hits your parked car — they leave. You find out hours later.',
+      'You leave your number on the dashboard — strangers have your personal info.',
+      'Your headlights are on overnight — dead battery, no one could warn you.',
+      'Double-parked for 5 minutes — car gets towed before anyone reaches you.',
+      'A pet or child is in a hot car — bystanders waste minutes finding you.'
+    ];
+    problems.forEach(function(p) {
+      doc.text('✗  ' + p, margin + 4, y); y += 5;
+    });
+
+    y += 4;
+
+    // With section
+    doc.setTextColor(17,17,17); doc.setFontSize(10); doc.setFont('helvetica','bold');
+    doc.text('With TapMyCar:', margin, y); y += 6;
+
+    doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(22,163,74);
+    var solutions = [
+      'Anyone can reach you in seconds — scan, tap, done.',
+      'Your real number is never shown — zero privacy risk.',
+      'You screen every call before speaking — full control.',
+      'Every scan is logged with time and location — full awareness.',
+      'Works 24/7 on any phone — no app needed to contact you.'
+    ];
+    solutions.forEach(function(s) {
+      doc.text('✓  ' + s, margin + 4, y); y += 5;
+    });
+
+    y += 5;
+    doc.setDrawColor(255,107,0); doc.setLineWidth(0.4);
+    doc.line(margin, y, pw - margin, y); y += 7;
+
+    // Plans
+    doc.setTextColor(17,17,17); doc.setFontSize(10); doc.setFont('helvetica','bold');
+    doc.text('Our Plans', margin, y); y += 7;
+
+    var plans = [
+      ['eTag (Free)', '$1 activation', '3 masked calls/month · digital QR · instant setup'],
+      ['Standard', '$9.99 + $4.99/yr', '10 masked calls/month · physical NFC+QR sticker · SMS alerts'],
+      ['Premium', '$24.99 + $9.99/yr', 'Unlimited calls · 3 vehicles · scan history · emergency contact'],
+      ['Business', '$49/month', 'Fleet dashboard · unlimited vehicles · bulk branded stickers']
+    ];
+    plans.forEach(function(plan) {
+      doc.setTextColor(255,107,0); doc.setFont('helvetica','bold'); doc.setFontSize(9);
+      doc.text(plan[0], margin + 4, y);
+      doc.setTextColor(17,17,17); doc.setFontSize(8);
+      doc.text(plan[1], 72, y); y += 4.5;
+      doc.setTextColor(55,65,81); doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
+      doc.text(plan[2], margin + 4, y); y += 7;
+    });
+
+    y += 3;
+    doc.setDrawColor(255,107,0); doc.line(margin, y, pw - margin, y); y += 7;
+
+    // App download promo — prominent
+    doc.setFillColor(255,107,0); doc.roundedRect(margin, y, pw - margin*2, 40, 3, 3, 'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(12); doc.setFont('helvetica','bold');
+    doc.text('Get the TapMyCar App', margin + 12, y + 12);
+    doc.setFontSize(8); doc.setFont('helvetica','normal');
+    doc.text('Manage your tag, view scan history, control privacy settings,', margin + 12, y + 20);
+    doc.text('and stay connected to your vehicle — all from your phone.', margin + 12, y + 26);
+    doc.setFont('helvetica','bold'); doc.setFontSize(9);
+    doc.text('Scan QR or visit tapmycar.io', margin + 12, y + 34);
+    if (appQR) {
+      doc.addImage(appQR, 'PNG', pw - margin - 36, y + 4, 32, 32);
+    }
+
+    y += 48;
+
+    // Contact
+    doc.setTextColor(55,65,81); doc.setFontSize(8); doc.setFont('helvetica','normal');
+    doc.text('Website: tapmycar.io', margin + 4, y); y += 4.5;
+    doc.text('Email: pramantechllc@gmail.com', margin + 4, y);
+
+    doc.setTextColor(107,114,128); doc.setFontSize(7);
+    doc.text('© 2026 Praman Tech LLC · New Britain, CT · tapmycar.io', pw/2, ph - 8, {align:'center'});
+
+    // Save PDF
+    doc.save('TapMyCar-eTag-' + tagToken + '.pdf');
+
+    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Downloaded!';
+    btn.style.background = 'var(--gn)';
+    showToast('eTag PDF saved! Check your Downloads folder.');
+
+    setTimeout(function() {
+      btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download free eTag PDF';
+      btn.style.background = 'var(--gn)';
+      btn.disabled = false;
+    }, 4000);
+
+  } catch(e) {
+    console.error('PDF error:', e);
+    showToast('Error generating PDF — try again');
+    btn.innerHTML = 'Download free eTag PDF';
+    btn.disabled = false;
+  }
 }
 
 loadTagData();
