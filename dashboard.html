@@ -125,11 +125,10 @@ async function loadDashboard() {
     if (data.tags && data.tags.length > 0) {
       const tag = data.tags[0];
       tagToken = tag.token;
-      tagURL = `${window.location.origin}/tag/${tag.token}`;
+      tagURL = `https://tapmycar.io/tag/${tag.token}`;
 
       document.getElementById('vehicle-label').textContent = tag.vehicle_label || 'My Vehicle';
-      document.getElementById('tag-token').textContent = '#TMC-' + tag.id.slice(0,6).toUpperCase();
-      document.getElementById('tag-url').textContent = tagURL;
+      document.getElementById('tag-token').textContent = '#' + tag.token;      document.getElementById('tag-url').textContent = tagURL;
       document.getElementById('hero-sub').textContent = `Scanned ${data.scanCount}× · tap to manage`;
 
       // Generate QR code
