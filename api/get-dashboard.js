@@ -24,7 +24,7 @@ module.exports = async function handler(req, res) {
   const { data: tags } = await supabase
     .from('tags')
     .select('*')
-    .eq('user_id', user_id);
+    .eq('owner_id', user_id);
 
   // Get scan count
   let scanCount = 0;

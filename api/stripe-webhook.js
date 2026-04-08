@@ -47,7 +47,7 @@ module.exports = async function handler(req, res) {
         activated_at: new Date().toISOString(),
         plan: plan || 'etag'
       })
-      .eq('user_id', user_id);
+      .eq('owner_id', user_id);
 
     // Update user plan
     await supabase
