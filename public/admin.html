@@ -17,8 +17,8 @@ body{background:#0D1B35;color:#fff;}
 .sc{background:#1E2D4A;border-radius:14px;padding:14px 10px;text-align:center;}
 .sn{font-size:24px;font-weight:800;color:#FF6B00;line-height:1;}
 .sl2{font-size:9px;color:#94A3B8;margin-top:4px;}
-.tabs{display:flex;gap:0;padding:0 20px;border-bottom:.5px solid rgba(255,255,255,.08)}
-.tab{flex:1;text-align:center;padding:12px 0;font-size:11px;font-weight:600;color:#64748B;cursor:pointer;border-bottom:2px solid transparent}
+.tabs{display:flex;gap:0;padding:0 20px;border-bottom:.5px solid rgba(255,255,255,.08);overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.tab{flex:1;text-align:center;padding:12px 0;font-size:10px;font-weight:600;color:#64748B;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;min-width:60px}
 .tab.active{color:#FF6B00;border-bottom-color:#FF6B00}
 .panel{display:none;padding:14px 20px}
 .panel.active{display:block}
@@ -31,16 +31,17 @@ body{background:#0D1B35;color:#fff;}
 .br{background:rgba(220,38,38,.15);color:#FCA5A5;padding:3px 8px;border-radius:99px;font-size:9px;font-weight:700}
 .gen-box{background:#1E2D4A;border-radius:14px;padding:16px;margin-bottom:16px}
 .gen-box h3{font-size:13px;font-weight:700;color:#fff;margin-bottom:10px}
-.gen-row{display:flex;gap:8px;align-items:flex-end}
-.gen-input{flex:1;height:42px;border:1.5px solid #334155;border-radius:10px;padding:0 12px;font-size:14px;font-family:'Inter',sans-serif;background:#0F1F3D;color:#fff;outline:none}
+.gen-row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.gen-input{flex:1;height:42px;border:1.5px solid #334155;border-radius:10px;padding:0 12px;font-size:14px;font-family:'Inter',sans-serif;background:#0F1F3D;color:#fff;outline:none;min-width:80px}
 .gen-input:focus{border-color:#FF6B00}
 .gen-btn{background:#FF6B00;color:#fff;font-size:12px;font-weight:700;padding:0 18px;border-radius:10px;height:42px;border:none;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap}
+.gen-btn:disabled{opacity:.4;cursor:not-allowed}
+.gen-btn-outline{background:transparent;color:#FF6B00;font-size:11px;font-weight:700;padding:0 14px;border-radius:10px;height:36px;border:1.5px solid #FF6B00;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap}
 .gen-result{margin-top:12px;max-height:200px;overflow-y:auto}
 .gen-token{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:.5px solid rgba(255,255,255,.05)}
 .gen-token-id{font-size:12px;font-weight:700;color:#FF6B00;font-family:monospace}
 .gen-token-url{font-size:9px;color:#64748B}
 .empty{text-align:center;padding:30px 20px;color:#64748B;font-size:13px}
-/* Login overlay */
 .login-overlay{position:fixed;inset:0;background:#0D1B35;z-index:300;display:flex;align-items:center;justify-content:center}
 .login-box{text-align:center;padding:24px}
 .login-box h2{font-size:20px;font-weight:800;color:#fff;margin-bottom:4px}
@@ -48,6 +49,29 @@ body{background:#0D1B35;color:#fff;}
 .login-input{width:100%;max-width:280px;height:46px;border:1.5px solid #334155;border-radius:11px;padding:0 14px;font-size:14px;font-family:'Inter',sans-serif;background:#0F1F3D;color:#fff;outline:none;text-align:center;margin-bottom:12px}
 .login-input:focus{border-color:#FF6B00}
 .login-btn{background:#FF6B00;color:#fff;font-size:14px;font-weight:700;padding:14px 40px;border-radius:13px;border:none;cursor:pointer;font-family:'Inter',sans-serif}
+.repl-box{background:#1A2744;border:1.5px solid #334155;border-radius:14px;padding:16px;margin-bottom:16px}
+.repl-box h3{font-size:13px;font-weight:700;color:#FDE047;margin-bottom:6px}
+.repl-box p{font-size:11px;color:#94A3B8;margin-bottom:12px;line-height:1.5}
+.verify-box{background:#1E2D4A;border-radius:14px;padding:16px;margin-bottom:16px}
+.verify-box h3{font-size:13px;font-weight:700;color:#fff;margin-bottom:6px}
+.verify-box p{font-size:11px;color:#94A3B8;line-height:1.5;margin-bottom:12px}
+.scan-entry{display:flex;gap:8px;margin-bottom:8px}
+.scan-input{flex:1;height:42px;border:1.5px solid #334155;border-radius:10px;padding:0 12px;font-size:14px;font-family:'Inter',sans-serif;background:#0F1F3D;color:#fff;outline:none;text-transform:uppercase}
+.scan-input:focus{border-color:#16A34A}
+.scanned-list{max-height:250px;overflow-y:auto;margin-top:10px}
+.scanned-item{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:.5px solid rgba(255,255,255,.05)}
+.scanned-token{font-size:12px;font-weight:700;color:#4ADE80;font-family:monospace}
+.scanned-num{font-size:10px;color:#64748B}
+.verify-summary{background:#0F1F3D;border-radius:10px;padding:12px;margin-top:12px}
+.verify-stat{display:flex;justify-content:space-between;padding:4px 0;font-size:11px}
+.verify-label{color:#94A3B8}
+.verify-val{font-weight:700}
+.verify-val.green{color:#4ADE80}
+.verify-val.yellow{color:#FDE047}
+.verify-val.red{color:#FCA5A5}
+.danger-btn{background:#DC2626;color:#fff;font-size:12px;font-weight:700;padding:0 18px;border-radius:10px;height:42px;border:none;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;margin-top:10px;width:100%}
+.danger-btn:disabled{opacity:.4;cursor:not-allowed}
+.export-row{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -82,6 +106,7 @@ body{background:#0D1B35;color:#fff;}
   <div class="tab active" onclick="showTab('users')">Users</div>
   <div class="tab" onclick="showTab('tags')">Tags</div>
   <div class="tab" onclick="showTab('generate')">Generate</div>
+  <div class="tab" onclick="showTab('receive')">Receive</div>
   <div class="tab" onclick="showTab('scans')">Scans</div>
 </div>
 
@@ -100,15 +125,61 @@ body{background:#0D1B35;color:#fff;}
 <!-- GENERATE TAB -->
 <div class="panel" id="panel-generate">
   <div class="gen-box">
-    <h3>Generate New Tokens</h3>
+    <h3>Generate New Batch</h3>
     <div class="gen-row">
-      <input type="number" class="gen-input" id="gen-count" placeholder="How many?" value="1" min="1" max="500">
+      <input type="number" class="gen-input" id="gen-count" placeholder="How many?" value="10" min="1" max="500">
       <input type="number" class="gen-input" id="gen-batch" placeholder="Batch #" style="max-width:90px">
       <button class="gen-btn" onclick="generateTokens()" id="gen-btn">Generate</button>
     </div>
+    <div class="export-row" id="export-row" style="display:none">
+      <button class="gen-btn-outline" onclick="downloadCSV()">Download CSV</button>
+    </div>
     <div class="gen-result" id="gen-result"></div>
   </div>
-  <div class="asl">Generated tokens appear above. Max 500 per batch.</div>
+
+  <div class="repl-box">
+    <h3>Generate Replacement Tokens</h3>
+    <p>Manufacturer reported failed stickers? Generate exact replacements. Unit numbers continue from where the original batch ended.</p>
+    <div class="gen-row">
+      <input type="number" class="gen-input" id="repl-count" placeholder="How many failed?" min="1" max="500">
+      <input type="number" class="gen-input" id="repl-batch" placeholder="Original Batch #" style="max-width:110px">
+      <button class="gen-btn" onclick="generateReplacements()" id="repl-btn" style="background:#FDE047;color:#0D1B35">Replace</button>
+    </div>
+    <div class="export-row" id="repl-export-row" style="display:none">
+      <button class="gen-btn-outline" onclick="downloadReplacementCSV()">Download Replacement CSV</button>
+    </div>
+    <div class="gen-result" id="repl-result"></div>
+  </div>
+
+  <div class="asl">Max 500 tokens per request. CSV formatted for manufacturer.</div>
+</div>
+
+<!-- RECEIVE & VERIFY TAB -->
+<div class="panel" id="panel-receive">
+  <div class="verify-box">
+    <h3>Scan Received Stickers</h3>
+    <p>Scan each sticker as you receive it from manufacturer. Only tokens from the selected batch are affected. Unscanned tokens in THIS batch only will be deleted when you finalize.</p>
+    <div style="margin-bottom:12px">
+      <div style="font-size:10px;color:#94A3B8;margin-bottom:4px">Select batch to verify</div>
+      <select id="verify-batch" class="gen-input" style="width:100%;appearance:auto;cursor:pointer" onchange="loadBatchForVerify()">
+        <option value="">— Select batch —</option>
+      </select>
+    </div>
+    <div class="scan-entry">
+      <input type="text" class="scan-input" id="scan-token" placeholder="Scan or type token..." onkeydown="if(event.key==='Enter')scanToken()">
+      <button class="gen-btn" onclick="scanToken()" style="background:#16A34A">Scan</button>
+    </div>
+    <div class="verify-summary" id="verify-summary" style="display:none">
+      <div class="verify-stat"><span class="verify-label">Batch total</span><span class="verify-val" id="v-total">0</span></div>
+      <div class="verify-stat"><span class="verify-label">Scanned (received)</span><span class="verify-val green" id="v-scanned">0</span></div>
+      <div class="verify-stat"><span class="verify-label">Not yet scanned</span><span class="verify-val yellow" id="v-remaining">0</span></div>
+    </div>
+    <div class="scanned-list" id="scanned-list"></div>
+    <button class="danger-btn" id="finalize-btn" onclick="finalizeReceive()" style="display:none" disabled>Finalize — Delete Unscanned From This Batch Only</button>
+    <div id="finalize-warning" style="display:none;margin-top:8px;background:rgba(220,38,38,.1);border-radius:8px;padding:10px;font-size:11px;color:#FCA5A5;line-height:1.5">
+      This will permanently delete all unscanned tokens from Batch <strong id="fw-batch"></strong> only. Other batches are NOT affected. Cannot be undone.
+    </div>
+  </div>
 </div>
 
 <!-- SCANS TAB -->
@@ -124,13 +195,16 @@ body{background:#0D1B35;color:#fff;}
 <script src="/app.js"></script>
 <script>
 let adminKey = '';
+let lastGeneratedTokens = [];
+let lastReplacementTokens = [];
+let scannedTokens = new Set();
+let batchTokensMap = {};
+let currentVerifyBatch = null;
 
 function adminLogin() {
   adminKey = document.getElementById('admin-key').value.trim();
   if (!adminKey) { document.getElementById('login-err').textContent = 'Enter admin key'; return; }
-
   document.getElementById('login-err').textContent = 'Verifying...';
-
   fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey))
     .then(r => r.json())
     .then(data => {
@@ -139,22 +213,16 @@ function adminLogin() {
         document.getElementById('admin-content').style.display = 'block';
         localStorage.setItem('tmc_admin_key', adminKey);
         renderDashboard(data);
+        loadBatchOptions(data.tags || []);
       } else {
         document.getElementById('login-err').textContent = 'Invalid admin key';
       }
     })
-    .catch(() => {
-      document.getElementById('login-err').textContent = 'Network error';
-    });
+    .catch(() => { document.getElementById('login-err').textContent = 'Network error'; });
 }
 
-// Auto-login if key saved
 const savedKey = localStorage.getItem('tmc_admin_key');
-if (savedKey) {
-  adminKey = savedKey;
-  document.getElementById('admin-key').value = savedKey;
-  adminLogin();
-}
+if (savedKey) { adminKey = savedKey; document.getElementById('admin-key').value = savedKey; adminLogin(); }
 
 function renderDashboard(data) {
   document.getElementById('s-users').textContent = data.userCount;
@@ -164,8 +232,7 @@ function renderDashboard(data) {
   document.getElementById('s-unclaimed').textContent = data.unclaimedTagCount;
   document.getElementById('s-revenue').textContent = '$' + (data.revenue / 100).toFixed(2);
 
-  // Users
-  if (data.users.length > 0) {
+  if (data.users && data.users.length > 0) {
     document.getElementById('user-list').innerHTML = data.users.map(u => {
       const date = new Date(u.created_at).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'});
       return `<div class="ar"><div><div class="un">${u.name || 'Unknown'}</div><div class="us">${u.email || u.phone || '—'} · ${date}</div></div><span class="${u.plan === 'standard' ? 'ba' : 'bw'}">${u.plan || 'etag'}</span></div>`;
@@ -174,19 +241,18 @@ function renderDashboard(data) {
     document.getElementById('user-list').innerHTML = '<div class="empty">No users yet</div>';
   }
 
-  // Tags
-  if (data.tags.length > 0) {
+  if (data.tags && data.tags.length > 0) {
     document.getElementById('tag-list').innerHTML = data.tags.map(t => {
       const statusClass = t.status === 'active' ? 'ba' : t.status === 'unclaimed' ? 'bw' : 'br';
       const label = t.vehicle_label || '—';
-      return `<div class="ar"><div><div class="un" style="font-family:monospace">#${t.token}</div><div class="us">${label} · ${t.license_plate || 'No plate'}</div></div><span class="${statusClass}">${t.status}</span></div>`;
+      const batch = t.batch_number ? `Batch ${t.batch_number}` : 'No batch';
+      return `<div class="ar"><div><div class="un" style="font-family:monospace">#${t.token}</div><div class="us">${label} · ${t.license_plate || 'No plate'} · ${batch}</div></div><span class="${statusClass}">${t.status}</span></div>`;
     }).join('');
   } else {
     document.getElementById('tag-list').innerHTML = '<div class="empty">No tags yet</div>';
   }
 
-  // Scans
-  if (data.recentScans.length > 0) {
+  if (data.recentScans && data.recentScans.length > 0) {
     document.getElementById('scan-list').innerHTML = data.recentScans.map(s => {
       const date = new Date(s.scanned_at).toLocaleString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
       const action = s.contact_action || s.action || 'view';
@@ -197,6 +263,23 @@ function renderDashboard(data) {
   }
 }
 
+function loadBatchOptions(tags) {
+  batchTokensMap = {};
+  tags.forEach(t => {
+    if (t.batch_number) {
+      if (!batchTokensMap[t.batch_number]) batchTokensMap[t.batch_number] = [];
+      batchTokensMap[t.batch_number].push(t);
+    }
+  });
+
+  const sel = document.getElementById('verify-batch');
+  sel.innerHTML = '<option value="">— Select batch —</option>';
+  Object.keys(batchTokensMap).sort((a,b) => a-b).forEach(b => {
+    const count = batchTokensMap[b].length;
+    sel.innerHTML += `<option value="${b}">Batch ${b} (${count} tokens)</option>`;
+  });
+}
+
 function showTab(id) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -204,46 +287,228 @@ function showTab(id) {
   event.target.classList.add('active');
 }
 
+// ── GENERATE NEW BATCH ──
 async function generateTokens() {
   const count = parseInt(document.getElementById('gen-count').value) || 1;
   const batch = document.getElementById('gen-batch').value || null;
   const btn = document.getElementById('gen-btn');
-
   if (count > 500) { showToast('Max 500 per batch'); return; }
-
-  btn.textContent = 'Generating...';
-  btn.disabled = true;
-
+  if (!batch) { showToast('Enter a batch number'); return; }
+  btn.textContent = 'Generating...'; btn.disabled = true;
   try {
     const res = await fetch('/api/generate-tokens', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-key': adminKey
-      },
-      body: JSON.stringify({ count, batch_number: batch ? parseInt(batch) : null })
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+      body: JSON.stringify({ count, batch_number: parseInt(batch) })
     });
     const data = await res.json();
-
     if (data.success) {
       showToast(data.generated + ' tokens generated!');
-      document.getElementById('gen-result').innerHTML = data.tokens.map(t =>
-        `<div class="gen-token"><div><div class="gen-token-id">#${t.token}</div><div class="gen-token-url">${t.url}</div></div><span class="bw">unclaimed</span></div>`
+      lastGeneratedTokens = data.tokens.map((t, i) => ({ unit: i + 1, token: t.token, url: t.url }));
+      document.getElementById('gen-result').innerHTML = lastGeneratedTokens.map(t =>
+        `<div class="gen-token"><div><div class="gen-token-id">${t.unit}. #${t.token}</div><div class="gen-token-url">${t.url}</div></div><span class="bw">unclaimed</span></div>`
       ).join('');
+      document.getElementById('export-row').style.display = 'flex';
+      const rr = await fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey));
+      const rd = await rr.json();
+      if (rd.admin) { renderDashboard(rd); loadBatchOptions(rd.tags || []); }
+    } else { showToast(data.error || 'Failed'); }
+  } catch(e) { showToast('Network error'); }
+  btn.textContent = 'Generate'; btn.disabled = false;
+}
 
-      // Refresh dashboard
-      const refreshRes = await fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey));
-      const refreshData = await refreshRes.json();
-      if (refreshData.admin) renderDashboard(refreshData);
-    } else {
-      showToast(data.error || 'Failed to generate');
+function downloadCSV() {
+  if (!lastGeneratedTokens.length) { showToast('No tokens'); return; }
+  const batch = document.getElementById('gen-batch').value || '000';
+  const pad = String(batch).padStart(3, '0');
+  let csv = 'Unit Number,Tag ID,QR URL,NFC URL\n';
+  lastGeneratedTokens.forEach(t => {
+    csv += `${t.unit},TMC-${t.token},https://tapmycar.io/tag/${t.token},https://tapmycar.io/tag/${t.token}\n`;
+  });
+  downloadFile(csv, `TapMyCar_Batch${pad}.csv`, 'text/csv');
+  showToast('CSV downloaded');
+}
+
+// ── GENERATE REPLACEMENT TOKENS ──
+async function generateReplacements() {
+  const count = parseInt(document.getElementById('repl-count').value) || 0;
+  const batch = document.getElementById('repl-batch').value || null;
+  const btn = document.getElementById('repl-btn');
+  if (!count || count < 1) { showToast('Enter how many replacements'); return; }
+  if (count > 500) { showToast('Max 500'); return; }
+  if (!batch) { showToast('Enter the original batch number'); return; }
+  const batchNum = parseInt(batch);
+  btn.textContent = 'Generating...'; btn.disabled = true;
+  try {
+    // Get current batch size to determine starting unit number
+    const checkRes = await fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey));
+    const checkData = await checkRes.json();
+    let existingCount = 0;
+    if (checkData.tags) {
+      existingCount = checkData.tags.filter(t => t.batch_number === batchNum).length;
     }
-  } catch(e) {
-    showToast('Network error');
+    // Generate with same batch number
+    const res = await fetch('/api/generate-tokens', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+      body: JSON.stringify({ count, batch_number: batchNum })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(data.generated + ' replacement tokens generated!');
+      lastReplacementTokens = data.tokens.map((t, i) => ({
+        unit: existingCount - count + i + 1,
+        token: t.token,
+        url: t.url,
+        batchNum: batchNum
+      }));
+      document.getElementById('repl-result').innerHTML = lastReplacementTokens.map(t =>
+        `<div class="gen-token"><div><div class="gen-token-id">${t.unit}. #${t.token}</div><div class="gen-token-url">${t.url}</div></div><span style="background:rgba(253,224,71,.15);color:#FDE047;padding:3px 8px;border-radius:99px;font-size:9px;font-weight:700">replacement</span></div>`
+      ).join('');
+      document.getElementById('repl-export-row').style.display = 'flex';
+      const rr = await fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey));
+      const rd = await rr.json();
+      if (rd.admin) { renderDashboard(rd); loadBatchOptions(rd.tags || []); }
+    } else { showToast(data.error || 'Failed'); }
+  } catch(e) { showToast('Network error'); }
+  btn.textContent = 'Replace'; btn.disabled = false;
+}
+
+function downloadReplacementCSV() {
+  if (!lastReplacementTokens.length) { showToast('No replacement tokens'); return; }
+  const batchNum = lastReplacementTokens[0].batchNum;
+  const pad = String(batchNum).padStart(3, '0');
+  let csv = 'Unit Number,Tag ID,QR URL,NFC URL\n';
+  lastReplacementTokens.forEach(t => {
+    csv += `${t.unit},TMC-${t.token},https://tapmycar.io/tag/${t.token},https://tapmycar.io/tag/${t.token}\n`;
+  });
+  downloadFile(csv, `TapMyCar_Batch${pad}_Replacements.csv`, 'text/csv');
+  showToast('Replacement CSV downloaded');
+}
+
+// ── RECEIVE & VERIFY ──
+function loadBatchForVerify() {
+  const batchNum = parseInt(document.getElementById('verify-batch').value);
+  if (!batchNum) {
+    document.getElementById('verify-summary').style.display = 'none';
+    document.getElementById('finalize-btn').style.display = 'none';
+    document.getElementById('finalize-warning').style.display = 'none';
+    document.getElementById('scanned-list').innerHTML = '';
+    currentVerifyBatch = null;
+    return;
+  }
+  currentVerifyBatch = batchNum;
+  scannedTokens = new Set();
+  const tokens = batchTokensMap[batchNum] || [];
+  document.getElementById('verify-summary').style.display = 'block';
+  document.getElementById('v-total').textContent = tokens.length;
+  document.getElementById('v-scanned').textContent = '0';
+  document.getElementById('v-remaining').textContent = tokens.length;
+  document.getElementById('scanned-list').innerHTML = '';
+  document.getElementById('finalize-btn').style.display = 'block';
+  document.getElementById('finalize-btn').disabled = true;
+  document.getElementById('finalize-warning').style.display = 'none';
+  document.getElementById('scan-token').focus();
+}
+
+function scanToken() {
+  const input = document.getElementById('scan-token');
+  let token = input.value.trim().toUpperCase();
+  if (!token) return;
+  // Clean — remove URL prefix, TMC- prefix, TMC. prefix
+  token = token.replace(/^HTTPS?:\/\/TAPMYCAR\.IO\/TAG\//i, '');
+  token = token.replace(/^TMC[-.]?/i, '');
+
+  if (!currentVerifyBatch) { showToast('Select a batch first'); return; }
+
+  const batchTokens = batchTokensMap[currentVerifyBatch] || [];
+  const found = batchTokens.find(t => {
+    const clean = t.token.replace(/^TMC/i, '');
+    return t.token.toUpperCase() === token || clean.toUpperCase() === token || t.token.toUpperCase() === 'TMC' + token;
+  });
+
+  if (!found) {
+    showToast('Token not found in Batch ' + currentVerifyBatch);
+    input.value = ''; input.focus(); return;
+  }
+  if (scannedTokens.has(found.token)) {
+    showToast('Already scanned: ' + found.token);
+    input.value = ''; input.focus(); return;
   }
 
-  btn.textContent = 'Generate';
-  btn.disabled = false;
+  scannedTokens.add(found.token);
+  const total = batchTokens.length;
+  const scanned = scannedTokens.size;
+  document.getElementById('v-scanned').textContent = scanned;
+  document.getElementById('v-remaining').textContent = total - scanned;
+
+  const list = document.getElementById('scanned-list');
+  const div = document.createElement('div');
+  div.className = 'scanned-item';
+  div.innerHTML = `<span class="scanned-token">#${found.token}</span><span class="scanned-num">✓ ${scanned} of ${total}</span>`;
+  list.prepend(div);
+
+  document.getElementById('finalize-btn').disabled = false;
+  document.getElementById('finalize-warning').style.display = 'block';
+  document.getElementById('fw-batch').textContent = currentVerifyBatch;
+
+  input.value = ''; input.focus();
+  if (scanned === total) showToast('All ' + total + ' tokens scanned! Batch complete.');
+}
+
+async function finalizeReceive() {
+  if (!currentVerifyBatch) return;
+  const batchTokens = batchTokensMap[currentVerifyBatch] || [];
+  const unscanned = batchTokens.filter(t => !scannedTokens.has(t.token));
+
+  if (unscanned.length === 0) {
+    showToast('All tokens received — nothing to delete!');
+    return;
+  }
+
+  const confirmed = confirm(
+    `Delete ${unscanned.length} unscanned token(s) from Batch ${currentVerifyBatch} ONLY?\n\n` +
+    `Tokens to delete:\n${unscanned.map(t => '#' + t.token).join('\n')}\n\n` +
+    `Other batches are NOT touched. This cannot be undone.`
+  );
+  if (!confirmed) return;
+
+  const btn = document.getElementById('finalize-btn');
+  btn.textContent = 'Deleting...'; btn.disabled = true;
+
+  let deleted = 0, errors = 0;
+  for (const t of unscanned) {
+    try {
+      const res = await fetch('/api/get-tag', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: t.token, user_id: 'admin-delete', status_override: 'deleted' })
+      });
+      const data = await res.json();
+      if (data.success) deleted++; else errors++;
+    } catch(e) { errors++; }
+  }
+
+  showToast(`Deleted ${deleted} unscanned tokens from Batch ${currentVerifyBatch}` + (errors ? ` (${errors} errors)` : ''));
+
+  const rr = await fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey));
+  const rd = await rr.json();
+  if (rd.admin) { renderDashboard(rd); loadBatchOptions(rd.tags || []); }
+
+  document.getElementById('verify-batch').value = '';
+  loadBatchForVerify();
+  btn.textContent = 'Finalize — Delete Unscanned From This Batch Only';
+  btn.disabled = true;
+}
+
+function downloadFile(content, filename, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 </script>
 </body>
