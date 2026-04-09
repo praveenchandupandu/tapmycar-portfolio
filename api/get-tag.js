@@ -7,14 +7,29 @@ const supabase = createClient(
 
 module.exports = async function handler(req, res) {
 
-  // ── POST — update/claim a tag ──
+  // ── POST — update/claim/deactivate a tag ──
   if (req.method === 'POST') {
-    const { token, user_id, license_plate, car_make, car_model, car_year, car_color } = req.body;
+    const { token, user_id, license_plate, car_make, car_model, car_year, car_color, status_override } = req.body;
 
     if (!token || !user_id) {
       return res.status(400).json({ error: 'token and user_id required' });
     }
 
+    // If status_override is set (e.g. 'inactive'), just update status
+    if (status_override) {
+      const { error } = await supabase
+        .from('tags')
+        .update({ status: status_override })
+        .eq('token', token.toUpperCase())
+        .eq('owner_id', user_id);
+
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+      return res.json({ success: true, status: status_override });
+    }
+
+    // Normal activation — set owner, status, vehicle details
     const updates = {
       owner_id: user_id,
       status: 'active',
@@ -66,6 +81,7 @@ module.exports = async function handler(req, res) {
       return res.status(404).json({ error: 'Tag not found' });
     }
 
+    // Log scan if tag is active
     let scan_id = null;
     if (tag.status === 'active') {
       const userAgent = req.headers['user-agent'] || '';
