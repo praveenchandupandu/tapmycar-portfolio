@@ -7,117 +7,167 @@ const supabase = createClient(
 
 module.exports = async function handler(req, res) {
 
-  // ── POST — update user profile ──
+  // ── POST — admin actions (update user, suspend, reactivate, profile update) ──
   if (req.method === 'POST') {
-    const { user_id, name, phone, email } = req.body;
-    if (!user_id) return res.status(400).json({ error: 'user_id required' });
+    const { action, admin_key, user_id, name, email, phone, plan } = req.body;
 
-    const updates = {};
-    if (name) updates.name = name;
-    if (phone) updates.phone = phone;
-    if (email) updates.email = email;
+    // Admin actions require admin key
+    if (action && admin_key) {
+      if (admin_key !== process.env.ADMIN_SECRET_KEY) {
+        return res.status(401).json({ error: 'Invalid admin key' });
+      }
 
-    const { error } = await supabase
-      .from('users')
-      .update(updates)
-      .eq('id', user_id);
+      if (action === 'update_user' && user_id) {
+        const updates = {};
+        if (name !== undefined) updates.name = name;
+        if (email !== undefined) updates.email = email;
+        if (phone !== undefined) updates.phone = phone;
+        if (plan !== undefined) updates.plan = plan;
 
-    if (error) {
-      return res.status(500).json({ error: error.message });
+        const { error } = await supabase
+          .from('users')
+          .update(updates)
+          .eq('id', user_id);
+
+        if (error) return res.status(500).json({ error: error.message });
+        return res.json({ success: true });
+      }
+
+      if (action === 'suspend_user' && user_id) {
+        const { error } = await supabase
+          .from('users')
+          .update({ plan: 'suspended' })
+          .eq('id', user_id);
+
+        if (error) return res.status(500).json({ error: error.message });
+
+        // Also deactivate all their tags
+        await supabase
+          .from('tags')
+          .update({ status: 'disabled' })
+          .eq('owner_id', user_id);
+
+        return res.json({ success: true });
+      }
+
+      if (action === 'reactivate_user' && user_id) {
+        const { error } = await supabase
+          .from('users')
+          .update({ plan: 'etag' })
+          .eq('id', user_id);
+
+        if (error) return res.status(500).json({ error: error.message });
+
+        // Reactivate their tags
+        await supabase
+          .from('tags')
+          .update({ status: 'active' })
+          .eq('owner_id', user_id)
+          .eq('status', 'disabled');
+
+        return res.json({ success: true });
+      }
+
+      return res.status(400).json({ error: 'Unknown action' });
     }
 
-    return res.json({ success: true });
+    // Regular user profile update (non-admin)
+    if (user_id && name) {
+      const updates = { name };
+      if (email) updates.email = email;
+      if (phone) updates.phone = phone;
+
+      const { error } = await supabase
+        .from('users')
+        .update(updates)
+        .eq('id', user_id);
+
+      if (error) return res.status(500).json({ error: error.message });
+      return res.json({ success: true });
+    }
+
+    return res.status(400).json({ error: 'Invalid request' });
   }
 
-  // ── GET ──
+  // ── GET — dashboard data ──
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   const { user_id, admin } = req.query;
 
-  // ── ADMIN MODE — return all data ──
-  if (admin === process.env.ADMIN_SECRET_KEY) {
-    const { data: users, count: userCount } = await supabase
+  // ── ADMIN MODE ──
+  if (admin) {
+    if (admin !== process.env.ADMIN_SECRET_KEY) {
+      return res.json({ admin: false });
+    }
+
+    // Get all users
+    const { data: users } = await supabase
       .from('users')
-      .select('*', { count: 'exact' })
-      .order('created_at', { ascending: false })
-      .limit(50);
+      .select('*')
+      .order('created_at', { ascending: false });
 
-    const { data: tags, count: tagCount } = await supabase
+    // Get all tags
+    const { data: tags } = await supabase
       .from('tags')
-      .select('*', { count: 'exact' })
-      .order('created_at', { ascending: false })
-      .limit(50);
+      .select('*')
+      .order('created_at', { ascending: false });
 
+    // Get total scan count
     const { count: scanCount } = await supabase
       .from('scan_logs')
       .select('*', { count: 'exact', head: true });
 
-    const { count: activeTagCount } = await supabase
-      .from('tags')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'active');
-
-    const { count: unclaimedTagCount } = await supabase
-      .from('tags')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'unclaimed');
-
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    const { count: weekScans } = await supabase
-      .from('scan_logs')
-      .select('*', { count: 'exact', head: true })
-      .gte('scanned_at', weekAgo.toISOString());
-
+    // Get recent scans
     const { data: recentScans } = await supabase
       .from('scan_logs')
       .select('*')
       .order('scanned_at', { ascending: false })
       .limit(20);
 
+    // Get revenue from orders
     const { data: orders } = await supabase
       .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(20);
+      .select('amount')
+      .eq('status', 'paid');
 
-    let revenue = 0;
-    if (orders) {
-      revenue = orders.reduce((sum, o) => sum + (o.amount || 0), 0);
-    }
+    const revenue = orders ? orders.reduce((sum, o) => sum + (o.amount || 0), 0) : 0;
+
+    const activeTagCount = tags ? tags.filter(t => t.status === 'active').length : 0;
+    const unclaimedTagCount = tags ? tags.filter(t => t.status === 'unclaimed').length : 0;
 
     return res.json({
       admin: true,
-      users: users || [],
-      userCount: userCount || 0,
-      tags: tags || [],
-      tagCount: tagCount || 0,
-      activeTagCount: activeTagCount || 0,
-      unclaimedTagCount: unclaimedTagCount || 0,
+      userCount: users ? users.length : 0,
+      tagCount: tags ? tags.length : 0,
       scanCount: scanCount || 0,
-      weekScans: weekScans || 0,
-      recentScans: recentScans || [],
-      orders: orders || [],
-      revenue
+      activeTagCount,
+      unclaimedTagCount,
+      revenue,
+      users: users || [],
+      tags: tags || [],
+      recentScans: recentScans || []
     });
   }
 
-  // ── NORMAL USER MODE ──
+  // ── REGULAR USER MODE ──
   if (!user_id) return res.status(400).json({ error: 'user_id required' });
 
+  // Get user
   const { data: user } = await supabase
     .from('users')
     .select('*')
     .eq('id', user_id)
     .single();
 
+  // Get tags — column is owner_id
   const { data: tags } = await supabase
     .from('tags')
     .select('*')
     .eq('owner_id', user_id);
 
+  // Get scan count
   let scanCount = 0;
   let weekCount = 0;
 
@@ -143,6 +193,7 @@ module.exports = async function handler(req, res) {
     weekCount = wc || 0;
   }
 
+  // Get recent scans
   const { data: recentScans } = await supabase
     .from('scan_logs')
     .select('*')

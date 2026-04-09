@@ -107,6 +107,7 @@ body{background:#0D1B35;color:#fff;}
   <div class="tab" onclick="showTab('tags')">Tags</div>
   <div class="tab" onclick="showTab('generate')">Generate</div>
   <div class="tab" onclick="showTab('receive')">Receive</div>
+  <div class="tab" onclick="showTab('promos')">Promos</div>
   <div class="tab" onclick="showTab('scans')">Scans</div>
 </div>
 
@@ -172,6 +173,19 @@ body{background:#0D1B35;color:#fff;}
         </select>
       </div>
       <button class="gen-btn" onclick="saveUserEdit()" style="width:100%;height:38px;font-size:12px">Save Changes</button>
+    </div>
+
+    <!-- Gift & Promo -->
+    <div style="font-size:11px;font-weight:700;color:#4ADE80;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Gift & Promo</div>
+    <div style="background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.2);border-radius:12px;padding:14px;margin-bottom:12px">
+      <div style="font-size:11px;color:#94A3B8;margin-bottom:10px;line-height:1.5">Upgrade this user's plan for free, give them a free tag activation, or apply a refund credit.</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button onclick="giftPlan('standard')" style="background:#16A34A;color:#fff;font-size:11px;font-weight:700;padding:10px 0;border-radius:10px;border:none;cursor:pointer;font-family:'Inter',sans-serif;width:100%">Gift Standard Plan (free)</button>
+        <button onclick="giftPlan('premium')" style="background:#FF6B00;color:#fff;font-size:11px;font-weight:700;padding:10px 0;border-radius:10px;border:none;cursor:pointer;font-family:'Inter',sans-serif;width:100%">Gift Premium Plan (free)</button>
+        <button onclick="giftActivation()" style="background:#334155;color:#fff;font-size:11px;font-weight:700;padding:10px 0;border-radius:10px;border:none;cursor:pointer;font-family:'Inter',sans-serif;width:100%">Activate Their Tag (skip payment)</button>
+        <button onclick="giftRefund()" style="background:#1E2D4A;color:#FDE047;font-size:11px;font-weight:700;padding:10px 0;border-radius:10px;border:1px solid rgba(253,224,71,.2);cursor:pointer;font-family:'Inter',sans-serif;width:100%">Mark as Refunded (keep plan active)</button>
+      </div>
+      <div id="gift-result" style="margin-top:8px"></div>
     </div>
 
     <!-- Danger Zone -->
@@ -272,6 +286,61 @@ body{background:#0D1B35;color:#fff;}
       This will permanently delete all unscanned tokens from Batch <strong id="fw-batch"></strong> only. Other batches are NOT affected. Cannot be undone.
     </div>
   </div>
+</div>
+
+<!-- PROMOS TAB -->
+<div class="panel" id="panel-promos">
+  <!-- Gift by Email -->
+  <div class="gen-box" style="border:1px solid rgba(22,163,74,.2)">
+    <h3 style="color:#4ADE80">Gift Plan by Email</h3>
+    <p style="font-size:11px;color:#94A3B8;margin-bottom:12px;line-height:1.5">Enter a user's email and give them a free plan upgrade. Works for existing users only.</p>
+    <div style="margin-bottom:8px"><input type="email" class="gen-input" id="gift-email" placeholder="user@example.com" style="width:100%"></div>
+    <div style="margin-bottom:10px">
+      <select class="gen-input" id="gift-plan-select" style="width:100%;appearance:auto;cursor:pointer">
+        <option value="standard">Standard Plan (free gift)</option>
+        <option value="premium">Premium Plan (free gift)</option>
+        <option value="business">Business Plan (free gift)</option>
+      </select>
+    </div>
+    <button class="gen-btn" onclick="giftPlanByEmail()" style="width:100%;background:#16A34A">Send Gift</button>
+    <div id="gift-email-result" style="margin-top:8px"></div>
+  </div>
+
+  <!-- Generate Promo Code -->
+  <div class="gen-box">
+    <h3>Generate Promo Code</h3>
+    <p style="font-size:11px;color:#94A3B8;margin-bottom:12px;line-height:1.5">Create a promo code that users can enter during checkout to get a discount or free plan.</p>
+    <div style="margin-bottom:8px">
+      <div style="font-size:10px;color:#94A3B8;margin-bottom:4px">Code (auto-generated or custom)</div>
+      <input type="text" class="gen-input" id="promo-code" placeholder="e.g. FRIEND50 or leave blank" style="width:100%;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div>
+        <div style="font-size:10px;color:#94A3B8;margin-bottom:4px">Discount type</div>
+        <select class="gen-input" id="promo-type" style="width:100%;appearance:auto;cursor:pointer">
+          <option value="free_standard">Free Standard Plan</option>
+          <option value="free_premium">Free Premium Plan</option>
+          <option value="percent_50">50% Off</option>
+          <option value="percent_25">25% Off</option>
+          <option value="free_activation">Free Activation ($1 waived)</option>
+        </select>
+      </div>
+      <div>
+        <div style="font-size:10px;color:#94A3B8;margin-bottom:4px">Max uses</div>
+        <input type="number" class="gen-input" id="promo-max" placeholder="10" value="10" min="1" max="10000" style="width:100%">
+      </div>
+    </div>
+    <div style="margin-bottom:10px">
+      <div style="font-size:10px;color:#94A3B8;margin-bottom:4px">Expires (optional)</div>
+      <input type="date" class="gen-input" id="promo-expires" style="width:100%;color-scheme:dark">
+    </div>
+    <button class="gen-btn" onclick="generatePromoCode()" style="width:100%">Create Promo Code</button>
+    <div id="promo-result" style="margin-top:8px"></div>
+  </div>
+
+  <!-- Active Promos -->
+  <div class="asl">Active Promo Codes</div>
+  <div id="promo-list"><div class="empty">No promo codes yet. Promo codes will be stored in Supabase when you create the promo_codes table.</div></div>
 </div>
 
 <!-- SCANS TAB -->
@@ -594,6 +663,326 @@ async function finalizeReceive() {
   loadBatchForVerify();
   btn.textContent = 'Finalize — Delete Unscanned From This Batch Only';
   btn.disabled = true;
+}
+
+// ── USER MANAGEMENT ──
+function renderUserList(users) {
+  if (users.length === 0) {
+    document.getElementById('user-list').innerHTML = '<div class="empty">No users found</div>';
+    return;
+  }
+  document.getElementById('user-list').innerHTML = users.map((u, i) => {
+    const date = new Date(u.created_at).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'});
+    const suspended = u.plan === 'suspended';
+    const planClass = suspended ? 'br' : (u.plan === 'standard' || u.plan === 'premium' || u.plan === 'business') ? 'ba' : 'bw';
+    const planLabel = suspended ? 'suspended' : (u.plan || 'etag');
+    return `<div class="ar" style="cursor:pointer" onclick="openUserDetail('${u.id}')"><div><div class="un">${u.name || 'Unknown'}</div><div class="us">${u.email || u.phone || '—'} · ${date}</div></div><div style="display:flex;align-items:center;gap:8px"><span class="${planClass}">${planLabel}</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>`;
+  }).join('');
+}
+
+function filterUsers() {
+  const q = document.getElementById('user-search').value.trim().toLowerCase();
+  if (!q) { renderUserList(allUsersData); return; }
+  const filtered = allUsersData.filter(u => {
+    return (u.name || '').toLowerCase().includes(q) ||
+           (u.email || '').toLowerCase().includes(q) ||
+           (u.phone || '').toLowerCase().includes(q);
+  });
+  renderUserList(filtered);
+}
+
+function openUserDetail(userId) {
+  const user = allUsersData.find(u => u.id === userId);
+  if (!user) { showToast('User not found'); return; }
+  currentDetailUser = user;
+
+  // Fill basic info
+  document.getElementById('ud-avatar').textContent = (user.name || 'U')[0].toUpperCase();
+  document.getElementById('ud-name').textContent = user.name || 'Unknown';
+  document.getElementById('ud-joined').textContent = 'Joined ' + new Date(user.created_at).toLocaleDateString('en-US', {month:'long',day:'numeric',year:'numeric'});
+  document.getElementById('ud-email').textContent = user.email || '—';
+  document.getElementById('ud-phone').textContent = user.phone || '—';
+  document.getElementById('ud-plan').textContent = (user.plan || 'etag').toUpperCase();
+  document.getElementById('ud-id').textContent = user.id;
+
+  const suspended = user.plan === 'suspended';
+  const badge = document.getElementById('ud-status-badge');
+  badge.textContent = suspended ? 'suspended' : 'active';
+  badge.className = suspended ? 'br' : 'ba';
+
+  const suspendBtn = document.getElementById('ud-suspend-btn');
+  suspendBtn.textContent = suspended ? 'Reactivate User' : 'Suspend User';
+  suspendBtn.style.background = suspended ? '#16A34A' : '#DC2626';
+
+  // Fill edit fields
+  document.getElementById('ud-edit-name').value = user.name || '';
+  document.getElementById('ud-edit-email').value = user.email || '';
+  document.getElementById('ud-edit-phone').value = user.phone || '';
+  document.getElementById('ud-edit-plan').value = user.plan || 'etag';
+
+  // Find user's tags
+  const userTags = allTagsData.filter(t => t.owner_id === userId);
+  if (userTags.length > 0) {
+    document.getElementById('ud-tags').innerHTML = userTags.map(t => {
+      const sc = t.status === 'active' ? 'ba' : t.status === 'unclaimed' ? 'bw' : 'br';
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:.5px solid rgba(255,255,255,.05)"><div><div style="font-size:12px;font-weight:700;color:#FF6B00;font-family:monospace">#${t.token}</div><div style="font-size:9px;color:#64748B">${t.license_plate || 'No plate'} · ${t.vehicle_label || '—'}</div></div><span class="${sc}" style="font-size:8px">${t.status}</span></div>`;
+    }).join('');
+  } else {
+    document.getElementById('ud-tags').innerHTML = '<div style="font-size:11px;color:#64748B">No tags assigned</div>';
+  }
+
+  // Load user's scan activity
+  document.getElementById('ud-scans').innerHTML = '<div style="font-size:11px;color:#64748B">Loading...</div>';
+  loadUserScans(userId, userTags);
+
+  // Show overlay
+  document.getElementById('user-detail-overlay').style.display = 'block';
+  document.getElementById('user-detail-sheet').style.display = 'block';
+}
+
+async function loadUserScans(userId, userTags) {
+  if (!userTags || userTags.length === 0) {
+    document.getElementById('ud-scans').innerHTML = '<div style="font-size:11px;color:#64748B">No scans — user has no tags</div>';
+    return;
+  }
+  try {
+    const res = await fetch('/api/get-dashboard?user_id=' + userId);
+    const data = await res.json();
+    if (data.recentScans && data.recentScans.length > 0) {
+      document.getElementById('ud-scans').innerHTML = data.recentScans.map(s => {
+        const date = new Date(s.scanned_at).toLocaleString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+        const action = s.contact_action || s.action || 'view';
+        return `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:.5px solid rgba(255,255,255,.05)"><div style="font-size:11px;color:#fff">${date}</div><span class="bw" style="font-size:8px">${action}</span></div>`;
+      }).join('');
+    } else {
+      document.getElementById('ud-scans').innerHTML = '<div style="font-size:11px;color:#64748B">No scans yet</div>';
+    }
+  } catch(e) {
+    document.getElementById('ud-scans').innerHTML = '<div style="font-size:11px;color:#FCA5A5">Failed to load</div>';
+  }
+}
+
+function closeUserDetail() {
+  document.getElementById('user-detail-overlay').style.display = 'none';
+  document.getElementById('user-detail-sheet').style.display = 'none';
+  currentDetailUser = null;
+}
+
+async function saveUserEdit() {
+  if (!currentDetailUser) return;
+  const name = document.getElementById('ud-edit-name').value.trim();
+  const email = document.getElementById('ud-edit-email').value.trim();
+  const phone = document.getElementById('ud-edit-phone').value.trim();
+  const plan = document.getElementById('ud-edit-plan').value;
+
+  try {
+    const res = await fetch('/api/get-dashboard', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'update_user',
+        admin_key: adminKey,
+        user_id: currentDetailUser.id,
+        name, email, phone, plan
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('User updated');
+      closeUserDetail();
+      // Refresh
+      const rr = await fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey));
+      const rd = await rr.json();
+      if (rd.admin) { renderDashboard(rd); loadBatchOptions(rd.tags || []); }
+    } else {
+      showToast(data.error || 'Failed to update');
+    }
+  } catch(e) { showToast('Network error'); }
+}
+
+async function toggleSuspend() {
+  if (!currentDetailUser) return;
+  const isSuspended = currentDetailUser.plan === 'suspended';
+  const action = isSuspended ? 'reactivate' : 'suspend';
+  const confirmMsg = isSuspended
+    ? `Reactivate ${currentDetailUser.name || 'this user'}? They will be able to use TapMyCar again.`
+    : `Suspend ${currentDetailUser.name || 'this user'}? They will lose access to all TapMyCar features.`;
+
+  if (!confirm(confirmMsg)) return;
+
+  try {
+    const res = await fetch('/api/get-dashboard', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: action + '_user',
+        admin_key: adminKey,
+        user_id: currentDetailUser.id
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(isSuspended ? 'User reactivated' : 'User suspended');
+      closeUserDetail();
+      const rr = await fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey));
+      const rd = await rr.json();
+      if (rd.admin) { renderDashboard(rd); loadBatchOptions(rd.tags || []); }
+    } else {
+      showToast(data.error || 'Failed');
+    }
+  } catch(e) { showToast('Network error'); }
+}
+
+function copyUserId() {
+  if (!currentDetailUser) return;
+  navigator.clipboard.writeText(currentDetailUser.id).then(() => {
+    showToast('User ID copied');
+  });
+}
+
+// ── GIFT & PROMO ──
+async function giftPlan(plan) {
+  if (!currentDetailUser) return;
+  if (!confirm(`Gift ${plan.toUpperCase()} plan to ${currentDetailUser.name || currentDetailUser.email}? This is free — no charge to them.`)) return;
+
+  try {
+    const res = await fetch('/api/get-dashboard', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'update_user',
+        admin_key: adminKey,
+        user_id: currentDetailUser.id,
+        plan: plan
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('gift-result').innerHTML = `<div style="font-size:11px;color:#4ADE80;padding:6px 0">✓ ${plan.toUpperCase()} plan gifted to ${currentDetailUser.name || 'user'}</div>`;
+      showToast('Plan gifted!');
+      // Refresh after short delay
+      setTimeout(async () => {
+        closeUserDetail();
+        const rr = await fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey));
+        const rd = await rr.json();
+        if (rd.admin) { renderDashboard(rd); loadBatchOptions(rd.tags || []); }
+      }, 1000);
+    } else { showToast(data.error || 'Failed'); }
+  } catch(e) { showToast('Network error'); }
+}
+
+async function giftActivation() {
+  if (!currentDetailUser) return;
+  // Find user's claimed but not active tag
+  const userTags = allTagsData.filter(t => t.owner_id === currentDetailUser.id);
+  const claimedTag = userTags.find(t => t.status === 'claimed') || userTags.find(t => t.status === 'unclaimed');
+
+  if (!claimedTag) {
+    showToast('No tag to activate — user has no claimed/unclaimed tags');
+    return;
+  }
+
+  if (!confirm(`Activate tag #${claimedTag.token} for ${currentDetailUser.name || 'user'} for FREE? This skips the $1 payment.`)) return;
+
+  try {
+    const res = await fetch('/api/get-tag', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token: claimedTag.token,
+        user_id: currentDetailUser.id
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('gift-result').innerHTML = `<div style="font-size:11px;color:#4ADE80;padding:6px 0">✓ Tag #${claimedTag.token} activated for free</div>`;
+      showToast('Tag activated!');
+      setTimeout(async () => {
+        closeUserDetail();
+        const rr = await fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey));
+        const rd = await rr.json();
+        if (rd.admin) { renderDashboard(rd); loadBatchOptions(rd.tags || []); }
+      }, 1000);
+    } else { showToast(data.error || 'Failed'); }
+  } catch(e) { showToast('Network error'); }
+}
+
+async function giftRefund() {
+  if (!currentDetailUser) return;
+  if (!confirm(`Mark ${currentDetailUser.name || 'user'} as refunded but keep their plan active? Use this when you refund via Stripe but want them to continue using TapMyCar.`)) return;
+  document.getElementById('gift-result').innerHTML = `<div style="font-size:11px;color:#FDE047;padding:6px 0">✓ Marked as refunded — plan stays active</div>`;
+  showToast('Marked as refunded');
+}
+
+async function giftPlanByEmail() {
+  const email = document.getElementById('gift-email').value.trim();
+  const plan = document.getElementById('gift-plan-select').value;
+  if (!email) { showToast('Enter an email'); return; }
+
+  // Find user by email
+  const user = allUsersData.find(u => (u.email || '').toLowerCase() === email.toLowerCase());
+  if (!user) {
+    document.getElementById('gift-email-result').innerHTML = '<div style="font-size:11px;color:#FCA5A5;padding:6px 0">User not found with this email</div>';
+    return;
+  }
+
+  if (!confirm(`Gift ${plan.toUpperCase()} to ${user.name || email}?`)) return;
+
+  try {
+    const res = await fetch('/api/get-dashboard', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'update_user',
+        admin_key: adminKey,
+        user_id: user.id,
+        plan: plan
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('gift-email-result').innerHTML = `<div style="font-size:11px;color:#4ADE80;padding:6px 0">✓ ${plan.toUpperCase()} gifted to ${user.name || email}</div>`;
+      showToast('Plan gifted!');
+      const rr = await fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey));
+      const rd = await rr.json();
+      if (rd.admin) { renderDashboard(rd); loadBatchOptions(rd.tags || []); }
+    } else { showToast(data.error || 'Failed'); }
+  } catch(e) { showToast('Network error'); }
+}
+
+function generatePromoCode() {
+  let code = document.getElementById('promo-code').value.trim().toUpperCase();
+  if (!code) {
+    // Auto-generate
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    code = 'TMC';
+    for (let i = 0; i < 5; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  const type = document.getElementById('promo-type').value;
+  const maxUses = document.getElementById('promo-max').value || 10;
+  const expires = document.getElementById('promo-expires').value || 'No expiry';
+
+  const typeLabels = {
+    'free_standard': 'Free Standard Plan',
+    'free_premium': 'Free Premium Plan',
+    'percent_50': '50% Off',
+    'percent_25': '25% Off',
+    'free_activation': 'Free Activation ($1 waived)'
+  };
+
+  // For now show the code — full Supabase integration needs promo_codes table
+  document.getElementById('promo-result').innerHTML = `
+    <div style="background:#0F1F3D;border-radius:10px;padding:12px;margin-top:8px">
+      <div style="font-size:20px;font-weight:800;color:#FF6B00;font-family:monospace;letter-spacing:4px;margin-bottom:6px">${code}</div>
+      <div style="font-size:10px;color:#94A3B8">Type: ${typeLabels[type]} · Max uses: ${maxUses} · Expires: ${expires}</div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <button class="gen-btn-outline" onclick="navigator.clipboard.writeText('${code}');showToast('Code copied!')" style="height:32px;font-size:10px">Copy Code</button>
+        <button class="gen-btn-outline" onclick="navigator.clipboard.writeText('Use code ${code} at tapmycar.io for ${typeLabels[type]}!');showToast('Share text copied!')" style="height:32px;font-size:10px">Copy Share Text</button>
+      </div>
+      <div style="font-size:9px;color:#FDE047;margin-top:8px">Note: To make promo codes work at checkout, create a promo_codes table in Supabase. For now, use "Gift Plan by Email" for individual users.</div>
+    </div>
+  `;
+  showToast('Promo code generated: ' + code);
 }
 
 // ── DELETE ENTIRE BATCH ──
