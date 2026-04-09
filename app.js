@@ -300,50 +300,53 @@ if (typeof window !== 'undefined') {
 }
 
 // ══════════════════════════════════════════════════
-// AI CHATBOT — Add this to the END of public/app.js
+// AI CHATBOT — REPLACE the old chatbot code in app.js
+// Delete everything from "// ── CHATBOT SYSTEM PROMPT ──" to the end
+// Then paste this entire block
 // ══════════════════════════════════════════════════
 
 // ── CHATBOT SYSTEM PROMPT ──
-const TMC_SYSTEM_PROMPT = `You are TapMyCar Assistant — a friendly, warm, and professional support agent for TapMyCar, a privacy-first vehicle contact system by Praman Tech LLC based in New Britain, Connecticut.
+const TMC_SYSTEM_PROMPT = `You are TapMyCar Assistant — a friendly, warm, and respectful support agent for TapMyCar, a privacy-first vehicle contact system by Praman Tech LLC, New Britain, Connecticut.
 
 ABOUT TAPMYCAR:
-- TapMyCar lets car owners place a QR/NFC sticker on their vehicle
-- Strangers can scan the tag to contact the owner privately — the owner's real phone number is NEVER shared
-- All calls are masked through Twilio proxy — neither party sees real numbers
-- The owner gets voice screening: Press 1 to send auto-message, Press 2 to connect directly
+- Car owners place a QR/NFC sticker on their vehicle
+- Strangers scan to contact the owner privately — owner's real phone number is NEVER shared
+- All calls are masked through a secure proxy — neither party sees real numbers
+- Owner gets voice screening: Press 1 to send auto-message, Press 2 to connect directly
+- Quick message alerts: strangers can tap preset messages like "Your lights are on" or "Your car is being towed"
 
-PLANS:
-- eTag (Free): Digital QR code, download instantly, 3 masked calls/month. Activation costs $1.
-- Standard ($9.99 + $4.99/yr): Physical NFC + QR sticker shipped to home, 10 masked calls/month, SMS scan alerts, voice screening
-- Premium ($24.99 + $9.99/yr): 3 vehicles, unlimited masked calls, scan history, emergency contact
-- Business ($49/month): Fleet dashboard, bulk stickers with logo
+PLANS (only mention pricing when specifically asked):
+- eTag: Free digital QR code, download instantly, 3 masked calls/month
+- Standard: Physical NFC + QR sticker shipped home, 10 masked calls/month, SMS scan alerts
+- Premium: 3 vehicles, unlimited masked calls, scan history, emergency contact
+- Business: Fleet dashboard, bulk stickers with logo
 
 HOW IT WORKS:
-1. Register free at tapmycar.io — get instant digital eTag (QR code PDF)
-2. Print and place QR on windshield
-3. Activate for $1 — enables masked calling
-4. After 30 days, auto-upgrade to Standard ($9.99) — physical sticker ships to your address
-5. Cancel anytime before day 30 — no charge
+1. Register free at tapmycar.io
+2. Get instant digital eTag (QR code PDF)
+3. Print and place on windshield
+4. Activate to enable masked calling
+5. Physical sticker ships after 30 days
 
-COMMON ISSUES & SOLUTIONS:
-- "QR not scanning" → Make sure QR is well-lit, not crinkled, camera focused. Try zooming in slightly.
-- "Can't download PDF" → Make sure you're logged in. Go to tapmycar.io/etag.html
-- "How to activate" → Go to tapmycar.io/activate.html, scan your QR, pay $1
-- "Want a refund" → Email pramantechllc@gmail.com. Refunds within 30 days, no questions asked.
-- "Sticker not arrived" → Physical stickers ship after day 30. Check dashboard for status.
-- "Lost my tag" → Sign in at tapmycar.io/signin.html with your email. Your tag is still active.
-- "How to pause tag" → Go to dashboard, toggle pause on your tag
-- "Change phone number" → Go to settings, update your phone number
-- "How masked calling works" → When someone scans your tag and taps Call, the call goes through our Twilio number. Neither you nor the caller see each other's real numbers.
-- "Is my number safe?" → Yes. Your real number is NEVER shown to anyone. All communication routes through TapMyCar's secure proxy.
+COMMON ISSUES:
+- QR not scanning → Ensure good lighting, clean QR, camera focused. Try zooming in.
+- Can't download PDF → Log in first, then go to Tag page
+- Want a refund → Email pramantechllc@gmail.com, refunds within 30 days
+- Sticker not arrived → Ships after day 30, check dashboard for status
+- Lost my tag → Sign in with email, tag is still active
+- Pause tag → Toggle from dashboard
+- Change phone → Go to Settings page
 
-TONE: Be warm, human, concise. Use short sentences. Never be robotic. If you can't solve something, say "I'll create a support ticket for you — our team will reach out within 24 hours." Never make up features that don't exist.
-
-IMPORTANT: Keep responses SHORT — 2-3 sentences max. This is a mobile chat, not an essay.`;
+RULES:
+- Be warm, human-like, concise. Short sentences. 2-3 sentences max.
+- NEVER mention prices or dollar amounts unless the user specifically asks about pricing or cost
+- If someone says hi/hello, respond warmly and ask how you can help
+- If you cannot solve something, say "Let me connect you with our team — email pramantechllc@gmail.com and we will help you within 24 hours."
+- Never make up features that don't exist
+- Always be soft and respectful`;
 
 // ── INJECT CHATBOT ──
 function injectChatbot() {
-  // Don't inject on admin page
   if (window.location.pathname.includes('admin')) return;
 
   const chatHTML = `
@@ -352,9 +355,7 @@ function injectChatbot() {
       <svg id="chat-icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" style="display:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </div>
     <div id="tmc-chat-badge" style="position:fixed;bottom:72px;right:20px;background:#111;color:#fff;font-size:11px;font-weight:600;padding:6px 12px;border-radius:10px 10px 0 10px;z-index:200;box-shadow:0 2px 10px rgba(0,0,0,.15);display:none;cursor:pointer" onclick="toggleChat()">Need help? 💬</div>
-
-    <div id="tmc-chat-window" style="display:none;position:fixed;bottom:90px;right:16px;width:340px;max-width:calc(100vw - 32px);height:480px;max-height:calc(100vh - 120px);background:#fff;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.2);z-index:201;display:none;flex-direction:column;overflow:hidden">
-      <!-- Header -->
+    <div id="tmc-chat-window" style="display:none;position:fixed;bottom:90px;right:16px;width:340px;max-width:calc(100vw - 32px);height:480px;max-height:calc(100vh - 120px);background:#fff;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.2);z-index:201;flex-direction:column;overflow:hidden">
       <div style="background:#FF6B00;padding:16px;display:flex;align-items:center;gap:10px;flex-shrink:0">
         <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -365,12 +366,8 @@ function injectChatbot() {
         </div>
         <button onclick="toggleChat()" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
-
-      <!-- Messages -->
       <div id="tmc-chat-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px">
-        <div class="tmc-msg tmc-msg-bot">
-          <div class="tmc-msg-bubble">Hi! I'm your TapMyCar assistant. How can I help you today? 😊</div>
-        </div>
+        <div class="tmc-msg tmc-msg-bot"><div class="tmc-msg-bubble">Hi there! Welcome to TapMyCar. How can I help you today? 😊</div></div>
         <div style="display:flex;flex-wrap:wrap;gap:6px">
           <button class="tmc-quick-q" onclick="askQuestion('How do I activate my tag?')">Activate my tag</button>
           <button class="tmc-quick-q" onclick="askQuestion('How does masked calling work?')">Masked calling</button>
@@ -379,8 +376,6 @@ function injectChatbot() {
           <button class="tmc-quick-q" onclick="askQuestion('Where is my physical sticker?')">Sticker status</button>
         </div>
       </div>
-
-      <!-- Input -->
       <div style="padding:12px;border-top:1px solid #F3F4F6;display:flex;gap:8px;flex-shrink:0;background:#fff">
         <input type="text" id="tmc-chat-input" placeholder="Type your message..." onkeydown="if(event.key==='Enter')sendChatMessage()" style="flex:1;height:40px;border:1.5px solid #E5E7EB;border-radius:12px;padding:0 14px;font-size:13px;font-family:'Inter',sans-serif;outline:none;background:#F9FAFB" />
         <button onclick="sendChatMessage()" style="width:40px;height:40px;border-radius:12px;background:#FF6B00;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">
@@ -390,7 +385,6 @@ function injectChatbot() {
     </div>
   `;
 
-  // Add CSS
   const chatStyle = document.createElement('style');
   chatStyle.textContent = `
     .tmc-msg{display:flex;gap:8px;max-width:85%}
@@ -407,12 +401,10 @@ function injectChatbot() {
   `;
   document.head.appendChild(chatStyle);
 
-  // Inject HTML
   const container = document.createElement('div');
   container.innerHTML = chatHTML;
   document.body.appendChild(container);
 
-  // Show help badge after 5 seconds on first visit
   if (!sessionStorage.getItem('tmc_chat_shown')) {
     setTimeout(() => {
       const badge = document.getElementById('tmc-chat-badge');
@@ -432,7 +424,6 @@ function toggleChat() {
   const iconOpen = document.getElementById('chat-icon-open');
   const iconClose = document.getElementById('chat-icon-close');
   const badge = document.getElementById('tmc-chat-badge');
-
   if (chatOpen) {
     win.style.display = 'flex';
     iconOpen.style.display = 'none';
@@ -482,22 +473,23 @@ async function sendChatMessage() {
 
   input.value = '';
   addChatMessage(text, true);
-
-  // Add to history
   chatHistory.push({ role: 'user', content: text });
-
-  // Show typing
   addTypingIndicator();
 
+  // Try Anthropic API first
+  let replied = false;
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 300,
         system: TMC_SYSTEM_PROMPT,
-        messages: chatHistory.slice(-10) // Keep last 10 messages for context
+        messages: chatHistory.slice(-10)
       })
     });
 
@@ -508,30 +500,106 @@ async function sendChatMessage() {
       const reply = data.content[0].text;
       chatHistory.push({ role: 'assistant', content: reply });
       addChatMessage(reply, false);
-    } else if (data.error) {
-      addChatMessage('Sorry, I encountered an issue. Please try again or email us at pramantechllc@gmail.com for help.', false);
+      replied = true;
     }
   } catch (e) {
+    // API failed — use smart offline
+  }
+
+  if (!replied) {
     removeTypingIndicator();
-    // Fallback — offline responses
-    const reply = getOfflineResponse(text);
+    const reply = getSmartResponse(text);
+    chatHistory.push({ role: 'assistant', content: reply });
     addChatMessage(reply, false);
   }
 }
 
-// Offline fallback responses when API fails
-function getOfflineResponse(question) {
+// ── SMART OFFLINE RESPONSES ──
+function getSmartResponse(question) {
   const q = question.toLowerCase();
-  if (q.includes('activate')) return 'To activate your tag, go to tapmycar.io/activate.html, scan your QR code, and pay $1. Your tag will be live instantly!';
-  if (q.includes('refund')) return 'For refunds, email us at pramantechllc@gmail.com. We offer full refunds within 30 days, no questions asked.';
-  if (q.includes('scan') && q.includes('not')) return 'Make sure your QR code is well-lit and not crinkled. Try zooming in slightly with your camera. If the issue persists, you can download a fresh PDF from tapmycar.io/etag.html';
-  if (q.includes('mask') || q.includes('call') && q.includes('work')) return 'When someone scans your tag and taps Call, the call routes through our secure Twilio proxy. Neither you nor the caller ever see each other\'s real phone numbers.';
-  if (q.includes('sticker') || q.includes('ship')) return 'Physical stickers ship after your auto-upgrade on day 30. Check your dashboard for the latest status.';
-  if (q.includes('number') && q.includes('safe')) return 'Yes! Your real phone number is NEVER shared with anyone. All calls and messages route through TapMyCar\'s secure proxy system.';
-  if (q.includes('pause')) return 'You can pause your tag from your dashboard. When paused, strangers cannot contact you until you resume it.';
-  if (q.includes('price') || q.includes('cost') || q.includes('plan')) return 'We have 4 plans: eTag (Free + $1 activation), Standard ($9.99), Premium ($24.99), and Business ($49/mo). See all details at tapmycar.io/pricing.html';
-  if (q.includes('cancel')) return 'You can cancel anytime before day 30 with no charge. After day 30, your Standard plan renews at $4.99/year. Email pramantechllc@gmail.com to cancel.';
-  return 'I\'m having trouble connecting right now. For immediate help, email us at pramantechllc@gmail.com — our team responds within 24 hours!';
+
+  // Greetings
+  if (q.match(/^(hi|hey|hello|good morning|good evening|sup|yo|howdy)/)) {
+    return 'Hey there! Welcome to TapMyCar support. How can I help you today?';
+  }
+
+  // Thanks
+  if (q.match(/^(thanks|thank you|thx|ty|appreciate)/)) {
+    return 'You\'re welcome! Let me know if there\'s anything else I can help with. 😊';
+  }
+
+  // Activation
+  if (q.includes('activate') || q.includes('activation')) {
+    return 'To activate your tag, go to your dashboard and tap "Activate" or visit tapmycar.io/activate.html. Scan your QR code and follow the steps — it only takes a minute!';
+  }
+
+  // QR scanning issues
+  if ((q.includes('qr') || q.includes('scan')) && (q.includes('not') || q.includes('won\'t') || q.includes('cant') || q.includes('can\'t') || q.includes('doesn\'t') || q.includes('issue') || q.includes('problem'))) {
+    return 'Try these steps: make sure the QR is well-lit and flat (not crinkled). Hold your camera steady and zoom in slightly. If it still doesn\'t work, you can download a fresh PDF from your Tag page.';
+  }
+
+  // Masked calling
+  if (q.includes('mask') || (q.includes('call') && q.includes('work')) || q.includes('privacy') || q.includes('number safe') || q.includes('hide number')) {
+    return 'Your real phone number is never shared with anyone. When someone taps Call on your tag, the call routes through our secure proxy — neither side sees the other\'s real number. Completely private!';
+  }
+
+  // Refund
+  if (q.includes('refund') || q.includes('money back') || q.includes('charge')) {
+    return 'We offer full refunds within 30 days, no questions asked. Just email pramantechllc@gmail.com with your account email and we\'ll process it right away.';
+  }
+
+  // Sticker / shipping
+  if (q.includes('sticker') || q.includes('ship') || q.includes('deliver') || q.includes('physical')) {
+    return 'Physical stickers ship after your 30-day period. You can check the status on your dashboard. If it\'s been longer than expected, email us at pramantechllc@gmail.com and we\'ll look into it.';
+  }
+
+  // Pause tag
+  if (q.includes('pause') || q.includes('disable') || q.includes('stop') || q.includes('turn off')) {
+    return 'You can pause your tag anytime from your dashboard. When paused, strangers won\'t be able to contact you. Just toggle it back on whenever you\'re ready!';
+  }
+
+  // Pricing — only when explicitly asked
+  if (q.includes('price') || q.includes('pricing') || q.includes('cost') || q.includes('how much') || q.includes('plan') || q.includes('subscription') || q.includes('upgrade')) {
+    return 'We have plans for every need — from a free eTag to our Premium and Business options. Check out all the details at tapmycar.io/pricing.html. Happy to answer specific questions about any plan!';
+  }
+
+  // Cancel
+  if (q.includes('cancel') || q.includes('unsubscribe') || q.includes('delete account')) {
+    return 'You can cancel anytime — no long-term commitment. Email us at pramantechllc@gmail.com and we\'ll take care of it for you right away.';
+  }
+
+  // Lost tag
+  if (q.includes('lost') || q.includes('forgot') || q.includes('can\'t find') || q.includes('cant find')) {
+    return 'No worries! Your tag is linked to your account. Just sign in at tapmycar.io/signin.html with your email — everything is still there and active.';
+  }
+
+  // Change info
+  if (q.includes('change') && (q.includes('phone') || q.includes('email') || q.includes('name') || q.includes('number'))) {
+    return 'You can update your personal info in the Settings page. Go to tapmycar.io/settings.html and make your changes there.';
+  }
+
+  // How it works
+  if (q.includes('how') && (q.includes('work') || q.includes('use'))) {
+    return 'It\'s simple! Register free, get your digital QR code, print and place it on your car. When someone needs to reach you, they scan the QR and can call you privately — your real number stays hidden. You control everything from your dashboard.';
+  }
+
+  // NFC
+  if (q.includes('nfc') || q.includes('tap')) {
+    return 'Our physical stickers come with both a QR code and NFC chip. Anyone can either scan the QR with their camera or tap their phone on the NFC chip — both work!';
+  }
+
+  // Multiple cars
+  if (q.includes('multiple') || q.includes('second car') || q.includes('more than one') || q.includes('another car')) {
+    return 'Our Premium plan supports up to 3 vehicles, and Business supports unlimited. Check tapmycar.io/pricing.html for details!';
+  }
+
+  // Emergency
+  if (q.includes('emergency') || q.includes('911') || q.includes('accident')) {
+    return 'In any life-threatening emergency, always call 911 first. TapMyCar is designed for non-emergency situations like parking issues, lights left on, or someone needing to reach you about your vehicle.';
+  }
+
+  // Default — friendly catch-all
+  return 'Great question! Let me connect you with our team for the best answer. Email us at pramantechllc@gmail.com and we\'ll get back to you within 24 hours. Is there anything else I can help with?';
 }
 
 // Auto-inject chatbot on every page
