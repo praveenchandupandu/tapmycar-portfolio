@@ -103,7 +103,7 @@ module.exports = async function handler(req, res) {
     }
 
     let scan_id = null;
-    if (tag.status === 'active') {
+    if (tag.status === 'active' || tag.status === 'paused') {
       const userAgent = req.headers['user-agent'] || '';
       const deviceType = /mobile|android|iphone|ipad/i.test(userAgent) ? 'mobile' : 'desktop';
 

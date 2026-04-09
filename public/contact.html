@@ -308,7 +308,7 @@ async function loadTag(){
     const tag=data.tag;
     if(tag.status==='disabled'){showState('disabled');}
     else if(tag.status==='unclaimed'){document.getElementById('unclaimed-token').textContent=tag.token;showState('unclaimed');}
-    else if(tag.status==='active'){showState('active');currentScanId=data.scan_id||'';requestLocation();}
+    else if(tag.status==='paused'){document.body.innerHTML=showPausedState();return;}{showState('active');currentScanId=data.scan_id||'';requestLocation();}
     else{showState('invalid');}
   }catch(e){showState('invalid');}
 }
