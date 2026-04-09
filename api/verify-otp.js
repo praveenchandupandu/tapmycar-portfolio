@@ -33,13 +33,35 @@ module.exports = async function handler(req, res) {
   if (type === 'email' || email) {
     if (!email || !code) return res.status(400).json({ error: 'Email and code required' });
 
+    // Find the most recent unused OTP for this email
     const { data: otps } = await supabase.from('otp_codes').select('*')
-      .eq('phone', email).eq('code', code).eq('used', false)
-      .gte('expires_at', new Date().toISOString()).limit(1);
+      .eq('phone', email)
+      .eq('code', code)
+      .eq('used', false)
+      .order('created_at', { ascending: false })
+      .limit(1);
 
-    if (!otps || otps.length === 0) return res.status(400).json({ error: 'Invalid or expired code' });
+    if (!otps || otps.length === 0) {
+      return res.status(400).json({ error: 'Invalid or expired code. Please request a new one.' });
+    }
 
-    await supabase.from('otp_codes').update({ used: true }).eq('id', otps[0].id);
+    const otp = otps[0];
+
+    // Check if expired — compare timestamps in JavaScript (timezone safe)
+    const expiresAt = new Date(otp.expires_at).getTime();
+    const now = Date.now();
+
+    if (now > expiresAt) {
+      // Clean up expired OTP
+      await supabase.from('otp_codes').update({ used: true }).eq('id', otp.id);
+      return res.status(400).json({ error: 'Code expired. Please request a new one.' });
+    }
+
+    // Mark as used
+    await supabase.from('otp_codes').update({ used: true }).eq('id', otp.id);
+
+    // Also clean up any other OTPs for this email
+    await supabase.from('otp_codes').delete().eq('phone', email).eq('used', false);
 
     let { data: user } = await supabase.from('users').select('*').eq('email', email).single();
     if (!user) {
