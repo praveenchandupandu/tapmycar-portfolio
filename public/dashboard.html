@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <link rel="manifest" href="/manifest.json">
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="TapMyCar">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Dashboard â€” TapMyCar</title>
+<title>Dashboard — TapMyCar</title>
 <link rel="stylesheet" href="/app.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
@@ -35,11 +35,11 @@
       <div style="font-size:9px;color:var(--gy);margin-bottom:2px">Privacy for you. Safety for your car.</div>
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div style="font-size:20px;font-weight:800;color:var(--bk)" id="greeting-name">...</div>
-        <div style="background:var(--orl);border:.5px solid var(--orl2);border-radius:99px;padding:4px 11px;font-size:10px;font-weight:600;color:var(--or)">â­ Standard</div>
+        <div style="background:var(--orl);border:.5px solid var(--orl2);border-radius:99px;padding:4px 11px;font-size:10px;font-weight:600;color:var(--or)">⭐ Standard</div>
       </div>
     </div>
 
-    <div class="hero-card" onclick="window.location.href='/etag.html'">
+    <div class="hero-card" onclick="window.location.href='/manage.html'">
       <div class="hero-ring1"></div><div class="hero-ring2"></div>
       <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.85);margin-bottom:5px;display:flex;align-items:center;gap:5px">
         <div style="width:7px;height:7px;border-radius:50%;background:#fff;animation:pulse 1.6s ease-in-out infinite"></div>
@@ -87,7 +87,7 @@
       <div style="font-size:14px;font-weight:700;color:var(--bk)">Recent activity</div>
     </div>
     <div id="activity-list">
-      <div style="text-align:center;padding:20px;color:var(--gy);font-size:13px">No scans yet â€” share your tag URL to get started.</div>
+      <div style="text-align:center;padding:20px;color:var(--gy);font-size:13px">No scans yet — share your tag URL to get started.</div>
     </div>
   </div>
 </div>
@@ -98,7 +98,7 @@
 </div>
 <nav class="bnav">
   <a href="/dashboard.html" class="bni active"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span><div class="bni-dot"></div></a>
-  <a href="/etag.html" class="bni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Tag</span></a>
+  <a href="/manage.html" class="bni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Tag</span></a>
   <a href="/activity.html" class="bni"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Activity</span></a>
   <a href="/settings.html" class="bni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></a>
 </nav>
@@ -134,8 +134,7 @@ async function loadDashboard() {
 
       document.getElementById('vehicle-label').textContent = tag.vehicle_label || 'My Vehicle';
       document.getElementById('tag-token').textContent = 'TMC.' + tag.token.replace('TMC','');      document.getElementById('tag-url').textContent = tagURL;
-      document.getElementById('hero-sub').textContent = `Scanned ${data.scanCount}Ã— Â· tap to manage`;
-
+      document.getElementById('hero-sub').textContent = `TMC.${tag.token.replace('TMC','')} · Scanned ${data.scanCount}×`;
       // Generate QR code
       document.getElementById('qr-container').innerHTML = '';
       new QRCode(document.getElementById('qr-container'), {
@@ -191,4 +190,3 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
-

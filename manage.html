@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#FF6B00">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="TapMyCar">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Manage Tag — TapMyCar</title>
+<link rel="stylesheet" href="/app.css">
+<style>
+.plan-card{border-radius:16px;padding:18px;margin-bottom:12px;border:1.5px solid var(--bd)}
+.plan-card.current{border-color:var(--or);background:var(--orl)}
+.plan-badge{display:inline-block;font-size:9px;font-weight:700;padding:3px 10px;border-radius:99px;margin-bottom:8px}
+.plan-name{font-size:16px;font-weight:800;color:var(--bk);margin-bottom:2px}
+.plan-price{font-size:20px;font-weight:800;color:var(--or)}
+.plan-price span{font-size:12px;color:var(--gy);font-weight:400}
+.plan-feat{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--bk);margin-bottom:6px}
+.plan-feat-dot{width:5px;height:5px;border-radius:1px;background:var(--or);flex-shrink:0}
+.plan-feat-lock{width:5px;height:5px;border-radius:1px;background:var(--sv);flex-shrink:0}
+.upgrade-box{background:linear-gradient(135deg,#FF6B00,#FF8533);border-radius:16px;padding:20px;text-align:center;margin-bottom:14px}
+.upgrade-box h3{font-size:17px;font-weight:800;color:#fff;margin-bottom:4px}
+.upgrade-box p{font-size:12px;color:rgba(255,255,255,.8);margin-bottom:14px;line-height:1.5}
+.tag-detail{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:.5px solid var(--bd)}
+.tag-detail:last-child{border-bottom:none}
+.tag-label{font-size:12px;color:var(--gy)}
+.tag-value{font-size:12px;font-weight:600;color:var(--bk)}
+</style>
+</head>
+<body>
+<div class="nav"><div class="bk" onclick="window.location.href='/dashboard.html'"><div class="bkb"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><span class="bk-label">Manage Tag</span></div><button class="gear" onclick="window.location.href='/settings.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button></div>
+<div class="chev"></div>
+<div class="page">
+<div class="page-inner">
+
+  <!-- Current tag info -->
+  <div class="card card-or" style="margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+      <div>
+        <div style="font-size:16px;font-weight:700;color:var(--bk)" id="m-vehicle">My Vehicle</div>
+        <div style="font-size:11px;color:var(--gy);margin-top:2px;font-family:monospace" id="m-token">Loading...</div>
+      </div>
+      <span class="sp sp-on" id="m-status">Active</span>
+    </div>
+    <div id="m-details">
+      <div class="tag-detail"><span class="tag-label">License plate</span><span class="tag-value" id="m-plate">—</span></div>
+      <div class="tag-detail"><span class="tag-label">Make</span><span class="tag-value" id="m-make">—</span></div>
+      <div class="tag-detail"><span class="tag-label">Model</span><span class="tag-value" id="m-model">—</span></div>
+      <div class="tag-detail"><span class="tag-label">Year</span><span class="tag-value" id="m-year">—</span></div>
+      <div class="tag-detail"><span class="tag-label">Color</span><span class="tag-value" id="m-color">—</span></div>
+      <div class="tag-detail"><span class="tag-label">Activated</span><span class="tag-value" id="m-activated">—</span></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn" style="font-size:12px;padding:10px 0" onclick="window.location.href='/etag.html'">Download eTag PDF</button>
+      <button class="btn-o" style="font-size:12px;padding:10px 0" onclick="window.location.href='/activate.html'">Scan New Tag</button>
+    </div>
+  </div>
+
+  <!-- Current plan -->
+  <div style="font-size:14px;font-weight:700;color:var(--bk);margin-bottom:10px">Your Plan</div>
+  <div id="current-plan-box"></div>
+
+  <!-- Upgrade section (shown for free/etag users) -->
+  <div id="upgrade-section" style="display:none">
+    <div class="upgrade-box">
+      <h3>Unlock more protection</h3>
+      <p>Upgrade to get a physical NFC sticker, more calls, SMS alerts, and full control over your car's safety.</p>
+      <a href="/activate.html" style="background:#fff;color:var(--or);font-size:14px;font-weight:700;padding:13px 0;border-radius:13px;text-decoration:none;display:block">Upgrade Now →</a>
+    </div>
+
+    <div style="font-size:14px;font-weight:700;color:var(--bk);margin-bottom:10px">Compare Plans</div>
+
+    <!-- Standard -->
+    <div class="plan-card" id="plan-standard">
+      <div class="plan-badge" style="background:var(--or);color:#fff">Most Popular</div>
+      <div class="plan-name">Standard</div>
+      <div class="plan-price">$9.99 <span>+ $4.99/yr</span></div>
+      <div style="font-size:11px;color:var(--gy);margin-bottom:12px">Physical NFC + QR sticker ships to your home</div>
+      <div class="plan-feat"><div class="plan-feat-dot"></div>Physical sticker shipped to your home</div>
+      <div class="plan-feat"><div class="plan-feat-dot"></div>10 masked calls per month</div>
+      <div class="plan-feat"><div class="plan-feat-dot"></div>SMS alert on every scan</div>
+      <div class="plan-feat"><div class="plan-feat-dot"></div>Voice screening system</div>
+      <div class="plan-feat"><div class="plan-feat-dot"></div>Scan history with timestamps</div>
+      <button class="btn" style="margin-top:12px;font-size:13px;padding:12px 0" onclick="window.location.href='/activate.html'">Get Standard →</button>
+    </div>
+
+    <!-- Premium -->
+    <div class="plan-card" id="plan-premium">
+      <div class="plan-name">Premium</div>
+      <div class="plan-price">$24.99 <span>+ $9.99/yr</span></div>
+      <div style="font-size:11px;color:var(--gy);margin-bottom:12px">3 vehicles · unlimited calls</div>
+      <div class="plan-feat"><div class="plan-feat-dot"></div>Everything in Standard</div>
+      <div class="plan-feat"><div class="plan-feat-dot"></div>Unlimited masked calls</div>
+      <div class="plan-feat"><div class="plan-feat-dot"></div>Up to 3 vehicles</div>
+      <div class="plan-feat"><div class="plan-feat-dot"></div>Scan location map</div>
+      <div class="plan-feat"><div class="plan-feat-dot"></div>Emergency contact feature</div>
+      <button class="btn-o" style="margin-top:12px;font-size:13px;padding:12px 0" onclick="window.location.href='/pricing.html'">Get Premium →</button>
+    </div>
+  </div>
+
+  <!-- Already upgraded message (shown for standard/premium/business) -->
+  <div id="upgraded-section" style="display:none">
+    <div style="background:var(--gnl);border:1.5px solid #BBF7D0;border-radius:14px;padding:16px;text-align:center;margin-bottom:14px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gn)" stroke-width="2.5" stroke-linecap="round" style="margin-bottom:6px"><polyline points="20 6 9 17 4 12"/></svg>
+      <div style="font-size:14px;font-weight:700;color:#166534;margin-bottom:4px">You're on the <span id="upgraded-plan-name">Standard</span> plan</div>
+      <div style="font-size:11px;color:#15803D">You have full access to all features in your plan.</div>
+    </div>
+    <div style="text-align:center;font-size:12px;color:var(--gy)">
+      <a href="/pricing.html" style="color:var(--or);font-weight:600;text-decoration:none">View all plans →</a>
+    </div>
+  </div>
+
+  <!-- Want another tag -->
+  <div style="margin-top:20px;background:var(--gbl);border-radius:14px;padding:16px;border:.5px solid var(--bd)">
+    <div style="font-size:13px;font-weight:700;color:var(--bk);margin-bottom:4px">Need a tag for another car?</div>
+    <div style="font-size:11px;color:var(--gy);line-height:1.5;margin-bottom:12px" id="another-tag-msg">Upgrade to Premium to protect up to 3 vehicles, or purchase an additional Standard tag.</div>
+    <a href="/pricing.html" style="color:var(--or);font-size:12px;font-weight:700;text-decoration:none">See plans →</a>
+  </div>
+
+  <!-- App promo -->
+  <div style="margin-top:16px;background:#111;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+    <div style="width:36px;height:36px;border-radius:9px;background:var(--or);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+    <div style="flex:1"><div style="font-size:12px;font-weight:700;color:#fff">Share TapMyCar</div><div style="font-size:10px;color:#9CA3AF">Privacy for you. Safety for your car.</div></div>
+    <button onclick="navigator.share?navigator.share({title:'TapMyCar',text:'Privacy for you. Safety for your car.',url:'https://tapmycar.io'}):navigator.clipboard.writeText('https://tapmycar.io').then(()=>showToast('Link copied!'))" style="background:var(--or);color:#fff;font-size:10px;font-weight:700;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;font-family:Inter,sans-serif">Share</button>
+  </div>
+
+</div>
+</div>
+
+<nav class="bnav">
+  <a href="/dashboard.html" class="bni"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></a>
+  <a href="/manage.html" class="bni active"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Tag</span><div class="bni-dot"></div></a>
+  <a href="/activity.html" class="bni"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Activity</span></a>
+  <a href="/settings.html" class="bni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></a>
+</nav>
+
+<div class="toast" id="toast"><div class="toast-ic"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span id="toast-msg"></span></div>
+
+<script src="/app.js"></script>
+<script>
+requireAuth();
+const s = getSession();
+
+const planNames = {etag:'eTag (Free)',standard:'Standard',premium:'Premium',business:'Business'};
+
+async function loadManage() {
+  try {
+    const res = await fetch('/api/get-dashboard?user_id=' + s.token);
+    const data = await res.json();
+
+    const userPlan = data.user ? (data.user.plan || 'etag') : 'etag';
+
+    // Tag details
+    if (data.tags && data.tags.length > 0) {
+      const tag = data.tags.find(t => t.status === 'active') || data.tags[0];
+      document.getElementById('m-vehicle').textContent = tag.vehicle_label || 'My Vehicle';
+      document.getElementById('m-token').textContent = 'TMC.' + tag.token.replace('TMC','');
+      document.getElementById('m-plate').textContent = tag.license_plate || '—';
+      document.getElementById('m-make').textContent = tag.car_make || '—';
+      document.getElementById('m-model').textContent = tag.car_model || '—';
+      document.getElementById('m-year').textContent = tag.car_year || '—';
+      document.getElementById('m-color').textContent = tag.car_color || '—';
+
+      const statusMap = {active:'sp-on',inactive:'sp-am',unclaimed:'sp-am',claimed:'sp-or',disabled:'sp-rd'};
+      document.getElementById('m-status').className = 'sp ' + (statusMap[tag.status] || 'sp-am');
+      document.getElementById('m-status').textContent = tag.status.charAt(0).toUpperCase() + tag.status.slice(1);
+
+      if (tag.activated_at) {
+        document.getElementById('m-activated').textContent = new Date(tag.activated_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      }
+    }
+
+    // Current plan display
+    var planHTML = '<div class="plan-card current">';
+    planHTML += '<div class="plan-badge" style="background:var(--or);color:#fff">Current Plan</div>';
+    planHTML += '<div class="plan-name">' + (planNames[userPlan] || userPlan) + '</div>';
+    if (userPlan === 'etag') {
+      planHTML += '<div style="font-size:11px;color:var(--gy);margin-top:4px">Free digital QR · 3 masked calls/month</div>';
+    } else if (userPlan === 'standard') {
+      planHTML += '<div style="font-size:11px;color:var(--gy);margin-top:4px">Physical sticker · 10 masked calls/month · SMS alerts</div>';
+    } else if (userPlan === 'premium') {
+      planHTML += '<div style="font-size:11px;color:var(--gy);margin-top:4px">3 vehicles · unlimited calls · scan location map</div>';
+    } else if (userPlan === 'business') {
+      planHTML += '<div style="font-size:11px;color:var(--gy);margin-top:4px">Fleet dashboard · unlimited vehicles · branded stickers</div>';
+    }
+    planHTML += '</div>';
+    document.getElementById('current-plan-box').innerHTML = planHTML;
+
+    // Show upgrade or upgraded section
+    if (userPlan === 'etag') {
+      document.getElementById('upgrade-section').style.display = 'block';
+      document.getElementById('upgraded-section').style.display = 'none';
+      document.getElementById('another-tag-msg').textContent = 'Your free eTag covers one vehicle. Upgrade to Standard for a physical sticker, or Premium for up to 3 vehicles.';
+    } else {
+      document.getElementById('upgrade-section').style.display = 'none';
+      document.getElementById('upgraded-section').style.display = 'block';
+      document.getElementById('upgraded-plan-name').textContent = planNames[userPlan] || userPlan;
+
+      if (userPlan === 'standard') {
+        document.getElementById('another-tag-msg').textContent = 'Want to protect another car? Upgrade to Premium for up to 3 vehicles.';
+      } else if (userPlan === 'premium') {
+        document.getElementById('another-tag-msg').textContent = 'You can protect up to 3 vehicles on your Premium plan. Scan a new tag to add another car.';
+      } else {
+        document.getElementById('another-tag-msg').textContent = 'Your Business plan supports unlimited vehicles. Contact us for bulk tags.';
+      }
+    }
+
+  } catch(e) {
+    console.error('Manage load error:', e);
+  }
+}
+
+loadManage();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js');
+}
+</script>
+</body>
+</html>
