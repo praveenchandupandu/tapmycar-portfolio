@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <link rel="manifest" href="/manifest.json">
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="TapMyCar">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Dashboard — TapMyCar</title>
+<title>Dashboard â€” TapMyCar</title>
 <link rel="stylesheet" href="/app.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
@@ -35,7 +35,7 @@
       <div style="font-size:9px;color:var(--gy);margin-bottom:2px">Privacy for you. Safety for your car.</div>
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div style="font-size:20px;font-weight:800;color:var(--bk)" id="greeting-name">...</div>
-        <div style="background:var(--orl);border:.5px solid var(--orl2);border-radius:99px;padding:4px 11px;font-size:10px;font-weight:600;color:var(--or)">⭐ Standard</div>
+        <div style="background:var(--orl);border:.5px solid var(--orl2);border-radius:99px;padding:4px 11px;font-size:10px;font-weight:600;color:var(--or)">â­ Standard</div>
       </div>
     </div>
 
@@ -87,7 +87,7 @@
       <div style="font-size:14px;font-weight:700;color:var(--bk)">Recent activity</div>
     </div>
     <div id="activity-list">
-      <div style="text-align:center;padding:20px;color:var(--gy);font-size:13px">No scans yet — share your tag URL to get started.</div>
+      <div style="text-align:center;padding:20px;color:var(--gy);font-size:13px">No scans yet â€” share your tag URL to get started.</div>
     </div>
   </div>
 </div>
@@ -133,8 +133,8 @@ async function loadDashboard() {
       tagURL = `https://tapmycar.io/tag/${tag.token}`;
 
       document.getElementById('vehicle-label').textContent = tag.vehicle_label || 'My Vehicle';
-      document.getElementById('tag-token').textContent = '#' + tag.token;      document.getElementById('tag-url').textContent = tagURL;
-      document.getElementById('hero-sub').textContent = `Scanned ${data.scanCount}× · tap to manage`;
+      document.getElementById('tag-token').textContent = 'TMC.' + tag.token.replace('TMC','');      document.getElementById('tag-url').textContent = tagURL;
+      document.getElementById('hero-sub').textContent = `Scanned ${data.scanCount}Ã— Â· tap to manage`;
 
       // Generate QR code
       document.getElementById('qr-container').innerHTML = '';
