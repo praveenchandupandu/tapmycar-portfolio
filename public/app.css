@@ -89,12 +89,8 @@ body{font-family:'Inter',sans-serif;background:var(--wh);color:var(--bk);max-wid
 .sticker-tape{height:3px;background:repeating-linear-gradient(90deg,var(--yl) 0,var(--yl) 9px,var(--sv) 9px,var(--sv) 18px);}
 .sticker-body{background:#fff;padding:14px;}
 
-/* OTP BOXES */
-.otp-row{display:flex;gap:6px;margin-bottom:16px;justify-content:center;}
-.otp-box{width:42px;height:46px;max-width:46px;border:1.5px solid #E5E7EB;border-radius:11px;text-align:center;font-size:18px;font-weight:700;font-family:'Inter',sans-serif;background:#F9FAFB;outline:none;flex:1;}
-.otp-box:focus{border-color:#FF6B00;background:#FFF3EC;}
-.otp-box.filled{border-color:#FF6B00;}
-.otp-row{display:flex;gap:8px;margin-bottom:16px;}
-.otp-box{width:42px;height:50px;border:1.5px solid #E5E7EB;border-radius:11px;text-align:center;font-size:20px;font-weight:700;font-family:'Inter',sans-serif;background:#F9FAFB;outline:none;flex:1;}
+/* OTP BOXES - responsive */
+.otp-row{display:flex;gap:6px;margin-bottom:16px;justify-content:center;max-width:300px;margin-left:auto;margin-right:auto;}
+.otp-box{width:100%;max-width:44px;height:48px;border:1.5px solid #E5E7EB;border-radius:11px;text-align:center;font-size:18px;font-weight:700;font-family:'Inter',sans-serif;background:#F9FAFB;outline:none;flex:1;min-width:0;}
 .otp-box:focus{border-color:#FF6B00;background:#FFF3EC;}
 .otp-box.filled{border-color:#FF6B00;}
