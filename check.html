@@ -261,7 +261,7 @@ async function loadTag() {
       showState('disabled');
     } else if (tag.status === 'unclaimed') {
       showState('unclaimed');
-    } else if (tag.status === 'active') {
+    } else if(tag.status==='paused'){document.body.innerHTML=showPausedState();return;} {
       showState('active');
       currentScanId = data.scan_id || '';
       requestLocation();
