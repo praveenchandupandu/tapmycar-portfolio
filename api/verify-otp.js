@@ -3,6 +3,66 @@ const twilio = require('twilio');
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
+// Auto-assign an unclaimed tag to a new user
+async function assignFreeTag(userId) {
+  try {
+    // Find first unclaimed tag
+    const { data: tags } = await supabase
+      .from('tags')
+      .select('*')
+      .eq('status', 'unclaimed')
+      .is('owner_id', null)
+      .limit(1);
+
+    if (tags && tags.length > 0) {
+      const tag = tags[0];
+      await supabase
+        .from('tags')
+        .update({
+          owner_id: userId,
+          status: 'claimed',
+          claimed_at: new Date().toISOString()
+        })
+        .eq('id', tag.id);
+
+      console.log('Auto-assigned tag', tag.token, 'to user', userId);
+      return tag.token;
+    } else {
+      // No unclaimed tags available — generate one on the fly
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let random = '';
+      for (let i = 0; i < 6; i++) {
+        random += chars[Math.floor(Math.random() * chars.length)];
+      }
+      const newToken = 'TMC' + random;
+
+      const { data: newTag, error } = await supabase
+        .from('tags')
+        .insert({
+          token: newToken,
+          status: 'claimed',
+          owner_id: userId,
+          claimed_at: new Date().toISOString(),
+          plan: 'etag',
+          vehicle_label: 'My Vehicle'
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Failed to generate tag:', error);
+        return null;
+      }
+
+      console.log('Generated and assigned new tag', newToken, 'to user', userId);
+      return newToken;
+    }
+  } catch(e) {
+    console.error('Tag assignment error:', e);
+    return null;
+  }
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -20,12 +80,20 @@ module.exports = async function handler(req, res) {
 
     // Find or create user
     let { data: user } = await supabase.from('users').select('*').eq('phone', phone).single();
+    let isNewUser = false;
     if (!user) {
       const { data: newUser } = await supabase.from('users')
         .insert({ phone, name: name || 'User', email: email || '' })
         .select().single();
       user = newUser;
+      isNewUser = true;
     }
+
+    // Auto-assign tag for new users
+    if (isNewUser && user) {
+      await assignFreeTag(user.id);
+    }
+
     return res.json({ token: user.id, name: user.name, phone: user.phone });
   }
 
@@ -52,7 +120,6 @@ module.exports = async function handler(req, res) {
     const now = Date.now();
 
     if (now > expiresAt) {
-      // Clean up expired OTP
       await supabase.from('otp_codes').update({ used: true }).eq('id', otp.id);
       return res.status(400).json({ error: 'Code expired. Please request a new one.' });
     }
@@ -60,10 +127,12 @@ module.exports = async function handler(req, res) {
     // Mark as used
     await supabase.from('otp_codes').update({ used: true }).eq('id', otp.id);
 
-    // Also clean up any other OTPs for this email
+    // Clean up other OTPs for this email
     await supabase.from('otp_codes').delete().eq('phone', email).eq('used', false);
 
+    // Find or create user
     let { data: user } = await supabase.from('users').select('*').eq('email', email).single();
+    let isNewUser = false;
     if (!user) {
       const cleaned = (phone || '').replace(/\D/g, '');
       const formatted = cleaned ? (cleaned.startsWith('1') ? '+' + cleaned : '+1' + cleaned) : '';
@@ -71,7 +140,14 @@ module.exports = async function handler(req, res) {
         .insert({ email, phone: formatted, name: name || 'User' })
         .select().single();
       user = newUser;
+      isNewUser = true;
     }
+
+    // Auto-assign tag for new users
+    if (isNewUser && user) {
+      await assignFreeTag(user.id);
+    }
+
     return res.json({ token: user.id, name: user.name, phone: user.phone, email: user.email });
   }
 
