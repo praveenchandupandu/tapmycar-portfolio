@@ -298,3 +298,243 @@ if (typeof window !== 'undefined') {
     } catch(e) {}
   };
 }
+
+// ══════════════════════════════════════════════════
+// AI CHATBOT — Add this to the END of public/app.js
+// ══════════════════════════════════════════════════
+
+// ── CHATBOT SYSTEM PROMPT ──
+const TMC_SYSTEM_PROMPT = `You are TapMyCar Assistant — a friendly, warm, and professional support agent for TapMyCar, a privacy-first vehicle contact system by Praman Tech LLC based in New Britain, Connecticut.
+
+ABOUT TAPMYCAR:
+- TapMyCar lets car owners place a QR/NFC sticker on their vehicle
+- Strangers can scan the tag to contact the owner privately — the owner's real phone number is NEVER shared
+- All calls are masked through Twilio proxy — neither party sees real numbers
+- The owner gets voice screening: Press 1 to send auto-message, Press 2 to connect directly
+
+PLANS:
+- eTag (Free): Digital QR code, download instantly, 3 masked calls/month. Activation costs $1.
+- Standard ($9.99 + $4.99/yr): Physical NFC + QR sticker shipped to home, 10 masked calls/month, SMS scan alerts, voice screening
+- Premium ($24.99 + $9.99/yr): 3 vehicles, unlimited masked calls, scan history, emergency contact
+- Business ($49/month): Fleet dashboard, bulk stickers with logo
+
+HOW IT WORKS:
+1. Register free at tapmycar.io — get instant digital eTag (QR code PDF)
+2. Print and place QR on windshield
+3. Activate for $1 — enables masked calling
+4. After 30 days, auto-upgrade to Standard ($9.99) — physical sticker ships to your address
+5. Cancel anytime before day 30 — no charge
+
+COMMON ISSUES & SOLUTIONS:
+- "QR not scanning" → Make sure QR is well-lit, not crinkled, camera focused. Try zooming in slightly.
+- "Can't download PDF" → Make sure you're logged in. Go to tapmycar.io/etag.html
+- "How to activate" → Go to tapmycar.io/activate.html, scan your QR, pay $1
+- "Want a refund" → Email pramantechllc@gmail.com. Refunds within 30 days, no questions asked.
+- "Sticker not arrived" → Physical stickers ship after day 30. Check dashboard for status.
+- "Lost my tag" → Sign in at tapmycar.io/signin.html with your email. Your tag is still active.
+- "How to pause tag" → Go to dashboard, toggle pause on your tag
+- "Change phone number" → Go to settings, update your phone number
+- "How masked calling works" → When someone scans your tag and taps Call, the call goes through our Twilio number. Neither you nor the caller see each other's real numbers.
+- "Is my number safe?" → Yes. Your real number is NEVER shown to anyone. All communication routes through TapMyCar's secure proxy.
+
+TONE: Be warm, human, concise. Use short sentences. Never be robotic. If you can't solve something, say "I'll create a support ticket for you — our team will reach out within 24 hours." Never make up features that don't exist.
+
+IMPORTANT: Keep responses SHORT — 2-3 sentences max. This is a mobile chat, not an essay.`;
+
+// ── INJECT CHATBOT ──
+function injectChatbot() {
+  // Don't inject on admin page
+  if (window.location.pathname.includes('admin')) return;
+
+  const chatHTML = `
+    <div id="tmc-chat-bubble" onclick="toggleChat()" style="position:fixed;bottom:24px;right:20px;width:56px;height:56px;border-radius:50%;background:#FF6B00;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(255,107,0,.4);z-index:200;transition:transform .2s">
+      <svg id="chat-icon-open" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <svg id="chat-icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" style="display:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </div>
+    <div id="tmc-chat-badge" style="position:fixed;bottom:72px;right:20px;background:#111;color:#fff;font-size:11px;font-weight:600;padding:6px 12px;border-radius:10px 10px 0 10px;z-index:200;box-shadow:0 2px 10px rgba(0,0,0,.15);display:none;cursor:pointer" onclick="toggleChat()">Need help? 💬</div>
+
+    <div id="tmc-chat-window" style="display:none;position:fixed;bottom:90px;right:16px;width:340px;max-width:calc(100vw - 32px);height:480px;max-height:calc(100vh - 120px);background:#fff;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.2);z-index:201;display:none;flex-direction:column;overflow:hidden">
+      <!-- Header -->
+      <div style="background:#FF6B00;padding:16px;display:flex;align-items:center;gap:10px;flex-shrink:0">
+        <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:700;color:#fff">TapMyCar Support</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.8);display:flex;align-items:center;gap:4px"><div style="width:6px;height:6px;border-radius:50%;background:#4ADE80"></div>Online now</div>
+        </div>
+        <button onclick="toggleChat()" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+
+      <!-- Messages -->
+      <div id="tmc-chat-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px">
+        <div class="tmc-msg tmc-msg-bot">
+          <div class="tmc-msg-bubble">Hi! I'm your TapMyCar assistant. How can I help you today? 😊</div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <button class="tmc-quick-q" onclick="askQuestion('How do I activate my tag?')">Activate my tag</button>
+          <button class="tmc-quick-q" onclick="askQuestion('How does masked calling work?')">Masked calling</button>
+          <button class="tmc-quick-q" onclick="askQuestion('My QR code is not scanning')">QR not scanning</button>
+          <button class="tmc-quick-q" onclick="askQuestion('I want a refund')">Refund</button>
+          <button class="tmc-quick-q" onclick="askQuestion('Where is my physical sticker?')">Sticker status</button>
+        </div>
+      </div>
+
+      <!-- Input -->
+      <div style="padding:12px;border-top:1px solid #F3F4F6;display:flex;gap:8px;flex-shrink:0;background:#fff">
+        <input type="text" id="tmc-chat-input" placeholder="Type your message..." onkeydown="if(event.key==='Enter')sendChatMessage()" style="flex:1;height:40px;border:1.5px solid #E5E7EB;border-radius:12px;padding:0 14px;font-size:13px;font-family:'Inter',sans-serif;outline:none;background:#F9FAFB" />
+        <button onclick="sendChatMessage()" style="width:40px;height:40px;border-radius:12px;background:#FF6B00;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  `;
+
+  // Add CSS
+  const chatStyle = document.createElement('style');
+  chatStyle.textContent = `
+    .tmc-msg{display:flex;gap:8px;max-width:85%}
+    .tmc-msg-bot{align-self:flex-start}
+    .tmc-msg-user{align-self:flex-end;flex-direction:row-reverse}
+    .tmc-msg-bubble{padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.5;font-family:'Inter',sans-serif}
+    .tmc-msg-bot .tmc-msg-bubble{background:#F3F4F6;color:#111;border-bottom-left-radius:4px}
+    .tmc-msg-user .tmc-msg-bubble{background:#FF6B00;color:#fff;border-bottom-right-radius:4px}
+    .tmc-msg-typing .tmc-msg-bubble{background:#F3F4F6;color:#9CA3AF;font-style:italic}
+    .tmc-quick-q{background:#fff;border:1px solid #FFE4CC;color:#FF6B00;font-size:11px;font-weight:600;padding:6px 12px;border-radius:99px;cursor:pointer;font-family:'Inter',sans-serif;transition:background .15s}
+    .tmc-quick-q:active{background:#FFF3EC}
+    #tmc-chat-bubble:active{transform:scale(.92)}
+    @media(max-width:400px){#tmc-chat-window{right:8px;width:calc(100vw - 16px);bottom:84px;height:calc(100vh - 100px)}}
+  `;
+  document.head.appendChild(chatStyle);
+
+  // Inject HTML
+  const container = document.createElement('div');
+  container.innerHTML = chatHTML;
+  document.body.appendChild(container);
+
+  // Show help badge after 5 seconds on first visit
+  if (!sessionStorage.getItem('tmc_chat_shown')) {
+    setTimeout(() => {
+      const badge = document.getElementById('tmc-chat-badge');
+      if (badge) badge.style.display = 'block';
+      setTimeout(() => { if (badge) badge.style.display = 'none'; }, 5000);
+    }, 5000);
+    sessionStorage.setItem('tmc_chat_shown', '1');
+  }
+}
+
+let chatOpen = false;
+let chatHistory = [];
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  const win = document.getElementById('tmc-chat-window');
+  const iconOpen = document.getElementById('chat-icon-open');
+  const iconClose = document.getElementById('chat-icon-close');
+  const badge = document.getElementById('tmc-chat-badge');
+
+  if (chatOpen) {
+    win.style.display = 'flex';
+    iconOpen.style.display = 'none';
+    iconClose.style.display = 'block';
+    if (badge) badge.style.display = 'none';
+    document.getElementById('tmc-chat-input').focus();
+  } else {
+    win.style.display = 'none';
+    iconOpen.style.display = 'block';
+    iconClose.style.display = 'none';
+  }
+}
+
+function askQuestion(q) {
+  document.getElementById('tmc-chat-input').value = q;
+  sendChatMessage();
+}
+
+function addChatMessage(text, isUser) {
+  const msgs = document.getElementById('tmc-chat-messages');
+  const div = document.createElement('div');
+  div.className = 'tmc-msg ' + (isUser ? 'tmc-msg-user' : 'tmc-msg-bot');
+  div.innerHTML = `<div class="tmc-msg-bubble">${text}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addTypingIndicator() {
+  const msgs = document.getElementById('tmc-chat-messages');
+  const div = document.createElement('div');
+  div.className = 'tmc-msg tmc-msg-bot tmc-msg-typing';
+  div.id = 'typing-indicator';
+  div.innerHTML = '<div class="tmc-msg-bubble">Typing...</div>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTypingIndicator() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+async function sendChatMessage() {
+  const input = document.getElementById('tmc-chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  addChatMessage(text, true);
+
+  // Add to history
+  chatHistory.push({ role: 'user', content: text });
+
+  // Show typing
+  addTypingIndicator();
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 300,
+        system: TMC_SYSTEM_PROMPT,
+        messages: chatHistory.slice(-10) // Keep last 10 messages for context
+      })
+    });
+
+    const data = await response.json();
+    removeTypingIndicator();
+
+    if (data.content && data.content[0] && data.content[0].text) {
+      const reply = data.content[0].text;
+      chatHistory.push({ role: 'assistant', content: reply });
+      addChatMessage(reply, false);
+    } else if (data.error) {
+      addChatMessage('Sorry, I encountered an issue. Please try again or email us at pramantechllc@gmail.com for help.', false);
+    }
+  } catch (e) {
+    removeTypingIndicator();
+    // Fallback — offline responses
+    const reply = getOfflineResponse(text);
+    addChatMessage(reply, false);
+  }
+}
+
+// Offline fallback responses when API fails
+function getOfflineResponse(question) {
+  const q = question.toLowerCase();
+  if (q.includes('activate')) return 'To activate your tag, go to tapmycar.io/activate.html, scan your QR code, and pay $1. Your tag will be live instantly!';
+  if (q.includes('refund')) return 'For refunds, email us at pramantechllc@gmail.com. We offer full refunds within 30 days, no questions asked.';
+  if (q.includes('scan') && q.includes('not')) return 'Make sure your QR code is well-lit and not crinkled. Try zooming in slightly with your camera. If the issue persists, you can download a fresh PDF from tapmycar.io/etag.html';
+  if (q.includes('mask') || q.includes('call') && q.includes('work')) return 'When someone scans your tag and taps Call, the call routes through our secure Twilio proxy. Neither you nor the caller ever see each other\'s real phone numbers.';
+  if (q.includes('sticker') || q.includes('ship')) return 'Physical stickers ship after your auto-upgrade on day 30. Check your dashboard for the latest status.';
+  if (q.includes('number') && q.includes('safe')) return 'Yes! Your real phone number is NEVER shared with anyone. All calls and messages route through TapMyCar\'s secure proxy system.';
+  if (q.includes('pause')) return 'You can pause your tag from your dashboard. When paused, strangers cannot contact you until you resume it.';
+  if (q.includes('price') || q.includes('cost') || q.includes('plan')) return 'We have 4 plans: eTag (Free + $1 activation), Standard ($9.99), Premium ($24.99), and Business ($49/mo). See all details at tapmycar.io/pricing.html';
+  if (q.includes('cancel')) return 'You can cancel anytime before day 30 with no charge. After day 30, your Standard plan renews at $4.99/year. Email pramantechllc@gmail.com to cancel.';
+  return 'I\'m having trouble connecting right now. For immediate help, email us at pramantechllc@gmail.com — our team responds within 24 hours!';
+}
+
+// Auto-inject chatbot on every page
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(injectChatbot, 1000);
+});
