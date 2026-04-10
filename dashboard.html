@@ -2,31 +2,22 @@
 <html lang="en">
 <head>
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#FF6B00">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="TapMyCar">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Dashboard — TapMyCar</title>
-  <link rel="stylesheet" href="/app.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <style>
-    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.75)}}
-    .qr-wrap{background:#fff;border:2px solid var(--or);border-radius:14px;width:130px;height:130px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 4px 16px rgba(255,107,0,.15);}
-    .qr-wrap canvas{width:114px !important;height:114px !important;}
-    .stat-box{flex:1;background:var(--wh);border-radius:14px;padding:14px 8px;border:.5px solid var(--bd);box-shadow:var(--sh);text-align:center;}
-    .stat-num{font-size:28px;font-weight:800;color:var(--or);line-height:1;margin-bottom:4px;}
-    .stat-label{font-size:10px;color:var(--gy);font-weight:500;}
-    .sec-title{font-size:15px;font-weight:700;color:var(--bk);margin-bottom:10px;}
-    .act-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:.5px solid var(--bd);}
-    .act-item:last-child{border-bottom:none;}
-    .act-icon{width:38px;height:38px;border-radius:12px;background:var(--orl);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-  </style>
+<meta name="theme-color" content="#FF6B00">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="TapMyCar">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Dashboard — TapMyCar</title>
+<link rel="stylesheet" href="/app.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.75)}}
+.qr-wrap{background:#fff;border:2px solid var(--or);border-radius:12px;width:80px;height:80px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.qr-wrap canvas{width:70px !important;height:70px !important;}
+</style>
 </head>
 <body>
-
-<!-- TOP NAV -->
 <div class="nav">
   <a href="/dashboard.html" class="logo">Tap<span>My</span>Car<span class="logo-dot"></span></a>
   <div class="nav-r">
@@ -36,96 +27,109 @@
     <button class="av" id="av-btn" onclick="window.location.href='/settings.html'">J</button>
   </div>
 </div>
-
 <div class="chev"></div>
-
 <div class="page">
   <div class="page-inner">
-
-    <!-- WELCOME -->
-    <div style="margin-bottom:14px">
+    <div style="margin-bottom:10px">
       <div style="font-size:11px;color:var(--gy);margin-bottom:3px">Welcome back</div>
+      <div style="font-size:9px;color:var(--gy);margin-bottom:2px">Privacy for you. Safety for your car.</div>
       <div style="display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:22px;font-weight:800;color:var(--bk)" id="greeting-name">...</div>
-        <div style="background:var(--orl);border:.5px solid var(--orl2);border-radius:99px;padding:5px 12px;font-size:10px;font-weight:700;color:var(--or)">⭐ Standard</div>
+        <div style="font-size:20px;font-weight:800;color:var(--bk)" id="greeting-name">...</div>
+        <div style="background:var(--orl);border:.5px solid var(--orl2);border-radius:99px;padding:4px 11px;font-size:10px;font-weight:600;color:var(--or)">⭐ Standard</div>
       </div>
-      <div style="font-size:11px;color:var(--gy);margin-top:2px">Privacy for you. Safety for your car.</div>
     </div>
 
-    <!-- HERO CARD -->
-    <div class="hero-card" onclick="window.location.href='/manage.html'" style="margin-bottom:14px">
+    <div class="hero-card" onclick="window.location.href='/manage.html'">
       <div class="hero-ring1"></div><div class="hero-ring2"></div>
-      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.85);margin-bottom:6px;display:flex;align-items:center;gap:5px">
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.85);margin-bottom:5px;display:flex;align-items:center;gap:5px">
         <div style="width:7px;height:7px;border-radius:50%;background:#fff;animation:pulse 1.6s ease-in-out infinite"></div>
         Tag active
       </div>
       <h2>Your tag is live</h2>
       <p id="hero-sub">Loading...</p>
-      <div style="background:#fff;color:var(--or);font-size:12px;font-weight:700;padding:8px 16px;border-radius:99px;display:inline-flex;align-items:center;gap:5px">
+      <div style="background:#fff;color:var(--or);font-size:11px;font-weight:700;padding:7px 14px;border-radius:99px;display:inline-flex;align-items:center;gap:4px">
         Manage <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
     </div>
 
-    <!-- STATS ROW -->
-    <div style="display:flex;gap:8px;margin-bottom:14px">
-      <div class="stat-box">
-        <div class="stat-num" id="stat-scans">0</div>
-        <div class="stat-label">Total Scans</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+      <div class="card" style="text-align:center;padding:12px 8px">
+        <div style="font-size:26px;font-weight:800;color:var(--or);line-height:1" id="stat-scans">0</div>
+        <div style="font-size:9px;color:var(--gy);margin-top:3px">Scans</div>
       </div>
-      <div class="stat-box">
-        <div class="stat-num" id="stat-week">0</div>
-        <div class="stat-label">This Week</div>
+      <div class="card" style="text-align:center;padding:12px 8px">
+        <div style="font-size:26px;font-weight:800;color:var(--or);line-height:1" id="stat-week">0</div>
+        <div style="font-size:9px;color:var(--gy);margin-top:3px">This week</div>
       </div>
-      <div class="stat-box">
-        <div class="stat-num" id="stat-status" style="color:#22C55E">ON</div>
-        <div class="stat-label">Status</div>
+      <div class="card" style="text-align:center;padding:12px 8px">
+        <div style="font-size:18px;font-weight:800;color:var(--gn);line-height:1" id="stat-status">ON</div>
+        <div style="font-size:9px;color:var(--gy);margin-top:3px">Status</div>
       </div>
     </div>
 
-    <!-- MY VEHICLE (QR CARD) -->
-    <div class="sec-title">My Vehicle</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+      <div class="card" style="padding:12px;cursor:pointer" onclick="showToast('Tag paused temporarily')">
+        <div style="font-size:13px;font-weight:700;color:var(--bk);margin-bottom:4px">⏸ Pause Tag</div>
+        <div style="font-size:10px;color:var(--gy);line-height:1.4">Hiding your tag from strangers temporarily.</div>
+      </div>
+      <div class="card" style="padding:12px;cursor:pointer" onclick="showToast('Referral link copied!')">
+        <div style="font-size:13px;font-weight:700;color:var(--bk);margin-bottom:4px">👥 Invite a Friend</div>
+        <div style="font-size:10px;color:var(--gy);line-height:1.4">They buy Standard, you get 1 free tag!</div>
+      </div>
+    </div>
+
     <div class="card card-or" style="margin-bottom:14px" id="tag-card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
         <div>
-          <div style="font-size:16px;font-weight:700;color:var(--bk)" id="vehicle-label">My Vehicle</div>
-          <div style="font-size:11px;color:var(--gy);margin-top:2px" id="tag-token">Loading...</div>
+          <div style="font-size:15px;font-weight:700;color:var(--bk)" id="vehicle-label">My Vehicle</div>
+          <div style="font-size:10px;color:var(--gy);margin-top:2px" id="tag-token">Loading...</div>
         </div>
         <span class="sp sp-on">Active</span>
       </div>
       <div class="qr-wrap" id="qr-container"></div>
-      <div style="text-align:center;font-size:10px;color:var(--gy);margin-bottom:14px;word-break:break-all" id="tag-url">Generating your tag URL...</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <button class="btn" style="font-size:12px;padding:12px 0;border-radius:12px" onclick="copyTagURL()">Copy Tag URL</button>
-        <button class="btn-o" style="font-size:12px;padding:12px 0;border-radius:12px" onclick="window.location.href='/etag.html'">Download PDF</button>
+      <div style="text-align:center;font-size:10px;color:var(--gy);margin-bottom:12px" id="tag-url">Generating your tag URL...</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" style="font-size:11px;padding:10px 0" onclick="copyTagURL()">Copy tag URL</button>
+        <button class="btn-o" style="font-size:11px;padding:10px 0" onclick="window.location.href='/etag.html'">Download PDF</button>
       </div>
     </div>
 
-    <!-- RECENT ACTIVITY -->
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <div class="sec-title" style="margin-bottom:0">Recent Activity</div>
-      <a href="/activity.html" style="font-size:12px;font-weight:600;color:var(--or);text-decoration:none">View all →</a>
+    <div id="activity-list">
+      <div style="text-align:center;padding:20px;color:var(--gy);font-size:13px">No scans yet — share your tag URL to get started.</div>
     </div>
-    <div class="card" style="padding:0 16px;margin-bottom:14px" id="activity-list">
-      <div style="text-align:center;padding:24px 0;color:var(--gy);font-size:13px">No scans yet — share your tag to get started.</div>
-    </div>
-
   </div>
 </div>
-
-<!-- SHARE BAR -->
-<div style="margin:0 12px 12px;background:#111;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px">
-  <div style="width:40px;height:40px;border-radius:10px;background:var(--or);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+<div style="margin:0 12px 14px;background:linear-gradient(135deg,#111 60%,#2a1500);border-radius:18px;padding:18px 16px;position:relative;overflow:hidden">
+  <div style="position:absolute;width:120px;height:120px;border-radius:50%;background:rgba(255,107,0,.18);right:-20px;top:-30px;pointer-events:none"></div>
+  <div style="position:absolute;width:70px;height:70px;border-radius:50%;background:rgba(255,107,0,.1);right:30px;bottom:-20px;pointer-events:none"></div>
+  <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,107,0,.2);border:1px solid rgba(255,107,0,.4);border-radius:99px;padding:3px 10px;margin-bottom:10px">
+    <div style="width:6px;height:6px;border-radius:50%;background:var(--or)"></div>
+    <span style="font-size:9px;font-weight:700;color:var(--or);letter-spacing:.5px">NOW AVAILABLE</span>
   </div>
-  <div style="flex:1">
-    <div style="font-size:12px;font-weight:700;color:#fff">Share TapMyCar</div>
-    <div style="font-size:10px;color:#9CA3AF">Privacy + safety for every car</div>
+  <div style="font-size:17px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:5px">Get the TapMyCar App<br><span style="color:var(--or)">Free to Download</span></div>
+  <div style="font-size:11px;color:#9CA3AF;margin-bottom:14px;line-height:1.5">Manage your tag, view scans &amp; protect your car — all from your phone.</div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">
+    <div style="background:rgba(255,255,255,.08);border-radius:99px;padding:4px 10px;font-size:10px;color:#fff;font-weight:500">🔔 Instant alerts</div>
+    <div style="background:rgba(255,255,255,.08);border-radius:99px;padding:4px 10px;font-size:10px;color:#fff;font-weight:500">📍 Scan location</div>
+    <div style="background:rgba(255,255,255,.08);border-radius:99px;padding:4px 10px;font-size:10px;color:#fff;font-weight:500">🔒 Privacy first</div>
   </div>
-  <button onclick="navigator.share?navigator.share({title:'TapMyCar',text:'Privacy for you. Safety for your car.',url:'https://tapmycar.io'}):navigator.clipboard.writeText('https://tapmycar.io').then(()=>showToast('Link copied!'))"
-    style="background:var(--or);color:#fff;font-size:12px;font-weight:700;padding:9px 16px;border-radius:10px;border:none;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap">Share</button>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <a href="https://apps.apple.com/app/tapmycar" target="_blank" style="background:#fff;border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:8px;text-decoration:none">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#111"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+      <div>
+        <div style="font-size:8px;color:#666;font-weight:500">Download on the</div>
+        <div style="font-size:12px;font-weight:800;color:#111">App Store</div>
+      </div>
+    </a>
+    <a href="https://play.google.com/store/apps/tapmycar" target="_blank" style="background:#fff;border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:8px;text-decoration:none">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 20.5v-17c0-.83 1-.83 1.5-.5l14 8.5-14 8.5c-.5.33-1.5.33-1.5-.5z" fill="#34A853"/><path d="M3 3.5l8.5 8.5L3 20.5V3.5z" fill="#4285F4"/><path d="M11.5 12l5.5 3.5-3-3 3-3-5.5 3.5z" fill="#FBBC05"/><path d="M17 15.5l-5.5-3.5 5.5-3.5 2 2.1c.7.7.7 2.3 0 3l-2 2z" fill="#EA4335"/></svg>
+      <div>
+        <div style="font-size:8px;color:#666;font-weight:500">Get it on</div>
+        <div style="font-size:12px;font-weight:800;color:#111">Google Play</div>
+      </div>
+    </a>
+  </div>
 </div>
-
-<!-- BOTTOM NAV -->
 <nav class="bnav">
   <a href="/dashboard.html" class="bni active"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span><div class="bni-dot"></div></a>
   <a href="/manage.html" class="bni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Tag</span></a>
@@ -161,45 +165,45 @@ async function loadDashboard() {
       const tag = data.tags[0];
       tagToken = tag.token;
       tagURL = `https://tapmycar.io/tag/${tag.token}`;
-      const displayToken = tag.token.includes('-') ? tag.token : 'TMC-' + tag.token.replace(/^TMC/i,'');
 
       document.getElementById('vehicle-label').textContent = tag.vehicle_label || 'My Vehicle';
-      document.getElementById('tag-token').textContent = displayToken;
+      document.getElementById('tag-token').textContent = tag.token.includes('-') ? tag.token : 'TMC-' + tag.token.replace(/^TMC/i,'');
       document.getElementById('tag-url').textContent = tagURL;
-      document.getElementById('hero-sub').textContent = `${displayToken} · Scanned ${data.scanCount}×`;
-
+      document.getElementById('hero-sub').textContent = `TMC.${tag.token.replace('TMC','')} · Scanned ${data.scanCount}×`;
+      // Generate QR code
       document.getElementById('qr-container').innerHTML = '';
       new QRCode(document.getElementById('qr-container'), {
         text: tagURL,
-        width: 114,
-        height: 114,
+        width: 70,
+        height: 70,
         colorDark: '#111111',
         colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.M
       });
     }
 
+    // Recent activity
     if (data.recentScans && data.recentScans.length > 0) {
-      const items = data.recentScans.slice(0, 5).map(scan => {
+      const list = data.recentScans.map(scan => {
         const date = new Date(scan.scanned_at);
         const timeStr = date.toLocaleString('en-US', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'});
         return `
-          <div class="act-item">
+          <div class="row">
             <div style="display:flex;align-items:center;gap:10px">
-              <div class="act-icon">
+              <div style="width:36px;height:36px;border-radius:11px;background:var(--orl);display:flex;align-items:center;justify-content:center">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               </div>
               <div>
                 <div style="font-size:13px;font-weight:600;color:var(--bk)">${timeStr}</div>
-                <div style="font-size:10px;color:var(--gy)">${scan.action || 'view'} · ${scan.device_type || 'mobile device'}</div>
+                <div style="font-size:10px;color:var(--gy)">${scan.action}</div>
               </div>
             </div>
-            <span class="sp sp-or" style="font-size:10px;padding:4px 10px">View</span>
-          </div>`;
+            <span class="sp sp-or">View</span>
+          </div>
+        `;
       }).join('');
-      document.getElementById('activity-list').innerHTML = items;
+      document.getElementById('activity-list').innerHTML = list;
     }
-
   } catch(e) {
     console.error('Dashboard load error:', e);
   }
@@ -207,7 +211,9 @@ async function loadDashboard() {
 
 function copyTagURL() {
   if (!tagURL) return;
-  navigator.clipboard.writeText(tagURL).then(() => showToast('Tag URL copied!'));
+  navigator.clipboard.writeText(tagURL).then(() => {
+    showToast('Tag URL copied to clipboard!');
+  });
 }
 
 loadDashboard();
