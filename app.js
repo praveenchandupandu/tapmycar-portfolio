@@ -612,7 +612,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ══════════════════════════════════════════════════
 
 // ── INJECT PAUSE BUTTON ON DASHBOARD ──
-function injectPauseButton() {
+function injectPauseButton() { return;
   // Only run on dashboard page
   if (!window.location.pathname.includes('dashboard')) return;
   // Wait for dashboard to load
@@ -730,7 +730,7 @@ function shareReferral() {
   }
 }
 
-function injectReferralCard() {
+function injectReferralCard() { return;
   if (!window.location.pathname.includes('dashboard')) return;
   setTimeout(() => {
     const pauseBtn = document.getElementById('tmc-pause-btn');
@@ -762,7 +762,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // ── SCAN LOCATION MAP (simple text-based for now, no Google Maps API needed) ──
-function injectScanMap() {
+function injectScanMap() { return;
   if (!window.location.pathname.includes('dashboard') && !window.location.pathname.includes('activity')) return;
 
   setTimeout(() => {
