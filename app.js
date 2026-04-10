@@ -656,7 +656,7 @@ function injectPauseButton() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(injectPauseButton, 500);
+  //setTimeout(injectPauseButton, 500);
 });
 
 
@@ -757,7 +757,7 @@ function injectReferralCard() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(injectReferralCard, 600);
+  //setTimeout(injectReferralCard, 600);
 });
 
 
@@ -811,7 +811,7 @@ function injectScanMap() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(injectScanMap, 700);
+  //setTimeout(injectScanMap, 700);
 });
 
 
