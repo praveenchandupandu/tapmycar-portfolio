@@ -13,11 +13,225 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.75)}}
-.qr-wrap{background:#fff;border:2px solid var(--or);border-radius:12px;width:80px;height:80px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-.qr-wrap canvas{width:70px !important;height:70px !important;}
+
+/* QR wrapper */
+.qr-wrap{
+  background:#fff;
+  border:2px solid var(--or);
+  border-radius:14px;
+  width:120px;
+  height:120px;
+  margin:0 auto 10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  box-shadow:0 4px 16px rgba(255,107,0,.15);
+}
+.qr-wrap canvas{width:104px !important;height:104px !important;}
+
+/* Stats row */
+.stat-card{
+  background:var(--wh);
+  border-radius:14px;
+  padding:14px 8px 12px;
+  border:.5px solid var(--bd);
+  box-shadow:var(--sh);
+  text-align:center;
+  flex:1;
+}
+.stat-num{
+  font-size:28px;
+  font-weight:800;
+  color:var(--or);
+  line-height:1;
+  margin-bottom:4px;
+}
+.stat-num.green{color:#22C55E;}
+.stat-label{
+  font-size:10px;
+  color:var(--gy);
+  font-weight:500;
+}
+
+/* Section title */
+.section-title{
+  font-size:15px;
+  font-weight:700;
+  color:var(--bk);
+  margin-bottom:10px;
+}
+
+/* Action buttons row */
+.action-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-bottom:14px;
+}
+
+/* Pause tag button card */
+.action-card{
+  background:var(--wh);
+  border:.5px solid var(--bd);
+  border-radius:14px;
+  padding:14px 12px;
+  box-shadow:var(--sh);
+  cursor:pointer;
+  transition:transform .13s;
+}
+.action-card:active{transform:scale(.97);}
+.action-card-icon{
+  width:34px;
+  height:34px;
+  border-radius:10px;
+  background:var(--orl);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:8px;
+}
+.action-card-title{
+  font-size:12px;
+  font-weight:700;
+  color:var(--bk);
+  margin-bottom:3px;
+}
+.action-card-sub{
+  font-size:10px;
+  color:var(--gy);
+  line-height:1.4;
+}
+
+/* Referral card */
+.referral-card{
+  background:var(--or);
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:14px;
+  position:relative;
+  overflow:hidden;
+}
+.referral-card::before{
+  content:'';
+  position:absolute;
+  width:100px;height:100px;
+  border-radius:50%;
+  background:rgba(255,255,255,.08);
+  right:-20px;top:-20px;
+}
+.referral-link-box{
+  background:rgba(255,255,255,.2);
+  border-radius:10px;
+  padding:8px 10px;
+  font-size:10px;
+  color:rgba(255,255,255,.9);
+  word-break:break-all;
+  margin:8px 0;
+  font-family:'Inter',sans-serif;
+}
+.referral-btns{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:8px;
+}
+.ref-btn{
+  background:rgba(255,255,255,.2);
+  border:1px solid rgba(255,255,255,.3);
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+  padding:9px 0;
+  border-radius:10px;
+  cursor:pointer;
+  text-align:center;
+  font-family:'Inter',sans-serif;
+  transition:background .13s;
+}
+.ref-btn:active{background:rgba(255,255,255,.35);}
+
+/* Vehicle card */
+.vehicle-card{
+  background:var(--wh);
+  border:1.5px solid var(--orl2);
+  border-radius:16px;
+  padding:16px;
+  margin-bottom:14px;
+  box-shadow:var(--sh);
+}
+.vehicle-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:14px;
+}
+.vehicle-name{
+  font-size:16px;
+  font-weight:700;
+  color:var(--bk);
+}
+.vehicle-token{
+  font-size:11px;
+  color:var(--gy);
+  margin-top:2px;
+}
+.vehicle-url{
+  text-align:center;
+  font-size:10px;
+  color:var(--gy);
+  margin-bottom:14px;
+  word-break:break-all;
+}
+.vehicle-btns{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.vehicle-btns .btn{
+  font-size:12px;
+  padding:12px 0;
+  border-radius:12px;
+}
+.vehicle-btns .btn-o{
+  font-size:12px;
+  padding:12px 0;
+  border-radius:12px;
+}
+
+/* Activity list */
+.activity-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 0;
+  border-bottom:.5px solid var(--bd);
+}
+.activity-item:last-child{border-bottom:none;}
+.activity-icon{
+  width:38px;height:38px;
+  border-radius:12px;
+  background:var(--orl);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.activity-time{font-size:13px;font-weight:600;color:var(--bk);}
+.activity-type{font-size:10px;color:var(--gy);margin-top:2px;}
+
+/* Share bar at bottom */
+.share-bar{
+  margin:0 12px 12px;
+  background:#111;
+  border-radius:16px;
+  padding:14px 16px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
 </style>
 </head>
 <body>
+
 <div class="nav">
   <a href="/dashboard.html" class="logo">Tap<span>My</span>Car<span class="logo-dot"></span></a>
   <div class="nav-r">
@@ -27,75 +241,132 @@
     <button class="av" id="av-btn" onclick="window.location.href='/settings.html'">J</button>
   </div>
 </div>
+
 <div class="chev"></div>
+
 <div class="page">
   <div class="page-inner">
-    <div style="margin-bottom:10px">
-      <div style="font-size:11px;color:var(--gy);margin-bottom:3px">Welcome back</div>
-      <div style="font-size:9px;color:var(--gy);margin-bottom:2px">Privacy for you. Safety for your car.</div>
+
+    <!-- Welcome row -->
+    <div style="margin-bottom:14px">
+      <div style="font-size:11px;color:var(--gy);margin-bottom:2px">Welcome back</div>
       <div style="display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:20px;font-weight:800;color:var(--bk)" id="greeting-name">...</div>
-        <div style="background:var(--orl);border:.5px solid var(--orl2);border-radius:99px;padding:4px 11px;font-size:10px;font-weight:600;color:var(--or)">⭐ Standard</div>
+        <div style="font-size:22px;font-weight:800;color:var(--bk)" id="greeting-name">...</div>
+        <div style="background:var(--orl);border:.5px solid var(--orl2);border-radius:99px;padding:5px 12px;font-size:10px;font-weight:700;color:var(--or)">⭐ Standard</div>
       </div>
+      <div style="font-size:11px;color:var(--gy);margin-top:2px">Privacy for you. Safety for your car.</div>
     </div>
 
-    <div class="hero-card" onclick="window.location.href='/manage.html'">
+    <!-- Hero card -->
+    <div class="hero-card" onclick="window.location.href='/manage.html'" style="margin-bottom:14px">
       <div class="hero-ring1"></div><div class="hero-ring2"></div>
-      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.85);margin-bottom:5px;display:flex;align-items:center;gap:5px">
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.85);margin-bottom:6px;display:flex;align-items:center;gap:5px">
         <div style="width:7px;height:7px;border-radius:50%;background:#fff;animation:pulse 1.6s ease-in-out infinite"></div>
         Tag active
       </div>
       <h2>Your tag is live</h2>
       <p id="hero-sub">Loading...</p>
-      <div style="background:#fff;color:var(--or);font-size:11px;font-weight:700;padding:7px 14px;border-radius:99px;display:inline-flex;align-items:center;gap:4px">
+      <div style="background:#fff;color:var(--or);font-size:12px;font-weight:700;padding:8px 16px;border-radius:99px;display:inline-flex;align-items:center;gap:5px">
         Manage <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
-      <div class="card" style="text-align:center;padding:12px 8px">
-        <div style="font-size:26px;font-weight:800;color:var(--or);line-height:1" id="stat-scans">0</div>
-        <div style="font-size:9px;color:var(--gy);margin-top:3px">Scans</div>
+    <!-- Stats row -->
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-scans">0</div>
+        <div class="stat-label">Total Scans</div>
       </div>
-      <div class="card" style="text-align:center;padding:12px 8px">
-        <div style="font-size:26px;font-weight:800;color:var(--or);line-height:1" id="stat-week">0</div>
-        <div style="font-size:9px;color:var(--gy);margin-top:3px">This week</div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-week">0</div>
+        <div class="stat-label">This Week</div>
       </div>
-      <div class="card" style="text-align:center;padding:12px 8px">
-        <div style="font-size:18px;font-weight:800;color:var(--gn);line-height:1" id="stat-status">ON</div>
-        <div style="font-size:9px;color:var(--gy);margin-top:3px">Status</div>
+      <div class="stat-card">
+        <div class="stat-num green" id="stat-status">ON</div>
+        <div class="stat-label">Status</div>
       </div>
     </div>
 
-    <div class="card card-or" style="margin-bottom:14px" id="tag-card">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+    <!-- Quick actions -->
+    <div class="action-row">
+      <div class="action-card" onclick="toggleTagVisibility()">
+        <div class="action-card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+        </div>
+        <div class="action-card-title">Pause Tag</div>
+        <div class="action-card-sub">Hide your tag from strangers temporarily</div>
+      </div>
+      <div class="action-card" onclick="showReferral()">
+        <div class="action-card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="action-card-title">Invite a Friend</div>
+        <div class="action-card-sub">They buy Standard, you get 1 free tag!</div>
+      </div>
+    </div>
+
+    <!-- Referral card (hidden by default) -->
+    <div class="referral-card" id="referral-section" style="display:none">
+      <div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:4px">🎁 Invite & Earn</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.8)">Share your link. When they buy Standard, you get 1 free tag!</div>
+      <div class="referral-link-box" id="referral-link-text">Loading your link...</div>
+      <div class="referral-btns">
+        <button class="ref-btn" onclick="shareReferralLink()">Share Link</button>
+        <button class="ref-btn" onclick="copyReferralLink()">Copy Link</button>
+      </div>
+    </div>
+
+    <!-- ─── MY VEHICLE (QR section) ─── -->
+    <div class="section-title">My Vehicle</div>
+    <div class="vehicle-card" id="tag-card">
+      <div class="vehicle-header">
         <div>
-          <div style="font-size:15px;font-weight:700;color:var(--bk)" id="vehicle-label">My Vehicle</div>
-          <div style="font-size:10px;color:var(--gy);margin-top:2px" id="tag-token">Loading...</div>
+          <div class="vehicle-name" id="vehicle-label">My Vehicle</div>
+          <div class="vehicle-token" id="tag-token">Loading...</div>
         </div>
         <span class="sp sp-on">Active</span>
       </div>
+
+      <!-- QR code centred -->
       <div class="qr-wrap" id="qr-container"></div>
-      <div style="text-align:center;font-size:10px;color:var(--gy);margin-bottom:12px" id="tag-url">Generating your tag URL...</div>
-      <div style="display:flex;gap:8px">
-        <button class="btn" style="font-size:11px;padding:10px 0" onclick="copyTagURL()">Copy tag URL</button>
-        <button class="btn-o" style="font-size:11px;padding:10px 0" onclick="window.location.href='/etag.html'">Download PDF</button>
+      <div class="vehicle-url" id="tag-url">Generating your tag URL...</div>
+
+      <!-- Buttons -->
+      <div class="vehicle-btns">
+        <button class="btn" onclick="copyTagURL()">Copy Tag URL</button>
+        <button class="btn-o" onclick="window.location.href='/etag.html'">Download PDF</button>
       </div>
     </div>
 
+    <!-- ─── RECENT ACTIVITY ─── -->
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <div style="font-size:14px;font-weight:700;color:var(--bk)">Recent activity</div>
+      <div class="section-title" style="margin-bottom:0">Recent Activity</div>
+      <a href="/activity.html" style="font-size:12px;font-weight:600;color:var(--or);text-decoration:none">View all →</a>
     </div>
-    <div id="activity-list">
-      <div style="text-align:center;padding:20px;color:var(--gy);font-size:13px">No scans yet — share your tag URL to get started.</div>
+
+    <div class="card" style="padding:0 16px" id="activity-list">
+      <div style="text-align:center;padding:24px 0;color:var(--gy);font-size:13px">No scans yet — share your tag to get started.</div>
     </div>
+
   </div>
 </div>
-<div style="margin:14px 20px;background:#111;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px">
-  <div style="width:40px;height:40px;border-radius:10px;background:var(--or);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-  <div style="flex:1"><div style="font-size:12px;font-weight:700;color:#fff">Share TapMyCar</div><div style="font-size:10px;color:#9CA3AF">Tell friends about privacy + safety for their car</div></div>
-  <button onclick="navigator.share?navigator.share({title:'TapMyCar',text:'Privacy for you. Safety for your car.',url:'https://tapmycar.io'}):navigator.clipboard.writeText('https://tapmycar.io').then(()=>showToast('Link copied!'))" style="background:var(--or);color:#fff;font-size:11px;font-weight:700;padding:7px 14px;border-radius:9px;border:none;cursor:pointer;font-family:Inter,sans-serif">Share</button>
+
+<!-- Share bar -->
+<div class="share-bar">
+  <div style="width:40px;height:40px;border-radius:10px;background:var(--or);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+  </div>
+  <div style="flex:1">
+    <div style="font-size:12px;font-weight:700;color:#fff">Share TapMyCar</div>
+    <div style="font-size:10px;color:#9CA3AF">Privacy + safety for every car</div>
+  </div>
+  <button onclick="navigator.share?navigator.share({title:'TapMyCar',text:'Privacy for you. Safety for your car.',url:'https://tapmycar.io'}):navigator.clipboard.writeText('https://tapmycar.io').then(()=>showToast('Link copied!'))"
+    style="background:var(--or);color:#fff;font-size:12px;font-weight:700;padding:9px 16px;border-radius:10px;border:none;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap">
+    Share
+  </button>
 </div>
+
+<!-- Bottom nav -->
 <nav class="bnav">
   <a href="/dashboard.html" class="bni active"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span><div class="bni-dot"></div></a>
   <a href="/manage.html" class="bni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Tag</span></a>
@@ -116,6 +387,8 @@ if (s.name) {
 
 let tagToken = '';
 let tagURL = '';
+let isTagPaused = false;
+let referralLink = '';
 
 async function loadDashboard() {
   try {
@@ -132,44 +405,50 @@ async function loadDashboard() {
       tagToken = tag.token;
       tagURL = `https://tapmycar.io/tag/${tag.token}`;
 
+      const displayToken = tag.token.includes('-') ? tag.token : 'TMC-' + tag.token.replace(/^TMC/i,'');
       document.getElementById('vehicle-label').textContent = tag.vehicle_label || 'My Vehicle';
-      document.getElementById('tag-token').textContent = tag.token.includes('-') ? tag.token : 'TMC-' + tag.token.replace(/^TMC/i,'');
+      document.getElementById('tag-token').textContent = displayToken;
       document.getElementById('tag-url').textContent = tagURL;
-      document.getElementById('hero-sub').textContent = `TMC.${tag.token.replace('TMC','')} · Scanned ${data.scanCount}×`;
-      // Generate QR code
+      document.getElementById('hero-sub').textContent = `${displayToken} · Scanned ${data.scanCount}×`;
+
+      // Generate QR
       document.getElementById('qr-container').innerHTML = '';
       new QRCode(document.getElementById('qr-container'), {
         text: tagURL,
-        width: 70,
-        height: 70,
+        width: 104,
+        height: 104,
         colorDark: '#111111',
         colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.M
       });
+
+      // Referral link
+      referralLink = `https://tapmycar.io/register.html?ref=TMC-${s.token ? s.token.slice(-6) : 'XXXXXX'}`;
+      document.getElementById('referral-link-text').textContent = referralLink;
     }
 
     // Recent activity
     if (data.recentScans && data.recentScans.length > 0) {
-      const list = data.recentScans.map(scan => {
+      const items = data.recentScans.slice(0, 5).map(scan => {
         const date = new Date(scan.scanned_at);
         const timeStr = date.toLocaleString('en-US', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'});
         return `
-          <div class="row">
+          <div class="activity-item">
             <div style="display:flex;align-items:center;gap:10px">
-              <div style="width:36px;height:36px;border-radius:11px;background:var(--orl);display:flex;align-items:center;justify-content:center">
+              <div class="activity-icon">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               </div>
               <div>
-                <div style="font-size:13px;font-weight:600;color:var(--bk)">${timeStr}</div>
-                <div style="font-size:10px;color:var(--gy)">${scan.action}</div>
+                <div class="activity-time">${timeStr}</div>
+                <div class="activity-type">${scan.action || 'view'} · ${scan.device_type || 'mobile device'}</div>
               </div>
             </div>
-            <span class="sp sp-or">View</span>
-          </div>
-        `;
+            <span class="sp sp-or" style="font-size:10px;padding:4px 10px">View</span>
+          </div>`;
       }).join('');
-      document.getElementById('activity-list').innerHTML = list;
+      document.getElementById('activity-list').innerHTML = items;
     }
+
   } catch(e) {
     console.error('Dashboard load error:', e);
   }
@@ -177,9 +456,31 @@ async function loadDashboard() {
 
 function copyTagURL() {
   if (!tagURL) return;
-  navigator.clipboard.writeText(tagURL).then(() => {
-    showToast('Tag URL copied to clipboard!');
-  });
+  navigator.clipboard.writeText(tagURL).then(() => showToast('Tag URL copied!'));
+}
+
+function toggleTagVisibility() {
+  isTagPaused = !isTagPaused;
+  document.getElementById('stat-status').textContent = isTagPaused ? 'OFF' : 'ON';
+  document.getElementById('stat-status').style.color = isTagPaused ? 'var(--gy)' : '#22C55E';
+  showToast(isTagPaused ? 'Tag paused — hidden from strangers' : 'Tag is live again!');
+}
+
+function showReferral() {
+  const sec = document.getElementById('referral-section');
+  sec.style.display = sec.style.display === 'none' ? 'block' : 'none';
+}
+
+function shareReferralLink() {
+  if (navigator.share) {
+    navigator.share({ title: 'TapMyCar', text: 'Get a free tag when you join TapMyCar!', url: referralLink });
+  } else {
+    copyReferralLink();
+  }
+}
+
+function copyReferralLink() {
+  navigator.clipboard.writeText(referralLink).then(() => showToast('Referral link copied!'));
 }
 
 loadDashboard();
