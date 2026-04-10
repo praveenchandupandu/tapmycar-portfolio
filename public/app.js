@@ -606,3 +606,239 @@ function getSmartResponse(question) {
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(injectChatbot, 1000);
 });
+
+// ══════════════════════════════════════════════════
+// DASHBOARD FEATURES — Add to END of public/app.js
+// ══════════════════════════════════════════════════
+
+// ── INJECT PAUSE BUTTON ON DASHBOARD ──
+function injectPauseButton() {
+  // Only run on dashboard page
+  if (!window.location.pathname.includes('dashboard')) return;
+  // Wait for dashboard to load
+  setTimeout(() => {
+    const tagTokenEl = document.querySelector('[id*="tag-token"], .tag-token, [data-tag-token]');
+    // Find the tag card area — look for QR code or tag display section
+    const tagCard = document.querySelector('.card') || document.querySelector('[id*="tag"]');
+    if (!tagCard) return;
+
+    // Check if pause button already exists
+    if (document.getElementById('tmc-pause-btn')) return;
+
+    // Get user's tag data from the page
+    const s = getSession ? getSession() : null;
+    if (!s) return;
+
+    fetch('/api/get-dashboard?user_id=' + s.token)
+      .then(r => r.json())
+      .then(data => {
+        if (!data.tags || data.tags.length === 0) return;
+        const tag = data.tags.find(t => t.status === 'active' || t.status === 'paused') || data.tags[0];
+        if (!tag) return;
+
+        const isPaused = tag.status === 'paused';
+        const btnHTML = `
+          <div id="tmc-pause-btn" style="margin-top:10px">
+            <button onclick="toggleTagPause('${tag.token}','${tag.status}')" style="width:100%;height:44px;border-radius:12px;border:1.5px solid ${isPaused ? 'var(--gn,#16A34A)' : 'var(--rd,#DC2626)'};background:${isPaused ? 'rgba(22,163,74,.08)' : 'rgba(220,38,38,.08)'};color:${isPaused ? 'var(--gn,#16A34A)' : 'var(--rd,#DC2626)'};font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                ${isPaused ? '<polygon points="5 3 19 12 5 21 5 3"/>' : '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>'}
+              </svg>
+              ${isPaused ? 'Resume Tag — Go Active' : 'Pause Tag — Go Invisible'}
+            </button>
+            ${isPaused ? '<div style="text-align:center;font-size:10px;color:var(--rd,#DC2626);margin-top:6px;font-weight:600">Your tag is currently paused. Strangers cannot contact you.</div>' : '<div style="text-align:center;font-size:10px;color:var(--gy,#6B7280);margin-top:6px">Pausing hides your tag from strangers temporarily.</div>'}
+          </div>
+        `;
+
+        // Insert after the first card
+        tagCard.insertAdjacentHTML('afterend', btnHTML);
+      });
+  }, 2000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(injectPauseButton, 500);
+});
+
+
+// ── SETTINGS SAVE TO SUPABASE ──
+async function saveSettings() {
+  const s = getSession ? getSession() : null;
+  if (!s) { showToast('Please sign in first'); return; }
+
+  const name = document.getElementById('s-name')?.value?.trim();
+  const email = document.getElementById('s-email')?.value?.trim();
+  const phone = document.getElementById('s-phone')?.value?.trim();
+
+  if (!name) { showToast('Name is required'); return; }
+
+  const btn = document.querySelector('#save-btn, [onclick*="saveSettings"]');
+  if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
+
+  try {
+    const res = await fetch('/api/get-dashboard', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: s.token,
+        name: name,
+        email: email || undefined,
+        phone: phone || undefined
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Settings saved!');
+      // Update session with new name
+      if (s.name !== name) {
+        const session = JSON.parse(localStorage.getItem('tmc_session') || '{}');
+        session.name = name;
+        localStorage.setItem('tmc_session', JSON.stringify(session));
+      }
+    } else {
+      showToast(data.error || 'Failed to save');
+    }
+  } catch(e) { showToast('Network error'); }
+
+  if (btn) { btn.textContent = 'Save Changes'; btn.disabled = false; }
+}
+
+
+// ── REFERRAL SYSTEM ──
+function generateReferralCode() {
+  const s = getSession ? getSession() : null;
+  if (!s) return '';
+  // Create referral code from user ID
+  const code = 'TMC-REF-' + s.token.slice(0, 6).toUpperCase();
+  return code;
+}
+
+function getReferralLink() {
+  const code = generateReferralCode();
+  return 'https://tapmycar.io/register.html?ref=' + code;
+}
+
+function shareReferral() {
+  const link = getReferralLink();
+  const text = 'Get TapMyCar — privacy-first vehicle contact. When you buy a Standard plan, you get 1 free tag! Use my link: ' + link;
+
+  if (navigator.share) {
+    navigator.share({ title: 'TapMyCar Referral', text: text, url: link }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('Referral link copied!');
+    });
+  }
+}
+
+function injectReferralCard() {
+  if (!window.location.pathname.includes('dashboard')) return;
+  setTimeout(() => {
+    const pauseBtn = document.getElementById('tmc-pause-btn');
+    const insertAfter = pauseBtn || document.querySelector('.card');
+    if (!insertAfter || document.getElementById('tmc-referral-card')) return;
+
+    const code = generateReferralCode();
+    const link = getReferralLink();
+
+    const html = `
+      <div id="tmc-referral-card" style="background:linear-gradient(135deg,#FF6B00 0%,#FF8533 100%);border-radius:14px;padding:16px;margin-top:12px;color:#fff">
+        <div style="font-size:14px;font-weight:800;margin-bottom:4px">Invite a Friend</div>
+        <div style="font-size:11px;opacity:.85;line-height:1.5;margin-bottom:12px">Share your referral link. When they buy a Standard plan, they get 1 free tag!</div>
+        <div style="background:rgba(255,255,255,.2);border-radius:10px;padding:10px 12px;font-size:11px;font-family:monospace;margin-bottom:10px;word-break:break-all">${link}</div>
+        <div style="display:flex;gap:8px">
+          <button onclick="shareReferral()" style="flex:1;height:38px;border-radius:10px;background:#fff;color:#FF6B00;font-size:12px;font-weight:700;border:none;cursor:pointer;font-family:'Inter',sans-serif">Share Link</button>
+          <button onclick="navigator.clipboard.writeText('${link}');showToast('Link copied!')" style="flex:1;height:38px;border-radius:10px;background:rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer;font-family:'Inter',sans-serif">Copy Link</button>
+        </div>
+      </div>
+    `;
+
+    insertAfter.insertAdjacentHTML('afterend', html);
+  }, 2500);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(injectReferralCard, 600);
+});
+
+
+// ── SCAN LOCATION MAP (simple text-based for now, no Google Maps API needed) ──
+function injectScanMap() {
+  if (!window.location.pathname.includes('dashboard') && !window.location.pathname.includes('activity')) return;
+
+  setTimeout(() => {
+    const s = getSession ? getSession() : null;
+    if (!s) return;
+    if (document.getElementById('tmc-scan-map')) return;
+
+    fetch('/api/get-dashboard?user_id=' + s.token)
+      .then(r => r.json())
+      .then(data => {
+        if (!data.recentScans || data.recentScans.length === 0) return;
+
+        const referralCard = document.getElementById('tmc-referral-card');
+        const insertAfter = referralCard || document.getElementById('tmc-pause-btn') || document.querySelector('.card');
+        if (!insertAfter) return;
+
+        const scans = data.recentScans.slice(0, 5);
+        const scanHTML = scans.map(s => {
+          const date = new Date(s.scanned_at).toLocaleString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+          const action = s.contact_action || s.action || 'view';
+          const device = s.device_type || 'unknown';
+          const actionColor = action === 'call' ? 'var(--gn,#16A34A)' : action === 'quick_message' ? 'var(--or,#FF6B00)' : 'var(--gy,#6B7280)';
+          return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:.5px solid var(--bd,#E5E7EB)">
+            <div>
+              <div style="font-size:12px;font-weight:600;color:var(--bk,#111)">${date}</div>
+              <div style="font-size:10px;color:var(--gy,#6B7280)">${device} device</div>
+            </div>
+            <span style="font-size:10px;font-weight:700;color:${actionColor};background:${actionColor}15;padding:3px 8px;border-radius:99px">${action}</span>
+          </div>`;
+        }).join('');
+
+        const html = `
+          <div id="tmc-scan-map" style="background:var(--gbl,#F9FAFB);border-radius:14px;padding:16px;margin-top:12px;border:.5px solid var(--bd,#E5E7EB)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <div style="font-size:14px;font-weight:800;color:var(--bk,#111)">Recent Activity</div>
+              <a href="/activity.html" style="font-size:11px;color:var(--or,#FF6B00);font-weight:600;text-decoration:none">View all →</a>
+            </div>
+            ${scanHTML}
+            <div style="text-align:center;margin-top:10px;font-size:10px;color:var(--gy,#6B7280)">Total scans: ${data.scanCount || 0} · This week: ${data.weekCount || 0}</div>
+          </div>
+        `;
+
+        insertAfter.insertAdjacentHTML('afterend', html);
+      });
+  }, 3000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(injectScanMap, 700);
+});
+
+
+// ── AUTO TAG ASSIGNMENT (on registration) ──
+// This runs on the success/dashboard page after registration
+async function autoAssignTag() {
+  const s = getSession ? getSession() : null;
+  if (!s) return;
+
+  // Check if user already has a tag
+  try {
+    const res = await fetch('/api/get-dashboard?user_id=' + s.token);
+    const data = await res.json();
+
+    if (data.tags && data.tags.length > 0) return; // Already has a tag
+
+    // Find an unclaimed tag and assign it
+    // We don't have a direct API for this, so we skip auto-assign
+    // The user gets their tag via the activate page flow
+    // This is a placeholder — full auto-assign needs admin to pre-allocate
+    console.log('New user — no tag assigned yet. User should visit /activate.html');
+  } catch(e) {}
+}
+
+// Run on dashboard load
+if (window.location.pathname.includes('dashboard')) {
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(autoAssignTag, 3000);
+  });
+}
