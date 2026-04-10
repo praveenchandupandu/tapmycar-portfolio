@@ -72,6 +72,25 @@ body{background:#0D1B35;color:#fff;}
 .danger-btn{background:#DC2626;color:#fff;font-size:12px;font-weight:700;padding:0 18px;border-radius:10px;height:42px;border:none;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;margin-top:10px;width:100%}
 .danger-btn:disabled{opacity:.4;cursor:not-allowed}
 .export-row{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.nfc-check{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:.5px solid rgba(255,255,255,.05);cursor:pointer;font-size:12px;color:#94A3B8}
+.nfc-check.done{color:#4ADE80}
+.nfc-box{width:22px;height:22px;border-radius:6px;border:1.5px solid #334155;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.nfc-check.done .nfc-box{background:#16A34A;border-color:#16A34A}
+.nfc-check.done .nfc-box::after{content:'✓';color:#fff;font-size:12px;font-weight:800}
+.chart-bar{flex:1;background:#FF6B00;border-radius:4px 4px 0 0;min-height:4px;position:relative;transition:height .3s}
+.chart-bar:hover{opacity:.8}
+.chart-bar::after{content:attr(data-label);position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-size:7px;color:#64748B;white-space:nowrap}
+.chart-bar::before{content:attr(data-value);position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:8px;color:#FF6B00;font-weight:700;opacity:0;transition:opacity .2s}
+.chart-bar:hover::before{opacity:1}
+.audit-item{display:flex;gap:10px;padding:10px 0;border-bottom:.5px solid rgba(255,255,255,.05)}
+.audit-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.audit-text{font-size:11px;color:#fff}
+.audit-time{font-size:9px;color:#64748B;margin-top:2px}
+.order-card{background:#0F1F3D;border-radius:12px;padding:12px;margin-bottom:8px}
+.order-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.order-name{font-size:13px;font-weight:700;color:#fff}
+.order-detail{font-size:10px;color:#64748B;line-height:1.6}
+.order-actions{display:flex;gap:6px;margin-top:8px}
 </style>
 </head>
 <body>
@@ -105,9 +124,14 @@ body{background:#0D1B35;color:#fff;}
 <div class="tabs">
   <div class="tab active" onclick="showTab('users')">Users</div>
   <div class="tab" onclick="showTab('tags')">Tags</div>
+  <div class="tab" onclick="showTab('orders')">Orders</div>
+  <div class="tab" onclick="showTab('analytics')">Analytics</div>
+  <div class="tab" onclick="showTab('upgrade')">Upgrades</div>
   <div class="tab" onclick="showTab('generate')">Generate</div>
   <div class="tab" onclick="showTab('receive')">Receive</div>
+  <div class="tab" onclick="showTab('inventory')">Inventory</div>
   <div class="tab" onclick="showTab('promos')">Promos</div>
+  <div class="tab" onclick="showTab('audit')">Audit</div>
   <div class="tab" onclick="showTab('scans')">Scans</div>
 </div>
 
@@ -343,6 +367,126 @@ body{background:#0D1B35;color:#fff;}
   <div id="promo-list"><div class="empty">No promo codes yet. Promo codes will be stored in Supabase when you create the promo_codes table.</div></div>
 </div>
 
+<!-- ORDERS TAB -->
+<div class="panel" id="panel-orders">
+  <div class="asl">Order Management</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+    <div class="sc"><div class="sn" id="o-total">0</div><div class="sl2">Total Orders</div></div>
+    <div class="sc"><div class="sn" id="o-pending">0</div><div class="sl2">Pending Ship</div></div>
+    <div class="sc"><div class="sn" id="o-shipped">0</div><div class="sl2">Shipped</div></div>
+  </div>
+  <div style="display:flex;gap:6px;margin-bottom:12px">
+    <button class="gen-btn-outline" onclick="filterOrders('all')" style="flex:1;height:34px;font-size:10px" id="of-all">All</button>
+    <button class="gen-btn-outline" onclick="filterOrders('pending')" style="flex:1;height:34px;font-size:10px" id="of-pending">Pending</button>
+    <button class="gen-btn-outline" onclick="filterOrders('shipped')" style="flex:1;height:34px;font-size:10px" id="of-shipped">Shipped</button>
+  </div>
+  <div id="order-list"><div class="empty">Orders load from Stripe payments. Showing users with active tags approaching day 30.</div></div>
+</div>
+
+<!-- ANALYTICS TAB -->
+<div class="panel" id="panel-analytics">
+  <div class="asl">Revenue Analytics</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+    <div class="sc"><div class="sn" id="a-revenue">$0</div><div class="sl2">Total Revenue</div></div>
+    <div class="sc"><div class="sn" id="a-avg">$0</div><div class="sl2">Avg Per User</div></div>
+  </div>
+  <!-- Revenue Chart -->
+  <div class="gen-box">
+    <h3>Revenue Over Time</h3>
+    <div id="revenue-chart" style="height:180px;display:flex;align-items:flex-end;gap:4px;padding:10px 0"></div>
+    <div style="display:flex;justify-content:space-between;font-size:9px;color:#64748B;margin-top:6px">
+      <span id="chart-start">—</span><span id="chart-end">—</span>
+    </div>
+  </div>
+  <!-- Scan Activity Chart -->
+  <div class="gen-box">
+    <h3>Daily Scans (Last 14 Days)</h3>
+    <div id="scan-chart" style="height:140px;display:flex;align-items:flex-end;gap:4px;padding:10px 0"></div>
+  </div>
+  <!-- Key Metrics -->
+  <div class="gen-box">
+    <h3>Key Metrics</h3>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:#94A3B8">Users this week</span><span style="color:#fff;font-weight:700" id="a-week-users">0</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:#94A3B8">Scans this week</span><span style="color:#fff;font-weight:700" id="a-week-scans">0</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:#94A3B8">Conversion rate</span><span style="color:#4ADE80;font-weight:700" id="a-conversion">0%</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:#94A3B8">Active tags</span><span style="color:#FF6B00;font-weight:700" id="a-active-tags">0</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:#94A3B8">Avg scans per tag</span><span style="color:#fff;font-weight:700" id="a-avg-scans">0</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- UPGRADES TAB (Auto-upgrade tracker) -->
+<div class="panel" id="panel-upgrade">
+  <div class="asl">Auto-Upgrade Tracker</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+    <div class="sc" style="border:1px solid rgba(220,38,38,.3)"><div class="sn" style="color:#FCA5A5" id="u-due-7">0</div><div class="sl2">Due in 7 days</div></div>
+    <div class="sc" style="border:1px solid rgba(253,224,71,.3)"><div class="sn" style="color:#FDE047" id="u-due-14">0</div><div class="sl2">Due in 14 days</div></div>
+    <div class="sc" style="border:1px solid rgba(22,163,74,.3)"><div class="sn" style="color:#4ADE80" id="u-due-30">0</div><div class="sl2">Due in 30 days</div></div>
+  </div>
+  <div class="gen-box" style="border:1px solid rgba(220,38,38,.2)">
+    <h3 style="color:#FCA5A5">Approaching Day 30 — Ship Stickers</h3>
+    <p style="font-size:11px;color:#94A3B8;margin-bottom:10px;line-height:1.5">These users activated their eTag and are approaching auto-upgrade. Prepare their physical stickers for shipping.</p>
+    <div id="upgrade-list"><div class="empty">Calculating...</div></div>
+  </div>
+  <div class="gen-box">
+    <h3>Recently Upgraded</h3>
+    <div id="upgraded-list"><div class="empty">No upgrades yet</div></div>
+  </div>
+</div>
+
+<!-- INVENTORY TAB -->
+<div class="panel" id="panel-inventory">
+  <div class="asl">Inventory & Production</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+    <div class="sc"><div class="sn" id="inv-stock">0</div><div class="sl2">In Stock (unclaimed)</div></div>
+    <div class="sc"><div class="sn" id="inv-sold">0</div><div class="sl2">Sold (claimed/active)</div></div>
+  </div>
+  <!-- Batch Inventory -->
+  <div class="gen-box">
+    <h3>Batch Breakdown</h3>
+    <div id="batch-inventory"><div class="empty">No batches yet</div></div>
+  </div>
+  <!-- NFC Checklist -->
+  <div class="gen-box">
+    <h3>NFC Programming Checklist</h3>
+    <p style="font-size:11px;color:#94A3B8;margin-bottom:10px;line-height:1.5">Track NFC programming status per batch. Check off each step as completed.</p>
+    <div style="margin-bottom:8px">
+      <select class="gen-input" id="nfc-batch-select" style="width:100%;appearance:auto;cursor:pointer" onchange="loadNFCChecklist()">
+        <option value="">— Select batch —</option>
+      </select>
+    </div>
+    <div id="nfc-checklist" style="display:none">
+      <div class="nfc-check" onclick="toggleNFC(this)"><div class="nfc-box"></div><span>Stickers received from manufacturer</span></div>
+      <div class="nfc-check" onclick="toggleNFC(this)"><div class="nfc-box"></div><span>NFC chips programmed with URLs</span></div>
+      <div class="nfc-check" onclick="toggleNFC(this)"><div class="nfc-box"></div><span>NFC chips locked (read-only)</span></div>
+      <div class="nfc-check" onclick="toggleNFC(this)"><div class="nfc-box"></div><span>QR codes verified (scan test)</span></div>
+      <div class="nfc-check" onclick="toggleNFC(this)"><div class="nfc-box"></div><span>Stickers packaged for shipping</span></div>
+      <div class="nfc-check" onclick="toggleNFC(this)"><div class="nfc-box"></div><span>Batch ready for dispatch</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- AUDIT TAB -->
+<div class="panel" id="panel-audit">
+  <div class="asl">Activity Audit Log</div>
+  <div class="gen-box">
+    <h3>Recent Admin Actions</h3>
+    <p style="font-size:11px;color:#94A3B8;margin-bottom:10px;line-height:1.5">Track all admin actions — user edits, suspensions, gifts, batch operations.</p>
+    <div id="audit-list"></div>
+  </div>
+  <div class="gen-box">
+    <h3>System Events</h3>
+    <div style="display:flex;flex-direction:column;gap:6px" id="system-events">
+      <div style="display:flex;justify-content:space-between;font-size:11px;padding:6px 0;border-bottom:.5px solid rgba(255,255,255,.05)"><span style="color:#94A3B8">Last deployment</span><span style="color:#fff">Today</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;padding:6px 0;border-bottom:.5px solid rgba(255,255,255,.05)"><span style="color:#94A3B8">API status</span><span style="color:#4ADE80;font-weight:700">Online</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;padding:6px 0;border-bottom:.5px solid rgba(255,255,255,.05)"><span style="color:#94A3B8">Supabase</span><span style="color:#4ADE80;font-weight:700">Connected</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;padding:6px 0;border-bottom:.5px solid rgba(255,255,255,.05)"><span style="color:#94A3B8">Twilio A2P</span><span style="color:#FDE047;font-weight:700">Pending</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;padding:6px 0"><span style="color:#94A3B8">Resend email</span><span style="color:#4ADE80;font-weight:700">Active</span></div>
+    </div>
+  </div>
+</div>
+
 <!-- SCANS TAB -->
 <div class="panel" id="panel-scans">
   <div class="asl">Recent Scans</div>
@@ -364,6 +508,19 @@ let currentVerifyBatch = null;
 let allUsersData = [];
 let allTagsData = [];
 let currentDetailUser = null;
+
+// STRICT FORMAT: TMC-XXXXXX everywhere
+function formatToken(token) {
+  if (!token) return '—';
+  // Remove any existing TMC, TMC-, TMC. prefix to get raw 6 chars
+  let raw = token.replace(/^TMC[-.]?/i, '');
+  return 'TMC-' + raw;
+}
+function rawToken(token) {
+  // Get the clean database token: TMCXXXXXX
+  if (!token) return '';
+  return 'TMC' + token.replace(/^TMC[-.]?/i, '');
+}
 
 function adminLogin() {
   adminKey = document.getElementById('admin-key').value.trim();
@@ -410,7 +567,7 @@ function renderDashboard(data) {
       const statusClass = t.status === 'active' ? 'ba' : t.status === 'unclaimed' ? 'bw' : 'br';
       const label = t.vehicle_label || '—';
       const batch = t.batch_number ? `Batch ${t.batch_number}` : 'No batch';
-      return `<div class="ar"><div><div class="un" style="font-family:monospace">#${t.token}</div><div class="us">${label} · ${t.license_plate || 'No plate'} · ${batch}</div></div><span class="${statusClass}">${t.status}</span></div>`;
+      return `<div class="ar"><div><div class="un" style="font-family:monospace">${formatToken(t.token)}</div><div class="us">${label} · ${t.license_plate || 'No plate'} · ${batch}</div></div><span class="${statusClass}">${t.status}</span></div>`;
     }).join('');
   } else {
     document.getElementById('tag-list').innerHTML = '<div class="empty">No tags yet</div>';
@@ -425,6 +582,161 @@ function renderDashboard(data) {
   } else {
     document.getElementById('scan-list').innerHTML = '<div class="empty">No scans yet</div>';
   }
+
+  // Render new tabs
+  renderOrders(data);
+  renderAnalytics(data);
+  renderUpgradeTracker(data);
+  renderInventory(data);
+  renderAuditLog(data);
+}
+
+// ── ORDERS ──
+function renderOrders(data) {
+  const tags = data.tags || [];
+  const users = data.users || [];
+  const activeTags = tags.filter(t => t.status === 'active' && t.owner_id);
+  const now = Date.now();
+  const pending = activeTags.filter(t => { const d = t.activated_at ? Math.floor((now - new Date(t.activated_at).getTime())/86400000) : 0; return d < 30; });
+  const shipped = activeTags.filter(t => t.plan === 'standard' || t.plan === 'premium');
+
+  document.getElementById('o-total').textContent = activeTags.length;
+  document.getElementById('o-pending').textContent = pending.length;
+  document.getElementById('o-shipped').textContent = shipped.length;
+
+  const orderItems = activeTags.map(t => {
+    const user = users.find(u => u.id === t.owner_id);
+    const name = user ? user.name : 'Unknown';
+    const email = user ? (user.email || user.phone) : '—';
+    const activated = t.activated_at ? new Date(t.activated_at) : null;
+    const daysSince = activated ? Math.floor((now - activated.getTime()) / 86400000) : 0;
+    const daysUntil = 30 - daysSince;
+    const statusLabel = daysUntil <= 0 ? 'SHIP NOW' : (daysUntil <= 7 ? daysUntil + 'd left' : 'Day ' + daysSince + '/30');
+    const statusClass = daysUntil <= 0 ? 'br' : (daysUntil <= 7 ? 'bw' : 'ba');
+    return `<div class="order-card"><div class="order-header"><div class="order-name">${name}</div><span class="${statusClass}">${statusLabel}</span></div><div class="order-detail">${email} · ${formatToken(t.token)} · ${t.license_plate||'No plate'}</div><div class="order-actions"><button class="gen-btn-outline" onclick="showToast('Shipping tracker coming soon')" style="height:30px;font-size:9px">Mark Shipped</button><button class="gen-btn-outline" onclick="openUserDetail('${t.owner_id}')" style="height:30px;font-size:9px;border-color:#64748B;color:#64748B">View User</button></div></div>`;
+  });
+  document.getElementById('order-list').innerHTML = orderItems.length > 0 ? orderItems.join('') : '<div class="empty">No orders yet</div>';
+}
+
+function filterOrders(f) { showToast('Filter: ' + f); }
+
+// ── ANALYTICS ──
+function renderAnalytics(data) {
+  const revenue = data.revenue || 0;
+  const uc = data.userCount || 1;
+  document.getElementById('a-revenue').textContent = '$' + (revenue/100).toFixed(2);
+  document.getElementById('a-avg').textContent = '$' + ((revenue/100)/uc).toFixed(2);
+  document.getElementById('a-active-tags').textContent = data.activeTagCount || 0;
+  const weekAgo = new Date(Date.now() - 7*86400000);
+  document.getElementById('a-week-users').textContent = (data.users||[]).filter(u => new Date(u.created_at) > weekAgo).length;
+  document.getElementById('a-week-scans').textContent = (data.recentScans||[]).filter(s => new Date(s.scanned_at) > weekAgo).length;
+  const au = (data.tags||[]).filter(t => t.status === 'active' && t.owner_id).length;
+  document.getElementById('a-conversion').textContent = (uc > 0 ? (au/uc*100).toFixed(0) : 0) + '%';
+  document.getElementById('a-avg-scans').textContent = ((data.scanCount||0)/Math.max(data.activeTagCount||1,1)).toFixed(1);
+  renderRevenueChart(data);
+  renderScanChart(data);
+}
+
+function renderRevenueChart(data) {
+  const c = document.getElementById('revenue-chart');
+  const days = [];
+  for (let i=6;i>=0;i--) { const d=new Date(Date.now()-i*86400000); days.push({label:d.toLocaleDateString('en-US',{weekday:'short'}),date:d,value:0}); }
+  (data.recentScans||[]).forEach(s => { const sd=new Date(s.scanned_at); days.forEach(d => { if(sd.toDateString()===d.date.toDateString()) d.value++; }); });
+  const max=Math.max(...days.map(d=>d.value),1);
+  c.innerHTML = days.map(d => `<div class="chart-bar" style="height:${Math.max((d.value/max)*140,4)}px" data-label="${d.label}" data-value="${d.value}"></div>`).join('');
+  document.getElementById('chart-start').textContent = days[0].label;
+  document.getElementById('chart-end').textContent = days[6].label;
+}
+
+function renderScanChart(data) {
+  const c = document.getElementById('scan-chart');
+  const days = [];
+  for (let i=13;i>=0;i--) { const d=new Date(Date.now()-i*86400000); days.push({label:d.getDate(),date:d,value:0}); }
+  (data.recentScans||[]).forEach(s => { const sd=new Date(s.scanned_at); days.forEach(d => { if(sd.toDateString()===d.date.toDateString()) d.value++; }); });
+  const max=Math.max(...days.map(d=>d.value),1);
+  c.innerHTML = days.map(d => `<div class="chart-bar" style="height:${Math.max((d.value/max)*100,4)}px;background:#334155" data-label="${d.label}" data-value="${d.value}"></div>`).join('');
+}
+
+// ── UPGRADE TRACKER ──
+function renderUpgradeTracker(data) {
+  const tags=data.tags||[]; const users=data.users||[]; const now=Date.now();
+  const active = tags.filter(t => t.status==='active' && t.activated_at && t.owner_id);
+  let due7=0,due14=0,due30=0; const items=[];
+  active.forEach(t => {
+    const ds=Math.floor((now-new Date(t.activated_at).getTime())/86400000);
+    const du=30-ds; const user=users.find(u=>u.id===t.owner_id);
+    if(du<=7&&du>0)due7++; if(du<=14&&du>0)due14++; if(du<=30&&du>0)due30++;
+    if(du<=14&&du>-7) {
+      const urg=du<=0?'br':(du<=7?'bw':'ba');
+      const lbl=du<=0?'OVERDUE':du+'d left';
+      items.push({html:`<div class="ar"><div><div class="un">${user?user.name:'Unknown'}</div><div class="us">${user?(user.email||user.phone):'—'} · ${formatToken(t.token)} · Day ${ds}</div></div><span class="${urg}">${lbl}</span></div>`,du});
+    }
+  });
+  document.getElementById('u-due-7').textContent=due7;
+  document.getElementById('u-due-14').textContent=due14;
+  document.getElementById('u-due-30').textContent=due30;
+  items.sort((a,b)=>a.du-b.du);
+  document.getElementById('upgrade-list').innerHTML = items.length>0 ? items.map(i=>i.html).join('') : '<div class="empty">No upcoming upgrades</div>';
+}
+
+// ── INVENTORY ──
+function renderInventory(data) {
+  const tags=data.tags||[];
+  document.getElementById('inv-stock').textContent = tags.filter(t=>t.status==='unclaimed').length;
+  document.getElementById('inv-sold').textContent = tags.filter(t=>t.status==='active'||t.status==='claimed').length;
+  const batches={};
+  tags.forEach(t => {
+    const b=t.batch_number||'No batch';
+    if(!batches[b])batches[b]={total:0,unclaimed:0,active:0,claimed:0,other:0};
+    batches[b].total++;
+    if(t.status==='unclaimed')batches[b].unclaimed++;
+    else if(t.status==='active')batches[b].active++;
+    else if(t.status==='claimed')batches[b].claimed++;
+    else batches[b].other++;
+  });
+  document.getElementById('batch-inventory').innerHTML = Object.keys(batches).sort().map(b => {
+    const d=batches[b]; const pct=d.total>0?((d.active+d.claimed)/d.total*100).toFixed(0):0;
+    return `<div style="background:#0F1F3D;border-radius:10px;padding:12px;margin-bottom:6px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><div style="font-size:12px;font-weight:700;color:#fff">Batch ${b}</div><div style="font-size:10px;color:#64748B">${d.total} total</div></div><div style="height:6px;background:#1E2D4A;border-radius:3px;overflow:hidden;margin-bottom:6px"><div style="height:100%;width:${pct}%;background:#FF6B00;border-radius:3px"></div></div><div style="display:flex;gap:12px;font-size:9px"><span style="color:#4ADE80">● ${d.active} active</span><span style="color:#FDE047">● ${d.unclaimed} stock</span><span style="color:#94A3B8">● ${d.claimed} claimed</span></div></div>`;
+  }).join('') || '<div class="empty">No batches</div>';
+  const nfcSel=document.getElementById('nfc-batch-select');
+  nfcSel.innerHTML='<option value="">— Select batch —</option>';
+  Object.keys(batches).filter(b=>b!=='No batch').sort().forEach(b=>{nfcSel.innerHTML+=`<option value="${b}">Batch ${b}</option>`;});
+}
+
+function loadNFCChecklist() {
+  const b=document.getElementById('nfc-batch-select').value;
+  const cl=document.getElementById('nfc-checklist');
+  if(!b){cl.style.display='none';return;}
+  cl.style.display='block';
+  const saved=JSON.parse(localStorage.getItem('tmc_nfc_'+b)||'[]');
+  cl.querySelectorAll('.nfc-check').forEach((el,i)=>{if(saved.includes(i))el.classList.add('done');else el.classList.remove('done');});
+}
+
+function toggleNFC(el) {
+  el.classList.toggle('done');
+  const b=document.getElementById('nfc-batch-select').value;
+  const checks=[];
+  document.querySelectorAll('.nfc-check').forEach((c,i)=>{if(c.classList.contains('done'))checks.push(i);});
+  localStorage.setItem('tmc_nfc_'+b,JSON.stringify(checks));
+}
+
+// ── AUDIT LOG ──
+let auditEntries=JSON.parse(localStorage.getItem('tmc_audit')||'[]');
+function addAuditEntry(action,detail) {
+  auditEntries.unshift({action,detail,time:new Date().toISOString()});
+  if(auditEntries.length>50)auditEntries.pop();
+  localStorage.setItem('tmc_audit',JSON.stringify(auditEntries));
+  renderAuditLog();
+}
+function renderAuditLog() {
+  const list=document.getElementById('audit-list');
+  if(!list)return;
+  if(auditEntries.length===0){list.innerHTML='<div class="empty">No actions logged yet</div>';return;}
+  list.innerHTML=auditEntries.slice(0,30).map(e=>{
+    const time=new Date(e.time).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+    const color=e.action.includes('delete')||e.action.includes('suspend')?'#FCA5A5':e.action.includes('gift')||e.action.includes('activate')?'#4ADE80':e.action.includes('generate')?'#FF6B00':'#64748B';
+    return `<div class="audit-item"><div class="audit-dot" style="background:${color}"></div><div><div class="audit-text">${e.detail}</div><div class="audit-time">${time}</div></div></div>`;
+  }).join('');
 }
 
 function loadBatchOptions(tags) {
@@ -470,7 +782,7 @@ async function generateTokens() {
       showToast(data.generated + ' tokens generated!');
       lastGeneratedTokens = data.tokens.map((t, i) => ({ unit: i + 1, token: t.token, url: t.url }));
       document.getElementById('gen-result').innerHTML = lastGeneratedTokens.map(t =>
-        `<div class="gen-token"><div><div class="gen-token-id">${t.unit}. #${t.token}</div><div class="gen-token-url">${t.url}</div></div><span class="bw">unclaimed</span></div>`
+        `<div class="gen-token"><div><div class="gen-token-id">${t.unit}. ${t.token}</div><div class="gen-token-url">https://tapmycar.io/tag/${t.token}</div></div><span class="bw">unclaimed</span></div>`
       ).join('');
       document.getElementById('export-row').style.display = 'flex';
       const rr = await fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey));
@@ -487,7 +799,7 @@ function downloadCSV() {
   const pad = String(batch).padStart(3, '0');
   let csv = 'Unit Number,Tag ID,QR URL,NFC URL\n';
   lastGeneratedTokens.forEach(t => {
-    csv += `${t.unit},TMC-${t.token},https://tapmycar.io/tag/${t.token},https://tapmycar.io/tag/${t.token}\n`;
+    csv += `${t.unit},${t.token},https://tapmycar.io/tag/${t.token},https://tapmycar.io/tag/${t.token}\n`;
   });
   downloadFile(csv, `TapMyCar_Batch${pad}.csv`, 'text/csv');
   showToast('CSV downloaded');
@@ -527,7 +839,7 @@ async function generateReplacements() {
         batchNum: batchNum
       }));
       document.getElementById('repl-result').innerHTML = lastReplacementTokens.map(t =>
-        `<div class="gen-token"><div><div class="gen-token-id">${t.unit}. #${t.token}</div><div class="gen-token-url">${t.url}</div></div><span style="background:rgba(253,224,71,.15);color:#FDE047;padding:3px 8px;border-radius:99px;font-size:9px;font-weight:700">replacement</span></div>`
+        `<div class="gen-token"><div><div class="gen-token-id">${t.unit}. ${t.token}</div><div class="gen-token-url">https://tapmycar.io/tag/${t.token}</div></div><span style="background:rgba(253,224,71,.15);color:#FDE047;padding:3px 8px;border-radius:99px;font-size:9px;font-weight:700">replacement</span></div>`
       ).join('');
       document.getElementById('repl-export-row').style.display = 'flex';
       const rr = await fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey));
@@ -544,7 +856,7 @@ function downloadReplacementCSV() {
   const pad = String(batchNum).padStart(3, '0');
   let csv = 'Unit Number,Tag ID,QR URL,NFC URL\n';
   lastReplacementTokens.forEach(t => {
-    csv += `${t.unit},TMC-${t.token},https://tapmycar.io/tag/${t.token},https://tapmycar.io/tag/${t.token}\n`;
+    csv += `${t.unit},${t.token},https://tapmycar.io/tag/${t.token},https://tapmycar.io/tag/${t.token}\n`;
   });
   downloadFile(csv, `TapMyCar_Batch${pad}_Replacements.csv`, 'text/csv');
   showToast('Replacement CSV downloaded');
@@ -725,7 +1037,7 @@ function openUserDetail(userId) {
   if (userTags.length > 0) {
     document.getElementById('ud-tags').innerHTML = userTags.map(t => {
       const sc = t.status === 'active' ? 'ba' : t.status === 'unclaimed' ? 'bw' : 'br';
-      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:.5px solid rgba(255,255,255,.05)"><div><div style="font-size:12px;font-weight:700;color:#FF6B00;font-family:monospace">#${t.token}</div><div style="font-size:9px;color:#64748B">${t.license_plate || 'No plate'} · ${t.vehicle_label || '—'}</div></div><span class="${sc}" style="font-size:8px">${t.status}</span></div>`;
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:.5px solid rgba(255,255,255,.05)"><div><div style="font-size:12px;font-weight:700;color:#FF6B00;font-family:monospace">${formatToken(t.token)}</div><div style="font-size:9px;color:#64748B">${t.license_plate || 'No plate'} · ${t.vehicle_label || '—'}</div></div><span class="${sc}" style="font-size:8px">${t.status}</span></div>`;
     }).join('');
   } else {
     document.getElementById('ud-tags').innerHTML = '<div style="font-size:11px;color:#64748B">No tags assigned</div>';

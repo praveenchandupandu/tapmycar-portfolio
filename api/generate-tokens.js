@@ -5,14 +5,14 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
-// Generate token — 8 chars, no confusing characters
+// Generate token — format: TMC-XXXXXX (dash included)
 function generateToken() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let random = '';
   for (let i = 0; i < 6; i++) {
     random += chars[Math.floor(Math.random() * chars.length)];
   }
-  return 'TMC' + random;
+  return 'TMC-' + random;
 }
 
 module.exports = async function handler(req, res) {

@@ -133,7 +133,8 @@ async function loadDashboard() {
       tagURL = `https://tapmycar.io/tag/${tag.token}`;
 
       document.getElementById('vehicle-label').textContent = tag.vehicle_label || 'My Vehicle';
-      document.getElementById('tag-token').textContent = 'TMC.' + tag.token.replace('TMC','');      document.getElementById('tag-url').textContent = tagURL;
+      document.getElementById('tag-token').textContent = tag.token.includes('-') ? tag.token : 'TMC-' + tag.token.replace(/^TMC/i,'');
+      document.getElementById('tag-url').textContent = tagURL;
       document.getElementById('hero-sub').textContent = `TMC.${tag.token.replace('TMC','')} · Scanned ${data.scanCount}×`;
       // Generate QR code
       document.getElementById('qr-container').innerHTML = '';
