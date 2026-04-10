@@ -135,12 +135,29 @@ module.exports = async function handler(req, res) {
     let isNewUser = false;
     if (!user) {
       const cleaned = (phone || '').replace(/\D/g, '');
-      const formatted = cleaned ? (cleaned.startsWith('1') ? '+' + cleaned : '+1' + cleaned) : '';
-      const { data: newUser } = await supabase.from('users')
+      const formatted = cleaned ? (cleaned.startsWith('1') ? '+' + cleaned : '+1' + cleaned) : null;
+      const { data: newUser, error: insertError } = await supabase.from('users')
         .insert({ email, phone: formatted, name: name || 'User' })
         .select().single();
-      user = newUser;
-      isNewUser = true;
+
+      if (insertError) {
+        console.error('User insert error:', insertError);
+        // Try fetching again in case of race condition or duplicate
+        const { data: existingUser } = await supabase.from('users').select('*').eq('email', email).single();
+        if (existingUser) {
+          user = existingUser;
+        } else {
+          return res.status(500).json({ error: 'Failed to create account. Please try again.' });
+        }
+      } else {
+        user = newUser;
+        isNewUser = true;
+      }
+    }
+
+    // Safety check
+    if (!user) {
+      return res.status(500).json({ error: 'Account error. Please try again.' });
     }
 
     // Auto-assign tag for new users
