@@ -76,6 +76,8 @@ module.exports = async function handler(req, res) {
       const updates = { name };
       if (email) updates.email = email;
       if (phone) updates.phone = phone;
+        if (req.body.emergency_name !== undefined) updates.emergency_name = req.body.emergency_name;
+        if (req.body.emergency_contact !== undefined) updates.emergency_contact = req.body.emergency_contact;
 
       const { error } = await supabase
         .from('users')
@@ -209,4 +211,6 @@ module.exports = async function handler(req, res) {
     recentScans: recentScans || []
   });
 };
+
+
 
