@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#FF6B00">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Admin — TapMyCar</title>
+<title>Admin â€” TapMyCar</title>
 <link rel="stylesheet" href="/app.css">
 <style>
 body{background:#0D1B35;color:#fff;}
@@ -76,7 +76,7 @@ body{background:#0D1B35;color:#fff;}
 .nfc-check.done{color:#4ADE80}
 .nfc-box{width:22px;height:22px;border-radius:6px;border:1.5px solid #334155;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
 .nfc-check.done .nfc-box{background:#16A34A;border-color:#16A34A}
-.nfc-check.done .nfc-box::after{content:'✓';color:#fff;font-size:12px;font-weight:800}
+.nfc-check.done .nfc-box::after{content:'âœ“';color:#fff;font-size:12px;font-weight:800}
 .chart-bar{flex:1;background:#FF6B00;border-radius:4px 4px 0 0;min-height:4px;position:relative;transition:height .3s}
 .chart-bar:hover{opacity:.8}
 .chart-bar::after{content:attr(data-label);position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-size:7px;color:#64748B;white-space:nowrap}
@@ -108,7 +108,7 @@ body{background:#0D1B35;color:#fff;}
 
 <!-- ADMIN DASHBOARD -->
 <div id="admin-content" style="display:none">
-<div class="an"><div class="al">TapMyCar<span>.</span> <span style="font-size:12px;font-weight:500;color:#64748B">Admin</span></div><span class="pb">Private</span></div>
+<div class="an"><div class="al">TapMyCar<span>.</span> <span style="font-size:12px;font-weight:500;color:#64748B">Admin</span></div><button onclick="adminLogout()" style="background:rgba(220,38,38,.15);color:#FCA5A5;border:none;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">Logout</button></div>
 
 <div class="stats">
   <div class="sc"><div class="sn" id="s-users">-</div><div class="sl2">Users</div></div>
@@ -261,14 +261,14 @@ body{background:#0D1B35;color:#fff;}
   <!-- Delete Entire Batch -->
   <div style="background:rgba(220,38,38,.08);border:1.5px solid rgba(220,38,38,.3);border-radius:14px;padding:16px;margin-bottom:16px">
     <h3 style="font-size:13px;font-weight:700;color:#FCA5A5;margin-bottom:6px">Delete Entire Batch</h3>
-    <p style="font-size:11px;color:#94A3B8;margin-bottom:12px;line-height:1.5">Created a batch by mistake? Delete all tokens from a specific batch. Requires admin password. Only unclaimed tokens will be deleted — active/claimed tags are protected.</p>
+    <p style="font-size:11px;color:#94A3B8;margin-bottom:12px;line-height:1.5">Created a batch by mistake? Delete all tokens from a specific batch. Requires admin password. Only unclaimed tokens will be deleted â€” active/claimed tags are protected.</p>
     <div class="gen-row">
       <input type="number" class="gen-input" id="del-batch" placeholder="Batch #" style="max-width:110px;border-color:rgba(220,38,38,.3)">
       <button class="gen-btn" onclick="showDeleteConfirm()" id="del-btn" style="background:#DC2626">Delete Batch</button>
     </div>
     <div id="del-confirm" style="display:none;margin-top:12px">
       <div style="background:rgba(220,38,38,.15);border-radius:10px;padding:12px;margin-bottom:10px">
-        <div style="font-size:12px;color:#FCA5A5;font-weight:700;margin-bottom:4px" id="del-info">Batch X — Y tokens will be deleted</div>
+        <div style="font-size:12px;color:#FCA5A5;font-weight:700;margin-bottom:4px" id="del-info">Batch X â€” Y tokens will be deleted</div>
         <div style="font-size:11px;color:#FCA5A5;line-height:1.5">Only unclaimed tokens are deleted. Active or claimed tags are protected and will NOT be removed.</div>
       </div>
       <div style="font-size:10px;color:#94A3B8;margin-bottom:6px">Enter admin password to confirm</div>
@@ -292,7 +292,7 @@ body{background:#0D1B35;color:#fff;}
     <div style="margin-bottom:12px">
       <div style="font-size:10px;color:#94A3B8;margin-bottom:4px">Select batch to verify</div>
       <select id="verify-batch" class="gen-input" style="width:100%;appearance:auto;cursor:pointer" onchange="loadBatchForVerify()">
-        <option value="">— Select batch —</option>
+        <option value="">â€” Select batch â€”</option>
       </select>
     </div>
     <div class="scan-entry">
@@ -305,7 +305,7 @@ body{background:#0D1B35;color:#fff;}
       <div class="verify-stat"><span class="verify-label">Not yet scanned</span><span class="verify-val yellow" id="v-remaining">0</span></div>
     </div>
     <div class="scanned-list" id="scanned-list"></div>
-    <button class="danger-btn" id="finalize-btn" onclick="finalizeReceive()" style="display:none" disabled>Finalize — Delete Unscanned From This Batch Only</button>
+    <button class="danger-btn" id="finalize-btn" onclick="finalizeReceive()" style="display:none" disabled>Finalize â€” Delete Unscanned From This Batch Only</button>
     <div id="finalize-warning" style="display:none;margin-top:8px;background:rgba(220,38,38,.1);border-radius:8px;padding:10px;font-size:11px;color:#FCA5A5;line-height:1.5">
       This will permanently delete all unscanned tokens from Batch <strong id="fw-batch"></strong> only. Other batches are NOT affected. Cannot be undone.
     </div>
@@ -395,7 +395,7 @@ body{background:#0D1B35;color:#fff;}
     <h3>Revenue Over Time</h3>
     <div id="revenue-chart" style="height:180px;display:flex;align-items:flex-end;gap:4px;padding:10px 0"></div>
     <div style="display:flex;justify-content:space-between;font-size:9px;color:#64748B;margin-top:6px">
-      <span id="chart-start">—</span><span id="chart-end">—</span>
+      <span id="chart-start">â€”</span><span id="chart-end">â€”</span>
     </div>
   </div>
   <!-- Scan Activity Chart -->
@@ -425,7 +425,7 @@ body{background:#0D1B35;color:#fff;}
     <div class="sc" style="border:1px solid rgba(22,163,74,.3)"><div class="sn" style="color:#4ADE80" id="u-due-30">0</div><div class="sl2">Due in 30 days</div></div>
   </div>
   <div class="gen-box" style="border:1px solid rgba(220,38,38,.2)">
-    <h3 style="color:#FCA5A5">Approaching Day 30 — Ship Stickers</h3>
+    <h3 style="color:#FCA5A5">Approaching Day 30 â€” Ship Stickers</h3>
     <p style="font-size:11px;color:#94A3B8;margin-bottom:10px;line-height:1.5">These users activated their eTag and are approaching auto-upgrade. Prepare their physical stickers for shipping.</p>
     <div id="upgrade-list"><div class="empty">Calculating...</div></div>
   </div>
@@ -453,7 +453,7 @@ body{background:#0D1B35;color:#fff;}
     <p style="font-size:11px;color:#94A3B8;margin-bottom:10px;line-height:1.5">Track NFC programming status per batch. Check off each step as completed.</p>
     <div style="margin-bottom:8px">
       <select class="gen-input" id="nfc-batch-select" style="width:100%;appearance:auto;cursor:pointer" onchange="loadNFCChecklist()">
-        <option value="">— Select batch —</option>
+        <option value="">â€” Select batch â€”</option>
       </select>
     </div>
     <div id="nfc-checklist" style="display:none">
@@ -472,7 +472,7 @@ body{background:#0D1B35;color:#fff;}
   <div class="asl">Activity Audit Log</div>
   <div class="gen-box">
     <h3>Recent Admin Actions</h3>
-    <p style="font-size:11px;color:#94A3B8;margin-bottom:10px;line-height:1.5">Track all admin actions — user edits, suspensions, gifts, batch operations.</p>
+    <p style="font-size:11px;color:#94A3B8;margin-bottom:10px;line-height:1.5">Track all admin actions â€” user edits, suspensions, gifts, batch operations.</p>
     <div id="audit-list"></div>
   </div>
   <div class="gen-box">
@@ -511,7 +511,7 @@ let currentDetailUser = null;
 
 // STRICT FORMAT: TMC-XXXXXX everywhere
 function formatToken(token) {
-  if (!token) return '—';
+  if (!token) return 'â€”';
   // Remove any existing TMC, TMC-, TMC. prefix to get raw 6 chars
   let raw = token.replace(/^TMC[-.]?/i, '');
   return 'TMC-' + raw;
@@ -545,6 +545,14 @@ function adminLogin() {
 const savedKey = localStorage.getItem('tmc_admin_key');
 if (savedKey) { adminKey = savedKey; document.getElementById('admin-key').value = savedKey; adminLogin(); }
 
+function adminLogout() {
+  localStorage.removeItem('tmc_admin_key');
+  document.getElementById('admin-content').style.display = 'none';
+  document.getElementById('login-overlay').style.display = 'flex';
+  document.getElementById('admin-key').value = '';
+  document.getElementById('login-err').textContent = '';
+}
+
 function renderDashboard(data) {
   document.getElementById('s-users').textContent = data.userCount;
   document.getElementById('s-tags').textContent = data.tagCount;
@@ -565,9 +573,9 @@ function renderDashboard(data) {
   if (data.tags && data.tags.length > 0) {
     document.getElementById('tag-list').innerHTML = data.tags.map(t => {
       const statusClass = t.status === 'active' ? 'ba' : t.status === 'unclaimed' ? 'bw' : 'br';
-      const label = t.vehicle_label || '—';
+      const label = t.vehicle_label || 'â€”';
       const batch = t.batch_number ? `Batch ${t.batch_number}` : 'No batch';
-      return `<div class="ar"><div><div class="un" style="font-family:monospace">${formatToken(t.token)}</div><div class="us">${label} · ${t.license_plate || 'No plate'} · ${batch}</div></div><span class="${statusClass}">${t.status}</span></div>`;
+      return `<div class="ar"><div><div class="un" style="font-family:monospace">${formatToken(t.token)}</div><div class="us">${label} Â· ${t.license_plate || 'No plate'} Â· ${batch}</div></div><span class="${statusClass}">${t.status}</span></div>`;
     }).join('');
   } else {
     document.getElementById('tag-list').innerHTML = '<div class="empty">No tags yet</div>';
@@ -577,7 +585,7 @@ function renderDashboard(data) {
     document.getElementById('scan-list').innerHTML = data.recentScans.map(s => {
       const date = new Date(s.scanned_at).toLocaleString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
       const action = s.contact_action || s.action || 'view';
-      return `<div class="ar"><div><div class="un">${date}</div><div class="us">${s.device_type || 'unknown'} · ${action}</div></div><span class="bw">${action}</span></div>`;
+      return `<div class="ar"><div><div class="un">${date}</div><div class="us">${s.device_type || 'unknown'} Â· ${action}</div></div><span class="bw">${action}</span></div>`;
     }).join('');
   } else {
     document.getElementById('scan-list').innerHTML = '<div class="empty">No scans yet</div>';
@@ -591,7 +599,7 @@ function renderDashboard(data) {
   renderAuditLog(data);
 }
 
-// ── ORDERS ──
+// â”€â”€ ORDERS â”€â”€
 function renderOrders(data) {
   const tags = data.tags || [];
   const users = data.users || [];
@@ -607,20 +615,20 @@ function renderOrders(data) {
   const orderItems = activeTags.map(t => {
     const user = users.find(u => u.id === t.owner_id);
     const name = user ? user.name : 'Unknown';
-    const email = user ? (user.email || user.phone) : '—';
+    const email = user ? (user.email || user.phone) : 'â€”';
     const activated = t.activated_at ? new Date(t.activated_at) : null;
     const daysSince = activated ? Math.floor((now - activated.getTime()) / 86400000) : 0;
     const daysUntil = 30 - daysSince;
     const statusLabel = daysUntil <= 0 ? 'SHIP NOW' : (daysUntil <= 7 ? daysUntil + 'd left' : 'Day ' + daysSince + '/30');
     const statusClass = daysUntil <= 0 ? 'br' : (daysUntil <= 7 ? 'bw' : 'ba');
-    return `<div class="order-card"><div class="order-header"><div class="order-name">${name}</div><span class="${statusClass}">${statusLabel}</span></div><div class="order-detail">${email} · ${formatToken(t.token)} · ${t.license_plate||'No plate'}</div><div class="order-actions"><button class="gen-btn-outline" onclick="showToast('Shipping tracker coming soon')" style="height:30px;font-size:9px">Mark Shipped</button><button class="gen-btn-outline" onclick="openUserDetail('${t.owner_id}')" style="height:30px;font-size:9px;border-color:#64748B;color:#64748B">View User</button></div></div>`;
+    return `<div class="order-card"><div class="order-header"><div class="order-name">${name}</div><span class="${statusClass}">${statusLabel}</span></div><div class="order-detail">${email} Â· ${formatToken(t.token)} Â· ${t.license_plate||'No plate'}</div><div class="order-actions"><button class="gen-btn-outline" onclick="showToast('Shipping tracker coming soon')" style="height:30px;font-size:9px">Mark Shipped</button><button class="gen-btn-outline" onclick="openUserDetail('${t.owner_id}')" style="height:30px;font-size:9px;border-color:#64748B;color:#64748B">View User</button></div></div>`;
   });
   document.getElementById('order-list').innerHTML = orderItems.length > 0 ? orderItems.join('') : '<div class="empty">No orders yet</div>';
 }
 
 function filterOrders(f) { showToast('Filter: ' + f); }
 
-// ── ANALYTICS ──
+// â”€â”€ ANALYTICS â”€â”€
 function renderAnalytics(data) {
   const revenue = data.revenue || 0;
   const uc = data.userCount || 1;
@@ -657,7 +665,7 @@ function renderScanChart(data) {
   c.innerHTML = days.map(d => `<div class="chart-bar" style="height:${Math.max((d.value/max)*100,4)}px;background:#334155" data-label="${d.label}" data-value="${d.value}"></div>`).join('');
 }
 
-// ── UPGRADE TRACKER ──
+// â”€â”€ UPGRADE TRACKER â”€â”€
 function renderUpgradeTracker(data) {
   const tags=data.tags||[]; const users=data.users||[]; const now=Date.now();
   const active = tags.filter(t => t.status==='active' && t.activated_at && t.owner_id);
@@ -669,7 +677,7 @@ function renderUpgradeTracker(data) {
     if(du<=14&&du>-7) {
       const urg=du<=0?'br':(du<=7?'bw':'ba');
       const lbl=du<=0?'OVERDUE':du+'d left';
-      items.push({html:`<div class="ar"><div><div class="un">${user?user.name:'Unknown'}</div><div class="us">${user?(user.email||user.phone):'—'} · ${formatToken(t.token)} · Day ${ds}</div></div><span class="${urg}">${lbl}</span></div>`,du});
+      items.push({html:`<div class="ar"><div><div class="un">${user?user.name:'Unknown'}</div><div class="us">${user?(user.email||user.phone):'â€”'} Â· ${formatToken(t.token)} Â· Day ${ds}</div></div><span class="${urg}">${lbl}</span></div>`,du});
     }
   });
   document.getElementById('u-due-7').textContent=due7;
@@ -679,7 +687,7 @@ function renderUpgradeTracker(data) {
   document.getElementById('upgrade-list').innerHTML = items.length>0 ? items.map(i=>i.html).join('') : '<div class="empty">No upcoming upgrades</div>';
 }
 
-// ── INVENTORY ──
+// â”€â”€ INVENTORY â”€â”€
 function renderInventory(data) {
   const tags=data.tags||[];
   document.getElementById('inv-stock').textContent = tags.filter(t=>t.status==='unclaimed').length;
@@ -696,10 +704,10 @@ function renderInventory(data) {
   });
   document.getElementById('batch-inventory').innerHTML = Object.keys(batches).sort().map(b => {
     const d=batches[b]; const pct=d.total>0?((d.active+d.claimed)/d.total*100).toFixed(0):0;
-    return `<div style="background:#0F1F3D;border-radius:10px;padding:12px;margin-bottom:6px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><div style="font-size:12px;font-weight:700;color:#fff">Batch ${b}</div><div style="font-size:10px;color:#64748B">${d.total} total</div></div><div style="height:6px;background:#1E2D4A;border-radius:3px;overflow:hidden;margin-bottom:6px"><div style="height:100%;width:${pct}%;background:#FF6B00;border-radius:3px"></div></div><div style="display:flex;gap:12px;font-size:9px"><span style="color:#4ADE80">● ${d.active} active</span><span style="color:#FDE047">● ${d.unclaimed} stock</span><span style="color:#94A3B8">● ${d.claimed} claimed</span></div></div>`;
+    return `<div style="background:#0F1F3D;border-radius:10px;padding:12px;margin-bottom:6px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><div style="font-size:12px;font-weight:700;color:#fff">Batch ${b}</div><div style="font-size:10px;color:#64748B">${d.total} total</div></div><div style="height:6px;background:#1E2D4A;border-radius:3px;overflow:hidden;margin-bottom:6px"><div style="height:100%;width:${pct}%;background:#FF6B00;border-radius:3px"></div></div><div style="display:flex;gap:12px;font-size:9px"><span style="color:#4ADE80">â— ${d.active} active</span><span style="color:#FDE047">â— ${d.unclaimed} stock</span><span style="color:#94A3B8">â— ${d.claimed} claimed</span></div></div>`;
   }).join('') || '<div class="empty">No batches</div>';
   const nfcSel=document.getElementById('nfc-batch-select');
-  nfcSel.innerHTML='<option value="">— Select batch —</option>';
+  nfcSel.innerHTML='<option value="">â€” Select batch â€”</option>';
   Object.keys(batches).filter(b=>b!=='No batch').sort().forEach(b=>{nfcSel.innerHTML+=`<option value="${b}">Batch ${b}</option>`;});
 }
 
@@ -720,7 +728,7 @@ function toggleNFC(el) {
   localStorage.setItem('tmc_nfc_'+b,JSON.stringify(checks));
 }
 
-// ── AUDIT LOG ──
+// â”€â”€ AUDIT LOG â”€â”€
 let auditEntries=JSON.parse(localStorage.getItem('tmc_audit')||'[]');
 function addAuditEntry(action,detail) {
   auditEntries.unshift({action,detail,time:new Date().toISOString()});
@@ -749,7 +757,7 @@ function loadBatchOptions(tags) {
   });
 
   const sel = document.getElementById('verify-batch');
-  sel.innerHTML = '<option value="">— Select batch —</option>';
+  sel.innerHTML = '<option value="">â€” Select batch â€”</option>';
   Object.keys(batchTokensMap).sort((a,b) => a-b).forEach(b => {
     const count = batchTokensMap[b].length;
     sel.innerHTML += `<option value="${b}">Batch ${b} (${count} tokens)</option>`;
@@ -763,7 +771,7 @@ function showTab(id) {
   event.target.classList.add('active');
 }
 
-// ── GENERATE NEW BATCH ──
+// â”€â”€ GENERATE NEW BATCH â”€â”€
 async function generateTokens() {
   const count = parseInt(document.getElementById('gen-count').value) || 1;
   const batch = document.getElementById('gen-batch').value || null;
@@ -805,7 +813,7 @@ function downloadCSV() {
   showToast('CSV downloaded');
 }
 
-// ── GENERATE REPLACEMENT TOKENS ──
+// â”€â”€ GENERATE REPLACEMENT TOKENS â”€â”€
 async function generateReplacements() {
   const count = parseInt(document.getElementById('repl-count').value) || 0;
   const batch = document.getElementById('repl-batch').value || null;
@@ -862,7 +870,7 @@ function downloadReplacementCSV() {
   showToast('Replacement CSV downloaded');
 }
 
-// ── RECEIVE & VERIFY ──
+// â”€â”€ RECEIVE & VERIFY â”€â”€
 function loadBatchForVerify() {
   const batchNum = parseInt(document.getElementById('verify-batch').value);
   if (!batchNum) {
@@ -891,7 +899,7 @@ function scanToken() {
   const input = document.getElementById('scan-token');
   let token = input.value.trim().toUpperCase();
   if (!token) return;
-  // Clean — remove URL prefix, TMC- prefix, TMC. prefix
+  // Clean â€” remove URL prefix, TMC- prefix, TMC. prefix
   token = token.replace(/^HTTPS?:\/\/TAPMYCAR\.IO\/TAG\//i, '');
   token = token.replace(/^TMC[-.]?/i, '');
 
@@ -921,7 +929,7 @@ function scanToken() {
   const list = document.getElementById('scanned-list');
   const div = document.createElement('div');
   div.className = 'scanned-item';
-  div.innerHTML = `<span class="scanned-token">#${found.token}</span><span class="scanned-num">✓ ${scanned} of ${total}</span>`;
+  div.innerHTML = `<span class="scanned-token">#${found.token}</span><span class="scanned-num">âœ“ ${scanned} of ${total}</span>`;
   list.prepend(div);
 
   document.getElementById('finalize-btn').disabled = false;
@@ -938,7 +946,7 @@ async function finalizeReceive() {
   const unscanned = batchTokens.filter(t => !scannedTokens.has(t.token));
 
   if (unscanned.length === 0) {
-    showToast('All tokens received — nothing to delete!');
+    showToast('All tokens received â€” nothing to delete!');
     return;
   }
 
@@ -973,11 +981,11 @@ async function finalizeReceive() {
 
   document.getElementById('verify-batch').value = '';
   loadBatchForVerify();
-  btn.textContent = 'Finalize — Delete Unscanned From This Batch Only';
+  btn.textContent = 'Finalize â€” Delete Unscanned From This Batch Only';
   btn.disabled = true;
 }
 
-// ── USER MANAGEMENT ──
+// â”€â”€ USER MANAGEMENT â”€â”€
 function renderUserList(users) {
   if (users.length === 0) {
     document.getElementById('user-list').innerHTML = '<div class="empty">No users found</div>';
@@ -988,7 +996,7 @@ function renderUserList(users) {
     const suspended = u.plan === 'suspended';
     const planClass = suspended ? 'br' : (u.plan === 'standard' || u.plan === 'premium' || u.plan === 'business') ? 'ba' : 'bw';
     const planLabel = suspended ? 'suspended' : (u.plan || 'etag');
-    return `<div class="ar" style="cursor:pointer" onclick="openUserDetail('${u.id}')"><div><div class="un">${u.name || 'Unknown'}</div><div class="us">${u.email || u.phone || '—'} · ${date}</div></div><div style="display:flex;align-items:center;gap:8px"><span class="${planClass}">${planLabel}</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>`;
+    return `<div class="ar" style="cursor:pointer" onclick="openUserDetail('${u.id}')"><div><div class="un">${u.name || 'Unknown'}</div><div class="us">${u.email || u.phone || 'â€”'} Â· ${date}</div></div><div style="display:flex;align-items:center;gap:8px"><span class="${planClass}">${planLabel}</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>`;
   }).join('');
 }
 
@@ -1012,8 +1020,8 @@ function openUserDetail(userId) {
   document.getElementById('ud-avatar').textContent = (user.name || 'U')[0].toUpperCase();
   document.getElementById('ud-name').textContent = user.name || 'Unknown';
   document.getElementById('ud-joined').textContent = 'Joined ' + new Date(user.created_at).toLocaleDateString('en-US', {month:'long',day:'numeric',year:'numeric'});
-  document.getElementById('ud-email').textContent = user.email || '—';
-  document.getElementById('ud-phone').textContent = user.phone || '—';
+  document.getElementById('ud-email').textContent = user.email || 'â€”';
+  document.getElementById('ud-phone').textContent = user.phone || 'â€”';
   document.getElementById('ud-plan').textContent = (user.plan || 'etag').toUpperCase();
   document.getElementById('ud-id').textContent = user.id;
 
@@ -1037,7 +1045,7 @@ function openUserDetail(userId) {
   if (userTags.length > 0) {
     document.getElementById('ud-tags').innerHTML = userTags.map(t => {
       const sc = t.status === 'active' ? 'ba' : t.status === 'unclaimed' ? 'bw' : 'br';
-      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:.5px solid rgba(255,255,255,.05)"><div><div style="font-size:12px;font-weight:700;color:#FF6B00;font-family:monospace">${formatToken(t.token)}</div><div style="font-size:9px;color:#64748B">${t.license_plate || 'No plate'} · ${t.vehicle_label || '—'}</div></div><span class="${sc}" style="font-size:8px">${t.status}</span></div>`;
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:.5px solid rgba(255,255,255,.05)"><div><div style="font-size:12px;font-weight:700;color:#FF6B00;font-family:monospace">${formatToken(t.token)}</div><div style="font-size:9px;color:#64748B">${t.license_plate || 'No plate'} Â· ${t.vehicle_label || 'â€”'}</div></div><span class="${sc}" style="font-size:8px">${t.status}</span></div>`;
     }).join('');
   } else {
     document.getElementById('ud-tags').innerHTML = '<div style="font-size:11px;color:#64748B">No tags assigned</div>';
@@ -1054,7 +1062,7 @@ function openUserDetail(userId) {
 
 async function loadUserScans(userId, userTags) {
   if (!userTags || userTags.length === 0) {
-    document.getElementById('ud-scans').innerHTML = '<div style="font-size:11px;color:#64748B">No scans — user has no tags</div>';
+    document.getElementById('ud-scans').innerHTML = '<div style="font-size:11px;color:#64748B">No scans â€” user has no tags</div>';
     return;
   }
   try {
@@ -1152,10 +1160,10 @@ function copyUserId() {
   });
 }
 
-// ── GIFT & PROMO ──
+// â”€â”€ GIFT & PROMO â”€â”€
 async function giftPlan(plan) {
   if (!currentDetailUser) return;
-  if (!confirm(`Gift ${plan.toUpperCase()} plan to ${currentDetailUser.name || currentDetailUser.email}? This is free — no charge to them.`)) return;
+  if (!confirm(`Gift ${plan.toUpperCase()} plan to ${currentDetailUser.name || currentDetailUser.email}? This is free â€” no charge to them.`)) return;
 
   try {
     const res = await fetch('/api/get-dashboard', {
@@ -1170,7 +1178,7 @@ async function giftPlan(plan) {
     });
     const data = await res.json();
     if (data.success) {
-      document.getElementById('gift-result').innerHTML = `<div style="font-size:11px;color:#4ADE80;padding:6px 0">✓ ${plan.toUpperCase()} plan gifted to ${currentDetailUser.name || 'user'}</div>`;
+      document.getElementById('gift-result').innerHTML = `<div style="font-size:11px;color:#4ADE80;padding:6px 0">âœ“ ${plan.toUpperCase()} plan gifted to ${currentDetailUser.name || 'user'}</div>`;
       showToast('Plan gifted!');
       // Refresh after short delay
       setTimeout(async () => {
@@ -1190,7 +1198,7 @@ async function giftActivation() {
   const claimedTag = userTags.find(t => t.status === 'claimed') || userTags.find(t => t.status === 'unclaimed');
 
   if (!claimedTag) {
-    showToast('No tag to activate — user has no claimed/unclaimed tags');
+    showToast('No tag to activate â€” user has no claimed/unclaimed tags');
     return;
   }
 
@@ -1207,7 +1215,7 @@ async function giftActivation() {
     });
     const data = await res.json();
     if (data.success) {
-      document.getElementById('gift-result').innerHTML = `<div style="font-size:11px;color:#4ADE80;padding:6px 0">✓ Tag #${claimedTag.token} activated for free</div>`;
+      document.getElementById('gift-result').innerHTML = `<div style="font-size:11px;color:#4ADE80;padding:6px 0">âœ“ Tag #${claimedTag.token} activated for free</div>`;
       showToast('Tag activated!');
       setTimeout(async () => {
         closeUserDetail();
@@ -1222,7 +1230,7 @@ async function giftActivation() {
 async function giftRefund() {
   if (!currentDetailUser) return;
   if (!confirm(`Mark ${currentDetailUser.name || 'user'} as refunded but keep their plan active? Use this when you refund via Stripe but want them to continue using TapMyCar.`)) return;
-  document.getElementById('gift-result').innerHTML = `<div style="font-size:11px;color:#FDE047;padding:6px 0">✓ Marked as refunded — plan stays active</div>`;
+  document.getElementById('gift-result').innerHTML = `<div style="font-size:11px;color:#FDE047;padding:6px 0">âœ“ Marked as refunded â€” plan stays active</div>`;
   showToast('Marked as refunded');
 }
 
@@ -1253,7 +1261,7 @@ async function giftPlanByEmail() {
     });
     const data = await res.json();
     if (data.success) {
-      document.getElementById('gift-email-result').innerHTML = `<div style="font-size:11px;color:#4ADE80;padding:6px 0">✓ ${plan.toUpperCase()} gifted to ${user.name || email}</div>`;
+      document.getElementById('gift-email-result').innerHTML = `<div style="font-size:11px;color:#4ADE80;padding:6px 0">âœ“ ${plan.toUpperCase()} gifted to ${user.name || email}</div>`;
       showToast('Plan gifted!');
       const rr = await fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey));
       const rd = await rr.json();
@@ -1282,11 +1290,11 @@ function generatePromoCode() {
     'free_activation': 'Free Activation ($1 waived)'
   };
 
-  // For now show the code — full Supabase integration needs promo_codes table
+  // For now show the code â€” full Supabase integration needs promo_codes table
   document.getElementById('promo-result').innerHTML = `
     <div style="background:#0F1F3D;border-radius:10px;padding:12px;margin-top:8px">
       <div style="font-size:20px;font-weight:800;color:#FF6B00;font-family:monospace;letter-spacing:4px;margin-bottom:6px">${code}</div>
-      <div style="font-size:10px;color:#94A3B8">Type: ${typeLabels[type]} · Max uses: ${maxUses} · Expires: ${expires}</div>
+      <div style="font-size:10px;color:#94A3B8">Type: ${typeLabels[type]} Â· Max uses: ${maxUses} Â· Expires: ${expires}</div>
       <div style="display:flex;gap:6px;margin-top:8px">
         <button class="gen-btn-outline" onclick="navigator.clipboard.writeText('${code}');showToast('Code copied!')" style="height:32px;font-size:10px">Copy Code</button>
         <button class="gen-btn-outline" onclick="navigator.clipboard.writeText('Use code ${code} at tapmycar.io for ${typeLabels[type]}!');showToast('Share text copied!')" style="height:32px;font-size:10px">Copy Share Text</button>
@@ -1297,7 +1305,7 @@ function generatePromoCode() {
   showToast('Promo code generated: ' + code);
 }
 
-// ── DELETE ENTIRE BATCH ──
+// â”€â”€ DELETE ENTIRE BATCH â”€â”€
 function showDeleteConfirm() {
   const batch = document.getElementById('del-batch').value;
   if (!batch) { showToast('Enter a batch number'); return; }
@@ -1309,9 +1317,9 @@ function showDeleteConfirm() {
   }
   const unclaimed = batchTokens.filter(t => t.status === 'unclaimed');
   const protected_ = batchTokens.filter(t => t.status !== 'unclaimed');
-  let info = `Batch ${batchNum} — ${unclaimed.length} unclaimed token(s) will be deleted`;
+  let info = `Batch ${batchNum} â€” ${unclaimed.length} unclaimed token(s) will be deleted`;
   if (protected_.length > 0) {
-    info += ` · ${protected_.length} active/claimed tag(s) will be PROTECTED`;
+    info += ` Â· ${protected_.length} active/claimed tag(s) will be PROTECTED`;
   }
   document.getElementById('del-info').textContent = info;
   document.getElementById('del-confirm').style.display = 'block';
@@ -1372,7 +1380,7 @@ async function executeDeleteBatch() {
   }
 
   showToast(`Deleted ${deleted} tokens from Batch ${batch}` + (errors ? ` (${errors} errors)` : ''));
-  document.getElementById('del-result').innerHTML = `<div style="padding:8px 0;font-size:12px;color:#4ADE80">✓ ${deleted} unclaimed tokens deleted from Batch ${batch}</div>`;
+  document.getElementById('del-result').innerHTML = `<div style="padding:8px 0;font-size:12px;color:#4ADE80">âœ“ ${deleted} unclaimed tokens deleted from Batch ${batch}</div>`;
   document.getElementById('del-confirm').style.display = 'none';
 
   // Refresh dashboard
@@ -1395,3 +1403,4 @@ function downloadFile(content, filename, mime) {
 </script>
 </body>
 </html>
+
