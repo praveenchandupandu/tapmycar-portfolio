@@ -247,7 +247,22 @@ function copyTagURL() {
 }
 
 function copyReferral() {
-  const link = `https://tapmycar.io/register.html?ref=${s.token ? s.token.slice(-6) : 'FRIEND'}`;
+  const s = getSession();
+  const code = s.token ? s.token.slice(-6).toUpperCase() : "FRIEND";
+  const link = `https://tapmycar.io/register.html?ref=${code}`;
+  const message = `🚗 I just started using TapMyCar — the smartest thing I have done for my car.\n\nIf someone needs to reach me about my parked car, they scan a tag and contact me privately. My real phone number is never shared.\n\n✅ No more leaving your number on the dashboard\n✅ Strangers can call or message you privately\n✅ You get notified instantly when your tag is scanned\n\nUse my link to get started:\n${link}`;
+  if (navigator.share) {
+    navigator.share({
+      title: "TapMyCar — Privacy for your car",
+      text: message,
+      url: link
+    }).catch(() => {
+      navigator.clipboard.writeText(message).then(() => showToast("Copied! Share it anywhere."));
+    });
+  } else {
+    navigator.clipboard.writeText(message).then(() => showToast("Copied! Share it anywhere."));
+  }
+}`;
   navigator.clipboard.writeText(link).then(() => showToast('Referral link copied!'));
 }
 
@@ -295,6 +310,7 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
