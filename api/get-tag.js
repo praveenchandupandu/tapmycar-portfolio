@@ -93,7 +93,7 @@ module.exports = async function handler(req, res) {
 
     const { data: tag, error } = await supabase
       .from('tags')
-      .select('*, users(name, phone)')
+      .select('*, users(name, phone, emergency_contact, emergency_name)')
       .eq('token', cleanToken)
       .single();
 
@@ -137,6 +137,7 @@ module.exports = async function handler(req, res) {
 
   res.status(400).json({ error: 'token or user_id required' });
 };
+
 
 
 

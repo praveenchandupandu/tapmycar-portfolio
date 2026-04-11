@@ -280,6 +280,11 @@
         <button onclick="sendPhoto()" id="send-photo-btn" style="height:40px;border-radius:10px;border:none;background:#FF6B00;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit">Send Photo →</button>
       </div>
     </div>
+    <div id="emergency-contact-btn" style="display:none;text-align:center">
+      <button onclick="callEmergencyContact()" style="background:none;border:1.5px solid #E5E7EB;border-radius:12px;padding:10px 20px;font-size:12px;font-weight:600;color:#6B7280;cursor:pointer;font-family:inherit;width:100%">
+        Could not reach owner? Contact emergency person
+      </button>
+    </div>
     <div style="background:#FEE2E2;border-radius:11px;padding:12px;border:.5px solid #FECACA"><p style="font-size:11px;font-weight:600;color:#DC2626;text-align:center">Life-threatening emergency? Call 911 immediately</p></div>
     <div style="text-align:center;font-size:10px;color:#9CA3AF;padding:4px 0">Official TapMyCar tag - Praman Tech LLC - <a href="https://tapmycar.io" style="color:#FF6B00;text-decoration:none">tapmycar.io</a></div>
   </div>
@@ -324,7 +329,7 @@ async function loadTag(){
     else if(tag.status==='unclaimed'){document.getElementById('unclaimed-token').textContent=tag.token;showState('unclaimed');}
     else if(tag.status==='paused'){showState('disabled');return;}
     else if(tag.status==='active')
-  {showState("active");currentScanId=data.scan_id||"";window._tagId=data.tag.id||"";requestLocation();}    else{showState('invalid');}
+  {showState("active");currentScanId=data.scan_id||"";window._tagId=data.tag.id||"";window._emergencyPhone=data.tag.users&&data.tag.users.emergency_contact?data.tag.users.emergency_contact:"";if(window._emergencyPhone){document.getElementById("emergency-contact-btn").style.display="block";}requestLocation();}    else{showState('invalid');}
   }catch(e){showState('invalid');}
 }
 
@@ -356,6 +361,17 @@ function handlePhotoSelected(input) {
     window._selectedPhoto = {file: input.files[0], base64: e.target.result};
   };
   reader.readAsDataURL(input.files[0]);
+}
+function callEmergencyContact() {
+  if (!window._emergencyPhone) { showToast("No emergency contact set"); return; }
+  fetch("/api/proxy-call", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({token: currentToken, caller_number: window._emergencyPhone, emergency: true})
+  }).then(r=>r.json()).then(data=>{
+    if(data.success){ showToast("Connecting to emergency contact..."); }
+    else { showToast(data.error||"Call failed"); }
+  }).catch(()=>showToast("Network error"));
 }
 function cancelPhoto() {
   window._selectedPhoto = null;
@@ -602,6 +618,9 @@ loadTag();
 </script>
 </body>
 </html>
+
+
+
 
 
 
