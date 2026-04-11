@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <link rel="manifest" href="/manifest.json">
@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-title" content="TapMyCar">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Dashboard — TapMyCar</title>
+  <title>Dashboard â€” TapMyCar</title>
   <link rel="stylesheet" href="/app.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
@@ -43,7 +43,7 @@
       <div style="font-size:11px;color:var(--gy);margin-bottom:3px">Welcome back</div>
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div style="font-size:22px;font-weight:800;color:var(--bk)" id="greeting-name">...</div>
-        <div style="background:var(--orl);border:.5px solid var(--orl2);border-radius:99px;padding:5px 12px;font-size:10px;font-weight:700;color:var(--or)">⭐ Standard</div>
+        <div style="background:var(--orl);border:.5px solid var(--orl2);border-radius:99px;padding:5px 12px;font-size:10px;font-weight:700;color:var(--or)">â­ Standard</div>
       </div>
       <div style="font-size:11px;color:var(--gy);margin-top:2px">Privacy for you. Safety for your car.</div>
     </div>
@@ -80,12 +80,12 @@
 
     <!-- 4. PAUSE TAG + INVITE A FRIEND (side by side) -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
-      <div class="card" style="padding:12px;cursor:pointer" onclick="showToast('Tag paused temporarily')">
-        <div style="font-size:13px;font-weight:700;color:var(--bk);margin-bottom:4px">⏸ Pause Tag</div>
+      <div class="card" style="padding:12px;cursor:pointer" onclick="togglePause()" id="pause-card">
+        <div style="font-size:13px;font-weight:700;color:var(--bk);margin-bottom:4px">â¸ Pause Tag</div>
         <div style="font-size:10px;color:var(--gy);line-height:1.4">Hiding your tag from strangers temporarily.</div>
       </div>
       <div class="card" style="padding:12px;cursor:pointer" onclick="copyReferral()">
-        <div style="font-size:13px;font-weight:700;color:var(--bk);margin-bottom:4px">👥 Invite a Friend</div>
+        <div style="font-size:13px;font-weight:700;color:var(--bk);margin-bottom:4px">ðŸ‘¥ Invite a Friend</div>
         <div style="font-size:10px;color:var(--gy);line-height:1.4">They buy Standard, you get 1 free tag!</div>
       </div>
     </div>
@@ -111,10 +111,10 @@
     <!-- 6. RECENT ACTIVITY -->
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <div style="font-size:15px;font-weight:700;color:var(--bk)">Recent Activity</div>
-      <a href="/activity.html" style="font-size:12px;font-weight:600;color:var(--or);text-decoration:none">View all →</a>
+      <a href="/activity.html" style="font-size:12px;font-weight:600;color:var(--or);text-decoration:none">View all â†’</a>
     </div>
     <div class="card" style="padding:0 16px;margin-bottom:14px" id="activity-list">
-      <div style="text-align:center;padding:24px 0;color:var(--gy);font-size:13px">No scans yet — share your tag to get started.</div>
+      <div style="text-align:center;padding:24px 0;color:var(--gy);font-size:13px">No scans yet â€” share your tag to get started.</div>
     </div>
 
   </div>
@@ -129,11 +129,11 @@
     <span style="font-size:9px;font-weight:700;color:var(--or);letter-spacing:.5px">NOW AVAILABLE</span>
   </div>
   <div style="font-size:17px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:5px">Get the TapMyCar App<br><span style="color:var(--or)">Free to Download</span></div>
-  <div style="font-size:11px;color:#9CA3AF;margin-bottom:14px;line-height:1.5">Manage your tag, view scans &amp; protect your car — all from your phone.</div>
+  <div style="font-size:11px;color:#9CA3AF;margin-bottom:14px;line-height:1.5">Manage your tag, view scans &amp; protect your car â€” all from your phone.</div>
   <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">
-    <div style="background:rgba(255,255,255,.08);border-radius:99px;padding:4px 10px;font-size:10px;color:#fff;font-weight:500">🔔 Instant alerts</div>
-    <div style="background:rgba(255,255,255,.08);border-radius:99px;padding:4px 10px;font-size:10px;color:#fff;font-weight:500">📍 Scan location</div>
-    <div style="background:rgba(255,255,255,.08);border-radius:99px;padding:4px 10px;font-size:10px;color:#fff;font-weight:500">🔒 Privacy first</div>
+    <div style="background:rgba(255,255,255,.08);border-radius:99px;padding:4px 10px;font-size:10px;color:#fff;font-weight:500">ðŸ”” Instant alerts</div>
+    <div style="background:rgba(255,255,255,.08);border-radius:99px;padding:4px 10px;font-size:10px;color:#fff;font-weight:500">ðŸ“ Scan location</div>
+    <div style="background:rgba(255,255,255,.08);border-radius:99px;padding:4px 10px;font-size:10px;color:#fff;font-weight:500">ðŸ”’ Privacy first</div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
     <a href="https://apps.apple.com/app/tapmycar" target="_blank" style="background:#fff;border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:8px;text-decoration:none">
@@ -188,13 +188,21 @@ async function loadDashboard() {
     if (data.tags && data.tags.length > 0) {
       const tag = data.tags[0];
       tagToken = tag.token;
+      currentTagToken = tag.token;
+      currentTagStatus = tag.status || "active";
+      if (currentTagStatus === "paused") {
+        document.getElementById("pause-label").textContent = "▶ Resume Tag";
+        document.getElementById("pause-sub").textContent = "Tag paused — strangers see nothing";
+        document.getElementById("stat-status").textContent = "OFF";
+        document.getElementById("stat-status").style.color = "var(--rd,#DC2626)";
+      }
       tagURL = `https://tapmycar.io/tag/${tag.token}`;
       const displayToken = tag.token.includes('-') ? tag.token : 'TMC-' + tag.token.replace(/^TMC/i,'');
 
       document.getElementById('vehicle-label').textContent = tag.vehicle_label || 'My Vehicle';
       document.getElementById('tag-token').textContent = displayToken;
       document.getElementById('tag-url').textContent = tagURL;
-      document.getElementById('hero-sub').textContent = `${displayToken} · Scanned ${data.scanCount}×`;
+      document.getElementById('hero-sub').textContent = `${displayToken} Â· Scanned ${data.scanCount}Ã—`;
 
       document.getElementById('qr-container').innerHTML = '';
       new QRCode(document.getElementById('qr-container'), {
@@ -219,7 +227,7 @@ async function loadDashboard() {
               </div>
               <div>
                 <div style="font-size:13px;font-weight:600;color:var(--bk)">${timeStr}</div>
-                <div style="font-size:10px;color:var(--gy)">${scan.action || 'view'} · ${scan.device_type || 'mobile device'}</div>
+                <div style="font-size:10px;color:var(--gy)">${scan.action || 'view'} Â· ${scan.device_type || 'mobile device'}</div>
               </div>
             </div>
             <span class="sp sp-or" style="font-size:10px;padding:4px 10px">View</span>
@@ -243,6 +251,41 @@ function copyReferral() {
   navigator.clipboard.writeText(link).then(() => showToast('Referral link copied!'));
 }
 
+let currentTagToken = "";
+let currentTagStatus = "active";
+
+async function togglePause() {
+  if (!currentTagToken) { showToast("Tag not loaded yet"); return; }
+  const newStatus = currentTagStatus === "active" ? "paused" : "active";
+  const card = document.getElementById("pause-card");
+  card.style.opacity = "0.5";
+  try {
+    const res = await fetch("/api/get-tag", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ token: currentTagToken, status_override: newStatus })
+    });
+    const data = await res.json();
+    if (data.success) {
+      currentTagStatus = newStatus;
+      if (newStatus === "paused") {
+        document.getElementById("pause-label").textContent = "▶ Resume Tag";
+        document.getElementById("pause-sub").textContent = "Tag paused — strangers see nothing";
+        document.getElementById("stat-status").textContent = "OFF";
+        document.getElementById("stat-status").style.color = "var(--rd,#DC2626)";
+        showToast("Tag paused — strangers cannot reach you");
+      } else {
+        document.getElementById("pause-label").textContent = "⏸ Pause Tag";
+        document.getElementById("pause-sub").textContent = "Hide from strangers temporarily";
+        document.getElementById("stat-status").textContent = "ON";
+        document.getElementById("stat-status").style.color = "var(--gn,#16A34A)";
+        showToast("Tag resumed — you are live again");
+      }
+    } else { showToast("Failed to update tag"); }
+  } catch(e) { showToast("Network error"); }
+  card.style.opacity = "1";
+}
+
 loadDashboard();
 </script>
 <script>
@@ -252,3 +295,7 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
+
+
+
