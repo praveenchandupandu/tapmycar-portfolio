@@ -81,8 +81,8 @@
     <!-- 4. PAUSE TAG + INVITE A FRIEND (side by side) -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
       <div class="card" style="padding:12px;cursor:pointer" onclick="togglePause()" id="pause-card">
-        <div style="font-size:13px;font-weight:700;color:var(--bk);margin-bottom:4px">â¸ Pause Tag</div>
-        <div style="font-size:10px;color:var(--gy);line-height:1.4">Hiding your tag from strangers temporarily.</div>
+        <div style="font-size:13px;font-weight:700;color:var(--bk);margin-bottom:4px" id="pause-label">⏸ Pause Tag</div>
+        <div style="font-size:10px;color:var(--gy);line-height:1.4" id="pause-sub">Hide from strangers temporarily</div>
       </div>
       <div class="card" style="padding:12px;cursor:pointer" onclick="copyReferral()">
         <div style="font-size:13px;font-weight:700;color:var(--bk);margin-bottom:4px">ðŸ‘¥ Invite a Friend</div>
@@ -269,6 +269,11 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
+
+
+
+
 
 
 

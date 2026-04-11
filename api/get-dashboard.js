@@ -1,4 +1,4 @@
-const { createClient } = require('@supabase/supabase-js');
+﻿const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -7,7 +7,7 @@ const supabase = createClient(
 
 module.exports = async function handler(req, res) {
 
-  // ── POST — admin actions (update user, suspend, reactivate, profile update) ──
+  // â”€â”€ POST â€” admin actions (update user, suspend, reactivate, profile update) â”€â”€
   if (req.method === 'POST') {
     const { action, admin_key, user_id, name, email, phone, plan } = req.body;
 
@@ -89,14 +89,14 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid request' });
   }
 
-  // ── GET — dashboard data ──
+  // â”€â”€ GET â€” dashboard data â”€â”€
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   const { user_id, admin } = req.query;
 
-  // ── ADMIN MODE ──
+  // â”€â”€ ADMIN MODE â”€â”€
   if (admin) {
     if (admin !== process.env.ADMIN_SECRET_KEY) {
       return res.json({ admin: false });
@@ -151,7 +151,7 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  // ── REGULAR USER MODE ──
+  // â”€â”€ REGULAR USER MODE â”€â”€
   if (!user_id) return res.status(400).json({ error: 'user_id required' });
 
   // Get user
@@ -161,7 +161,7 @@ module.exports = async function handler(req, res) {
     .eq('id', user_id)
     .single();
 
-  // Get tags — column is owner_id
+  // Get tags â€” column is owner_id
   const { data: tags } = await supabase
     .from('tags')
     .select('*')
@@ -209,3 +209,4 @@ module.exports = async function handler(req, res) {
     recentScans: recentScans || []
   });
 };
+
