@@ -63,24 +63,6 @@ module.exports = async function handler(req, res) {
         <div style="font-size:11px;color:#9CA3AF;text-align:center">Your real number was never shared with the caller.</div>
       </div>
     `;
-  } else if (action === 'photo') {
-    subject = `Someone sent you a photo of your vehicle via TapMyCar`;
-    const photoHTML = req.body.photo_base64
-      ? `<img src="data:${req.body.photo_type || 'image/jpeg'};base64,${req.body.photo_base64}" style="width:100%;max-width:360px;border-radius:12px;margin-bottom:16px">`
-      : '<p style="color:#6B7280;font-size:13px">Photo attached</p>';
-    body = `
-      <div style="font-family:Inter,sans-serif;max-width:400px;margin:0 auto;padding:40px 20px">
-        <div style="font-size:24px;font-weight:800;color:#111;margin-bottom:8px">TapMyCar<span style="color:#FF6B00">.</span></div>
-        <div style="font-size:14px;color:#6B7280;margin-bottom:24px">Privacy for you. Safety for your car.</div>
-        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:14px;padding:16px;margin-bottom:20px">
-          <div style="font-size:12px;color:#6B7280;font-weight:600;margin-bottom:12px">ðŸ“· Photo from someone who scanned your tag for <strong>${vehicleLabel}</strong></div>
-          ${photoHTML}
-          <div style="font-size:12px;color:#6B7280">They scanned your tag and sent you this photo.</div>
-        </div>
-        <a href="https://tapmycar.io/dashboard.html" style="display:block;background:#FF6B00;color:#fff;font-size:14px;font-weight:700;padding:14px 0;border-radius:13px;text-align:center;text-decoration:none;margin-bottom:16px">Check Dashboard</a>
-        <div style="font-size:11px;color:#9CA3AF;text-align:center">You received this because your TapMyCar tag was scanned.</div>
-      </div>
-    `;
   } else if (action === "photo") {
     subject = `Someone sent you a photo of your vehicle via TapMyCar`;
     const photoHTML = req.body.photo_base64
@@ -146,3 +128,4 @@ module.exports = async function handler(req, res) {
 
   res.json({ success: true });
 };
+
