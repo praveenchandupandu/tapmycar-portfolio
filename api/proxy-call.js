@@ -1,4 +1,4 @@
-const twilio = require('twilio');
+﻿const twilio = require('twilio');
 const { createClient } = require('@supabase/supabase-js');
 
 const client = twilio(
@@ -16,7 +16,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { token, caller_number } = req.body;
+  const { token, caller_number, emergency_phone, owner_name } = req.body;
 
   if (!token || !caller_number) {
     return res.status(400).json({ error: 'token and caller_number required' });
@@ -41,21 +41,16 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Tag not activated' });
   }
 
-  const ownerPhone = tag.users.phone;
+  const ownerPhone = emergency_phone || tag.users.phone;
+  const friendName = owner_name || tag.users.name || "your friend";
+  const isEmergency = !!emergency_phone;
 
   try {
-    // Create Twilio call — caller hears ringing, owner gets called
+    // Create Twilio call â€” caller hears ringing, owner gets called
     const call = await client.calls.create({
       to: ownerPhone,
       from: process.env.TWILIO_PHONE_NUMBER,
-      twiml: `
-        <Response>
-          <Say voice="alice">You have an incoming masked call from a TapMyCar scan. Connecting now.</Say>
-          <Dial callerId="${process.env.TWILIO_PHONE_NUMBER}">
-            <Number>${callerFormatted}</Number>
-          </Dial>
-        </Response>
-      `
+      twiml: isEmergency ? `<Response><Gather input="dtmf" timeout="10" numDigits="1" action="https://${req.headers.host}/api/voice-action" method="POST"><Say voice="alice">Hello. Someone scanned your friend ${friendName}s TapMyCar tag but was unable to reach them. We are calling you as the emergency contact. Press 1 to send an automated message. Press 2 to speak with the caller directly.</Say></Gather><Say voice="alice">No input received. Goodbye.</Say></Response>` : `<Response><Say voice="alice">You have an incoming masked call from a TapMyCar scan. Connecting now.</Say><Dial callerId="${process.env.TWILIO_PHONE_NUMBER}"><Number>${callerFormatted}</Number></Dial></Response>`
     });
 
     // Log the scan as a call
@@ -69,3 +64,6 @@ module.exports = async function handler(req, res) {
     res.status(500).json({ error: err.message });
   }
 };
+
+
+

@@ -329,7 +329,7 @@ async function loadTag(){
     else if(tag.status==='unclaimed'){document.getElementById('unclaimed-token').textContent=tag.token;showState('unclaimed');}
     else if(tag.status==='paused'){showState('disabled');return;}
     else if(tag.status==='active')
-  {showState("active");currentScanId=data.scan_id||"";window._tagId=data.tag.id||"";window._emergencyPhone=data.tag.users&&data.tag.users.emergency_contact?data.tag.users.emergency_contact:"";if(window._emergencyPhone){document.getElementById("emergency-contact-btn").style.display="block";}requestLocation();}    else{showState('invalid');}
+  {showState("active");currentScanId=data.scan_id||"";window._tagId=data.tag.id||"";window._emergencyPhone=data.tag.users&&data.tag.users.emergency_contact?data.tag.users.emergency_contact:"";window._ownerName=data.tag.users&&data.tag.users.name?data.tag.users.name:"your friend";if(window._emergencyPhone){document.getElementById("emergency-contact-btn").style.display="block";}requestLocation();}    else{showState('invalid');}
   }catch(e){showState('invalid');}
 }
 
@@ -367,7 +367,7 @@ function callEmergencyContact() {
   fetch("/api/proxy-call", {
     method: "POST",
     headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({token: currentToken, caller_number: window._emergencyPhone, emergency: true})
+    body: JSON.stringify({token: currentToken, caller_number: "stranger", emergency_phone: window._emergencyPhone, owner_name: window._ownerName||"your friend"})
   }).then(r=>r.json()).then(data=>{
     if(data.success){ showToast("Connecting to emergency contact..."); }
     else { showToast(data.error||"Call failed"); }
@@ -618,6 +618,9 @@ loadTag();
 </script>
 </body>
 </html>
+
+
+
 
 
 
