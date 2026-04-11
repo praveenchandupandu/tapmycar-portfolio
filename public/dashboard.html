@@ -260,6 +260,41 @@ function copyReferral() {
   }
 }
 
+let currentTagToken = "";
+let currentTagStatus = "active";
+
+async function togglePause() {
+  if (!currentTagToken) { showToast("Tag not loaded yet"); return; }
+  const newStatus = currentTagStatus === "active" ? "paused" : "active";
+  const card = document.getElementById("pause-card");
+  card.style.opacity = "0.5";
+  try {
+    const res = await fetch("/api/get-tag", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ token: currentTagToken, status_override: newStatus })
+    });
+    const data = await res.json();
+    if (data.success) {
+      currentTagStatus = newStatus;
+      if (newStatus === "paused") {
+        document.getElementById("pause-label").textContent = "Pause Tag";
+        document.getElementById("pause-sub").textContent = "Tag paused - strangers see nothing";
+        document.getElementById("stat-status").textContent = "OFF";
+        document.getElementById("stat-status").style.color = "var(--rd,#DC2626)";
+        showToast("Tag paused - strangers cannot reach you");
+      } else {
+        document.getElementById("pause-label").textContent = "Pause Tag";
+        document.getElementById("pause-sub").textContent = "Hide from strangers temporarily";
+        document.getElementById("stat-status").textContent = "ON";
+        document.getElementById("stat-status").style.color = "var(--gn,#16A34A)";
+        showToast("Tag resumed - you are live again");
+      }
+    } else { showToast("Failed to update tag"); }
+  } catch(e) { showToast("Network error"); }
+  card.style.opacity = "1";
+}
+
 loadDashboard();
 </script>
 <script>
@@ -269,6 +304,7 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
