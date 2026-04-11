@@ -1,4 +1,4 @@
-const { createClient } = require('@supabase/supabase-js');
+﻿const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -7,7 +7,7 @@ const supabase = createClient(
 
 module.exports = async function handler(req, res) {
 
-  // ── POST — update/claim/deactivate/delete a tag ──
+  // â”€â”€ POST â€” update/claim/deactivate/delete a tag â”€â”€
   if (req.method === 'POST') {
     const { token, user_id, license_plate, car_make, car_model, car_year, car_color, status_override } = req.body;
 
@@ -34,16 +34,13 @@ module.exports = async function handler(req, res) {
 
       const { data, error } = await supabase
         .from('tags')
-        .update({ status: status_override })
-        .eq('token', cleanToken)
-        .select()
-        .single();
+        .update({ status: status_override }).eq('token', cleanToken).select();
 
       if (error) {
         console.error('Status override error:', error);
         return res.status(500).json({ error: error.message });
       }
-      return res.json({ success: true, tag: data });
+      return res.json({ success: true, tag: data ? data[0] : null });
     }
 
     // Normal claim/update
@@ -81,10 +78,10 @@ module.exports = async function handler(req, res) {
       return res.status(500).json({ error: error.message });
     }
 
-    return res.json({ success: true, tag: data });
+    return res.json({ success: true, tag: data ? data[0] : null });
   }
 
-  // ── GET — fetch tag(s) ──
+  // â”€â”€ GET â€” fetch tag(s) â”€â”€
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -140,3 +137,6 @@ module.exports = async function handler(req, res) {
 
   res.status(400).json({ error: 'token or user_id required' });
 };
+
+
+
