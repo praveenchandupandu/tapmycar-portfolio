@@ -81,6 +81,17 @@
       <label>Email address</label>
       <input type="email" id="edit-email" placeholder="jane@example.com">
     </div>
+    <div style="height:1px;background:#F3F4F6;margin:4px 0 12px"></div>
+    <div style="font-size:11px;font-weight:700;color:#6B7280;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Emergency Contact (optional)</div>
+    <div class="edit-field">
+      <label>Contact name</label>
+      <input type="text" id="edit-emergency-name" placeholder="e.g. John Smith">
+    </div>
+    <div class="edit-field">
+      <label>Contact phone</label>
+      <input type="tel" id="edit-emergency-phone" placeholder="+1 (203) 555-0100">
+      <div style="font-size:10px;color:#9CA3AF;margin-top:4px">Notified if you don't respond to a scan alert</div>
+    </div>
     <button class="btn" onclick="saveProfile()" id="save-btn">Save changes</button>
     <button class="btn-o" style="margin-top:8px" onclick="closeEdit()">Cancel</button>
   </div>
@@ -127,6 +138,8 @@ function openEditProfile() {
     document.getElementById('edit-name').value = userData.name || '';
     document.getElementById('edit-phone').value = userData.phone || '';
     document.getElementById('edit-email').value = userData.email || '';
+    document.getElementById('edit-emergency-name').value = userData.emergency_name || '';
+    document.getElementById('edit-emergency-phone').value = userData.emergency_contact || '';
   }
   document.getElementById('edit-overlay').classList.add('show');
 }
@@ -139,6 +152,8 @@ async function saveProfile() {
   const name = document.getElementById('edit-name').value.trim();
   const phone = document.getElementById('edit-phone').value.trim();
   const email = document.getElementById('edit-email').value.trim();
+  const emergencyName = document.getElementById('edit-emergency-name').value.trim();
+  const emergencyPhone = document.getElementById('edit-emergency-phone').value.trim();
 
   if (!name) { showToast('Name is required'); return; }
 
@@ -152,33 +167,26 @@ async function saveProfile() {
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
         user_id: s.token,
-        name: name,
-        phone: phone,
-        email: email
+        name, phone, email,
+        emergency_name: emergencyName,
+        emergency_contact: emergencyPhone
       })
     });
     const data = await res.json();
-
     if (data.success) {
-      // Update localStorage
       localStorage.setItem('tmc_name', name);
       localStorage.setItem('tmc_phone', phone);
       localStorage.setItem('tmc_email', email);
-
-      // Update display
       document.getElementById('profile-name').textContent = name;
       document.getElementById('profile-av').textContent = name[0].toUpperCase();
       document.getElementById('profile-phone').textContent = phone || '—';
       document.getElementById('profile-email').textContent = email || '—';
-
       closeEdit();
       showToast('Profile updated!');
     } else {
       showToast(data.error || 'Failed to save');
     }
-  } catch(e) {
-    showToast('Network error');
-  }
+  } catch(e) { showToast('Network error'); }
 
   btn.textContent = 'Save changes';
   btn.disabled = false;
