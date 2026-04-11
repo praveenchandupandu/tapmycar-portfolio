@@ -266,6 +266,20 @@
       <div style="display:flex;align-items:center;gap:12px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><div style="text-align:left"><div style="font-size:16px;font-weight:700;color:#111">TEXT</div><div style="font-size:10px;color:#6B7280">Send a message to the owner</div></div></div>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
+    <div style="display:flex;align-items:center;gap:10px">
+      <label for="photo-input" id="photo-btn" style="display:flex;align-items:center;gap:10px;background:#fff;border-radius:14px;padding:14px 16px;border:1.5px solid #E5E7EB;cursor:pointer;width:100%">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <div style="text-align:left"><div style="font-size:14px;font-weight:700;color:#111">Send Photo</div><div style="font-size:10px;color:#6B7280" id="photo-label">Damage, parking issue, etc.</div></div>
+      </label>
+      <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handlePhotoSelected(this)">
+    </div>
+    <div id="photo-preview-box" style="display:none;background:#F9FAFB;border-radius:14px;padding:12px;border:1.5px solid #E5E7EB">
+      <img id="photo-preview-img" style="width:100%;border-radius:10px;max-height:180px;object-fit:cover;margin-bottom:10px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button onclick="cancelPhoto()" style="height:40px;border-radius:10px;border:1.5px solid #E5E7EB;background:#fff;font-size:12px;font-weight:600;color:#6B7280;cursor:pointer;font-family:inherit">Cancel</button>
+        <button onclick="sendPhoto()" id="send-photo-btn" style="height:40px;border-radius:10px;border:none;background:#FF6B00;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit">Send Photo →</button>
+      </div>
+    </div>
     <div style="background:#FEE2E2;border-radius:11px;padding:12px;border:.5px solid #FECACA"><p style="font-size:11px;font-weight:600;color:#DC2626;text-align:center">Life-threatening emergency? Call 911 immediately</p></div>
     <div style="text-align:center;font-size:10px;color:#9CA3AF;padding:4px 0">Official TapMyCar tag - Praman Tech LLC - <a href="https://tapmycar.io" style="color:#FF6B00;text-decoration:none">tapmycar.io</a></div>
   </div>
@@ -310,7 +324,7 @@ async function loadTag(){
     else if(tag.status==='unclaimed'){document.getElementById('unclaimed-token').textContent=tag.token;showState('unclaimed');}
     else if(tag.status==='paused'){showState('disabled');return;}
     else if(tag.status==='active')
-  {showState('active');currentScanId=data.scan_id||'';requestLocation();}    else{showState('invalid');}
+  {showState("active");currentScanId=data.scan_id||"";window._tagId=data.tag.id||"";requestLocation();}    else{showState('invalid');}
   }catch(e){showState('invalid');}
 }
 
@@ -331,7 +345,45 @@ async function saveLocation(lat,lng){
   try{await fetch('/api/update-scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scan_id:currentScanId,latitude:lat,longitude:lng})});}catch(e){}
 }
 function handleCall(){updateScanAction('call');window.location.href='tel:+18605158987';}
-function handleText(){updateScanAction('text');showToast('Text messaging coming soon');}
+function handleText(){updateScanAction("text");showToast("Text messaging coming soon");}
+function handlePhotoSelected(input) {
+  if (!input.files||!input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    document.getElementById("photo-preview-img").src = e.target.result;
+    document.getElementById("photo-preview-box").style.display = "block";
+    document.getElementById("photo-label").textContent = "Photo selected — tap Send";
+    window._selectedPhoto = {file: input.files[0], base64: e.target.result};
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+function cancelPhoto() {
+  window._selectedPhoto = null;
+  document.getElementById("photo-input").value = "";
+  document.getElementById("photo-preview-box").style.display = "none";
+  document.getElementById("photo-label").textContent = "Damage, parking issue, etc.";
+}
+async function sendPhoto() {
+  if (!window._selectedPhoto) return;
+  const btn = document.getElementById("send-photo-btn");
+  btn.textContent = "Sending..."; btn.disabled = true;
+  try {
+    const base64 = window._selectedPhoto.base64.split(",")[1];
+    const res = await fetch("/api/notify-owner", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({tag_id: window._tagId, action: "photo", photo_base64: base64, photo_type: window._selectedPhoto.file.type, scan_id: currentScanId})
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById("photo-preview-box").style.display = "none";
+      document.getElementById("photo-btn").style.display = "none";
+      showToast("Photo sent to vehicle owner!");
+      updateScanAction("photo");
+    } else { showToast(data.error||"Failed to send photo"); }
+  } catch(e) { showToast("Network error"); }
+  btn.textContent = "Send Photo →"; btn.disabled = false;
+}
 async function updateScanAction(action){
   if(!currentScanId)return;
   try{await fetch('/api/update-scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scan_id:currentScanId,contact_action:action})});}catch(e){}
@@ -550,3 +602,5 @@ loadTag();
 </script>
 </body>
 </html>
+
+
