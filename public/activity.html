@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <link rel="manifest" href="/manifest.json">
@@ -184,7 +184,23 @@ function openDetail(index) {
   document.getElementById('detail-title').textContent = labels[action] || 'Scan';
   document.getElementById('detail-time').textContent = new Date(scan.scanned_at).toLocaleString('en-US', {weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
   document.getElementById('detail-action').textContent = labels[action] || 'View';
-  document.getElementById('detail-device').textContent = scan.device_type || 'Mobile';
+  document.getElementById("detail-device").textContent = scan.device_type || "Mobile";
+  // Show message text if available
+  let extraHTML = "";
+  if (scan.message_text) {
+    extraHTML += "<div style=\"background:#FFF3EC;border:1.5px solid #FFE4CC;border-radius:12px;padding:12px;margin-bottom:12px\"><div style=\"font-size:11px;color:#FF6B00;font-weight:600;margin-bottom:4px\">Message from stranger</div><div style=\"font-size:13px;color:#111\">" + scan.message_text + "</div></div>";
+  }
+  if (scan.photo_url) {
+    extraHTML += "<div style=\"margin-bottom:12px\"><div style=\"font-size:11px;color:#7C3AED;font-weight:600;margin-bottom:6px\">Photo from stranger</div><img src=\"" + scan.photo_url + "\" style=\"width:100%;border-radius:12px;max-height:200px;object-fit:cover\"></div>";
+  }
+  if (extraHTML) {
+    const existingExtra = document.getElementById("detail-extra");
+    if (existingExtra) existingExtra.remove();
+    const extraDiv = document.createElement("div");
+    extraDiv.id = "detail-extra";
+    extraDiv.innerHTML = extraHTML;
+    document.getElementById("detail-map").before(extraDiv);
+  }
   if (detailMap) { detailMap.remove(); detailMap = null; }
   document.getElementById('detail-map').innerHTML = '';
   if (scan.latitude && scan.longitude) {

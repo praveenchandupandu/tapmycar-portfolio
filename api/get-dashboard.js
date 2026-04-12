@@ -197,7 +197,7 @@ module.exports = async function handler(req, res) {
 
   // Get recent scans
   const { data: recentScans } = await supabase
-    .from('scan_logs').select('id, tag_id, action, contact_action, scanned_at, device_type, latitude, longitude').in('tag_id', tags ? tags.map(t => t.id) : [])
+    .from('scan_logs').select('id, tag_id, action, contact_action, scanned_at, device_type, latitude, longitude, message_text, photo_url').in('tag_id', tags ? tags.map(t => t.id) : [])
     .order('scanned_at', { ascending: false })
     .limit(50);
 
@@ -209,6 +209,7 @@ module.exports = async function handler(req, res) {
     recentScans: recentScans || []
   });
 };
+
 
 
 

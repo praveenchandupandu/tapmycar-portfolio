@@ -128,10 +128,14 @@ module.exports = async function handler(req, res) {
 
   if (scan_id) {
     try {
-      await supabase.from("scan_logs").update({ contact_action: action }).eq("id", scan_id);
+      const scanUpdate = { contact_action: action };
+      if (action === "quick_message" && message) scanUpdate.message_text = message;
+      if (action === "photo" && req.body.photo_base64) scanUpdate.photo_url = "data:" + (req.body.photo_type || "image/jpeg") + ";base64," + req.body.photo_base64;
+      await supabase.from("scan_logs").update(scanUpdate).eq("id", scan_id);
     } catch(e) { console.error("scan log update error:", e); }
   }
   res.json({ success: true });
 };
+
 
 
