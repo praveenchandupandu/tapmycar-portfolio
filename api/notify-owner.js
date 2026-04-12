@@ -126,6 +126,12 @@ module.exports = async function handler(req, res) {
     console.log('SMS failed (A2P pending):', err.message);
   }
 
+  if (scan_id) {
+    try {
+      await supabase.from("scan_logs").update({ contact_action: action }).eq("id", scan_id);
+    } catch(e) { console.error("scan log update error:", e); }
+  }
   res.json({ success: true });
 };
+
 
