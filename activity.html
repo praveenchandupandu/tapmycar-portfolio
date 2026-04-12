@@ -135,10 +135,34 @@ function renderScans(scans) {
     const c = cfg[action] || cfg.view;
     const timeStr = new Date(scan.scanned_at).toLocaleString("en-US", {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
     const hasLoc = scan.latitude && scan.longitude;
-    return "<div class=\"scan-item\"><div style=\"display:flex;align-items:center;gap:10px\"><div class=\"scan-icon\" style=\"background:" + c.color + "\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"" + c.stroke + "\" stroke-width=\"2\" stroke-linecap=\"round\"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/></svg></div><div><div style=\"font-size:13px;font-weight:600;color:var(--bk)\">" + timeStr + "</div><div style=\"font-size:10px;color:var(--gy)\">" + c.label + " - " + (scan.device_type || "mobile") + (hasLoc ? " - Location recorded" : "") + "</div></div></div><span class=\"sp " + c.sp + "\" style=\"font-size:10px;padding:4px 10px\">" + c.label + "</span></div>";
+    return "<div class=\"scan-item\" style=\"cursor:pointer\" onclick=\"openDetail(allScans[" + allScans.indexOf(scan) + "])\"><div style=\"display:flex;align-items:center;gap:10px\"><div class=\"scan-icon\" style=\"background:" + c.color + "\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"" + c.stroke + "\" stroke-width=\"2\" stroke-linecap=\"round\"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/></svg></div><div><div style=\"font-size:13px;font-weight:600;color:var(--bk)\">" + timeStr + "</div><div style=\"font-size:10px;color:var(--gy)\">" + c.label + " - " + (scan.device_type || "mobile") + (hasLoc ? " - Location recorded" : "") + "</div></div></div><span class=\"sp " + c.sp + "\" style=\"font-size:10px;padding:4px 10px\">" + c.label + "</span></div>";
   }).join("");
   document.getElementById("scan-list").innerHTML = html;
 }
+
+<div id="scan-detail-overlay" onclick="if(event.target===this)closeDetail()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:24px 20px 34px">
+    <div style="width:36px;height:4px;border-radius:2px;background:#E5E7EB;margin:0 auto 20px"></div>
+    <div style="font-size:16px;font-weight:800;color:#111;margin-bottom:4px" id="detail-title">Scan Details</div>
+    <div style="font-size:12px;color:#6B7280;margin-bottom:16px" id="detail-time"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+      <div style="background:#F9FAFB;border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:11px;color:#6B7280;margin-bottom:4px">Action</div>
+        <div style="font-size:13px;font-weight:700;color:#111" id="detail-action">-</div>
+      </div>
+      <div style="background:#F9FAFB;border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:11px;color:#6B7280;margin-bottom:4px">Device</div>
+        <div style="font-size:13px;font-weight:700;color:#111" id="detail-device">-</div>
+      </div>
+    </div>
+    <div id="detail-map" style="height:180px;border-radius:14px;overflow:hidden;margin-bottom:12px"></div>
+    <div id="detail-no-location" style="display:none;background:#F9FAFB;border-radius:14px;padding:20px;text-align:center;margin-bottom:12px">
+      <div style="font-size:13px;color:#6B7280">No location data for this scan</div>
+    </div>
+    <a id="detail-maps-btn" href="#" target="_blank" style="display:none;background:#FF6B00;color:#fff;font-size:13px;font-weight:700;padding:13px 0;border-radius:13px;text-align:center;text-decoration:none;display:block;margin-bottom:8px">View on Google Maps</a>
+    <button onclick="closeDetail()" style="width:100%;height:44px;border-radius:13px;border:1.5px solid #E5E7EB;background:#fff;font-size:13px;font-weight:600;color:#6B7280;cursor:pointer;font-family:inherit">Close</button>
+  </div>
+</div>
 
 function filterScans(type, btn) {
   document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
@@ -147,6 +171,52 @@ function filterScans(type, btn) {
 }
 
 loadActivity();
+
+let detailMap = null;
+
+function openDetail(scan) {
+  const overlay = document.getElementById("scan-detail-overlay");
+  overlay.style.display = "flex";
+  overlay.style.flexDirection = "column";
+  overlay.style.justifyContent = "flex-end";
+  overlay.style.alignItems = "center";
+
+  const action = scan.contact_action || scan.action || "view";
+  const labels = { call: "Call", quick_message: "Message", photo: "Photo", view: "View" };
+  const timeStr = new Date(scan.scanned_at).toLocaleString("en-US", {weekday:"short", month:"short", day:"numeric", hour:"numeric", minute:"2-digit"});
+
+  document.getElementById("detail-title").textContent = labels[action] || "Scan";
+  document.getElementById("detail-time").textContent = timeStr;
+  document.getElementById("detail-action").textContent = labels[action] || "View";
+  document.getElementById("detail-device").textContent = scan.device_type || "Mobile";
+
+  // Clear old map
+  if (detailMap) { detailMap.remove(); detailMap = null; }
+  document.getElementById("detail-map").innerHTML = "";
+
+  if (scan.latitude && scan.longitude) {
+    document.getElementById("detail-map").style.display = "block";
+    document.getElementById("detail-no-location").style.display = "none";
+    document.getElementById("detail-maps-btn").style.display = "block";
+    document.getElementById("detail-maps-btn").href = "https://maps.google.com/?q=" + scan.latitude + "," + scan.longitude;
+
+    setTimeout(() => {
+      detailMap = L.map("detail-map", { zoomControl: true, attributionControl: false });
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(detailMap);
+      detailMap.setView([scan.latitude, scan.longitude], 15);
+      L.marker([scan.latitude, scan.longitude]).addTo(detailMap);
+    }, 100);
+  } else {
+    document.getElementById("detail-map").style.display = "none";
+    document.getElementById("detail-no-location").style.display = "block";
+    document.getElementById("detail-maps-btn").style.display = "none";
+  }
+}
+
+function closeDetail() {
+  document.getElementById("scan-detail-overlay").style.display = "none";
+  if (detailMap) { detailMap.remove(); detailMap = null; }
+}
 </script>
 <script>
 if ("serviceWorker" in navigator) { navigator.serviceWorker.register("/sw.js"); }
@@ -158,6 +228,9 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
+
+
 
 
 
