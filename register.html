@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <link rel="manifest" href="/manifest.json">
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="TapMyCar">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Create account — TapMyCar</title>
+<title>Create account  TapMyCar</title>
 <link rel="stylesheet" href="/app.css">
 <style>
 .page-inner{display:flex;flex-direction:column;min-height:calc(100vh - 12px);}
@@ -31,15 +31,15 @@
   <div class="field">
     <label>Email address</label>
     <input type="email" id="email" placeholder="jane@example.com" autocomplete="email">
-    <div class="hint">A 6-digit code will be sent to your email — free, no SMS needed</div>
+    <div class="hint">A 6-digit code will be sent to your email  free, no SMS needed</div>
   </div>
   <div class="field">
     <label>Phone number <span style="color:var(--gy);font-weight:400">(for call forwarding)</span></label>
     <input type="tel" id="phone" placeholder="+1 (203) 555-0100" autocomplete="tel">
-    <div class="hint">Used only for masked call forwarding — never shared</div>
+    <div class="hint">Used only for masked call forwarding  never shared</div>
   </div>
   <div style="margin-top:auto">
-    <button class="btn" onclick="sendOTP()">Send verification code →</button>
+    <button class="btn" onclick="sendOTP()">Send verification code </button>
     <div style="text-align:center;font-size:12px;color:var(--gy);margin-top:12px">
       Have account? <a href="/signin.html" class="link-or">Sign in</a>
     </div>
@@ -71,7 +71,7 @@
     <p>Check your spam folder if you don't see the email within 1 minute.</p>
   </div>
   <div style="margin-top:auto">
-    <button class="btn" onclick="verifyOTP()">Verify and create account →</button>
+    <button class="btn" onclick="verifyOTP()">Verify and create account </button>
   </div>
 </div>
 
@@ -132,7 +132,7 @@ async function verifyOTP() {
       localStorage.setItem('tmc_email', email);
       window.location.href = '/etag.html';
     } else {
-      showToast(data.error || 'Wrong code — try again');
+      showToast(data.error || 'Wrong code  try again');
     }
   } catch(e) { showToast('Network error'); }
 }

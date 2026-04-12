@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Sign in — TapMyCar</title>
+<title>Sign in  TapMyCar</title>
 <link rel="stylesheet" href="/app.css">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#FF6B00">
@@ -53,7 +53,7 @@
   </div>
 
   <div style="margin-top:auto">
-    <button class="btn" onclick="signIn()">Sign in →</button>
+    <button class="btn" onclick="signIn()">Sign in </button>
     <div style="text-align:center;font-size:12px;color:#9CA3AF;margin-top:12px">
       No account? <a href="/register.html" style="color:#FF6B00;font-weight:600;text-decoration:none">Sign up free</a>
     </div>
@@ -103,7 +103,7 @@ async function signIn() {
       localStorage.setItem('tmc_email', email);
       window.location.href = '/dashboard.html';
     } else {
-      showToast(data.error || 'Wrong code — try again');
+      showToast(data.error || 'Wrong code  try again');
     }
   } catch(e) { showToast('Network error'); }
 }

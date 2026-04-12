@@ -1,4 +1,4 @@
-// TapMyCar — app.js
+﻿// TapMyCar  app.js
 
 const API = {
   sendOTP: (phone) => fetch('/api/send-otp', {
@@ -90,11 +90,11 @@ function startCountdown(btnId, seconds = 60) {
 }
 
 document.addEventListener('DOMContentLoaded', () => { initOTP(); });
-// ══════════════════════════════════════════════════
+// 
 // ADD THIS ENTIRE BLOCK TO THE END OF public/app.js
-// ══════════════════════════════════════════════════
+// 
 
-// ── QUICK MESSAGE TEMPLATES (auto-injects into contact page) ──
+//  QUICK MESSAGE TEMPLATES (auto-injects into contact page) 
 function injectQuickMessages() {
   const textBtn = document.getElementById('text-btn');
   if (!textBtn) return;
@@ -106,32 +106,32 @@ function injectQuickMessages() {
         <div style="font-size:10px;color:#6B7280">Tap to notify the owner instantly</div>
       </div>
       <div class="qm-row" onclick="sendQuickMessage('Your lights are on')">
-        <div class="qm-icon" style="background:#FEF3C7">💡</div>
+        <div class="qm-icon" style="background:#FEF3C7"></div>
         <div class="qm-label">Your lights are on</div>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
       <div class="qm-row" onclick="sendQuickMessage('Your car is being towed')">
-        <div class="qm-icon" style="background:#FEE2E2">🚨</div>
+        <div class="qm-icon" style="background:#FEE2E2"></div>
         <div class="qm-label">Your car is being towed</div>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
       <div class="qm-row" onclick="sendQuickMessage('You are parked illegally')">
-        <div class="qm-icon" style="background:#FFF3EC">🚫</div>
+        <div class="qm-icon" style="background:#FFF3EC"></div>
         <div class="qm-label">You're parked illegally</div>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
       <div class="qm-row" onclick="sendQuickMessage('Your alarm is going off')">
-        <div class="qm-icon" style="background:#DBEAFE">🔔</div>
+        <div class="qm-icon" style="background:#DBEAFE"></div>
         <div class="qm-label">Your alarm is going off</div>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
       <div class="qm-row" onclick="sendQuickMessage('Someone hit your car')" style="border-bottom:none">
-        <div class="qm-icon" style="background:#FCE7F3">💥</div>
+        <div class="qm-icon" style="background:#FCE7F3"></div>
         <div class="qm-label">Someone hit your car</div>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
       <div id="custom-msg-row" class="qm-row" onclick="showCustomMessage()" style="border-bottom:none">
-        <div class="qm-icon" style="background:#F3F4F6">✏️</div>
+        <div class="qm-icon" style="background:#F3F4F6"></div>
         <div class="qm-label" style="color:#6B7280">Write a custom message...</div>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -144,7 +144,7 @@ function injectQuickMessages() {
       </div>
     </div>
     <div id="msg-sent" style="display:none;background:#DCFCE7;border-radius:14px;padding:16px;text-align:center;border:1.5px solid #BBF7D0">
-      <div style="font-size:18px;margin-bottom:6px">✓</div>
+      <div style="font-size:18px;margin-bottom:6px"></div>
       <div style="font-size:14px;font-weight:700;color:#166534;margin-bottom:2px">Message sent!</div>
       <div style="font-size:11px;color:#15803D">The vehicle owner has been notified.</div>
     </div>
@@ -215,7 +215,7 @@ function showCustomMessage() {
 function sendCustomMessage() {
   const text = document.getElementById('custom-msg-text').value.trim();
   if (!text) { showToast('Type a message first'); return; }
-  if (text.length > 200) { showToast('Message too long — max 200 characters'); return; }
+  if (text.length > 200) { showToast('Message too long  max 200 characters'); return; }
   sendQuickMessage(text);
 }
 
@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// ── TAG PAUSE/RESUME (for dashboard) ──
+//  TAG PAUSE/RESUME (for dashboard) 
 async function toggleTagPause(token, currentStatus) {
   const newStatus = currentStatus === 'active' ? 'paused' : 'active';
   const action = newStatus === 'paused' ? 'pause' : 'resume';
@@ -240,7 +240,7 @@ async function toggleTagPause(token, currentStatus) {
     });
     const data = await res.json();
     if (data.success) {
-      showToast(action === 'pause' ? 'Tag paused — strangers cannot contact you' : 'Tag resumed — you are reachable again');
+      showToast(action === 'pause' ? 'Tag paused  strangers cannot contact you' : 'Tag resumed  you are reachable again');
       // Reload page to reflect change
       setTimeout(() => window.location.reload(), 800);
     } else {
@@ -250,7 +250,7 @@ async function toggleTagPause(token, currentStatus) {
 }
 
 
-// ── SCAN NOTIFICATION (call notify-owner when tag is scanned) ──
+//  SCAN NOTIFICATION (call notify-owner when tag is scanned) 
 async function notifyScan(tagId, scanId) {
   try {
     await fetch('/api/notify-owner', {
@@ -262,7 +262,7 @@ async function notifyScan(tagId, scanId) {
 }
 
 
-// ── PAUSED STATE HANDLER (for contact pages) ──
+//  PAUSED STATE HANDLER (for contact pages) 
 function showPausedState() {
   // Check if we're on a contact page and tag is paused
   // This is called from contact.html/check.html when tag.status === 'paused'
@@ -284,7 +284,7 @@ function showPausedState() {
 }
 
 
-// ── HANDLE CALL WITH NOTIFICATION ──
+//  HANDLE CALL WITH NOTIFICATION 
 // Override handleCall on contact pages to also send notification
 const _origHandleCall = typeof handleCall === 'function' ? handleCall : null;
 if (typeof window !== 'undefined') {
@@ -299,19 +299,19 @@ if (typeof window !== 'undefined') {
   };
 }
 
-// ══════════════════════════════════════════════════
-// AI CHATBOT — REPLACE the old chatbot code in app.js
-// Delete everything from "// ── CHATBOT SYSTEM PROMPT ──" to the end
+// 
+// AI CHATBOT  REPLACE the old chatbot code in app.js
+// Delete everything from "//  CHATBOT SYSTEM PROMPT " to the end
 // Then paste this entire block
-// ══════════════════════════════════════════════════
+// 
 
-// ── CHATBOT SYSTEM PROMPT ──
-const TMC_SYSTEM_PROMPT = `You are TapMyCar Assistant — a friendly, warm, and respectful support agent for TapMyCar, a privacy-first vehicle contact system by Praman Tech LLC, New Britain, Connecticut.
+//  CHATBOT SYSTEM PROMPT 
+const TMC_SYSTEM_PROMPT = `You are TapMyCar Assistant  a friendly, warm, and respectful support agent for TapMyCar, a privacy-first vehicle contact system by Praman Tech LLC, New Britain, Connecticut.
 
 ABOUT TAPMYCAR:
 - Car owners place a QR/NFC sticker on their vehicle
-- Strangers scan to contact the owner privately — owner's real phone number is NEVER shared
-- All calls are masked through a secure proxy — neither party sees real numbers
+- Strangers scan to contact the owner privately  owner's real phone number is NEVER shared
+- All calls are masked through a secure proxy  neither party sees real numbers
 - Owner gets voice screening: Press 1 to send auto-message, Press 2 to connect directly
 - Quick message alerts: strangers can tap preset messages like "Your lights are on" or "Your car is being towed"
 
@@ -329,23 +329,23 @@ HOW IT WORKS:
 5. Physical sticker ships after 30 days
 
 COMMON ISSUES:
-- QR not scanning → Ensure good lighting, clean QR, camera focused. Try zooming in.
-- Can't download PDF → Log in first, then go to Tag page
-- Want a refund → Email pramantechllc@gmail.com, refunds within 30 days
-- Sticker not arrived → Ships after day 30, check dashboard for status
-- Lost my tag → Sign in with email, tag is still active
-- Pause tag → Toggle from dashboard
-- Change phone → Go to Settings page
+- QR not scanning  Ensure good lighting, clean QR, camera focused. Try zooming in.
+- Can't download PDF  Log in first, then go to Tag page
+- Want a refund  Email pramantechllc@gmail.com, refunds within 30 days
+- Sticker not arrived  Ships after day 30, check dashboard for status
+- Lost my tag  Sign in with email, tag is still active
+- Pause tag  Toggle from dashboard
+- Change phone  Go to Settings page
 
 RULES:
 - Be warm, human-like, concise. Short sentences. 2-3 sentences max.
 - NEVER mention prices or dollar amounts unless the user specifically asks about pricing or cost
 - If someone says hi/hello, respond warmly and ask how you can help
-- If you cannot solve something, say "Let me connect you with our team — email pramantechllc@gmail.com and we will help you within 24 hours."
+- If you cannot solve something, say "Let me connect you with our team  email pramantechllc@gmail.com and we will help you within 24 hours."
 - Never make up features that don't exist
 - Always be soft and respectful`;
 
-// ── INJECT CHATBOT ──
+//  INJECT CHATBOT 
 function injectChatbot() {
   if (window.location.pathname.includes('admin')) return;
 
@@ -354,7 +354,7 @@ function injectChatbot() {
       <svg id="chat-icon-open" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       <svg id="chat-icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" style="display:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </div>
-    <div id="tmc-chat-badge" style="position:fixed;bottom:72px;right:20px;background:#111;color:#fff;font-size:11px;font-weight:600;padding:6px 12px;border-radius:10px 10px 0 10px;z-index:200;box-shadow:0 2px 10px rgba(0,0,0,.15);display:none;cursor:pointer" onclick="toggleChat()">Need help? 💬</div>
+    <div id="tmc-chat-badge" style="position:fixed;bottom:72px;right:20px;background:#111;color:#fff;font-size:11px;font-weight:600;padding:6px 12px;border-radius:10px 10px 0 10px;z-index:200;box-shadow:0 2px 10px rgba(0,0,0,.15);display:none;cursor:pointer" onclick="toggleChat()">Need help? </div>
     <div id="tmc-chat-window" style="display:none;position:fixed;bottom:90px;right:16px;width:340px;max-width:calc(100vw - 32px);height:480px;max-height:calc(100vh - 120px);background:#fff;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.2);z-index:201;flex-direction:column;overflow:hidden">
       <div style="background:#FF6B00;padding:16px;display:flex;align-items:center;gap:10px;flex-shrink:0">
         <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center">
@@ -367,7 +367,7 @@ function injectChatbot() {
         <button onclick="toggleChat()" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div id="tmc-chat-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px">
-        <div class="tmc-msg tmc-msg-bot"><div class="tmc-msg-bubble">Hi there! Welcome to TapMyCar. How can I help you today? 😊</div></div>
+        <div class="tmc-msg tmc-msg-bot"><div class="tmc-msg-bubble">Hi there! Welcome to TapMyCar. How can I help you today? </div></div>
         <div style="display:flex;flex-wrap:wrap;gap:6px">
           <button class="tmc-quick-q" onclick="askQuestion('How do I activate my tag?')">Activate my tag</button>
           <button class="tmc-quick-q" onclick="askQuestion('How does masked calling work?')">Masked calling</button>
@@ -503,7 +503,7 @@ async function sendChatMessage() {
       replied = true;
     }
   } catch (e) {
-    // API failed — use smart offline
+    // API failed  use smart offline
   }
 
   if (!replied) {
@@ -514,7 +514,7 @@ async function sendChatMessage() {
   }
 }
 
-// ── SMART OFFLINE RESPONSES ──
+//  SMART OFFLINE RESPONSES 
 function getSmartResponse(question) {
   const q = question.toLowerCase();
 
@@ -525,12 +525,12 @@ function getSmartResponse(question) {
 
   // Thanks
   if (q.match(/^(thanks|thank you|thx|ty|appreciate)/)) {
-    return 'You\'re welcome! Let me know if there\'s anything else I can help with. 😊';
+    return 'You\'re welcome! Let me know if there\'s anything else I can help with. ';
   }
 
   // Activation
   if (q.includes('activate') || q.includes('activation')) {
-    return 'To activate your tag, go to your dashboard and tap "Activate" or visit tapmycar.io/activate.html. Scan your QR code and follow the steps — it only takes a minute!';
+    return 'To activate your tag, go to your dashboard and tap "Activate" or visit tapmycar.io/activate.html. Scan your QR code and follow the steps  it only takes a minute!';
   }
 
   // QR scanning issues
@@ -540,7 +540,7 @@ function getSmartResponse(question) {
 
   // Masked calling
   if (q.includes('mask') || (q.includes('call') && q.includes('work')) || q.includes('privacy') || q.includes('number safe') || q.includes('hide number')) {
-    return 'Your real phone number is never shared with anyone. When someone taps Call on your tag, the call routes through our secure proxy — neither side sees the other\'s real number. Completely private!';
+    return 'Your real phone number is never shared with anyone. When someone taps Call on your tag, the call routes through our secure proxy  neither side sees the other\'s real number. Completely private!';
   }
 
   // Refund
@@ -558,19 +558,19 @@ function getSmartResponse(question) {
     return 'You can pause your tag anytime from your dashboard. When paused, strangers won\'t be able to contact you. Just toggle it back on whenever you\'re ready!';
   }
 
-  // Pricing — only when explicitly asked
+  // Pricing  only when explicitly asked
   if (q.includes('price') || q.includes('pricing') || q.includes('cost') || q.includes('how much') || q.includes('plan') || q.includes('subscription') || q.includes('upgrade')) {
-    return 'We have plans for every need — from a free eTag to our Premium and Business options. Check out all the details at tapmycar.io/pricing.html. Happy to answer specific questions about any plan!';
+    return 'We have plans for every need  from a free eTag to our Premium and Business options. Check out all the details at tapmycar.io/pricing.html. Happy to answer specific questions about any plan!';
   }
 
   // Cancel
   if (q.includes('cancel') || q.includes('unsubscribe') || q.includes('delete account')) {
-    return 'You can cancel anytime — no long-term commitment. Email us at pramantechllc@gmail.com and we\'ll take care of it for you right away.';
+    return 'You can cancel anytime  no long-term commitment. Email us at pramantechllc@gmail.com and we\'ll take care of it for you right away.';
   }
 
   // Lost tag
   if (q.includes('lost') || q.includes('forgot') || q.includes('can\'t find') || q.includes('cant find')) {
-    return 'No worries! Your tag is linked to your account. Just sign in at tapmycar.io/signin.html with your email — everything is still there and active.';
+    return 'No worries! Your tag is linked to your account. Just sign in at tapmycar.io/signin.html with your email  everything is still there and active.';
   }
 
   // Change info
@@ -580,12 +580,12 @@ function getSmartResponse(question) {
 
   // How it works
   if (q.includes('how') && (q.includes('work') || q.includes('use'))) {
-    return 'It\'s simple! Register free, get your digital QR code, print and place it on your car. When someone needs to reach you, they scan the QR and can call you privately — your real number stays hidden. You control everything from your dashboard.';
+    return 'It\'s simple! Register free, get your digital QR code, print and place it on your car. When someone needs to reach you, they scan the QR and can call you privately  your real number stays hidden. You control everything from your dashboard.';
   }
 
   // NFC
   if (q.includes('nfc') || q.includes('tap')) {
-    return 'Our physical stickers come with both a QR code and NFC chip. Anyone can either scan the QR with their camera or tap their phone on the NFC chip — both work!';
+    return 'Our physical stickers come with both a QR code and NFC chip. Anyone can either scan the QR with their camera or tap their phone on the NFC chip  both work!';
   }
 
   // Multiple cars
@@ -598,7 +598,7 @@ function getSmartResponse(question) {
     return 'In any life-threatening emergency, always call 911 first. TapMyCar is designed for non-emergency situations like parking issues, lights left on, or someone needing to reach you about your vehicle.';
   }
 
-  // Default — friendly catch-all
+  // Default  friendly catch-all
   return 'Great question! Let me connect you with our team for the best answer. Email us at pramantechllc@gmail.com and we\'ll get back to you within 24 hours. Is there anything else I can help with?';
 }
 
@@ -607,18 +607,18 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(injectChatbot, 1000);
 });
 
-// ══════════════════════════════════════════════════
-// DASHBOARD FEATURES — Add to END of public/app.js
-// ══════════════════════════════════════════════════
+// 
+// DASHBOARD FEATURES  Add to END of public/app.js
+// 
 
-// ── INJECT PAUSE BUTTON ON DASHBOARD ──
+//  INJECT PAUSE BUTTON ON DASHBOARD 
 function injectPauseButton() { return;
   // Only run on dashboard page
   if (!window.location.pathname.includes('dashboard')) return;
   // Wait for dashboard to load
   setTimeout(() => {
     const tagTokenEl = document.querySelector('[id*="tag-token"], .tag-token, [data-tag-token]');
-    // Find the tag card area — look for QR code or tag display section
+    // Find the tag card area  look for QR code or tag display section
     const tagCard = document.querySelector('.card') || document.querySelector('[id*="tag"]');
     if (!tagCard) return;
 
@@ -643,7 +643,7 @@ function injectPauseButton() { return;
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                 ${isPaused ? '<polygon points="5 3 19 12 5 21 5 3"/>' : '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>'}
               </svg>
-              ${isPaused ? 'Resume Tag — Go Active' : 'Pause Tag — Go Invisible'}
+              ${isPaused ? 'Resume Tag  Go Active' : 'Pause Tag  Go Invisible'}
             </button>
             ${isPaused ? '<div style="text-align:center;font-size:10px;color:var(--rd,#DC2626);margin-top:6px;font-weight:600">Your tag is currently paused. Strangers cannot contact you.</div>' : '<div style="text-align:center;font-size:10px;color:var(--gy,#6B7280);margin-top:6px">Pausing hides your tag from strangers temporarily.</div>'}
           </div>
@@ -660,7 +660,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// ── SETTINGS SAVE TO SUPABASE ──
+//  SETTINGS SAVE TO SUPABASE 
 async function saveSettings() {
   const s = getSession ? getSession() : null;
   if (!s) { showToast('Please sign in first'); return; }
@@ -703,7 +703,7 @@ async function saveSettings() {
 }
 
 
-// ── REFERRAL SYSTEM ──
+//  REFERRAL SYSTEM 
 function generateReferralCode() {
   const s = getSession ? getSession() : null;
   if (!s) return '';
@@ -719,7 +719,7 @@ function getReferralLink() {
 
 function shareReferral() {
   const link = getReferralLink();
-  const text = 'Get TapMyCar — privacy-first vehicle contact. When you buy a Standard plan, you get 1 free tag! Use my link: ' + link;
+  const text = 'Get TapMyCar  privacy-first vehicle contact. When you buy a Standard plan, you get 1 free tag! Use my link: ' + link;
 
   if (navigator.share) {
     navigator.share({ title: 'TapMyCar Referral', text: text, url: link }).catch(() => {});
@@ -761,7 +761,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// ── SCAN LOCATION MAP (simple text-based for now, no Google Maps API needed) ──
+//  SCAN LOCATION MAP (simple text-based for now, no Google Maps API needed) 
 function injectScanMap() { return;
   if (!window.location.pathname.includes('dashboard') && !window.location.pathname.includes('activity')) return;
 
@@ -798,10 +798,10 @@ function injectScanMap() { return;
           <div id="tmc-scan-map" style="background:var(--gbl,#F9FAFB);border-radius:14px;padding:16px;margin-top:12px;border:.5px solid var(--bd,#E5E7EB)">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
               <div style="font-size:14px;font-weight:800;color:var(--bk,#111)">Recent Activity</div>
-              <a href="/activity.html" style="font-size:11px;color:var(--or,#FF6B00);font-weight:600;text-decoration:none">View all →</a>
+              <a href="/activity.html" style="font-size:11px;color:var(--or,#FF6B00);font-weight:600;text-decoration:none">View all </a>
             </div>
             ${scanHTML}
-            <div style="text-align:center;margin-top:10px;font-size:10px;color:var(--gy,#6B7280)">Total scans: ${data.scanCount || 0} · This week: ${data.weekCount || 0}</div>
+            <div style="text-align:center;margin-top:10px;font-size:10px;color:var(--gy,#6B7280)">Total scans: ${data.scanCount || 0}  This week: ${data.weekCount || 0}</div>
           </div>
         `;
 
@@ -815,7 +815,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// ── AUTO TAG ASSIGNMENT (on registration) ──
+//  AUTO TAG ASSIGNMENT (on registration) 
 // This runs on the success/dashboard page after registration
 async function autoAssignTag() {
   const s = getSession ? getSession() : null;
@@ -831,8 +831,8 @@ async function autoAssignTag() {
     // Find an unclaimed tag and assign it
     // We don't have a direct API for this, so we skip auto-assign
     // The user gets their tag via the activate page flow
-    // This is a placeholder — full auto-assign needs admin to pre-allocate
-    console.log('New user — no tag assigned yet. User should visit /activate.html');
+    // This is a placeholder  full auto-assign needs admin to pre-allocate
+    console.log('New user  no tag assigned yet. User should visit /activate.html');
   } catch(e) {}
 }
 
@@ -842,3 +842,4 @@ if (window.location.pathname.includes('dashboard')) {
     setTimeout(autoAssignTag, 3000);
   });
 }
+
