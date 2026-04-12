@@ -43,7 +43,7 @@
       <div style="font-size:11px;color:var(--gy);margin-bottom:3px">Welcome back</div>
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div style="font-size:22px;font-weight:800;color:var(--bk)" id="greeting-name">...</div>
-        <div style="background:var(--orl);border:.5px solid var(--orl2);border-radius:99px;padding:5px 12px;font-size:10px;font-weight:700;color:var(--or)"> Standard</div>
+        <div style="background:var(--orl);border:.5px solid var(--orl2);border-radius:99px;padding:5px 12px;font-size:10px;font-weight:700;color:var(--or)"" id="plan-badge"> Standard</div>
       </div>
       <div style="font-size:11px;color:var(--gy);margin-top:2px">Privacy for you. Safety for your car.</div>
     </div>
@@ -81,7 +81,7 @@
     <!-- 4. PAUSE TAG + INVITE A FRIEND (side by side) -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
       <div class="card" style="padding:12px;cursor:pointer" onclick="togglePause()" id="pause-card">
-        <div style="font-size:13px;font-weight:700;color:var(--bk);margin-bottom:4px" id="pause-label">⏸ Pause Tag</div>
+        <div style="font-size:13px;font-weight:700;color:var(--bk);margin-bottom:4px" id="pause-label">|| Pause Tag</div>
         <div style="font-size:10px;color:var(--gy);line-height:1.4" id="pause-sub">Hide from strangers temporarily</div>
       </div>
       <div class="card" style="padding:12px;cursor:pointer" onclick="copyReferral()">
@@ -196,13 +196,14 @@ async function loadDashboard() {
         document.getElementById("stat-status").textContent = "OFF";
         document.getElementById("stat-status").style.color = "var(--rd,#DC2626)";
       }
-      tagURL = `https://tapmycar.io/tag/${tag.token}`;
+      const tok = tag.token.includes("-") ? tag.token : "TMC-" + tag.token.replace(/^TMC/i,"");
+      tagURL = `https://tapmycar.io/tag/${tok}`;
       const displayToken = tag.token.includes('-') ? tag.token : 'TMC-' + tag.token.replace(/^TMC/i,'');
 
       document.getElementById('vehicle-label').textContent = tag.vehicle_label || 'My Vehicle';
       document.getElementById('tag-token').textContent = displayToken;
       document.getElementById('tag-url').textContent = tagURL;
-      document.getElementById('hero-sub').textContent = `${displayToken} Â· Scanned ${data.scanCount}Ã—`;
+      document.getElementById('hero-sub').textContent = `${displayToken} | Scanned ${data.scanCount} times`;
 
       document.getElementById('qr-container').innerHTML = '';
       new QRCode(document.getElementById('qr-container'), {
@@ -304,6 +305,13 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
 
 
 
