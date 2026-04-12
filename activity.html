@@ -10,6 +10,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Activity - TapMyCar</title>
 <link rel="stylesheet" href="/app.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    #map{height:220px;border-radius:14px;overflow:hidden;margin-bottom:14px;z-index:1}
+    .map-blur{filter:blur(6px);pointer-events:none}
+    .map-overlay{position:relative}
+    .map-upgrade{position:absolute;top:0;left:0;right:0;bottom:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.85);border-radius:14px;text-align:center;padding:20px}
+    .filter-row{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px}
+    .filter-btn{background:#F3F4F6;border:none;border-radius:99px;padding:6px 14px;font-size:11px;font-weight:600;color:#6B7280;cursor:pointer;font-family:inherit;white-space:nowrap}
+    .filter-btn.active{background:#FF6B00;color:#fff}
+    .scan-item{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:.5px solid var(--bd)}
+    .scan-item:last-child{border-bottom:none}
+    .scan-icon{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  </style>
 </head>
 <body>
 <div class="nav">
@@ -26,8 +40,26 @@
   <div class="page-inner">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px">
       <div class="card" style="text-align:center"><div style="font-size:28px;font-weight:800;color:var(--or)" id="total-scans">0</div><div style="font-size:9px;color:var(--gy);margin-top:2px">Total scans</div></div>
-      <div class="card" style="text-align:center"><div style="font-size:28px;font-weight:800;color:var(--or)" id="total-calls">0</div><div style="font-size:9px;color:var(--gy);margin-top:2px">Calls made</div></div>
+      <div class="card" style="text-align:center;padding:14px 8px"><div style="font-size:26px;font-weight:800;color:var(--or);line-height:1" id="total-calls">0</div><div style="font-size:9px;color:var(--gy);margin-top:4px">Calls made</div></div>
+      <div class="card" style="text-align:center;padding:14px 8px"><div style="font-size:26px;font-weight:800;color:var(--or);line-height:1" id="total-msgs">0</div><div style="font-size:9px;color:var(--gy);margin-top:4px">Messages</div></div>
     </div>
+    <div style="font-size:15px;font-weight:700;color:var(--bk);margin-bottom:10px">Scan Locations</div>
+    <div class="map-overlay" id="map-wrapper">
+      <div id="map"></div>
+      <div id="map-upgrade-overlay" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;z-index:10;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.85);border-radius:14px;text-align:center;padding:20px">
+        <div style="font-size:14px;font-weight:700;color:#111;margin-bottom:4px">Upgrade to see scan locations</div>
+        <div style="font-size:11px;color:#6B7280;margin-bottom:12px">Standard plan includes scan location map</div>
+        <a href="/pricing.html" style="background:#FF6B00;color:#fff;font-size:12px;font-weight:700;padding:8px 20px;border-radius:99px;text-decoration:none">Upgrade now</a>
+      </div>
+    </div>
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="filterScans('all', this)">All</button>
+      <button class="filter-btn" onclick="filterScans('view', this)">Views</button>
+      <button class="filter-btn" onclick="filterScans('call', this)">Calls</button>
+      <button class="filter-btn" onclick="filterScans('quick_message', this)">Messages</button>
+      <button class="filter-btn" onclick="filterScans('photo', this)">Photos</button>
+    </div>
+    <div style="font-size:15px;font-weight:700;color:var(--bk);margin-bottom:10px">All Scans</div>
     <div id="scan-list">
       <div style="text-align:center;padding:30px 20px;color:var(--gy);font-size:13px">No scans yet  share your QR code to get started.</div>
     </div>
@@ -43,38 +75,81 @@
 <script>
 requireAuth();
 const s = getSession();
+let allScans = [];
 
 async function loadActivity() {
   try {
-    const res = await fetch(`/api/get-dashboard?user_id=${s.token}`);
+    const res = await fetch("/api/get-dashboard?user_id=" + s.token);
     const data = await res.json();
-    document.getElementById('total-scans').textContent = data.scanCount || 0;
-
-    if (data.recentScans && data.recentScans.length > 0) {
-      const list = data.recentScans.map(scan => {
-        const date = new Date(scan.scanned_at);
-        const timeStr = date.toLocaleString('en-US', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'});
-        return `
-          <div class="row">
-            <div style="display:flex;align-items:center;gap:10px">
-              <div style="width:36px;height:36px;border-radius:11px;background:var(--orl);display:flex;align-items:center;justify-content:center">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              </div>
-              <div>
-                <div style="font-size:13px;font-weight:600;color:var(--bk)">${timeStr}</div>
-                <div style="font-size:10px;color:var(--gy)">${scan.action}</div>
-              </div>
-            </div>
-            <span class="sp sp-or">View</span>
-          </div>
-        `;
-      }).join('');
-      document.getElementById('scan-list').innerHTML = list;
+    const userPlan = data.user ? (data.user.plan || "free") : "free";
+    document.getElementById("total-scans").textContent = data.scanCount || 0;
+    if (data.recentScans) {
+      const calls = data.recentScans.filter(s => s.action === "call" || s.contact_action === "call").length;
+      const msgs = data.recentScans.filter(s => s.action === "quick_message" || s.contact_action === "quick_message").length;
+      document.getElementById("total-calls").textContent = calls;
+      document.getElementById("total-msgs").textContent = msgs;
+      allScans = data.recentScans;
+      renderScans(allScans);
+      initMap(data.recentScans, userPlan);
     }
   } catch(e) { console.error(e); }
 }
 
+function initMap(scans, plan) {
+  const isPremium = ["standard","premium","business","etag"].includes(plan);
+  const map = L.map("map", { zoomControl: true, attributionControl: false });
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+  if (!isPremium) {
+    map.setView([39.5, -98.35], 4);
+    document.getElementById("map").style.filter = "blur(6px)";
+    document.getElementById("map-upgrade-overlay").style.display = "flex";
+    return;
+  }
+  const scansWithLocation = scans.filter(s => s.latitude && s.longitude);
+  if (scansWithLocation.length > 0) {
+    const markers = scansWithLocation.map(scan => {
+      const color = scan.action === "call" ? "#16A34A" : scan.action === "quick_message" ? "#FF6B00" : "#6B7280";
+      const icon = L.divIcon({ html: "<div style=\"width:12px;height:12px;border-radius:50%;background:" + color + ";border:2px solid #fff;box-shadow:0 2px 4px rgba(0,0,0,.3)\"></div>", className: "", iconSize: [12,12] });
+      return L.marker([scan.latitude, scan.longitude], { icon }).bindPopup("<b>" + new Date(scan.scanned_at).toLocaleDateString() + "</b><br>" + (scan.action || "view"));
+    });
+    const group = L.featureGroup(markers).addTo(map);
+    map.fitBounds(group.getBounds().pad(0.3));
+  } else {
+    map.setView([39.5, -98.35], 4);
+  }
+}
+
+function renderScans(scans) {
+  if (!scans || scans.length === 0) {
+    document.getElementById("scan-list").innerHTML = "<div style=\"text-align:center;padding:30px 0;color:var(--gy);font-size:13px\">No scans yet - share your QR code to get started.</div>";
+    return;
+  }
+  const cfg = {
+    call: { color: "#DCFCE7", stroke: "#16A34A", label: "Call", sp: "sp-on" },
+    quick_message: { color: "#FFF3EC", stroke: "#FF6B00", label: "Message", sp: "sp-or" },
+    photo: { color: "#EDE9FE", stroke: "#7C3AED", label: "Photo", sp: "sp-am" },
+    view: { color: "#F3F4F6", stroke: "#6B7280", label: "View", sp: "sp-am" }
+  };
+  const html = scans.map(scan => {
+    const action = scan.contact_action || scan.action || "view";
+    const c = cfg[action] || cfg.view;
+    const timeStr = new Date(scan.scanned_at).toLocaleString("en-US", {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
+    const hasLoc = scan.latitude && scan.longitude;
+    return "<div class=\"scan-item\"><div style=\"display:flex;align-items:center;gap:10px\"><div class=\"scan-icon\" style=\"background:" + c.color + "\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"" + c.stroke + "\" stroke-width=\"2\" stroke-linecap=\"round\"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/></svg></div><div><div style=\"font-size:13px;font-weight:600;color:var(--bk)\">" + timeStr + "</div><div style=\"font-size:10px;color:var(--gy)\">" + c.label + " - " + (scan.device_type || "mobile") + (hasLoc ? " - Location recorded" : "") + "</div></div></div><span class=\"sp " + c.sp + "\" style=\"font-size:10px;padding:4px 10px\">" + c.label + "</span></div>";
+  }).join("");
+  document.getElementById("scan-list").innerHTML = html;
+}
+
+function filterScans(type, btn) {
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderScans(type === "all" ? allScans : allScans.filter(s => (s.contact_action || s.action) === type));
+}
+
 loadActivity();
+</script>
+<script>
+if ("serviceWorker" in navigator) { navigator.serviceWorker.register("/sw.js"); }
 </script>
 <script>
 if ('serviceWorker' in navigator) {
@@ -83,5 +158,9 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
+
+
+
 
 
