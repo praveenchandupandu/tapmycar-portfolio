@@ -111,10 +111,10 @@
     <!-- 6. RECENT ACTIVITY -->
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <div style="font-size:15px;font-weight:700;color:var(--bk)">Recent Activity</div>
-      <a href="/activity.html" style="font-size:12px;font-weight:600;color:var(--or);text-decoration:none">View all â†’</a>
+      <a href="/activity.html" style="font-size:12px;font-weight:600;color:var(--or);text-decoration:none">View all </a>
     </div>
     <div class="card" style="padding:0 16px;margin-bottom:14px" id="activity-list">
-      <div style="text-align:center;padding:24px 0;color:var(--gy);font-size:13px">No scans yet â€” share your tag to get started.</div>
+      <div style="text-align:center;padding:24px 0;color:var(--gy);font-size:13px">No scans yet  share your tag to get started.</div>
     </div>
 
   </div>
@@ -191,8 +191,8 @@ async function loadDashboard() {
       currentTagToken = tag.token;
       currentTagStatus = tag.status || "active";
       if (currentTagStatus === "paused") {
-        document.getElementById("pause-label").textContent = "▶ Resume Tag";
-        document.getElementById("pause-sub").textContent = "Tag paused — strangers see nothing";
+        document.getElementById("pause-label").textContent = " Resume Tag";
+        document.getElementById("pause-sub").textContent = "Tag paused  strangers see nothing";
         document.getElementById("stat-status").textContent = "OFF";
         document.getElementById("stat-status").style.color = "var(--rd,#DC2626)";
       }
@@ -228,7 +228,7 @@ async function loadDashboard() {
               </div>
               <div>
                 <div style="font-size:13px;font-weight:600;color:var(--bk)">${timeStr}</div>
-                <div style="font-size:10px;color:var(--gy)">${scan.action || 'view'} Â· ${scan.device_type || 'mobile device'}</div>
+                <div style="font-size:10px;color:var(--gy)">${scan.action || 'view'}  ${scan.device_type || 'mobile device'}</div>
               </div>
             </div>
             <span class="sp sp-or" style="font-size:10px;padding:4px 10px">View</span>
@@ -305,6 +305,7 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
 
 
 

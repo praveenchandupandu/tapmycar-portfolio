@@ -30,8 +30,8 @@
   <div style="padding:20px 20px 14px;text-align:center">
     <div style="width:68px;height:68px;border-radius:50%;background:var(--or);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff" id="profile-av">U</div>
     <div style="font-size:18px;font-weight:800;color:var(--bk);margin-bottom:3px" id="profile-name">Loading...</div>
-    <div style="font-size:12px;color:var(--gy);margin-bottom:4px" id="profile-email">â€”</div>
-    <div style="font-size:12px;color:var(--gy);margin-bottom:10px" id="profile-phone">â€”</div>
+    <div style="font-size:12px;color:var(--gy);margin-bottom:4px" id="profile-email"></div>
+    <div style="font-size:12px;color:var(--gy);margin-bottom:10px" id="profile-phone"></div>
     <div style="display:inline-flex;align-items:center;gap:4px;background:var(--orl);border:.5px solid var(--orl2);border-radius:99px;padding:4px 14px;font-size:11px;font-weight:600;color:var(--or)" id="profile-plan">Loading...</div>
   </div>
 
@@ -62,7 +62,7 @@
   <!-- Sign out -->
   <div class="set-row" onclick="signOut()"><div class="set-l"><div class="set-ic" style="background:var(--rdl)"><svg viewBox="0 0 24 24" stroke="var(--rd)"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div><div><div class="set-t" style="color:var(--rd)">Sign out</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
 
-  <div style="padding:20px;text-align:center"><div style="font-size:11px;color:#CCC">TapMyCar v1.0.0 Â· Praman Tech LLC Â· Connecticut</div></div>
+  <div style="padding:20px;text-align:center"><div style="font-size:11px;color:#CCC">TapMyCar v1.0.0  Praman Tech LLC  Connecticut</div></div>
 </div>
 
 <!-- Edit Profile Sheet -->
@@ -115,18 +115,18 @@ async function loadSettings() {
       userData = data.user;
       document.getElementById('profile-name').textContent = data.user.name || 'User';
       document.getElementById('profile-av').textContent = (data.user.name || 'U')[0].toUpperCase();
-      document.getElementById('profile-phone').textContent = data.user.phone || 'â€”';
-      document.getElementById('profile-email').textContent = data.user.email || 'â€”';
+      document.getElementById('profile-phone').textContent = data.user.phone || '';
+      document.getElementById('profile-email').textContent = data.user.email || '';
 
       const plan = data.user.plan || 'etag';
       const planNames = { etag: 'eTag (Free)', standard: 'Standard', premium: 'Premium', business: 'Business' };
-      document.getElementById('profile-plan').textContent = 'â­ ' + (planNames[plan] || plan);
+      document.getElementById('profile-plan').textContent = ' ' + (planNames[plan] || plan);
       document.getElementById('plan-info').textContent = (planNames[plan] || plan) + ' plan';
     }
 
     if (data.tags && data.tags.length > 0) {
       tagData = data.tags[0];
-      document.getElementById('tag-info').textContent = 'TMC.' + tagData.token.replace('TMC','') + ' Â· ' + (tagData.status || 'unknown');
+      document.getElementById('tag-info').textContent = 'TMC.' + tagData.token.replace('TMC','') + '  ' + (tagData.status || 'unknown');
     }
   } catch(e) {
     console.error('Settings load error:', e);
@@ -179,8 +179,8 @@ async function saveProfile() {
       localStorage.setItem('tmc_email', email);
       document.getElementById('profile-name').textContent = name;
       document.getElementById('profile-av').textContent = name[0].toUpperCase();
-      document.getElementById('profile-phone').textContent = phone || 'â€”';
-      document.getElementById('profile-email').textContent = email || 'â€”';
+      document.getElementById('profile-phone').textContent = phone || '';
+      document.getElementById('profile-email').textContent = email || '';
       closeEdit();
       showToast('Profile updated!');
     } else {
@@ -213,4 +213,5 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
 
