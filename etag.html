@@ -54,10 +54,10 @@ async function loadTagData() {
       // Accept any tag status for eTag download
 
       const tag = data.tags[0];
-      tagToken = tag.token;
+      tagToken = tag.token.includes("-") ? tag.token : "TMC-" + tag.token.replace(/^TMC/i,"");
       tagURL = 'https://tapmycar.io/tag/' + tag.token;
       const label = tag.vehicle_label || s.name || 'Your eTag';
-      document.getElementById('tag-name').textContent = label + '  #' + tag.token;
+      document.getElementById('tag-name').textContent = label + '  #' + tagToken;
       const etagTok = tag.token.includes('-') ? tag.token : 'TMC-' + tag.token.replace(/^TMC/i,'');
       document.getElementById('sticker-token').textContent = '#' + etagTok;
 
@@ -410,6 +410,8 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
+
 
 
 
