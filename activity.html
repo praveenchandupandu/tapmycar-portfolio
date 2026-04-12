@@ -1,28 +1,25 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#FF6B00">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="TapMyCar">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Activity - TapMyCar</title>
-<link rel="stylesheet" href="/app.css">
+  <meta name="theme-color" content="#FF6B00">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Activity - TapMyCar</title>
+  <link rel="stylesheet" href="/app.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-    #map{height:220px;border-radius:14px;overflow:hidden;margin-bottom:14px;z-index:1}
-    .map-blur{filter:blur(6px);pointer-events:none}
-    .map-overlay{position:relative}
-    .map-upgrade{position:absolute;top:0;left:0;right:0;bottom:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.85);border-radius:14px;text-align:center;padding:20px}
+    #map{height:220px;border-radius:14px;overflow:hidden;margin-bottom:14px;z-index:1;background:#F3F4F6}
     .filter-row{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px}
     .filter-btn{background:#F3F4F6;border:none;border-radius:99px;padding:6px 14px;font-size:11px;font-weight:600;color:#6B7280;cursor:pointer;font-family:inherit;white-space:nowrap}
     .filter-btn.active{background:#FF6B00;color:#fff}
-    .scan-item{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:.5px solid var(--bd)}
+    .scan-item{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:.5px solid var(--bd);cursor:pointer}
     .scan-item:last-child{border-bottom:none}
     .scan-icon{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .detail-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center}
+    .detail-overlay.show{display:flex}
+    .detail-sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:24px 20px 34px}
   </style>
 </head>
 <body>
@@ -38,110 +35,36 @@
 <div class="chev"></div>
 <div class="page">
   <div class="page-inner">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px">
-      <div class="card" style="text-align:center"><div style="font-size:28px;font-weight:800;color:var(--or)" id="total-scans">0</div><div style="font-size:9px;color:var(--gy);margin-top:2px">Total scans</div></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+      <div class="card" style="text-align:center;padding:14px 8px"><div style="font-size:26px;font-weight:800;color:var(--or);line-height:1" id="total-scans">0</div><div style="font-size:9px;color:var(--gy);margin-top:4px">Total scans</div></div>
       <div class="card" style="text-align:center;padding:14px 8px"><div style="font-size:26px;font-weight:800;color:var(--or);line-height:1" id="total-calls">0</div><div style="font-size:9px;color:var(--gy);margin-top:4px">Calls made</div></div>
       <div class="card" style="text-align:center;padding:14px 8px"><div style="font-size:26px;font-weight:800;color:var(--or);line-height:1" id="total-msgs">0</div><div style="font-size:9px;color:var(--gy);margin-top:4px">Messages</div></div>
     </div>
     <div style="font-size:15px;font-weight:700;color:var(--bk);margin-bottom:10px">Scan Locations</div>
-    <div class="map-overlay" id="map-wrapper">
+    <div style="position:relative;margin-bottom:14px">
       <div id="map"></div>
-      <div id="map-upgrade-overlay" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;z-index:10;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.85);border-radius:14px;text-align:center;padding:20px">
+      <div id="map-upgrade" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;z-index:10;background:rgba(255,255,255,.9);border-radius:14px;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px">
         <div style="font-size:14px;font-weight:700;color:#111;margin-bottom:4px">Upgrade to see scan locations</div>
         <div style="font-size:11px;color:#6B7280;margin-bottom:12px">Standard plan includes scan location map</div>
         <a href="/pricing.html" style="background:#FF6B00;color:#fff;font-size:12px;font-weight:700;padding:8px 20px;border-radius:99px;text-decoration:none">Upgrade now</a>
       </div>
     </div>
     <div class="filter-row">
-      <button class="filter-btn active" onclick="filterScans('all', this)">All</button>
-      <button class="filter-btn" onclick="filterScans('view', this)">Views</button>
-      <button class="filter-btn" onclick="filterScans('call', this)">Calls</button>
-      <button class="filter-btn" onclick="filterScans('quick_message', this)">Messages</button>
-      <button class="filter-btn" onclick="filterScans('photo', this)">Photos</button>
+      <button class="filter-btn active" onclick="filterScans('all',this)">All</button>
+      <button class="filter-btn" onclick="filterScans('view',this)">Views</button>
+      <button class="filter-btn" onclick="filterScans('call',this)">Calls</button>
+      <button class="filter-btn" onclick="filterScans('quick_message',this)">Messages</button>
+      <button class="filter-btn" onclick="filterScans('photo',this)">Photos</button>
     </div>
     <div style="font-size:15px;font-weight:700;color:var(--bk);margin-bottom:10px">All Scans</div>
-    <div id="scan-list">
-      <div style="text-align:center;padding:30px 20px;color:var(--gy);font-size:13px">No scans yet  share your QR code to get started.</div>
+    <div class="card" style="padding:0 16px" id="scan-list">
+      <div style="text-align:center;padding:30px 0;color:var(--gy);font-size:13px">No scans yet - share your QR code to get started.</div>
     </div>
   </div>
 </div>
-<nav class="bnav">
-  <a href="/dashboard.html" class="bni"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></a>
-  <a href="/etag.html" class="bni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Tag</span></a>
-  <a href="/activity.html" class="bni active"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Activity</span><div class="bni-dot"></div></a>
-  <a href="/settings.html" class="bni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></a>
-</nav>
-<script src="/app.js"></script>
-<script>
-requireAuth();
-const s = getSession();
-let allScans = [];
 
-async function loadActivity() {
-  try {
-    const res = await fetch("/api/get-dashboard?limit=50&user_id=" + s.token);
-    const data = await res.json();
-    const userPlan = data.user ? (data.user.plan || "free") : "free";
-    document.getElementById("total-scans").textContent = data.scanCount || 0;
-    if (data.recentScans) {
-      const calls = data.recentScans.filter(s => s.action === "call" || s.contact_action === "call").length;
-      const msgs = data.recentScans.filter(s => s.action === "quick_message" || s.contact_action === "quick_message").length;
-      document.getElementById("total-calls").textContent = calls;
-      document.getElementById("total-msgs").textContent = msgs;
-      allScans = data.recentScans;
-      renderScans(allScans);
-      initMap(data.recentScans, userPlan);
-    }
-  } catch(e) { console.error(e); }
-}
-
-function initMap(scans, plan) {
-  const isPremium = ["standard","premium","business","etag"].includes(plan);
-  const map = L.map("map", { zoomControl: true, attributionControl: false });
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
-  if (!isPremium) {
-    map.setView([39.5, -98.35], 4);
-    document.getElementById("map").style.filter = "blur(6px)";
-    document.getElementById("map-upgrade-overlay").style.display = "flex";
-    return;
-  }
-  const scansWithLocation = scans.filter(s => s.latitude && s.longitude);
-  if (scansWithLocation.length > 0) {
-    const markers = scansWithLocation.map(scan => {
-      const color = scan.action === "call" ? "#16A34A" : scan.action === "quick_message" ? "#FF6B00" : "#6B7280";
-      const icon = L.divIcon({ html: "<div style=\"width:12px;height:12px;border-radius:50%;background:" + color + ";border:2px solid #fff;box-shadow:0 2px 4px rgba(0,0,0,.3)\"></div>", className: "", iconSize: [12,12] });
-      return L.marker([scan.latitude, scan.longitude], { icon }).bindPopup("<b>" + new Date(scan.scanned_at).toLocaleDateString() + "</b><br>" + (scan.action || "view"));
-    });
-    const group = L.featureGroup(markers).addTo(map);
-    map.fitBounds(group.getBounds().pad(0.3));
-  } else {
-    map.setView([39.5, -98.35], 4);
-  }
-}
-
-function renderScans(scans) {
-  if (!scans || scans.length === 0) {
-    document.getElementById("scan-list").innerHTML = "<div style=\"text-align:center;padding:30px 0;color:var(--gy);font-size:13px\">No scans yet - share your QR code to get started.</div>";
-    return;
-  }
-  const cfg = {
-    call: { color: "#DCFCE7", stroke: "#16A34A", label: "Call", sp: "sp-on" },
-    quick_message: { color: "#FFF3EC", stroke: "#FF6B00", label: "Message", sp: "sp-or" },
-    photo: { color: "#EDE9FE", stroke: "#7C3AED", label: "Photo", sp: "sp-am" },
-    view: { color: "#F3F4F6", stroke: "#6B7280", label: "View", sp: "sp-am" }
-  };
-  const html = scans.map(scan => {
-    const action = scan.contact_action || scan.action || "view";
-    const c = cfg[action] || cfg.view;
-    const timeStr = new Date(scan.scanned_at).toLocaleString("en-US", {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
-    const hasLoc = scan.latitude && scan.longitude;
-    return "<div class=\"scan-item\" style=\"cursor:pointer\" onclick=\"openDetail(allScans[" + allScans.indexOf(scan) + "])\"><div style=\"display:flex;align-items:center;gap:10px\"><div class=\"scan-icon\" style=\"background:" + c.color + "\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"" + c.stroke + "\" stroke-width=\"2\" stroke-linecap=\"round\"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/></svg></div><div><div style=\"font-size:13px;font-weight:600;color:var(--bk)\">" + timeStr + "</div><div style=\"font-size:10px;color:var(--gy)\">" + c.label + " - " + (scan.device_type || "mobile") + (hasLoc ? " - Location recorded" : "") + "</div></div></div><span class=\"sp " + c.sp + "\" style=\"font-size:10px;padding:4px 10px\">" + c.label + "</span></div>";
-  }).join("");
-  document.getElementById("scan-list").innerHTML = html;
-}
-
-<div id="scan-detail-overlay" onclick="if(event.target===this)closeDetail()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center">
-  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:24px 20px 34px">
+<div class="detail-overlay" id="detail-overlay" onclick="if(event.target===this)closeDetail()">
+  <div class="detail-sheet">
     <div style="width:36px;height:4px;border-radius:2px;background:#E5E7EB;margin:0 auto 20px"></div>
     <div style="font-size:16px;font-weight:800;color:#111;margin-bottom:4px" id="detail-title">Scan Details</div>
     <div style="font-size:12px;color:#6B7280;margin-bottom:16px" id="detail-time"></div>
@@ -155,86 +78,141 @@ function renderScans(scans) {
         <div style="font-size:13px;font-weight:700;color:#111" id="detail-device">-</div>
       </div>
     </div>
-    <div id="detail-map" style="height:180px;border-radius:14px;overflow:hidden;margin-bottom:12px"></div>
-    <div id="detail-no-location" style="display:none;background:#F9FAFB;border-radius:14px;padding:20px;text-align:center;margin-bottom:12px">
-      <div style="font-size:13px;color:#6B7280">No location data for this scan</div>
-    </div>
-    <a id="detail-maps-btn" href="#" target="_blank" style="display:none;background:#FF6B00;color:#fff;font-size:13px;font-weight:700;padding:13px 0;border-radius:13px;text-align:center;text-decoration:none;display:block;margin-bottom:8px">View on Google Maps</a>
+    <div id="detail-map" style="height:180px;border-radius:14px;overflow:hidden;margin-bottom:12px;background:#F3F4F6"></div>
+    <div id="detail-no-loc" style="display:none;background:#F9FAFB;border-radius:14px;padding:20px;text-align:center;margin-bottom:12px;font-size:13px;color:#6B7280">No location data for this scan</div>
+    <a id="detail-gmaps" href="#" target="_blank" style="display:block;background:#FF6B00;color:#fff;font-size:13px;font-weight:700;padding:13px 0;border-radius:13px;text-align:center;text-decoration:none;margin-bottom:8px">View on Google Maps</a>
     <button onclick="closeDetail()" style="width:100%;height:44px;border-radius:13px;border:1.5px solid #E5E7EB;background:#fff;font-size:13px;font-weight:600;color:#6B7280;cursor:pointer;font-family:inherit">Close</button>
   </div>
 </div>
 
-function filterScans(type, btn) {
-  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
-  btn.classList.add("active");
-  renderScans(type === "all" ? allScans : allScans.filter(s => (s.contact_action || s.action) === type));
-}
+<nav class="bnav">
+  <a href="/dashboard.html" class="bni"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></a>
+  <a href="/manage.html" class="bni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Tag</span></a>
+  <a href="/activity.html" class="bni active"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Activity</span><div class="bni-dot"></div></a>
+  <a href="/settings.html" class="bni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></a>
+</nav>
 
-loadActivity();
+<div class="toast" id="toast"><div class="toast-ic"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span id="toast-msg"></span></div>
 
+<script src="/app.js"></script>
+<script>
+requireAuth();
+const s = getSession();
+let allScans = [];
+let mainMap = null;
 let detailMap = null;
 
-function openDetail(scan) {
-  const overlay = document.getElementById("scan-detail-overlay");
-  overlay.style.display = "flex";
-  overlay.style.flexDirection = "column";
-  overlay.style.justifyContent = "flex-end";
-  overlay.style.alignItems = "center";
+async function loadActivity() {
+  try {
+    const res = await fetch('/api/get-dashboard?user_id=' + s.token);
+    const data = await res.json();
+    const userPlan = data.user ? (data.user.plan || 'free') : 'free';
+    document.getElementById('total-scans').textContent = data.scanCount || 0;
+    if (data.recentScans) {
+      const calls = data.recentScans.filter(x => x.action === 'call' || x.contact_action === 'call').length;
+      const msgs = data.recentScans.filter(x => x.action === 'quick_message' || x.contact_action === 'quick_message').length;
+      document.getElementById('total-calls').textContent = calls;
+      document.getElementById('total-msgs').textContent = msgs;
+      allScans = data.recentScans;
+      renderScans(allScans);
+      initMap(data.recentScans, userPlan);
+    }
+  } catch(e) { console.error(e); }
+}
 
-  const action = scan.contact_action || scan.action || "view";
-  const labels = { call: "Call", quick_message: "Message", photo: "Photo", view: "View" };
-  const timeStr = new Date(scan.scanned_at).toLocaleString("en-US", {weekday:"short", month:"short", day:"numeric", hour:"numeric", minute:"2-digit"});
+function initMap(scans, plan) {
+  const isPremium = ['standard','premium','business','etag'].includes(plan);
+  mainMap = L.map('map', { zoomControl: false, attributionControl: false });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mainMap);
+  if (!isPremium) {
+    mainMap.setView([39.5, -98.35], 4);
+    document.getElementById('map').style.filter = 'blur(5px)';
+    document.getElementById('map-upgrade').style.display = 'flex';
+    return;
+  }
+  const withLoc = scans.filter(x => x.latitude && x.longitude);
+  if (withLoc.length > 0) {
+    const markers = withLoc.map(scan => {
+      const color = scan.action === 'call' ? '#16A34A' : scan.action === 'quick_message' ? '#FF6B00' : '#6B7280';
+      const icon = L.divIcon({ html: '<div style="width:12px;height:12px;border-radius:50%;background:' + color + ';border:2px solid #fff;box-shadow:0 2px 4px rgba(0,0,0,.3)"></div>', className: '', iconSize: [12,12] });
+      return L.marker([scan.latitude, scan.longitude], { icon }).bindPopup(new Date(scan.scanned_at).toLocaleDateString() + ' - ' + (scan.action || 'view'));
+    });
+    const group = L.featureGroup(markers).addTo(mainMap);
+    mainMap.fitBounds(group.getBounds().pad(0.3));
+  } else {
+    mainMap.setView([39.5, -98.35], 4);
+  }
+}
 
-  document.getElementById("detail-title").textContent = labels[action] || "Scan";
-  document.getElementById("detail-time").textContent = timeStr;
-  document.getElementById("detail-action").textContent = labels[action] || "View";
-  document.getElementById("detail-device").textContent = scan.device_type || "Mobile";
+function renderScans(scans) {
+  if (!scans || scans.length === 0) {
+    document.getElementById('scan-list').innerHTML = '<div style="text-align:center;padding:30px 0;color:var(--gy);font-size:13px">No scans yet - share your QR code to get started.</div>';
+    return;
+  }
+  const cfg = {
+    call: { bg: '#DCFCE7', stroke: '#16A34A', label: 'Call', sp: 'sp-on' },
+    quick_message: { bg: '#FFF3EC', stroke: '#FF6B00', label: 'Message', sp: 'sp-or' },
+    photo: { bg: '#EDE9FE', stroke: '#7C3AED', label: 'Photo', sp: 'sp-am' },
+    view: { bg: '#F3F4F6', stroke: '#6B7280', label: 'View', sp: 'sp-am' }
+  };
+  document.getElementById('scan-list').innerHTML = scans.map((scan, i) => {
+    const action = scan.contact_action || scan.action || 'view';
+    const c = cfg[action] || cfg.view;
+    const t = new Date(scan.scanned_at).toLocaleString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+    const hasLoc = scan.latitude && scan.longitude;
+    return '<div class="scan-item" onclick="openDetail(' + i + ')">' +
+      '<div style="display:flex;align-items:center;gap:10px">' +
+      '<div class="scan-icon" style="background:' + c.bg + '">' +
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="' + c.stroke + '" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>' +
+      '<div><div style="font-size:13px;font-weight:600;color:var(--bk)">' + t + '</div>' +
+      '<div style="font-size:10px;color:var(--gy)">' + c.label + ' - ' + (scan.device_type || 'mobile') + (hasLoc ? ' - Location recorded' : '') + '</div></div></div>' +
+      '<span class="sp ' + c.sp + '" style="font-size:10px;padding:4px 10px">' + c.label + '</span></div>';
+  }).join('');
+}
 
-  // Clear old map
+function filterScans(type, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderScans(type === 'all' ? allScans : allScans.filter(x => (x.contact_action || x.action) === type));
+}
+
+function openDetail(index) {
+  const scan = allScans[index];
+  if (!scan) return;
+  const action = scan.contact_action || scan.action || 'view';
+  const labels = { call: 'Call', quick_message: 'Message', photo: 'Photo', view: 'View' };
+  document.getElementById('detail-title').textContent = labels[action] || 'Scan';
+  document.getElementById('detail-time').textContent = new Date(scan.scanned_at).toLocaleString('en-US', {weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+  document.getElementById('detail-action').textContent = labels[action] || 'View';
+  document.getElementById('detail-device').textContent = scan.device_type || 'Mobile';
   if (detailMap) { detailMap.remove(); detailMap = null; }
-  document.getElementById("detail-map").innerHTML = "";
-
+  document.getElementById('detail-map').innerHTML = '';
   if (scan.latitude && scan.longitude) {
-    document.getElementById("detail-map").style.display = "block";
-    document.getElementById("detail-no-location").style.display = "none";
-    document.getElementById("detail-maps-btn").style.display = "block";
-    document.getElementById("detail-maps-btn").href = "https://maps.google.com/?q=" + scan.latitude + "," + scan.longitude;
-
+    document.getElementById('detail-map').style.display = 'block';
+    document.getElementById('detail-no-loc').style.display = 'none';
+    document.getElementById('detail-gmaps').style.display = 'block';
+    document.getElementById('detail-gmaps').href = 'https://maps.google.com/?q=' + scan.latitude + ',' + scan.longitude;
     setTimeout(() => {
-      detailMap = L.map("detail-map", { zoomControl: true, attributionControl: false });
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(detailMap);
+      detailMap = L.map('detail-map', { zoomControl: true, attributionControl: false });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(detailMap);
       detailMap.setView([scan.latitude, scan.longitude], 15);
       L.marker([scan.latitude, scan.longitude]).addTo(detailMap);
     }, 100);
   } else {
-    document.getElementById("detail-map").style.display = "none";
-    document.getElementById("detail-no-location").style.display = "block";
-    document.getElementById("detail-maps-btn").style.display = "none";
+    document.getElementById('detail-map').style.display = 'none';
+    document.getElementById('detail-no-loc').style.display = 'block';
+    document.getElementById('detail-gmaps').style.display = 'none';
   }
+  document.getElementById('detail-overlay').classList.add('show');
 }
 
 function closeDetail() {
-  document.getElementById("scan-detail-overlay").style.display = "none";
+  document.getElementById('detail-overlay').classList.remove('show');
   if (detailMap) { detailMap.remove(); detailMap = null; }
 }
+
+loadActivity();
 </script>
-<script>
-if ("serviceWorker" in navigator) { navigator.serviceWorker.register("/sw.js"); }
-</script>
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js');
-}
-</script>
+<script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }</script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
