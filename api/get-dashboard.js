@@ -201,7 +201,7 @@ module.exports = async function handler(req, res) {
     .select('*')
     .in('tag_id', tags ? tags.map(t => t.id) : [])
     .order('scanned_at', { ascending: false })
-    .limit(5);
+    .limit(50);
 
   res.json({
     user,
@@ -211,6 +211,7 @@ module.exports = async function handler(req, res) {
     recentScans: recentScans || []
   });
 };
+
 
 
 

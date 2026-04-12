@@ -79,7 +79,7 @@ let allScans = [];
 
 async function loadActivity() {
   try {
-    const res = await fetch("/api/get-dashboard?user_id=" + s.token);
+    const res = await fetch("/api/get-dashboard?limit=50&user_id=" + s.token);
     const data = await res.json();
     const userPlan = data.user ? (data.user.plan || "free") : "free";
     document.getElementById("total-scans").textContent = data.scanCount || 0;
@@ -158,6 +158,7 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
