@@ -7,12 +7,6 @@
       "maxDuration": 10
     }
   },
-  "crons": [
-    {
-      "path": "/api/daily-report",
-      "schedule": "0 8 * * *"
-    }
-  ],
   "rewrites": [
     { "source": "/tag/:token", "destination": "/contact.html" },
     { "source": "/api/:path*", "destination": "/api/:path*" }
