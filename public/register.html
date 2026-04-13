@@ -130,7 +130,7 @@ async function verifyOTP() {
     if (data.token) {
       saveSession(data.token, data.phone || phone, data.name || name);
       localStorage.setItem('tmc_email', email);
-      window.location.href = '/etag.html';
+      window.location.href = '/dashboard.html';
     } else {
       showToast(data.error || 'Wrong code  try again');
     }
@@ -144,3 +144,4 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
