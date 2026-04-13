@@ -138,7 +138,13 @@ function initMap(scans, plan) {
       return L.marker([scan.latitude, scan.longitude], { icon }).bindPopup(new Date(scan.scanned_at).toLocaleDateString() + ' - ' + (scan.action || 'view'));
     });
     const group = L.featureGroup(markers).addTo(mainMap);
-    mainMap.fitBounds(group.getBounds().pad(0.3));
+    mainmainMap.fitBounds(group.getBounds().pad(0.3));
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(pos => {
+        const blueDot = L.divIcon({ html: "<div style=\"width:14px;height:14px;border-radius:50%;background:#2563EB;border:3px solid #fff;box-shadow:0 2px 6px rgba(37,99,235,.5)\"></div>", className: "", iconSize: [14,14] });
+        L.marker([pos.coords.latitude, pos.coords.longitude], { icon: blueDot }).bindPopup("Your location").addTo(mainMap);
+      });
+    }
   } else {
     mainMap.setView([39.5, -98.35], 4);
   }
@@ -204,7 +210,7 @@ function openDetail(index) {
   }
   if (detailMap) { detailMap.remove(); detailMap = null; }
   document.getElementById('detail-map').innerHTML = '';
-  if (scan.latitude && scan.longitude) {
+  if (action === "view" && scan.latitude && scan.longitude) {
     document.getElementById('detail-map').style.display = 'block';
     document.getElementById('detail-no-loc').style.display = 'none';
     document.getElementById('detail-gmaps').style.display = 'block';
@@ -215,10 +221,14 @@ function openDetail(index) {
       detailMap.setView([scan.latitude, scan.longitude], 15);
       L.marker([scan.latitude, scan.longitude]).addTo(detailMap);
     }, 100);
+  } else if (action === "view") {
+    document.getElementById("detail-map").style.display = "none";
+    document.getElementById("detail-no-loc").style.display = "block";
+    document.getElementById("detail-gmaps").style.display = "none";
   } else {
-    document.getElementById('detail-map').style.display = 'none';
-    document.getElementById('detail-no-loc').style.display = 'block';
-    document.getElementById('detail-gmaps').style.display = 'none';
+    document.getElementById("detail-map").style.display = "none";
+    document.getElementById("detail-no-loc").style.display = "none";
+    document.getElementById("detail-gmaps").style.display = "none";
   }
   document.getElementById('detail-overlay').classList.add('show');
 }
@@ -233,6 +243,10 @@ loadActivity();
 <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }</script>
 </body>
 </html>
+
+
+
+
 
 
 
