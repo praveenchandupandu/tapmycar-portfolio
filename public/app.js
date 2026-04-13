@@ -843,3 +843,30 @@ if (window.location.pathname.includes('dashboard')) {
   });
 }
 
+
+async function registerPush() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  const s = getSession();
+  if (!s || !s.token) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') return;
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: 'EKYvbjg84PwT28vsbESyR45_5mR7eiLG-NCqFPz0kAsZUCTA7see54fuytLQ6S_NCxheRYPO93OhqM3HK3HNpxg'
+    });
+    const key = sub.getKey('p256dh');
+    const auth = sub.getKey('auth');
+    await fetch('/api/save-push-subscription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: s.token,
+        endpoint: sub.endpoint,
+        p256dh: btoa(String.fromCharCode(...new Uint8Array(key))),
+        auth: btoa(String.fromCharCode(...new Uint8Array(auth)))
+      })
+    });
+  } catch(e) { console.error('Push registration error:', e); }
+}

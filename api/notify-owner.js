@@ -134,6 +134,21 @@ module.exports = async function handler(req, res) {
       await supabase.from("scan_logs").update(scanUpdate).eq("id", scan_id);
     } catch(e) { console.error("scan log update error:", e); }
   }
+  // Send push notification to owner
+  try {
+    const { data: tag } = await supabase.from("tags").select("owner_id").eq("id", tag_id).single();
+    if (tag && tag.owner_id) {
+      const actionLabels = { quick_message: "sent you a message", photo: "sent you a photo", call: "called you" };
+      const label = actionLabels[action] || "scanned your tag";
+      const baseUrl = process.env.VERCEL_URL ? "https://" + process.env.VERCEL_URL : "https://tapmycar.io";
+      await fetch(baseUrl + "/api/send-push", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: tag.owner_id, title: "TapMyCar Alert", body: "Someone " + label + "!", url: "/activity.html" })
+      });
+    }
+  } catch(e) { console.error("Push error:", e.message); }
+
   res.json({ success: true });
 };
 
