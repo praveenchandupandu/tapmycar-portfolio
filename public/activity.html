@@ -221,7 +221,7 @@ function openDetail(index) {
       detailMap.setView([scan.latitude, scan.longitude], 15);
       L.marker([scan.latitude, scan.longitude]).addTo(detailMap);
     }, 100);
-  } else if (action === "view") {
+  } else if (action === "view" && !scan.latitude) {
     document.getElementById("detail-map").style.display = "none";
     document.getElementById("detail-no-loc").style.display = "block";
     document.getElementById("detail-gmaps").style.display = "none";
@@ -243,6 +243,8 @@ loadActivity();
 <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }</script>
 </body>
 </html>
+
+
 
 
 
