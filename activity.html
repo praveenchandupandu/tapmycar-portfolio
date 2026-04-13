@@ -225,8 +225,9 @@ function openDetail(index) {
 
   document.getElementById('detail-content').innerHTML = contentHTML;
 
-  if ((action === 'view' || action === 'quick_message') && scan.latitude && scan.longitude && document.getElementById('detail-map-container')) {
+  if ((action === 'view' || action === 'quick_message') && scan.latitude && scan.longitude) {
     setTimeout(() => {
+      if (!document.getElementById('detail-map-container')) return;
       detailMap = L.map('detail-map-container', { zoomControl: true, attributionControl: false });
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(detailMap);
       detailMap.setView([scan.latitude, scan.longitude], 15);
