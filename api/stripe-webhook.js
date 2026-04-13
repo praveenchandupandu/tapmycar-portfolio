@@ -40,6 +40,26 @@ module.exports = async function handler(req, res) {
 
       await supabase.from("users").update({ plan: plan || "etag" }).eq("id", user_id);
 
+      // Referral reward logic - only for paid plans (not etag)
+      if (plan === "standard" || plan === "premium") {
+        const { data: buyer } = await supabase.from("users").select("referred_by").eq("id", user_id).single();
+        if (buyer && buyer.referred_by) {
+          const { data: referrer } = await supabase.from("users").select("id, referral_count, referral_credits, referral_reward_pending").eq("referral_code", buyer.referred_by).single();
+          if (referrer) {
+            const newCount = (referrer.referral_count || 0) + 1;
+            let updates = { referral_count: newCount };
+            if (newCount === 1) {
+              // First referral - $3 discount credit
+              updates.referral_credits = (referrer.referral_credits || 0) + 3.00;
+            } else {
+              // 2nd+ referral - choice reward
+              updates.referral_reward_pending = "choice";
+            }
+            await supabase.from("users").update(updates).eq("id", referrer.id);
+          }
+        }
+      }
+
       // Auto-start subscription after 30 days for standard/premium
       if (plan === "standard" || plan === "premium") {
         const { data: user } = await supabase.from("users").select("*").eq("id", user_id).single();

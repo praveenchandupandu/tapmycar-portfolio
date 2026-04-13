@@ -163,6 +163,18 @@ module.exports = async function handler(req, res) {
     // Auto-assign tag for new users
     if (isNewUser && user) {
       await assignFreeTag(user.id);
+      // Generate referral code
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      let refCode = "TMC-";
+      for (let i = 0; i < 6; i++) refCode += chars[Math.floor(Math.random() * chars.length)];
+      // Save referral code and referred_by
+      const refBy = req.body.ref_code || null;
+      let referredBy = null;
+      if (refBy) {
+        const { data: referrer } = await supabase.from("users").select("id").eq("referral_code", refBy).single();
+        if (referrer) referredBy = refBy;
+      }
+      await supabase.from("users").update({ referral_code: refCode, referred_by: referredBy }).eq("id", user.id);
     }
 
     return res.json({ token: user.id, name: user.name, phone: user.phone, email: user.email });

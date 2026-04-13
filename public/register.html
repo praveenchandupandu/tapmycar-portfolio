@@ -124,7 +124,7 @@ async function verifyOTP() {
     const res = await fetch('/api/verify-otp', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ email, code, name, phone })
+      body: JSON.stringify({ email, code, name, phone, ref_code: localStorage.getItem('tmc_ref') || null })
     });
     const data = await res.json();
     if (data.token) {
