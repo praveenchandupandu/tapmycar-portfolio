@@ -177,8 +177,9 @@ function filterScans(type, btn) {
 }
 
 function openDetail(index) {
-  const scan = allScans[index];
+  const scan = (window._displayedScans || allScans)[index];
   if (!scan) return;
+  
   const action = scan.contact_action || scan.action || 'view';
   const labels = { call: 'Call', quick_message: 'Message', photo: 'Photo', view: 'View' };
   document.getElementById('detail-title').textContent = labels[action] || 'Scan';
@@ -232,3 +233,6 @@ loadActivity();
 <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }</script>
 </body>
 </html>
+
+
+
