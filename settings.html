@@ -97,7 +97,27 @@
     </div>
     <div class="edit-field">
       <label>Phone number</label>
-      <input type="tel" id="edit-phone" placeholder="+1 (203) 555-0100">
+      <div style="display:flex;gap:8px;align-items:stretch">
+      <select id="edit-country-code" style="height:46px;border:1.5px solid #E5E7EB;border-radius:11px;padding:0 10px;font-size:14px;font-family:'Inter',sans-serif;background:#F9FAFB;outline:none;color:#111;min-width:90px">
+        <option value="+1">???? +1</option>
+        <option value="+44">???? +44</option>
+        <option value="+91">???? +91</option>
+        <option value="+61">???? +61</option>
+        <option value="+1-CA">???? +1</option>
+        <option value="+49">???? +49</option>
+        <option value="+33">???? +33</option>
+        <option value="+39">???? +39</option>
+        <option value="+34">???? +34</option>
+        <option value="+55">???? +55</option>
+        <option value="+52">???? +52</option>
+        <option value="+971">???? +971</option>
+        <option value="+65">???? +65</option>
+        <option value="+81">???? +81</option>
+        <option value="+82">???? +82</option>
+        <option value="+86">???? +86</option>
+      </select>
+      <input type="tel" id="edit-phone" placeholder="(203) 555-0100" style="flex:1;height:46px;border:1.5px solid #E5E7EB;border-radius:11px;padding:0 14px;font-size:14px;font-family:'Inter',sans-serif;background:#F9FAFB;outline:none">
+    </div>
     </div>
     <div class="edit-field">
       <label>Email address</label>
@@ -166,7 +186,7 @@ function closeEdit() { document.getElementById('edit-overlay').classList.remove(
 
 async function saveProfile() {
   const name = document.getElementById('edit-name').value.trim();
-  const phone = document.getElementById('edit-phone').value.trim();
+  const editCC = document.getElementById('edit-country-code').value.replace('-CA',''); const phoneRaw = document.getElementById('edit-phone').value.trim().replace(/[^0-9]/g,''); const phone = phoneRaw ? editCC + phoneRaw : '';
   const email = document.getElementById('edit-email').value.trim();
   const emergencyName = document.getElementById('edit-emergency-name').value.trim();
   const emergencyPhone = document.getElementById('edit-emergency-phone').value.trim();
