@@ -65,7 +65,7 @@ module.exports = async function handler(req, res) {
 
     await resend.emails.send({
       from: "TapMyCar <noreply@tapmycar.io>",
-      to: "pramantechllc@gmail.com",
+      to: "support@tapmycar.io",
       subject: `TapMyCar Daily Report - ${dateStr}`,
       html: `<div style="font-family:Inter,sans-serif;max-width:500px;margin:0 auto;padding:40px 20px">
         <div style="font-size:24px;font-weight:800;color:#111;margin-bottom:4px">TapMyCar<span style="color:#FF6B00">.</span></div>

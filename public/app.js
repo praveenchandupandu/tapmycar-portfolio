@@ -331,7 +331,7 @@ HOW IT WORKS:
 COMMON ISSUES:
 - QR not scanning  Ensure good lighting, clean QR, camera focused. Try zooming in.
 - Can't download PDF  Log in first, then go to Tag page
-- Want a refund  Email pramantechllc@gmail.com, refunds within 30 days
+- Want a refund  Email support@tapmycar.io, refunds within 30 days
 - Sticker not arrived  Ships after day 30, check dashboard for status
 - Lost my tag  Sign in with email, tag is still active
 - Pause tag  Toggle from dashboard
@@ -341,7 +341,7 @@ RULES:
 - Be warm, human-like, concise. Short sentences. 2-3 sentences max.
 - NEVER mention prices or dollar amounts unless the user specifically asks about pricing or cost
 - If someone says hi/hello, respond warmly and ask how you can help
-- If you cannot solve something, say "Let me connect you with our team  email pramantechllc@gmail.com and we will help you within 24 hours."
+- If you cannot solve something, say "Let me connect you with our team  email support@tapmycar.io and we will help you within 24 hours."
 - Never make up features that don't exist
 - Always be soft and respectful`;
 
@@ -545,12 +545,12 @@ function getSmartResponse(question) {
 
   // Refund
   if (q.includes('refund') || q.includes('money back') || q.includes('charge')) {
-    return 'We offer full refunds within 30 days, no questions asked. Just email pramantechllc@gmail.com with your account email and we\'ll process it right away.';
+    return 'We offer full refunds within 30 days, no questions asked. Just email support@tapmycar.io with your account email and we\'ll process it right away.';
   }
 
   // Sticker / shipping
   if (q.includes('sticker') || q.includes('ship') || q.includes('deliver') || q.includes('physical')) {
-    return 'Physical stickers ship after your 30-day period. You can check the status on your dashboard. If it\'s been longer than expected, email us at pramantechllc@gmail.com and we\'ll look into it.';
+    return 'Physical stickers ship after your 30-day period. You can check the status on your dashboard. If it\'s been longer than expected, email us at support@tapmycar.io and we\'ll look into it.';
   }
 
   // Pause tag
@@ -565,7 +565,7 @@ function getSmartResponse(question) {
 
   // Cancel
   if (q.includes('cancel') || q.includes('unsubscribe') || q.includes('delete account')) {
-    return 'You can cancel anytime  no long-term commitment. Email us at pramantechllc@gmail.com and we\'ll take care of it for you right away.';
+    return 'You can cancel anytime  no long-term commitment. Email us at support@tapmycar.io and we\'ll take care of it for you right away.';
   }
 
   // Lost tag
@@ -599,7 +599,7 @@ function getSmartResponse(question) {
   }
 
   // Default  friendly catch-all
-  return 'Great question! Let me connect you with our team for the best answer. Email us at pramantechllc@gmail.com and we\'ll get back to you within 24 hours. Is there anything else I can help with?';
+  return 'Great question! Let me connect you with our team for the best answer. Email us at support@tapmycar.io and we\'ll get back to you within 24 hours. Is there anything else I can help with?';
 }
 
 // Auto-inject chatbot on every page
