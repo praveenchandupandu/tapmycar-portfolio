@@ -349,7 +349,7 @@ async function saveLocation(lat,lng){
   if(!currentScanId)return;
   try{await fetch('/api/update-scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scan_id:currentScanId,latitude:lat,longitude:lng})});}catch(e){}
 }
-function handleCall(){updateScanAction('call');window.location.href='tel:+18605158987';}
+function handleCall(){updateScanAction('call');showFeedback();window.location.href='tel:+18605158987';}
 function handleText(){updateScanAction("text");showToast("Text messaging coming soon");}
 function handlePhotoSelected(input) {
   if (!input.files||!input.files[0]) return;
@@ -429,7 +429,7 @@ async function sendPhoto() {
         if (data.success) {
           document.getElementById("photo-preview-box").style.display = "none";
           document.getElementById("photo-btn").style.display = "none";
-          showToast("Photo sent to vehicle owner!");
+          showToast("Photo sent to vehicle owner!"); showFeedback();
           updateScanAction("photo");
         } else { showToast(data.error || "Failed to send photo"); }
       } catch(e) { showToast("Network error"); }
@@ -655,7 +655,79 @@ async function activateAndPay(){
 }
 
 loadTag();
+
+let selectedRating = 0;
+let feedbackShown = false;
+
+function showFeedback() {
+  if (feedbackShown) return;
+  feedbackShown = true;
+  setTimeout(() => {
+    document.getElementById('feedback-overlay').style.display = 'flex';
+    document.getElementById('feedback-overlay').style.flexDirection = 'column';
+    document.getElementById('feedback-overlay').style.justifyContent = 'flex-end';
+    document.getElementById('feedback-overlay').style.alignItems = 'center';
+  }, 2000);
+}
+
+function selectStar(n) {
+  selectedRating = n;
+  for (let i = 1; i <= 5; i++) {
+    document.getElementById('star-' + i).style.opacity = i <= n ? '1' : '.3';
+  }
+}
+
+async function submitFeedback() {
+  const email = document.getElementById('feedback-email').value.trim();
+  if (!email) { 
+    document.getElementById('feedback-email').style.borderColor = '#DC2626';
+    document.getElementById('feedback-email').placeholder = 'Email is required!';
+    return; 
+  }
+  const btn = document.getElementById('feedback-btn');
+  btn.textContent = 'Sending...'; btn.disabled = true;
+  try {
+    await fetch('/api/save-lead', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ email, tag_id: window._tagId || null, rating: selectedRating || null })
+    });
+    document.getElementById('feedback-overlay').innerHTML = '<div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:40px 20px 50px;text-align:center"><div style="font-size:40px;margin-bottom:12px">??</div><div style="font-size:18px;font-weight:800;color:#111;margin-bottom:8px">Check your email!</div><div style="font-size:13px;color:#6B7280;line-height:1.6">We sent your free TapMyCar tag link to ' + email + '</div></div>';
+    document.getElementById('feedback-overlay').style.display = 'flex';
+    setTimeout(() => { document.getElementById('feedback-overlay').style.display = 'none'; }, 4000);
+  } catch(e) { btn.textContent = 'Get My Free Tag ?'; btn.disabled = false; }
+}
+
+function closeFeedback() {
+  document.getElementById('feedback-overlay').style.display = 'none';
+}
 </script>
+
+<!-- FEEDBACK OVERLAY -->
+<div id="feedback-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:flex-end;justify-content:center">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:24px 20px 34px">
+    <div style="width:36px;height:4px;border-radius:2px;background:#E5E7EB;margin:0 auto 16px"></div>
+    <div style="font-size:18px;font-weight:800;color:#111;margin-bottom:4px">Did this help you? ??</div>
+    <div style="font-size:13px;color:#6B7280;margin-bottom:16px">Rate your experience contacting this car owner</div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-bottom:20px" id="star-row">
+      <span onclick="selectStar(1)" style="font-size:32px;cursor:pointer;opacity:.4" id="star-1">?</span>
+      <span onclick="selectStar(2)" style="font-size:32px;cursor:pointer;opacity:.4" id="star-2">?</span>
+      <span onclick="selectStar(3)" style="font-size:32px;cursor:pointer;opacity:.4" id="star-3">?</span>
+      <span onclick="selectStar(4)" style="font-size:32px;cursor:pointer;opacity:.4" id="star-4">?</span>
+      <span onclick="selectStar(5)" style="font-size:32px;cursor:pointer;opacity:.4" id="star-5">?</span>
+    </div>
+    <div style="background:#FFF3EC;border-radius:14px;padding:16px;margin-bottom:16px">
+      <div style="font-size:14px;font-weight:700;color:#FF6B00;margin-bottom:4px">?? Protect YOUR car too � it's free!</div>
+      <div style="font-size:12px;color:#374151;line-height:1.5">Get your own TapMyCar tag. Strangers can reach you privately without knowing your number.</div>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:600;color:#111;display:block;margin-bottom:6px">Your email � get your free tag link</label>
+      <input type="email" id="feedback-email" placeholder="jane@example.com" style="width:100%;height:46px;border:1.5px solid #E5E7EB;border-radius:11px;padding:0 14px;font-size:14px;font-family:'Inter',sans-serif;background:#F9FAFB;outline:none;box-sizing:border-box">
+    </div>
+    <button onclick="submitFeedback()" id="feedback-btn" style="width:100%;height:48px;border-radius:13px;border:none;background:#FF6B00;font-size:14px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;margin-bottom:8px">Get My Free Tag ?</button>
+    <button onclick="closeFeedback()" style="width:100%;height:40px;border-radius:13px;border:1.5px solid #E5E7EB;background:#fff;font-size:13px;font-weight:600;color:#6B7280;cursor:pointer;font-family:inherit">Skip</button>
+  </div>
+</div>
 </body>
 </html>
 
