@@ -1,43 +1,99 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#FF6B00">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="TapMyCar">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Pricing  TapMyCar</title>
-<link rel="stylesheet" href="/app.css">
+  <meta name="theme-color" content="#FF6B00">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Pricing TapMyCar</title>
+  <link rel="stylesheet" href="/app.css">
 </head>
 <body>
-<div class="nav"><a href="/" class="logo">Tap<span>My</span>Car<span class="logo-dot"></span></a></div>
-<div class="chev"></div><div class="tape"></div>
-<div class="page-inner">
-  <div style="text-align:center;margin-bottom:20px"><div style="font-size:22px;font-weight:800;color:var(--bk);margin-bottom:5px">Simple pricing</div><div style="font-size:13px;color:var(--gy)">One-time tag  small renewal after year one</div></div>
-  
-<!-- Discount Banner -->
-<div id="discount-banner" style="display:none;background:#DCFCE7;border:1.5px solid #BBF7D0;border-radius:14px;padding:12px 16px;margin-bottom:12px">
-  <div style="font-size:13px;font-weight:700;color:#166534">Referral discount applied!</div>
-  <div style="font-size:11px;color:#15803D;margin-top:2px">Your referral credits have been applied to the prices below.</div>
+<div class="nav">
+  <div class="bk" onclick="history.back()"><div class="bkb"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><span class="bk-label">Pricing</span></div>
 </div>
-<div id="reward-banner" style="display:none;background:#FFF3EC;border:1.5px solid #FFE4CC;border-radius:14px;padding:12px 16px;margin-bottom:12px">
-  <div style="font-size:13px;font-weight:700;color:#FF6B00">You have a pending reward!</div>
-  <div style="font-size:11px;color:#92400E;margin-top:2px">Go to Settings ? Referrals to claim your Free Standard plan or $4.99 coupon.</div>
-</div>
-<div style="border:1.5px solid #BBF7D0;border-radius:18px;padding:18px;background:#F0FDF4;margin-bottom:12px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div style="font-size:17px;font-weight:800;color:var(--bk)">eTag</div><div style="background:var(--gn);color:#fff;font-size:11px;font-weight:700;padding:3px 13px;border-radius:99px">Free</div></div><div style="font-size:12px;color:#15803D;margin-bottom:12px;font-weight:500">Download instantly  no card needed</div><div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px"><div style="font-size:12px;color:#166534;display:flex;gap:7px;align-items:flex-start"><div style="width:7px;height:7px;border-radius:1px;background:var(--gn);flex-shrink:0;margin-top:3px"></div>Register free  get digital QR instantly</div><div style="font-size:12px;color:#166534;display:flex;gap:7px;align-items:flex-start"><div style="width:7px;height:7px;border-radius:1px;background:var(--gn);flex-shrink:0;margin-top:3px"></div>No credit card required to start</div></div><button class="btn-g" onclick="window.location.href='/register.html'">Get free eTag</button></div>
-  <div style="border:2px solid var(--or);border-radius:18px;padding:18px;background:#fff;margin-bottom:12px"><div style="display:inline-block;background:var(--or);color:#fff;font-size:10px;font-weight:700;padding:3px 11px;border-radius:99px;margin-bottom:8px">Most popular</div><div style="display:flex;align-items:baseline;gap:8px;margin-bottom:5px"><div style="font-size:17px;font-weight:800;color:var(--bk)">Standard</div><div id="std-price" style="font-size:22px;font-weight:800;color:var(--or)">$9.99 <span style="font-size:12px;color:var(--gy);font-weight:400">+ $19.99/yr</span></div></div><div style="font-size:12px;color:var(--gy);margin-bottom:12px">1 vehicle  physical NFC + QR sticker ships home</div><div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px"><div style="font-size:12px;color:var(--bk);display:flex;gap:7px;align-items:flex-start"><div style="width:7px;height:7px;border-radius:1px;background:var(--or);flex-shrink:0;margin-top:3px"></div>Physical sticker ships to your home</div><div style="font-size:12px;color:var(--bk);display:flex;gap:7px;align-items:flex-start"><div style="width:7px;height:7px;border-radius:1px;background:var(--or);flex-shrink:0;margin-top:3px"></div>10 masked calls/month</div><div style="font-size:12px;color:var(--bk);display:flex;gap:7px;align-items:flex-start"><div style="width:7px;height:7px;border-radius:1px;background:var(--or);flex-shrink:0;margin-top:3px"></div>SMS alert on every scan</div></div><button class="btn" onclick="window.location.href='/register.html'">Get Standard</button></div>
-  <div style="border:1.5px solid var(--bd);border-radius:18px;padding:18px;background:#fff;margin-bottom:12px"><div style="display:flex;align-items:baseline;gap:8px;margin-bottom:5px"><div style="font-size:17px;font-weight:800;color:var(--bk)">Premium</div><div id="prem-price" style="font-size:22px;font-weight:800;color:var(--or)">$24.99 <span style="font-size:12px;color:var(--gy);font-weight:400">+ $19.99/yr</span></div></div><div style="font-size:12px;color:var(--gy);margin-bottom:12px">3 vehicles  unlimited calls</div><div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px"><div style="font-size:12px;color:var(--bk);display:flex;gap:7px"><div style="width:7px;height:7px;border-radius:1px;background:var(--or);flex-shrink:0;margin-top:3px"></div>Unlimited masked calls</div><div style="font-size:12px;color:var(--bk);display:flex;gap:7px"><div style="width:7px;height:7px;border-radius:1px;background:var(--or);flex-shrink:0;margin-top:3px"></div>Scan history + emergency contact</div></div><button class="btn-o" onclick="window.location.href='/register.html'">Get Premium</button></div>
-  <div style="border:1.5px solid var(--bd);border-radius:18px;padding:18px;background:#fff;margin-bottom:24px"><div style="display:flex;align-items:baseline;gap:8px;margin-bottom:5px"><div style="font-size:17px;font-weight:800;color:var(--bk)">Business</div><div style="font-size:22px;font-weight:800;color:var(--or)">$49 <span style="font-size:12px;color:var(--gy);font-weight:400">/month</span></div></div><div style="font-size:12px;color:var(--gy);margin-bottom:12px">Fleet dashboard  bulk stickers with logo</div><button class="btn-o">Contact us</button></div>
-</div>
-<div style="background:#111;border-radius:16px;padding:18px;text-align:center;margin-bottom:20px">
-  <div style="font-size:16px;font-weight:800;color:#fff;margin-bottom:4px">Get the TapMyCar App</div>
-  <div style="font-size:11px;color:#9CA3AF;margin-bottom:14px;line-height:1.5">Manage your tag, view scan history, control your privacy  all from your phone.</div>
-  <a href="/register.html" style="background:var(--or);color:#fff;font-size:14px;font-weight:700;padding:13px 0;border-radius:13px;text-decoration:none;display:block">Download Free </a>
-  <div style="font-size:10px;color:#6B7280;margin-top:8px">Available on iOS, Android & Web</div>
-</div>
-<script src="/app.js"></script>
+<div class="chev"></div>
+<div class="page"><div class="page-inner">
+
+  <div style="text-align:center;padding:8px 0 20px">
+    <div style="font-size:22px;font-weight:800;color:var(--bk)">Simple pricing</div>
+    <div style="font-size:13px;color:var(--gy);margin-top:4px">One-time tag + small renewal after year one</div>
+  </div>
+
+  <!-- Discount Banner -->
+  <div id="discount-banner" style="display:none;background:#DCFCE7;border:1.5px solid #BBF7D0;border-radius:14px;padding:12px 16px;margin-bottom:12px">
+    <div style="font-size:13px;font-weight:700;color:#166534">Referral discount applied!</div>
+    <div style="font-size:11px;color:#15803D;margin-top:2px">Your referral credits have been applied to the prices below.</div>
+  </div>
+  <div id="reward-banner" style="display:none;background:#FFF3EC;border:1.5px solid #FFE4CC;border-radius:14px;padding:12px 16px;margin-bottom:12px">
+    <div style="font-size:13px;font-weight:700;color:#FF6B00">You have a pending reward!</div>
+    <div style="font-size:11px;color:#92400E;margin-top:2px">Go to Settings - Referrals to claim your Free Standard plan or $4.99 coupon.</div>
+  </div>
+
+  <!-- STANDARD - HERO -->
+  <div style="border:2.5px solid var(--or);border-radius:18px;padding:18px;background:#fff;margin-bottom:12px;position:relative">
+    <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--or);color:#fff;font-size:11px;font-weight:700;padding:4px 16px;border-radius:99px;white-space:nowrap">Most Popular - Best Value</div>
+    <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:5px;margin-top:8px">
+      <div style="font-size:20px;font-weight:800;color:var(--bk)">Standard</div>
+      <div id="std-price" style="font-size:24px;font-weight:800;color:var(--or)">$9.99 <span style="font-size:12px;color:var(--gy);font-weight:400">+ $9.99/yr</span></div>
+    </div>
+    <div style="font-size:12px;color:var(--gy);margin-bottom:12px">1 vehicle - physical NFC + QR sticker ships home</div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">
+      <div style="font-size:12px;color:var(--bk);display:flex;gap:7px;align-items:flex-start"><div style="width:7px;height:7px;border-radius:1px;background:var(--or);flex-shrink:0;margin-top:3px"></div>Physical NFC + QR sticker ships to your door</div>
+      <div style="font-size:12px;color:var(--bk);display:flex;gap:7px;align-items:flex-start"><div style="width:7px;height:7px;border-radius:1px;background:var(--or);flex-shrink:0;margin-top:3px"></div>10 masked calls/month - your number never shared</div>
+      <div style="font-size:12px;color:var(--bk);display:flex;gap:7px;align-items:flex-start"><div style="width:7px;height:7px;border-radius:1px;background:var(--or);flex-shrink:0;margin-top:3px"></div>SMS + email alert on every scan</div>
+      <div style="font-size:12px;color:var(--bk);display:flex;gap:7px;align-items:flex-start"><div style="width:7px;height:7px;border-radius:1px;background:var(--or);flex-shrink:0;margin-top:3px"></div>Scan history dashboard</div>
+    </div>
+    <button class="btn" onclick="window.location.href='/register.html?plan=standard'">Get Standard - $9.99</button>
+    <div style="text-align:center;font-size:10px;color:var(--gy);margin-top:8px">30 days free - then $9.99/yr renewal</div>
+  </div>
+
+  <!-- PREMIUM -->
+  <div style="border:1.5px solid var(--bd);border-radius:18px;padding:18px;background:#fff;margin-bottom:12px">
+    <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:5px">
+      <div style="font-size:20px;font-weight:800;color:var(--bk)">Premium</div>
+      <div id="prem-price" style="font-size:24px;font-weight:800;color:var(--or)">$24.99 <span style="font-size:12px;color:var(--gy);font-weight:400">+ $19.99/yr</span></div>
+    </div>
+    <div style="font-size:12px;color:var(--gy);margin-bottom:12px">3 vehicles - unlimited calls - full privacy suite</div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">
+      <div style="font-size:12px;color:var(--bk);display:flex;gap:7px"><div style="width:7px;height:7px;border-radius:1px;background:var(--or);flex-shrink:0;margin-top:3px"></div>Everything in Standard</div>
+      <div style="font-size:12px;color:var(--bk);display:flex;gap:7px"><div style="width:7px;height:7px;border-radius:1px;background:var(--or);flex-shrink:0;margin-top:3px"></div>Unlimited masked calls</div>
+      <div style="font-size:12px;color:var(--bk);display:flex;gap:7px"><div style="width:7px;height:7px;border-radius:1px;background:var(--or);flex-shrink:0;margin-top:3px"></div>Scan location map</div>
+      <div style="font-size:12px;color:var(--bk);display:flex;gap:7px"><div style="width:7px;height:7px;border-radius:1px;background:var(--or);flex-shrink:0;margin-top:3px"></div>Emergency contact system</div>
+      <div style="font-size:12px;color:var(--bk);display:flex;gap:7px"><div style="width:7px;height:7px;border-radius:1px;background:var(--or);flex-shrink:0;margin-top:3px"></div>Up to 3 vehicles</div>
+    </div>
+    <button class="btn-o" onclick="window.location.href='/register.html?plan=premium'">Get Premium - $24.99</button>
+    <div style="text-align:center;font-size:10px;color:var(--gy);margin-top:8px">30 days free - then $19.99/yr renewal</div>
+  </div>
+
+  <!-- BUSINESS -->
+  <div style="border:1.5px solid var(--bd);border-radius:18px;padding:18px;background:#fff;margin-bottom:12px">
+    <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:5px">
+      <div style="font-size:20px;font-weight:800;color:var(--bk)">Business</div>
+      <div style="font-size:24px;font-weight:800;color:var(--or)">$49 <span style="font-size:12px;color:var(--gy);font-weight:400">/month</span></div>
+    </div>
+    <div style="font-size:12px;color:var(--gy);margin-bottom:12px">Fleet dashboard - bulk stickers with logo</div>
+    <button class="btn-o" onclick="window.location.href='mailto:support@tapmycar.io?subject=Business Plan'">Contact us</button>
+  </div>
+
+  <!-- ETAG - LAST -->
+  <div style="border:1.5px solid #E5E7EB;border-radius:18px;padding:18px;background:#F9FAFB;margin-bottom:24px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <div style="font-size:17px;font-weight:700;color:var(--gy)">eTag</div>
+      <div style="background:#E5E7EB;color:#6B7280;font-size:11px;font-weight:700;padding:3px 13px;border-radius:99px">Free</div>
+    </div>
+    <div style="font-size:12px;color:#9CA3AF;margin-bottom:12px">Digital QR only - no physical sticker</div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">
+      <div style="font-size:12px;color:#9CA3AF;display:flex;gap:7px;align-items:flex-start"><div style="width:7px;height:7px;border-radius:1px;background:#D1D5DB;flex-shrink:0;margin-top:3px"></div>Digital QR code only</div>
+      <div style="font-size:12px;color:#9CA3AF;display:flex;gap:7px;align-items:flex-start"><div style="width:7px;height:7px;border-radius:1px;background:#D1D5DB;flex-shrink:0;margin-top:3px"></div>No physical sticker included</div>
+      <div style="font-size:12px;color:#9CA3AF;display:flex;gap:7px;align-items:flex-start"><div style="width:7px;height:7px;border-radius:1px;background:#D1D5DB;flex-shrink:0;margin-top:3px"></div>Limited features</div>
+    </div>
+    <button class="btn-g" onclick="window.location.href='/register.html'">Get free eTag</button>
+  </div>
+
+</div></div>
+
 <script src="/app.js"></script>
 <script>
 async function loadReferralDiscount() {
@@ -47,47 +103,25 @@ async function loadReferralDiscount() {
     const res = await fetch('/api/get-referral?user_id=' + s.token);
     const data = await res.json();
     if (!data.success) return;
-
-    // Show reward choice banner if pending
     if (data.referral_reward_pending === 'choice') {
-      const banner = document.getElementById('reward-banner');
-      if (banner) banner.style.display = 'block';
+      document.getElementById('reward-banner').style.display = 'block';
     }
-
-    // Apply $3 credit discount
     if (data.referral_credits >= 3) {
-      const stdPrice = document.getElementById('std-price');
-      const premPrice = document.getElementById('prem-price');
       const discount = parseFloat(data.referral_credits);
-      if (stdPrice) stdPrice.innerHTML = '<span style="text-decoration:line-through;color:#9CA3AF;font-size:16px">$9.99</span> <span style="color:var(--or)">
-</body>
-</html>
-
- + Math.max(0, 9.99 - discount).toFixed(2) + '</span> <span style="font-size:12px;color:var(--gy);font-weight:400">+ $19.99/yr</span>';
-      if (premPrice) premPrice.innerHTML = '<span style="text-decoration:line-through;color:#9CA3AF;font-size:16px">$24.99</span> <span style="color:var(--or)">
-</body>
-</html>
-
- + Math.max(0, 24.99 - discount).toFixed(2) + '</span> <span style="font-size:12px;color:var(--gy);font-weight:400">+ $19.99/yr</span>';
-      const discBanner = document.getElementById('discount-banner');
-      if (discBanner) discBanner.style.display = 'block';
+      const stdEl = document.getElementById('std-price');
+      const premEl = document.getElementById('prem-price');
+      if (stdEl) stdEl.innerHTML = '<span style="text-decoration:line-through;color:#9CA3AF;font-size:16px">$9.99</span> <span style="color:var(--or)">$' + Math.max(0, 9.99 - discount).toFixed(2) + '</span> <span style="font-size:12px;color:var(--gy);font-weight:400">+ $9.99/yr</span>';
+      if (premEl) premEl.innerHTML = '<span style="text-decoration:line-through;color:#9CA3AF;font-size:16px">$24.99</span> <span style="color:var(--or)">$' + Math.max(0, 24.99 - discount).toFixed(2) + '</span> <span style="font-size:12px;color:var(--gy);font-weight:400">+ $19.99/yr</span>';
+      document.getElementById('discount-banner').style.display = 'block';
     }
-
-    // Free standard if credits >= 9.99
     if (data.referral_credits >= 9.99) {
-      const stdPrice = document.getElementById('std-price');
-      if (stdPrice) stdPrice.innerHTML = '<span style="text-decoration:line-through;color:#9CA3AF;font-size:16px">$9.99</span> <span style="color:#16A34A;font-size:22px;font-weight:800">FREE</span> <span style="font-size:11px;color:#16A34A">first year!</span>';
+      const stdEl = document.getElementById('std-price');
+      if (stdEl) stdEl.innerHTML = '<span style="text-decoration:line-through;color:#9CA3AF;font-size:16px">$9.99</span> <span style="color:#16A34A;font-size:24px;font-weight:800">FREE</span> <span style="font-size:11px;color:#16A34A">first year!</span>';
     }
   } catch(e) { console.error(e); }
 }
-
 loadReferralDiscount();
 </script>
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js');
-}
-</script>
+<script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }</script>
 </body>
 </html>
-
