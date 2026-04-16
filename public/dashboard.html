@@ -78,6 +78,22 @@
       </div>
     </div>
 
+
+    <!-- UPGRADE BANNERS -->
+    <div id="upgrade-banner-etag" style="display:none;background:linear-gradient(135deg,#FF6B00,#D21209);border-radius:18px;padding:18px 16px;margin-bottom:14px;position:relative;overflow:hidden">
+      <div style="position:absolute;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.08);right:-20px;top:-30px"></div>
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.75);margin-bottom:6px;letter-spacing:.8px;text-transform:uppercase">Your car needs real protection</div>
+      <div style="font-size:18px;font-weight:800;color:#fff;line-height:1.3;margin-bottom:8px">What if your car gets hit<br>while you're away?</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.85);line-height:1.7;margin-bottom:14px">With Standard plan you get a real physical tag shipped to you plus privacy tools that actually work.<br><br><span style="color:#FFE4CC;font-weight:600">Know where your car was scanned. Screen every call. Stay protected.</span></div>
+      <a href="/pricing.html" style="display:inline-block;background:#fff;color:#FF6B00;font-size:13px;font-weight:800;padding:12px 24px;border-radius:12px;text-decoration:none">Upgrade to Standard � $9.99/yr</a>
+    </div>
+    <div id="upgrade-banner-standard" style="display:none;background:linear-gradient(135deg,#1A1A1A,#2d1a00);border-radius:18px;padding:18px 16px;margin-bottom:14px;position:relative;overflow:hidden">
+      <div style="position:absolute;width:120px;height:120px;border-radius:50%;background:rgba(255,107,0,.12);right:-20px;top:-30px"></div>
+      <div style="font-size:10px;font-weight:700;color:var(--or);margin-bottom:6px;letter-spacing:.8px;text-transform:uppercase">Protect your whole family</div>
+      <div style="font-size:18px;font-weight:800;color:#fff;line-height:1.3;margin-bottom:8px">Your family drives too.<br>Are they protected?</div>
+      <div style="font-size:12px;color:#9CA3AF;line-height:1.7;margin-bottom:14px">Every car in your family deserves privacy. With Premium, get multiple tags for family vehicles and advanced protection for everyone you love.<br><br><span style="color:#FFE4CC;font-weight:600">One family. One plan. Complete protection.</span></div>
+      <a href="/pricing.html" style="display:inline-block;background:var(--or);color:#fff;font-size:13px;font-weight:800;padding:12px 24px;border-radius:12px;text-decoration:none">Upgrade to Premium � $24.99/yr</a>
+    </div>
     <!-- 4. PAUSE TAG + INVITE A FRIEND (side by side) -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
       <div class="card" style="padding:12px;cursor:pointer" onclick="togglePause()" id="pause-card">
@@ -103,7 +119,7 @@
       <div style="text-align:center;font-size:10px;color:var(--gy);margin-bottom:14px;word-break:break-all" id="tag-url">Generating your tag URL...</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <button class="btn" style="font-size:12px;padding:12px 0;border-radius:12px" onclick="copyTagURL()">Copy Tag URL</button>
-        <button class="btn-o" style="font-size:12px;padding:12px 0;border-radius:12px" onclick="window.location.href='/etag.html'">Download PDF</button>
+        <button class="btn-o" style="font-size:12px;padding:12px 0;border-radius:12px" onclick="window.location.href='/manage.html'">Manage Tag</button>
       </div>
     </div>
 
