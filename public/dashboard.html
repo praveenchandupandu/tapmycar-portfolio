@@ -198,6 +198,13 @@ async function loadDashboard() {
     if (data.scanCount !== undefined) {
       document.getElementById('stat-scans').textContent = data.scanCount;
       document.getElementById('stat-week').textContent = data.weekCount;
+      // Show upgrade banner based on plan
+      const userPlan = data.user ? (data.user.plan || 'etag') : 'etag';
+      if (userPlan === 'etag' || userPlan === 'free') {
+        document.getElementById('upgrade-banner-etag').style.display = 'block';
+      } else if (userPlan === 'standard') {
+        document.getElementById('upgrade-banner-standard').style.display = 'block';
+      }
     }
 
     if (data.tags && data.tags.length > 0) {
