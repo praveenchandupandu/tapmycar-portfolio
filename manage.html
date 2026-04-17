@@ -43,6 +43,11 @@
     </div>
   </div>
 
+  <!-- 3. CURRENT PLAN -->
+  <div style="font-size:14px;font-weight:700;color:var(--bk);margin-bottom:10px">Your Plan</div>
+  <div id="current-plan-box"></div>
+
+
   <!-- 2. CURRENT TAG INFO -->
   <div class="card card-or" style="margin-bottom:14px">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
@@ -62,9 +67,12 @@
     </div>
   </div>
 
-  <!-- 3. CURRENT PLAN -->
-  <div style="font-size:14px;font-weight:700;color:var(--bk);margin-bottom:10px">Your Plan</div>
-  <div id="current-plan-box"></div>
+  <div id="upgraded-section" style="display:none;background:var(--gnl);border:1.5px solid #BBF7D0;border-radius:14px;padding:16px;text-align:center;margin-bottom:12px">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gn)" stroke-width="2.5" stroke-linecap="round" style="margin-bottom:6px"><polyline points="20 6 9 17 4 12"/></svg>
+    <div style="font-size:14px;font-weight:700;color:#166534;margin-bottom:4px">You are on the <span id="upgraded-plan-name">Standard</span> plan</div>
+    <div style="font-size:11px;color:#15803D" id="another-tag-msg">You have full access to all features.</div>
+  </div>
+
 
   <!-- 4. ALL PLANS -->
   <div style="font-size:14px;font-weight:700;color:var(--bk);margin-bottom:10px">Available Plans</div>
@@ -93,12 +101,6 @@
     <div class="plan-feat"><div class="plan-feat-dot"></div>Scan location map</div>
     <div class="plan-feat"><div class="plan-feat-dot"></div>Emergency contact feature</div>
     <button class="btn" id="btn-premium" style="margin-top:12px;font-size:13px;padding:12px 0;background:#1A1A1A" onclick="window.location.href='/pricing.html'">Get Premium</button>
-  </div>
-
-  <div id="upgraded-section" style="display:none;background:var(--gnl);border:1.5px solid #BBF7D0;border-radius:14px;padding:16px;text-align:center;margin-bottom:12px">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gn)" stroke-width="2.5" stroke-linecap="round" style="margin-bottom:6px"><polyline points="20 6 9 17 4 12"/></svg>
-    <div style="font-size:14px;font-weight:700;color:#166534;margin-bottom:4px">You are on the <span id="upgraded-plan-name">Standard</span> plan</div>
-    <div style="font-size:11px;color:#15803D" id="another-tag-msg">You have full access to all features.</div>
   </div>
 
   <div style="margin-bottom:14px;background:var(--gbl);border-radius:14px;padding:16px;border:.5px solid var(--bd)">
