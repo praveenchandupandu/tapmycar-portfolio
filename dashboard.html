@@ -112,15 +112,35 @@
       <div style="font-size:12px;color:#9CA3AF;line-height:1.7;margin-bottom:14px">Every car in your family deserves privacy. With Premium, get multiple tags for family vehicles and advanced protection for everyone you love.<br><br><span style="color:#FFE4CC;font-weight:600">One family. One plan. Complete protection.</span></div>
       <a href="/pricing.html" style="display:block;background:var(--or);color:#fff;font-size:13px;font-weight:800;padding:12px 24px;border-radius:12px;text-decoration:none;text-align:center">Upgrade to Premium</a>
     </div>
-    <!-- 4. PAUSE TAG + INVITE A FRIEND (side by side) -->
+    <!-- 4. ACTION BUTTONS (2x2 grid) -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
-      <div class="card" style="padding:12px;cursor:pointer" onclick="togglePause()" id="pause-card">
-        <div style="font-size:13px;font-weight:700;color:var(--bk);margin-bottom:4px" id="pause-label">Pause Tag</div>
-        <div style="font-size:10px;color:var(--gy);line-height:1.4" id="pause-sub">Hide from strangers temporarily</div>
+      <div style="background:#111;border-radius:14px;padding:14px;cursor:pointer" onclick="window.open('https://youtube.com','_blank')">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#FF6B00"/><polygon points="10 8 16 12 10 16 10 8" fill="#fff"/></svg>
+          <div style="font-size:12px;font-weight:700;color:#fff">Demo Video</div>
+        </div>
+        <div style="font-size:10px;color:#9CA3AF;line-height:1.4">See how TapMyCar works</div>
       </div>
-      <div class="card" style="padding:12px;cursor:pointer" onclick="copyReferral()">
-<div style="font-size:13px;font-weight:700;color:var(--bk);margin-bottom:4px">Invite a Friend</div>
-        <div style="font-size:10px;color:var(--gy);line-height:1.4">Get discounts when friends buy a plan. Go to Settings for your referral code!</div>
+      <div style="background:#FF6B00;border-radius:14px;padding:14px;cursor:pointer" onclick="window.location.href='/pricing.html'">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <div style="font-size:12px;font-weight:700;color:#fff">Place Order</div>
+        </div>
+        <div style="font-size:10px;color:rgba(255,255,255,.8);line-height:1.4">Get your physical NFC sticker</div>
+      </div>
+      <div style="background:#F3F4F6;border-radius:14px;padding:14px;cursor:pointer" id="pause-card" onclick="togglePause()">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2.5" stroke-linecap="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+          <div style="font-size:12px;font-weight:700;color:#111" id="pause-label">Pause Tag</div>
+        </div>
+        <div style="font-size:10px;color:#6B7280;line-height:1.4" id="pause-sub">Hide from strangers temporarily</div>
+      </div>
+      <div style="background:#F3F4F6;border-radius:14px;padding:14px;cursor:pointer" onclick="shareInvite()">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <div style="font-size:12px;font-weight:700;color:#111">Invite a Friend</div>
+        </div>
+        <div style="font-size:10px;color:#6B7280;line-height:1.4">Get discounts when friends buy a plan!</div>
       </div>
     </div>
 
@@ -173,6 +193,7 @@
 <nav class="bnav">
   <a href="/dashboard.html" class="bni active"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span><div class="bni-dot"></div></a>
   <a href="/manage.html" class="bni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Tag</span></a>
+  <a href="/contact.html" class="bni"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span>Verify</span></a>
   <a href="/activity.html" class="bni"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Activity</span></a>
   <a href="/settings.html" class="bni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></a>
 </nav>
@@ -270,6 +291,13 @@ function copyTagURL() {
   navigator.clipboard.writeText(tagURL).then(() => showToast('Tag URL copied!'));
 }
 
+function shareInvite() {
+  if (navigator.share) {
+    navigator.share({ title: 'TapMyCar', text: 'Protect your car privacy with TapMyCar!', url: 'https://tapmycar.io' });
+  } else {
+    navigator.clipboard.writeText('https://tapmycar.io').then(() => showToast('Link copied!'));
+  }
+}
 function copyReferral() {
   const s = getSession();
   const code = s.token ? s.token.slice(-6).toUpperCase() : "FRIEND";
