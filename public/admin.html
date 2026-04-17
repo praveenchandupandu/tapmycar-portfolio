@@ -789,6 +789,100 @@ input[type="date"].gen-input { color-scheme: dark; }
 
 /* Focus */
 button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+/* ============ FINAL OVERRIDE — classic fixed-sidebar pattern ============ */
+/* No flex/grid for the shell. Sidebar is position:fixed, main uses margin-left.
+   This pattern is used by Bootstrap, Shopify admin, etc. It CANNOT break. */
+
+.app { display: block !important; width: 100% !important; min-height: 100vh; }
+.app.is-hidden { display: none !important; }
+
+.sidebar {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 248px !important;
+  min-width: 248px !important;
+  max-width: 248px !important;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 40;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(0);
+  transition: transform .25s ease;
+}
+
+.main {
+  margin-left: 248px !important;
+  width: auto !important;
+  flex: none !important;
+  min-height: 100vh;
+  display: block;
+  overflow-x: hidden;
+}
+
+.page-header, .content-wrap {
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box;
+}
+
+/* Small desktop: shrink sidebar to 200px */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .sidebar { width: 200px !important; min-width: 200px !important; max-width: 200px !important; }
+  .main { margin-left: 200px !important; }
+}
+
+/* Mobile: sidebar slides off-screen as drawer */
+@media (max-width: 1023px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: 280px !important;
+    min-width: 280px !important;
+    max-width: 280px !important;
+    box-shadow: var(--shadow-lg);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0 !important; }
+  .mobile-top { display: flex !important; }
+  .mobile-bottom { display: flex !important; }
+}
+
+/* Grids: explicit column counts at each breakpoint */
+.kpi-grid {
+  display: grid !important;
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 28px;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+@media (max-width: 1439px) { .kpi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }
+@media (max-width: 1023px) { .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+@media (max-width: 499px)  { .kpi-grid { grid-template-columns: 1fr !important; } }
+
+.users-grid {
+  display: grid !important;
+  gap: 14px;
+  width: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+@media (max-width: 1439px) { .users-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+@media (max-width: 767px)  { .users-grid { grid-template-columns: 1fr !important; } }
+
+.split-2 {
+  display: grid !important;
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 24px;
+  grid-template-columns: 1fr 1fr !important;
+}
+@media (max-width: 1023px) { .split-2 { grid-template-columns: 1fr !important; } }
+
+.panel, .panel.active { width: 100%; }
 </style>
 </head>
 <body>
