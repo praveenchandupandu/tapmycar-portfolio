@@ -600,11 +600,10 @@ function renderLeads(leads) {
 
 function exportLeads() {
   if (!allLeads.length) { alert("No leads to export"); return; }
-  const csv = "Email,Rating,Comment,Date
-" + allLeads.map(l => 
-    '"' + (l.email||'') + '","' + (l.rating||'') + '","' + (l.comment||'').replace(/"/g,"'") + '","' + new Date(l.created_at).toLocaleDateString() + '"'
-  ).join('
-');
+  const rows = ["Email,Rating,Comment,Date"].concat(allLeads.map(function(l) {
+    return '"' + (l.email||'') + '","' + (l.rating||'') + '","' + (l.comment||'').replace(/"/g,"'") + '","' + new Date(l.created_at).toLocaleDateString() + '"';
+  }));
+  const csv = rows.join("\n");
   const blob = new Blob([csv], {type:'text/csv'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
