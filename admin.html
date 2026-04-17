@@ -593,7 +593,7 @@ function renderLeads(leads) {
       '<div style="font-size:13px;font-weight:600;color:#fff">' + (l.email || 'No email') + '</div>' +
       '<div style="font-size:10px;color:#64748B;margin-top:2px">' + date + ' � ' + '<span style="color:#FF6B00">' + stars + '</span>' + (l.comment ? ' � ' + l.comment : '') + '</div>' +
       '</div>' +
-      '<button onclick="copyToClipboard('' + l.email + '')" style="background:#1E2D4A;color:#94A3B8;font-size:10px;font-weight:700;padding:6px 10px;border-radius:8px;border:none;cursor:pointer;font-family:inherit">Copy</button>' +
+      '<button onclick="copyToClipboard(this.dataset.email)" data-email="' + (l.email||'') + '" style="background:#1E2D4A;color:#94A3B8;font-size:10px;font-weight:700;padding:6px 10px;border-radius:8px;border:none;cursor:pointer;font-family:inherit">Copy</button>' +
       '</div>';
   }).join('');
 }
