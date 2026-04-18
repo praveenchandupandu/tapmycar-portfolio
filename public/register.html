@@ -59,6 +59,9 @@
     <div class="hint">Used only for masked call forwarding  never shared</div>
   </div>
   <div style="margin-top:auto">
+    <div style="font-size:11px;color:#6B7280;text-align:center;line-height:1.55;margin-bottom:12px;padding:0 8px">
+      By continuing, you agree to our <a href="/terms.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Terms of Service</a> and <a href="/privacy.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Privacy Policy</a>.
+    </div>
     <button class="btn" onclick="sendOTP()">Send verification code </button>
     <div style="text-align:center;font-size:12px;color:var(--gy);margin-top:12px">
       Have account? <a href="/signin.html" class="link-or">Sign in</a>
@@ -91,6 +94,9 @@
     <p>Check your spam folder if you don't see the email within 1 minute.</p>
   </div>
   <div style="margin-top:auto">
+    <div style="font-size:11px;color:#6B7280;text-align:center;line-height:1.55;margin-bottom:12px;padding:0 8px">
+      By continuing, you agree to our <a href="/terms.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Terms of Service</a> and <a href="/privacy.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Privacy Policy</a>.
+    </div>
     <button class="btn" onclick="verifyOTP()">Verify and create account </button>
   </div>
 </div>
@@ -162,6 +168,18 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js');
 }
 </script>
+
+<div style="padding:20px 20px 32px;text-align:center;border-top:.5px solid #E5E7EB;margin-top:24px;background:#fff">
+  <p style="font-size:11px;color:#9CA3AF;margin:0 0 4px">
+    <a href="/privacy.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Privacy</a>
+    &nbsp;·&nbsp;
+    <a href="/terms.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Terms</a>
+    &nbsp;·&nbsp;
+    <a href="mailto:support@tapmycar.io" style="color:#FF6B00;text-decoration:none;font-weight:600">Support</a>
+  </p>
+  <p style="font-size:11px;color:#9CA3AF;margin:0">© 2026 Praman Tech LLC</p>
+</div>
+
 </body>
 </html>
 
