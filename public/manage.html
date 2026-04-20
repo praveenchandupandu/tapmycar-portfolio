@@ -150,7 +150,7 @@ async function loadManage() {
     if (data.tags && data.tags.length > 0) {
       const tag = data.tags.find(t => t.status === 'active') || data.tags[0];
       document.getElementById('m-vehicle').textContent = tag.vehicle_label || 'My Vehicle';
-      document.getElementById('m-token').textContent = 'TMC.' + tag.token.replace('TMC','');
+      document.getElementById('m-token').textContent = tag.token.includes('-') ? tag.token : 'TMC-' + tag.token.replace(/^TMC[-.]?/,'');
       document.getElementById('m-plate').textContent = tag.license_plate || '-';
       document.getElementById('m-make').textContent = tag.car_make || '-';
       document.getElementById('m-model').textContent = tag.car_model || '-';

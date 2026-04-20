@@ -171,7 +171,7 @@ async function loadSettings() {
     }
     if (data.tags && data.tags.length > 0) {
       tagData = data.tags[0];
-      document.getElementById('tag-info').textContent = 'TMC.' + tagData.token.replace('TMC','') + ' - ' + (tagData.status || 'unknown');
+      document.getElementById('tag-info').textContent = (tagData.token.includes('-') ? tagData.token : 'TMC-' + tagData.token.replace(/^TMC[-.]?/,'')) + ' - ' + (tagData.status || 'unknown');
     }
   } catch(e) { console.error('Settings load error:', e); }
 }

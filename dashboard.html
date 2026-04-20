@@ -43,7 +43,7 @@
       <div style="font-size:11px;color:var(--gy);margin-bottom:3px">Welcome back</div>
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div style="font-size:22px;font-weight:800;color:var(--bk)" id="greeting-name">...</div>
-        <div style="background:var(--orl);border:.5px solid var(--orl2);border-radius:99px;padding:5px 12px;font-size:10px;font-weight:700;color:var(--or)"" id="plan-badge"> Standard</div>
+        <div style="background:var(--orl);border:.5px solid var(--orl2);border-radius:99px;padding:5px 12px;font-size:10px;font-weight:700;color:var(--or);text-transform:capitalize" id="plan-badge">Free</div>
       </div>
       <div style="font-size:11px;color:var(--gy);margin-top:2px">Privacy for you. Safety for your car.</div>
     </div>
@@ -222,6 +222,12 @@ async function loadDashboard() {
       document.getElementById('stat-week').textContent = data.weekCount;
       // Show upgrade banner based on plan
       const userPlan = data.user ? (data.user.plan || 'etag') : 'etag';
+      // Update plan badge label dynamically
+      const badge = document.getElementById('plan-badge');
+      if (badge) {
+        const label = userPlan === 'etag' ? 'Free' : userPlan === 'standard' ? 'Standard' : userPlan === 'premium' ? 'Premium' : userPlan;
+        badge.textContent = label;
+      }
       if (userPlan === 'etag' || userPlan === 'free') {
         document.getElementById('upgrade-banner-etag').style.display = 'block';
       } else if (userPlan === 'standard') {
