@@ -6,26 +6,34 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
- * TapMyCar Stripe Webhook — v2
- * ────────────────────────────
- * Handles the new subscription-mode checkout flow where every paid purchase creates:
- *   (a) an immediate one-time charge for activation and/or sticker, AND
- *   (b) a trialing subscription that starts auto-billing at day 30 or 365.
+ * TapMyCar Stripe Webhook — v2.2
+ * ═══════════════════════════════
+ * CRITICAL: Vercel's `config` export must be a separate top-level assignment,
+ * NOT attached to an arrow function or `module.exports = function`. Otherwise
+ * Vercel JSON-parses the body before our handler sees it, and Stripe's signature
+ * verification fails.
  *
- * Events we listen to:
- *   checkout.session.completed        → record order, activate tag, send confirmation email
- *   invoice.payment_succeeded         → trial-end first invoice OR annual renewal (send renewed email)
- *   invoice.payment_failed            → notify user to update payment method
- *   invoice.upcoming                  → renewal reminder email (required by CA/CT auto-renewal laws)
- *   customer.subscription.deleted     → disable tag on cancel
- *
- * Required env vars:
- *   STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
- *   SUPABASE_URL, SUPABASE_SERVICE_KEY
- *   RESEND_API_KEY
+ * Events handled:
+ *   checkout.session.completed   → Day-0 purchase: record order, activate tag, update user.plan
+ *   invoice.payment_succeeded    → trial-end or annual renewal
+ *   invoice.payment_failed       → notify user
+ *   invoice.upcoming             → renewal reminder
+ *   customer.subscription.deleted → cancel
  */
 
-module.exports = async function handler(req, res) {
+// ─── RAW BODY READER ───────────────────────────────────────
+// Collects the raw bytes of the POST body before Vercel parses anything.
+function getRawBody(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on('data', c => chunks.push(c));
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('error', reject);
+  });
+}
+
+// ─── HANDLER ───────────────────────────────────────────────
+async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   const sig = req.headers["stripe-signature"];
@@ -39,12 +47,14 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: err.message });
   }
 
+  console.log(`Webhook received: ${event.type}`);
+
   try {
     switch (event.type) {
 
-      // ─────────────────────────────────────────────────────────
-      // CHECKOUT COMPLETED — Day 0 purchase (all paid flows)
-      // ─────────────────────────────────────────────────────────
+      // ─────────────────────────────────────────────────────
+      // CHECKOUT COMPLETED — Day 0 purchase
+      // ─────────────────────────────────────────────────────
       case "checkout.session.completed": {
         const session = event.data.object;
         const { user_id, plan, flow, prepay } = session.metadata || {};
@@ -53,31 +63,31 @@ module.exports = async function handler(req, res) {
           break;
         }
 
-        // Pull full session with shipping details expanded
         const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
           expand: ['shipping_details', 'subscription', 'customer_details']
         });
         const ship = fullSession.shipping_details || null;
         const subscription = fullSession.subscription;
+        const subId = subscription ? (typeof subscription === 'string' ? subscription : subscription.id) : null;
 
-        // ORDER — record the Day-0 payment
+        // ORDER
         await supabase.from("orders").insert({
           user_id,
           plan,
           amount: session.amount_total,
           stripe_id: session.id,
-          subscription_id: subscription ? (typeof subscription === 'string' ? subscription : subscription.id) : null,
+          subscription_id: subId,
           status: "paid",
           shipping_name: ship ? ship.name : null,
           shipping_address: ship ? ship.address.line1 + (ship.address.line2 ? ' ' + ship.address.line2 : '') : null,
           shipping_city: ship ? ship.address.city : null,
           shipping_state: ship ? ship.address.state : null,
           shipping_zip: ship ? ship.address.postal_code : null,
-          shipping_fee: 0,  // no separate shipping fee — shipping is bundled in sticker price
-          order_status: 'processing'  // every paid order needs fulfillment (physical sticker ships, activation too)
+          shipping_fee: 0,
+          order_status: 'processing'
         });
 
-        // TAG — activate it (unclaimed → active or claimed → active)
+        // TAG — activate NOW (payment confirmed)
         await supabase.from("tags").update({
           status: "active",
           activated_at: new Date().toISOString(),
@@ -86,12 +96,12 @@ module.exports = async function handler(req, res) {
 
         // USER — update plan + subscription id
         const userUpdates = { plan };
-        if (subscription) {
-          userUpdates.subscription_id = typeof subscription === 'string' ? subscription : subscription.id;
-        }
+        if (subId) userUpdates.subscription_id = subId;
         await supabase.from("users").update(userUpdates).eq("id", user_id);
 
-        // REFERRAL REWARDS — preserve existing logic (only triggers for paid plans)
+        console.log(`✓ Activated user ${user_id} on ${plan} plan (flow=${flow}, prepay=${prepay})`);
+
+        // REFERRAL REWARDS
         const { data: buyer } = await supabase.from("users").select("referred_by").eq("id", user_id).single();
         if (buyer && buyer.referred_by) {
           const { data: referrer } = await supabase.from("users")
@@ -109,7 +119,7 @@ module.exports = async function handler(req, res) {
           }
         }
 
-        // CONFIRMATION EMAIL — to the buyer
+        // CONFIRMATION EMAIL
         const { data: orderUser } = await supabase.from("users").select("*").eq("id", user_id).single();
         if (orderUser && orderUser.email) {
           const planName = plan === 'standard' ? 'Standard' : plan === 'premium' ? 'Premium' : plan;
@@ -138,23 +148,21 @@ module.exports = async function handler(req, res) {
         break;
       }
 
-      // ─────────────────────────────────────────────────────────
-      // INVOICE PAYMENT SUCCEEDED — trial-end first charge OR annual renewal
-      // ─────────────────────────────────────────────────────────
+      // ─────────────────────────────────────────────────────
+      // INVOICE PAYMENT SUCCEEDED — trial-end or annual renewal
+      // ─────────────────────────────────────────────────────
       case "invoice.payment_succeeded": {
         const invoice = event.data.object;
         const customerId = invoice.customer;
-        const billingReason = invoice.billing_reason;  // 'subscription_create', 'subscription_cycle', etc.
+        const billingReason = invoice.billing_reason;
 
         const { data: user } = await supabase.from("users").select("*").eq("stripe_customer_id", customerId).single();
         if (!user) break;
 
-        // Keep tag active
         await supabase.from("tags").update({ status: "active" }).eq("owner_id", user.id);
 
-        // Record as an order entry so admin dashboard totals reflect recurring revenue
         const isRenewal = billingReason === 'subscription_cycle';
-        const isFirstTrialCharge = billingReason === 'subscription_create' || billingReason === 'subscription_update';
+
         await supabase.from("orders").insert({
           user_id: user.id,
           plan: user.plan || 'unknown',
@@ -162,11 +170,10 @@ module.exports = async function handler(req, res) {
           stripe_id: invoice.id,
           subscription_id: invoice.subscription,
           status: "paid",
-          order_status: 'delivered',  // no fulfillment needed for subscription invoices
+          order_status: 'delivered',
           shipping_fee: 0
         });
 
-        // Email only on true renewals (cycle), not on the first trial-end charge
         if (isRenewal && user.email) {
           await resend.emails.send({
             from: "TapMyCar <noreply@tapmycar.io>",
@@ -178,9 +185,9 @@ module.exports = async function handler(req, res) {
         break;
       }
 
-      // ─────────────────────────────────────────────────────────
+      // ─────────────────────────────────────────────────────
       // INVOICE PAYMENT FAILED
-      // ─────────────────────────────────────────────────────────
+      // ─────────────────────────────────────────────────────
       case "invoice.payment_failed": {
         const invoice = event.data.object;
         const { data: user } = await supabase.from("users").select("*").eq("stripe_customer_id", invoice.customer).single();
@@ -195,9 +202,9 @@ module.exports = async function handler(req, res) {
         break;
       }
 
-      // ─────────────────────────────────────────────────────────
-      // INVOICE UPCOMING — 3-7 day renewal reminder (legally required in CA/CT)
-      // ─────────────────────────────────────────────────────────
+      // ─────────────────────────────────────────────────────
+      // INVOICE UPCOMING — renewal reminder
+      // ─────────────────────────────────────────────────────
       case "invoice.upcoming": {
         const invoice = event.data.object;
         const amount = (invoice.amount_due / 100).toFixed(2);
@@ -214,14 +221,13 @@ module.exports = async function handler(req, res) {
         break;
       }
 
-      // ─────────────────────────────────────────────────────────
+      // ─────────────────────────────────────────────────────
       // SUBSCRIPTION DELETED (cancelled)
-      // ─────────────────────────────────────────────────────────
+      // ─────────────────────────────────────────────────────
       case "customer.subscription.deleted": {
         const subscription = event.data.object;
         const { data: user } = await supabase.from("users").select("*").eq("stripe_customer_id", subscription.customer).single();
         if (user) {
-          // Disable all their tags — any scan now shows 'inactive tag'
           await supabase.from("tags").update({ status: "disabled" }).eq("owner_id", user.id);
           await supabase.from("users").update({ subscription_id: null, plan: 'etag' }).eq("id", user.id);
 
@@ -238,7 +244,6 @@ module.exports = async function handler(req, res) {
       }
 
       default:
-        // Unhandled event type — acknowledge to Stripe anyway to prevent retries
         break;
     }
 
@@ -246,25 +251,21 @@ module.exports = async function handler(req, res) {
 
   } catch (err) {
     console.error(`Webhook handler error on ${event.type}:`, err);
-    // Return 200 so Stripe doesn't keep retrying for handler bugs — but log it loudly
     return res.status(200).json({ received: true, handler_error: err.message });
   }
-};
-
-module.exports.config = { api: { bodyParser: false } };
-
-// ────────────────────────────────────────────────────────────
-// UTILITIES
-// ────────────────────────────────────────────────────────────
-function getRawBody(req) {
-  return new Promise((resolve, reject) => {
-    const chunks = [];
-    req.on('data', c => chunks.push(c));
-    req.on('end', () => resolve(Buffer.concat(chunks)));
-    req.on('error', reject);
-  });
 }
 
+// ─── CRITICAL VERCEL EXPORT PATTERN ──────────────────────────
+// `config` must be attached to the exports object directly, NOT to a function.
+// We do this by assigning the handler and config as separate properties on module.exports.
+module.exports = handler;
+module.exports.config = {
+  api: { bodyParser: false }
+};
+
+// ────────────────────────────────────────────────────────────
+// EMAIL BUILDERS & UTILITIES
+// ────────────────────────────────────────────────────────────
 function nextChargeDescription(flow, plan, prepay) {
   const yearly = plan === 'standard' ? '$9.99' : '$19.99';
   const sticker = plan === 'standard' ? '$9.99' : '$24.99';
