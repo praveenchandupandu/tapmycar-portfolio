@@ -921,6 +921,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
     <button class="sb-item" data-tab="users" onclick="navTo('users')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span>Users</span></button>
     <button class="sb-item" data-tab="orders" onclick="navTo('orders')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg><span>Orders</span></button>
     <button class="sb-item" data-tab="leads" onclick="navTo('leads')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><span>Leads</span></button>
+    <button class="sb-item" data-tab="reviews" onclick="navTo('reviews')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span>Reviews</span></button>
     <button class="sb-item" data-tab="tags" onclick="navTo('tags')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg><span>Tags</span></button>
     <button class="sb-item" data-tab="analytics" onclick="navTo('analytics')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Analytics</span></button>
     <button class="sb-item" data-tab="scans" onclick="navTo('scans')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Scans</span></button>
@@ -2753,6 +2754,113 @@ function showToast(msg){
   window.__toast_t = setTimeout(() => t.classList.remove('show'), 2600);
 }
 window.showToast = showToast;
+</script>
+<!-- REVIEWS TAB -->
+<div class="panel" id="panel-reviews">
+  <div class="asl">Reviews moderation</div>
+  <div style="display:flex;gap:8px;margin-bottom:16px">
+    <button onclick="loadReviewsTab('pending')" class="rev-tab-btn" id="rev-tab-pending" style="background:#FF6B00;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Pending <span id="rev-pending-count" style="background:rgba(255,255,255,0.3);padding:2px 6px;border-radius:8px;margin-left:4px">0</span></button>
+    <button onclick="loadReviewsTab('approved')" class="rev-tab-btn" id="rev-tab-approved" style="background:#1E2D4A;color:#94A3B8;border:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Approved</button>
+    <button onclick="loadReviewsTab('rejected')" class="rev-tab-btn" id="rev-tab-rejected" style="background:#1E2D4A;color:#94A3B8;border:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Rejected</button>
+  </div>
+  <div id="reviews-list"><div class="empty">Click a tab to load reviews</div></div>
+</div>
+
+<script>
+let currentReviewTab = null;
+
+async function loadReviewsTab(status) {
+  currentReviewTab = status;
+  // Toggle button styling
+  document.querySelectorAll('.rev-tab-btn').forEach(b => {
+    b.style.background = '#1E2D4A';
+    b.style.color = '#94A3B8';
+  });
+  const activeBtn = document.getElementById('rev-tab-' + status);
+  if (activeBtn) {
+    activeBtn.style.background = '#FF6B00';
+    activeBtn.style.color = '#fff';
+  }
+
+  const container = document.getElementById('reviews-list');
+  container.innerHTML = '<div class="empty">Loading...</div>';
+
+  try {
+    const res = await fetch('/api/get-reviews?status=' + status + '&limit=200&admin_key=' + encodeURIComponent(getAdminKey()));
+    const data = await res.json();
+
+    if (!data.reviews || data.reviews.length === 0) {
+      container.innerHTML = '<div class="empty">No ' + status + ' reviews</div>';
+      if (status === 'pending') document.getElementById('rev-pending-count').textContent = '0';
+      return;
+    }
+
+    if (status === 'pending') document.getElementById('rev-pending-count').textContent = data.reviews.length;
+
+    container.innerHTML = data.reviews.map(r => {
+      const created = new Date(r.created_at).toLocaleString();
+      const cityLine = r.city ? ' · ' + escapeHtml(r.city) : '';
+      const actions = status === 'pending'
+        ? '<button onclick="moderateReview(\'' + r.id + '\', \'approve\')" style="background:#16A34A;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;margin-right:6px">Approve</button>' +
+          '<button onclick="moderateReview(\'' + r.id + '\', \'reject\')" style="background:#DC2626;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Reject</button>'
+        : '<button onclick="moderateReview(\'' + r.id + '\', \'delete\')" style="background:#1E2D4A;color:#fff;border:1px solid #94A3B8;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Delete</button>';
+
+      return '<div style="background:#0F172A;border:1px solid #1E2D4A;border-radius:12px;padding:16px;margin-bottom:12px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">' +
+          '<div><div style="font-size:13px;font-weight:700;color:#fff">' + escapeHtml(r.name) + cityLine + '</div>' +
+          '<div style="font-size:10px;color:#64748B;margin-top:2px">' + created + '</div></div>' +
+          '<div>' + actions + '</div>' +
+        '</div>' +
+        '<div style="font-size:13px;color:#CBD5E1;line-height:1.5;font-style:italic">"' + escapeHtml(r.text) + '"</div>' +
+      '</div>';
+    }).join('');
+  } catch (e) {
+    container.innerHTML = '<div class="empty">Failed to load: ' + e.message + '</div>';
+  }
+}
+
+async function moderateReview(reviewId, action) {
+  const confirmText = action === 'delete' ? 'Permanently delete this review?' : action === 'reject' ? 'Reject this review?' : null;
+  if (confirmText && !confirm(confirmText)) return;
+
+  try {
+    const res = await fetch('/api/moderate-review', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ review_id: reviewId, action, admin_key: getAdminKey() })
+    });
+    const data = await res.json();
+    if (data.success) {
+      // Reload current tab
+      loadReviewsTab(currentReviewTab);
+    } else {
+      alert('Error: ' + (data.error || 'unknown'));
+    }
+  } catch (e) { alert('Network error: ' + e.message); }
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function getAdminKey() {
+  // Read from same place admin.html stores it (URL param, localStorage, prompt)
+  return localStorage.getItem('admin_key') || new URLSearchParams(window.location.search).get('key') || '';
+}
+
+// Auto-load pending count on admin page load
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    fetch('/api/get-reviews?status=pending&limit=200&admin_key=' + encodeURIComponent(getAdminKey()))
+      .then(r => r.json())
+      .then(d => {
+        if (d.reviews) {
+          document.getElementById('rev-pending-count').textContent = d.reviews.length;
+        }
+      })
+      .catch(() => {});
+  }, 1000);
+});
 </script>
 </body>
 </html>
