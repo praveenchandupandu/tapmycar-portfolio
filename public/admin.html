@@ -2844,8 +2844,10 @@ function escapeHtml(s) {
 }
 
 function getAdminKey() {
-  // Read from same place admin.html stores it (URL param, localStorage, prompt)
-  return localStorage.getItem('admin_key') || new URLSearchParams(window.location.search).get('key') || '';
+  // Use the global adminKey variable that admin.html's login flow already populates
+  if (typeof adminKey !== 'undefined' && adminKey) return adminKey;
+  // Fall back to localStorage keys that admin.html uses
+  return localStorage.getItem('tmc_admin_key') || localStorage.getItem('admin_key') || '';
 }
 
 // Auto-load pending count on admin page load
