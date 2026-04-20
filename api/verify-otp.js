@@ -6,7 +6,6 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
 // Auto-assign an unclaimed tag to a new user
 async function assignFreeTag(userId) {
   try {
-    // Find first unclaimed tag
     const { data: tags } = await supabase
       .from('tags')
       .select('*')
@@ -24,18 +23,13 @@ async function assignFreeTag(userId) {
           claimed_at: new Date().toISOString()
         })
         .eq('id', tag.id);
-
       console.log('Auto-assigned tag', tag.token, 'to user', userId);
       return tag.token;
     } else {
-      // No unclaimed tags available — generate one on the fly
       const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
       let random = '';
-      for (let i = 0; i < 6; i++) {
-        random += chars[Math.floor(Math.random() * chars.length)];
-      }
+      for (let i = 0; i < 6; i++) random += chars[Math.floor(Math.random() * chars.length)];
       const newToken = 'TMC' + random;
-
       const { data: newTag, error } = await supabase
         .from('tags')
         .insert({
@@ -48,25 +42,19 @@ async function assignFreeTag(userId) {
         })
         .select()
         .single();
-
-      if (error) {
-        console.error('Failed to generate tag:', error);
-        return null;
-      }
-
+      if (error) { console.error('Failed to generate tag:', error); return null; }
       console.log('Generated and assigned new tag', newToken, 'to user', userId);
       return newToken;
     }
-  } catch(e) {
-    console.error('Tag assignment error:', e);
-    return null;
-  }
+  } catch(e) { console.error('Tag assignment error:', e); return null; }
 }
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { email, phone, code, name, token, type } = req.body;
+  // mode: 'signin' = user must already exist (don't auto-create)
+  // mode: 'register' = create user if not exists (default legacy behavior)
+  const { email, phone, code, name, token, type, mode } = req.body;
 
   // PHONE OTP — Twilio Verify (used for tag activation)
   if (type === 'phone') {
@@ -78,7 +66,6 @@ module.exports = async function handler(req, res) {
       if (check.status !== 'approved') return res.status(400).json({ error: 'Invalid or expired code' });
     } catch(e) { return res.status(400).json({ error: 'Invalid or expired code' }); }
 
-    // Find or create user
     let { data: user } = await supabase.from('users').select('*').eq('phone', phone).single();
     let isNewUser = false;
     if (!user) {
@@ -88,16 +75,11 @@ module.exports = async function handler(req, res) {
       user = newUser;
       isNewUser = true;
     }
-
-    // Auto-assign tag for new users
-    if (isNewUser && user) {
-      await assignFreeTag(user.id);
-    }
-
+    if (isNewUser && user) await assignFreeTag(user.id);
     return res.json({ token: user.id, name: user.name, phone: user.phone });
   }
 
-  // EMAIL OTP — Resend custom code (used for signin + register)
+  // EMAIL OTP — signin or register
   if (type === 'email' || email) {
     if (!email || !code) return res.status(400).json({ error: 'Email and code required' });
 
@@ -114,25 +96,28 @@ module.exports = async function handler(req, res) {
     }
 
     const otp = otps[0];
-
-    // Check if expired — compare timestamps in JavaScript (timezone safe)
     const expiresAt = new Date(otp.expires_at).getTime();
-    const now = Date.now();
-
-    if (now > expiresAt) {
+    if (Date.now() > expiresAt) {
       await supabase.from('otp_codes').update({ used: true }).eq('id', otp.id);
       return res.status(400).json({ error: 'Code expired. Please request a new one.' });
     }
 
-    // Mark as used
     await supabase.from('otp_codes').update({ used: true }).eq('id', otp.id);
-
-    // Clean up other OTPs for this email
     await supabase.from('otp_codes').delete().eq('phone', email).eq('used', false);
 
-    // Find or create user
+    // Check if user exists
     let { data: user } = await supabase.from('users').select('*').eq('email', email).single();
     let isNewUser = false;
+
+    // ─── SIGNIN MODE: reject if user doesn't exist ──────────────
+    if (mode === 'signin' && !user) {
+      return res.status(404).json({
+        error: 'No account found for this email. Please register first.',
+        no_account: true
+      });
+    }
+
+    // ─── REGISTER MODE (or legacy): create user if not exists ──
     if (!user) {
       const cleaned = (phone || '').replace(/\D/g, '');
       const formatted = cleaned ? (cleaned.startsWith('1') ? '+' + cleaned : '+1' + cleaned) : null;
@@ -142,7 +127,6 @@ module.exports = async function handler(req, res) {
 
       if (insertError) {
         console.error('User insert error:', insertError);
-        // Try fetching again in case of race condition or duplicate
         const { data: existingUser } = await supabase.from('users').select('*').eq('email', email).single();
         if (existingUser) {
           user = existingUser;
@@ -155,30 +139,26 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    // Safety check
-    if (!user) {
-      return res.status(500).json({ error: 'Account error. Please try again.' });
-    }
+    if (!user) return res.status(500).json({ error: 'Account error. Please try again.' });
 
-    // Auto-assign tag for new users
+    // Auto-assign tag and generate referral code for new users
     if (isNewUser && user) {
       await assignFreeTag(user.id);
-      // Generate referral code
       const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
       let refCode = "TMC-";
       for (let i = 0; i < 6; i++) refCode += chars[Math.floor(Math.random() * chars.length)];
-      // Save referral code and referred_by
-      const refBy = req.body.ref_code || null;
-      let referredBy = null;
-      if (refBy) {
-        const { data: referrer } = await supabase.from("users").select("id").eq("referral_code", refBy).single();
-        if (referrer) referredBy = refBy;
-      }
-      await supabase.from("users").update({ referral_code: refCode, referred_by: referredBy }).eq("id", user.id);
+      const updates = { referral_code: refCode };
+      if (token) updates.referred_by = token;
+      await supabase.from('users').update(updates).eq('id', user.id);
     }
 
-    return res.json({ token: user.id, name: user.name, phone: user.phone, email: user.email });
+    return res.json({
+      token: user.id,
+      name: user.name,
+      email: user.email,
+      isNewUser
+    });
   }
 
-  return res.status(400).json({ error: 'Email or phone required' });
+  return res.status(400).json({ error: 'type or email required' });
 };

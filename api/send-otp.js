@@ -8,25 +8,40 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { email, phone, type } = req.body;
+  // mode: 'signin' = check that email exists before sending OTP
+  // mode: 'register' = allow any email (default)
+  const { email, phone, type, mode } = req.body;
 
-  // EMAIL OTP — used by signin.html and register.html
+  // EMAIL OTP
   if (type === 'email' || (!type && email)) {
     if (!email) return res.status(400).json({ error: 'Email required' });
 
+    // ─── SIGNIN MODE: verify user exists first ─────────────────
+    if (mode === 'signin') {
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle();
+
+      if (!existingUser) {
+        return res.status(404).json({
+          error: 'No account found for this email. Please register first.',
+          no_account: true
+        });
+      }
+    }
+
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Delete ALL old OTPs for this email first — wait for it to complete
+    // Delete old OTPs for this email
     const { error: delError } = await supabase
       .from('otp_codes')
       .delete()
       .eq('phone', email);
+    if (delError) console.error('Delete old OTPs error:', delError);
 
-    if (delError) {
-      console.error('Delete old OTPs error:', delError);
-    }
-
-    // Now insert new OTP
+    // Insert new OTP
     const { error: insError } = await supabase
       .from('otp_codes')
       .insert({
@@ -64,7 +79,7 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // PHONE OTP — used by contact.html tag activation only
+  // PHONE OTP (Twilio Verify) — used for tag activation only
   if (type === 'phone' || (!type && phone)) {
     if (!phone) return res.status(400).json({ error: 'Phone required' });
     try {

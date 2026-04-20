@@ -72,7 +72,7 @@ async function sendOTP() {
     const res  = await fetch('/api/send-otp', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ email, type: 'email' })
+      body: JSON.stringify({ email, type: 'email', mode: 'signin' })
     });
     const data = await res.json();
     if (data.success) {
@@ -95,7 +95,7 @@ async function signIn() {
     const res  = await fetch('/api/verify-otp', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ email, code, type: 'email' })
+      body: JSON.stringify({ email, code, type: 'email', mode: 'signin' })
     });
     const data = await res.json();
     if (data.token) {
