@@ -1339,6 +1339,18 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
   <div id="scan-list"><div class="empty">Loading…</div></div>
 </div>
 
+    
+      <!-- REVIEWS TAB -->
+<div class="panel" id="panel-reviews">
+  <div class="asl">Reviews moderation</div>
+  <div style="display:flex;gap:8px;margin-bottom:16px">
+    <button onclick="loadReviewsTab('pending')" class="rev-tab-btn" id="rev-tab-pending" style="background:#FF6B00;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Pending <span id="rev-pending-count" style="background:rgba(255,255,255,0.3);padding:2px 6px;border-radius:8px;margin-left:4px">0</span></button>
+    <button onclick="loadReviewsTab('approved')" class="rev-tab-btn" id="rev-tab-approved" style="background:#1E2D4A;color:#94A3B8;border:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Approved</button>
+    <button onclick="loadReviewsTab('rejected')" class="rev-tab-btn" id="rev-tab-rejected" style="background:#1E2D4A;color:#94A3B8;border:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Rejected</button>
+  </div>
+  <div id="reviews-list"><div class="empty">Click a tab to load reviews</div></div>
+</div>
+
     </div>
   </main>
 
@@ -2712,8 +2724,8 @@ function downloadFile(content, filename, mime) {
 </script>
 <script>
 // ─── NAV HELPERS (defined AFTER preserved script so our showTab wins) ──
-const TAB_TITLES = {"home": "Home", "users": "Users", "orders": "Orders", "leads": "Leads", "tags": "Tags", "analytics": "Analytics", "scans": "Scans", "upgrade": "Upgrade tracker", "generate": "Generate", "receive": "Receive", "inventory": "Inventory", "promos": "Promos", "audit": "Audit"};
-const TAB_SUBS = {"home": "At-a-glance view of the business", "users": "Search, manage, and gift plans", "orders": "Physical shipping and fulfillment", "leads": "Feedback emails captured on contact pages", "tags": "All tokens in the system", "analytics": "Revenue, scans, and growth metrics", "scans": "Raw scan history", "upgrade": "Users approaching day 30 auto-upgrade", "generate": "Create new NFC/QR token batches", "receive": "Verify stickers received from manufacturer", "inventory": "Stock levels by batch", "promos": "Gift plans and promo codes", "audit": "Admin actions and system health"};
+const TAB_TITLES = {"home": "Home", "users": "Users", "orders": "Orders", "leads": "Leads", "tags": "Tags", "analytics": "Analytics", "scans": "Scans", "upgrade": "Upgrade tracker", "reviews": "Reviews", "generate": "Generate", "receive": "Receive", "inventory": "Inventory", "promos": "Promos", "audit": "Audit"};
+const TAB_SUBS = {"home": "At-a-glance view of the business", "users": "Search, manage, and gift plans", "orders": "Physical shipping and fulfillment", "leads": "Feedback emails captured on contact pages", "tags": "All tokens in the system", "analytics": "Revenue, scans, and growth metrics", "scans": "Raw scan history", "upgrade": "Users approaching day 30 auto-upgrade", "reviews": "Review moderation — approve, toggle visibility, feature on landing", "generate": "Create new NFC/QR token batches", "receive": "Verify stickers received from manufacturer", "inventory": "Stock levels by batch", "promos": "Gift plans and promo codes", "audit": "Admin actions and system health"};
 function navTo(id){
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   const panel = document.getElementById('panel-' + id);
@@ -2755,16 +2767,7 @@ function showToast(msg){
 }
 window.showToast = showToast;
 </script>
-<!-- REVIEWS TAB -->
-<div class="panel" id="panel-reviews">
-  <div class="asl">Reviews moderation</div>
-  <div style="display:flex;gap:8px;margin-bottom:16px">
-    <button onclick="loadReviewsTab('pending')" class="rev-tab-btn" id="rev-tab-pending" style="background:#FF6B00;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Pending <span id="rev-pending-count" style="background:rgba(255,255,255,0.3);padding:2px 6px;border-radius:8px;margin-left:4px">0</span></button>
-    <button onclick="loadReviewsTab('approved')" class="rev-tab-btn" id="rev-tab-approved" style="background:#1E2D4A;color:#94A3B8;border:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Approved</button>
-    <button onclick="loadReviewsTab('rejected')" class="rev-tab-btn" id="rev-tab-rejected" style="background:#1E2D4A;color:#94A3B8;border:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Rejected</button>
-  </div>
-  <div id="reviews-list"><div class="empty">Click a tab to load reviews</div></div>
-</div>
+
 
 <script>
 let currentReviewTab = null;
