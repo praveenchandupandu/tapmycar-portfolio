@@ -647,7 +647,7 @@ async function activateAndPay(){
   const btn=document.getElementById('pay-btn');
   btn.textContent='Redirecting...';btn.disabled=true;
   try{
-    const res=await fetch('/api/create-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:registrationData.userId,plan:'etag',token:currentToken})});
+    const res=await fetch('/api/create-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:registrationData.userId,flow:'activate',plan:'standard',prepay:false,referral_discount:0,token:currentToken})});
     const data=await res.json();
     if(data.url){window.location.href=data.url;}
     else{showToast(data.error||'Payment failed');btn.textContent='Pay $1  activate tag';btn.disabled=false;}

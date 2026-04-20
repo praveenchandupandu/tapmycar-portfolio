@@ -76,7 +76,7 @@
   <div class="chev"></div>
   <div style="flex:1;padding:20px;display:flex;flex-direction:column">
     <div class="result-card">
-      <div class="result-tag" id="r-token">TMC.XXXXXX</div>
+      <div class="result-tag" id="r-token">TMC-XXXXXX</div>
       <div class="result-status" id="r-status">Checking...</div>
       <div style="font-size:11px;color:var(--gy);margin-top:6px" id="r-message"></div>
     </div>
@@ -259,7 +259,7 @@ function onScanSuccess(decodedText) {
 async function processToken(token) {
   scannedToken = token;
   showStep('result');
-  document.getElementById('r-token').textContent = 'TMC.' + token.replace('TMC','');
+  document.getElementById('r-token').textContent = 'TMC-' + token.replace(/^TMC[-.]?/,'');
   document.getElementById('r-status').textContent = 'Verifying...';
   document.getElementById('r-status').className = 'result-status';
   document.getElementById('r-message').textContent = 'Checking database...';
@@ -489,8 +489,10 @@ async function processPayment() {
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
         user_id: s.token,
-        plan: 'etag',
-        address: address
+        flow: 'activate',
+        plan: 'standard',
+        prepay: false,
+        referral_discount: 0
       })
     });
     const data = await res.json();
