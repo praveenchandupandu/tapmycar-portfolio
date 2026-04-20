@@ -67,7 +67,7 @@ async function handler(req, res) {
         }
 
         const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
-          expand: ['shipping_details', 'subscription', 'customer_details']
+          expand: ['subscription']
         });
         const ship = fullSession.shipping_details || null;
         const subscription = fullSession.subscription;
