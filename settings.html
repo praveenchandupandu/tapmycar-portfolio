@@ -86,6 +86,13 @@
     </div>
   </div>
 
+  <!-- Cancel Subscription (only shown if user has an active subscription) -->
+  <div class="set-row" id="cancel-sub-row" style="display:none" onclick="cancelSubscription()"><div class="set-l"><div class="set-ic" style="background:#FFF3EC"><svg viewBox="0 0 24 24" stroke="var(--or)"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div><div><div class="set-t">Cancel subscription</div><div class="set-s">Stop future charges. Keeps tag active until paid period ends.</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+
+  <!-- Danger zone -->
+  <div class="sl" style="color:var(--rd)">Danger zone</div>
+  <div class="set-row" onclick="deleteAccount()"><div class="set-l"><div class="set-ic" style="background:var(--rdl)"><svg viewBox="0 0 24 24" stroke="var(--rd)"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div><div><div class="set-t" style="color:var(--rd)">Delete account</div><div class="set-s">Permanently delete your account and all data.</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+
   <!-- Sign out -->
   <div class="set-row" onclick="signOut()"><div class="set-l"><div class="set-ic" style="background:var(--rdl)"><svg viewBox="0 0 24 24" stroke="var(--rd)"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div><div><div class="set-t" style="color:var(--rd)">Sign out</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
 
@@ -220,13 +227,38 @@ function toggleSMS() {
 }
 
 async function cancelSubscription() {
-  if (!confirm('Are you sure you want to cancel your subscription?')) return;
+  if (!confirm('Cancel your TapMyCar subscription?\n\nYou will not be charged again. Your tag will stay active until the end of your current paid period.\n\nPhysical stickers already shipped are yours to keep.')) return;
   try {
     const res = await fetch('/api/cancel-subscription', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ user_id: s.token }) });
     const data = await res.json();
     if (data.success) { showToast('Subscription cancelled'); document.getElementById('cancel-sub-row').style.display = 'none'; }
     else { showToast(data.error || 'Failed to cancel'); }
   } catch(e) { showToast('Network error'); }
+}
+
+async function deleteAccount() {
+  const first = confirm('Delete your TapMyCar account permanently?\n\nThis will:\n• Cancel any active subscription\n• Disable all your tags (scans will show "inactive")\n• Permanently delete your personal data\n\nThis cannot be undone.');
+  if (!first) return;
+  const typed = prompt('To confirm, type DELETE (all caps) in the box below:');
+  if (typed !== 'DELETE') {
+    if (typed !== null) showToast('Delete cancelled — confirmation text did not match');
+    return;
+  }
+  try {
+    const res = await fetch('/api/delete-account', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ user_id: s.token, confirm: 'DELETE' })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Account deleted. Goodbye!');
+      localStorage.clear();
+      setTimeout(() => { window.location.href = '/landing.html'; }, 1500);
+    } else {
+      showToast(data.error || 'Failed to delete account. Please contact support@tapmycar.io.');
+    }
+  } catch(e) { showToast('Network error — please try again'); }
 }
 
 async function loadReferrals() {
