@@ -75,7 +75,7 @@
 
 
   <!-- 4. ALL PLANS -->
-  <div style="font-size:14px;font-weight:700;color:var(--bk);margin-bottom:10px">Available Plans</div>
+  <div data-available-plans-heading style="font-size:14px;font-weight:700;color:var(--bk);margin-bottom:10px">Available Plans</div>
 
   <div class="plan-card" id="plan-standard" style="border-color:var(--or);background:var(--orl)">
     <div class="plan-badge" style="background:var(--or);color:#fff">Most Popular</div>
@@ -174,22 +174,25 @@ async function loadManage() {
     planHTML += '</div>';
     document.getElementById('current-plan-box').innerHTML = planHTML;
 
+    // Hide the user's current plan from "Available Plans" so only upgrades are shown
     if (userPlan === 'standard') {
-      document.getElementById('btn-standard').textContent = 'Current Plan';
-      document.getElementById('btn-standard').disabled = true;
-      document.getElementById('btn-standard').style.opacity = '0.5';
+      // On Standard → hide Standard card, show Premium as upgrade
+      document.getElementById('plan-standard').style.display = 'none';
       document.getElementById('upgraded-section').style.display = 'block';
       document.getElementById('upgraded-plan-name').textContent = 'Standard';
-      document.getElementById('another-tag-msg').textContent = 'Want to protect more vehicles? Upgrade to Premium for up to 3 cars.';
+      document.getElementById('another-tag-msg').textContent = 'Upgrade to Premium to protect up to 3 vehicles in your family.';
     } else if (userPlan === 'premium') {
-      document.getElementById('btn-standard').textContent = 'Downgrade';
-      document.getElementById('btn-premium').textContent = 'Current Plan';
-      document.getElementById('btn-premium').disabled = true;
-      document.getElementById('btn-premium').style.opacity = '0.5';
+      // On Premium → hide both (you're at the top)
+      document.getElementById('plan-standard').style.display = 'none';
+      document.getElementById('plan-premium').style.display = 'none';
       document.getElementById('upgraded-section').style.display = 'block';
       document.getElementById('upgraded-plan-name').textContent = 'Premium';
-      document.getElementById('another-tag-msg').textContent = 'You can protect up to 3 vehicles. Scan a new tag to add another car.';
+      document.getElementById('another-tag-msg').textContent = 'You can protect up to 3 vehicles. Share Premium codes with family.';
+      // Also hide the "Available Plans" heading since nothing is available
+      const avHeading = document.querySelector('[data-available-plans-heading]');
+      if (avHeading) avHeading.style.display = 'none';
     }
+    // Free plan users (etag) see both cards unchanged — they can upgrade to either
   } catch(e) { console.error('Manage load error:', e); }
 }
 

@@ -6,18 +6,16 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
- * TapMyCar Stripe Webhook — v3.0 FINAL
+ * TapMyCar Stripe Webhook — v4.0 FINAL
  * ══════════════════════════════════════════════════════════════
- * Implements the authoritative pricing spec:
- *   - Direct flow: Day 0 sticker + activation; Day 30 first annual
- *   - Activate flow: Day 0 $1 (free stays); Day 30 sticker+upgrade; Day 60 annual
- *   - Premium: generates 3 gift codes
- *
- * CRITICAL: The `config` export at the bottom uses the correct pattern so
- * that Vercel respects bodyParser:false (required for Stripe signature verification).
+ * ARCHITECTURE:
+ *   - Checkout runs in `mode: 'payment'` (one-time charge for sticker)
+ *   - After payment succeeds, THIS webhook creates the recurring subscription
+ *     with trial_period_days set appropriately (30 or 395 depending on prepay)
+ *   - This makes the Stripe checkout UI display clean "Pay $9.99" instead of
+ *     confusing "$9.99 per year" language.
  */
 
-// ─── RAW BODY READER (for Stripe signature verification) ────────
 function getRawBody(req) {
   return new Promise((resolve, reject) => {
     const chunks = [];
@@ -27,15 +25,13 @@ function getRawBody(req) {
   });
 }
 
-// ─── GENERATE A RANDOM PREMIUM GIFT CODE ───────────────────────
 function generatePremiumCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no ambiguous chars (0/O/1/I)
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let out = 'TMC-PREM-';
   for (let i = 0; i < 6; i++) out += chars[Math.floor(Math.random() * chars.length)];
   return out;
 }
 
-// ─── HANDLER ────────────────────────────────────────────────────
 async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
@@ -56,31 +52,72 @@ async function handler(req, res) {
     switch (event.type) {
 
       // ═════════════════════════════════════════════════════════
-      // CHECKOUT COMPLETED (Day 0 of any paid flow)
+      // CHECKOUT COMPLETED — one-time payment succeeded
       // ═════════════════════════════════════════════════════════
       case "checkout.session.completed": {
         const session = event.data.object;
-        const { user_id, plan, flow, prepay, sticker_count } = session.metadata || {};
+        const { user_id, plan, flow, prepay, sticker_count, subscription_price_id } = session.metadata || {};
         if (!user_id || !plan || !flow) {
           console.warn("Missing metadata on session:", session.id);
           break;
         }
 
-        const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
-          expand: ['subscription']
-        });
-        const ship = fullSession.shipping_details || null;
-        const subscription = fullSession.subscription;
-        const subId = subscription ? (typeof subscription === 'string' ? subscription : subscription.id) : null;
+        // shipping_details is already on the session object, no expand needed
+        const ship = session.shipping_details || session.collected_information?.shipping_details || null;
         const nStickers = parseInt(sticker_count || '1', 10);
+        const isPrepay = prepay === 'true';
 
-        // DETERMINE WHAT PLAN THE USER IS ON AFTER DAY 0
-        // - direct flow: user gets the plan immediately
-        // - activate flow: user stays on 'etag' (free) for 30 days; day-30 invoice upgrades them
+        // ─── CREATE THE SUBSCRIPTION (saved card from one-time payment) ──
+        // For activate flow no-prepay: trial = 30 days (sticker charge fires at trial-end)
+        // For direct flow no-prepay: trial = 30 days (annual charge fires at trial-end)
+        // For any prepay: trial = 395 days (activate) or 365 days (direct)
+        let trialDays;
+        if (flow === 'activate') {
+          trialDays = isPrepay ? 395 : 30;
+        } else {
+          trialDays = isPrepay ? 365 : 30;
+        }
+
+        let subscription;
+        try {
+          const subParams = {
+            customer: session.customer,
+            items: [{ price: subscription_price_id }],
+            trial_period_days: trialDays,
+            metadata: { user_id, plan, flow, prepay }
+          };
+
+          // For activate flow without prepay, the sticker fee hits at trial-end (day 30) as add_invoice_items
+          if (flow === 'activate' && !isPrepay) {
+            const STICKER = plan === 'standard' ? 999 : 2499;
+            const stickerProductName = plan === 'standard' ? 'Standard sticker' : 'Premium 3 stickers';
+            const stickerProduct = await getOrCreateProduct(`tapmycar_${plan}_sticker`, stickerProductName);
+            subParams.add_invoice_items = [{
+              price_data: {
+                currency: 'usd',
+                product: stickerProduct,
+                unit_amount: STICKER,
+                tax_behavior: 'unspecified'
+              },
+              quantity: 1
+            }];
+          }
+
+          subscription = await stripe.subscriptions.create(subParams);
+          console.log(`✓ Created subscription ${subscription.id} for ${user_id} (trial ${trialDays}d)`);
+        } catch (subErr) {
+          console.error("Failed to create subscription:", subErr.message);
+          // Continue anyway — we'll still record the order and activate the tag
+        }
+
+        const subId = subscription?.id || null;
+
+        // ─── DETERMINE PLAN STATE AFTER DAY 0 ──────────────────
+        // direct flow: user gets plan immediately
+        // activate flow: user stays on 'etag' for 30 days; upgrade happens at trial-end invoice
         const userPlanNow = flow === 'direct' ? plan : 'etag';
-        const tagStatus = 'active';  // all paid flows activate the tag immediately
 
-        // ORDER — record the Day-0 payment
+        // ─── ORDER RECORD ──────────────────────────────────────
         const { data: orderRow } = await supabase.from("orders").insert({
           user_id,
           plan,
@@ -98,26 +135,25 @@ async function handler(req, res) {
           order_status: flow === 'activate' ? 'pending_sticker' : 'processing'
         }).select().single();
 
-        // TAG — activate immediately for all paid flows
+        // ─── ACTIVATE TAG ──────────────────────────────────────
         await supabase.from("tags").update({
-          status: tagStatus,
+          status: "active",
           activated_at: new Date().toISOString(),
           plan: userPlanNow
         }).eq("owner_id", user_id);
 
-        // USER — update plan + subscription id
+        // ─── UPDATE USER ───────────────────────────────────────
         const userUpdates = { plan: userPlanNow };
         if (subId) userUpdates.subscription_id = subId;
         await supabase.from("users").update(userUpdates).eq("id", user_id);
 
-        console.log(`✓ User ${user_id}: flow=${flow} plan=${userPlanNow} (will become ${plan}) subId=${subId}`);
+        console.log(`✓ User ${user_id}: flow=${flow} plan=${userPlanNow} subId=${subId}`);
 
-        // ─── PREMIUM: generate 3 gift codes ───────────────────
+        // ─── PREMIUM: GENERATE 3 GIFT CODES ─────────────────────
         let premiumCodes = [];
         if (plan === 'premium' && orderRow) {
           for (let i = 0; i < 3; i++) {
             let code = generatePremiumCode();
-            // Retry if duplicate (very rare but handle it)
             for (let attempts = 0; attempts < 5; attempts++) {
               const { data: existing } = await supabase.from('premium_codes').select('id').eq('code', code).maybeSingle();
               if (!existing) break;
@@ -130,19 +166,17 @@ async function handler(req, res) {
             }).select().single();
             if (codeRow) premiumCodes.push(codeRow.code);
           }
-          // Assign the first code to the buyer themselves so they have their own sticker linked
+          // First code auto-assigned to buyer
           if (premiumCodes.length > 0) {
             await supabase.from('premium_codes')
               .update({ redeemed_by_user_id: user_id, redeemed_at: new Date().toISOString() })
               .eq('code', premiumCodes[0]);
-            await supabase.from('users')
-              .update({ redeemed_code: premiumCodes[0] })
-              .eq('id', user_id);
+            await supabase.from('users').update({ redeemed_code: premiumCodes[0] }).eq('id', user_id);
           }
-          console.log(`✓ Generated ${premiumCodes.length} Premium codes for ${user_id}`);
+          console.log(`✓ Generated ${premiumCodes.length} Premium codes`);
         }
 
-        // REFERRAL REWARDS
+        // ─── REFERRAL REWARDS ───────────────────────────────────
         const { data: buyer } = await supabase.from("users").select("referred_by").eq("id", user_id).single();
         if (buyer && buyer.referred_by) {
           const { data: referrer } = await supabase.from("users")
@@ -151,24 +185,21 @@ async function handler(req, res) {
           if (referrer) {
             const newCount = (referrer.referral_count || 0) + 1;
             const updates = { referral_count: newCount };
-            if (newCount === 1) {
-              updates.referral_credits = (referrer.referral_credits || 0) + 3.00;
-            } else {
-              updates.referral_reward_pending = "choice";
-            }
+            if (newCount === 1) updates.referral_credits = (referrer.referral_credits || 0) + 3.00;
+            else updates.referral_reward_pending = "choice";
             await supabase.from("users").update(updates).eq("id", referrer.id);
           }
         }
 
-        // CONFIRMATION EMAIL
+        // ─── CONFIRMATION EMAIL ────────────────────────────────
         const { data: orderUser } = await supabase.from("users").select("*").eq("id", user_id).single();
         if (orderUser && orderUser.email) {
           const html = buildOrderEmail({
-            plan, flow, prepay: prepay === 'true',
+            plan, flow, prepay: isPrepay,
             amountToday: ((session.amount_total || 0) / 100).toFixed(2),
             shipName: ship ? ship.name : '',
             shipAddress: ship ? `${ship.address.line1}, ${ship.address.city}, ${ship.address.state} ${ship.address.postal_code}` : '',
-            premiumCodes: premiumCodes.slice(1)  // codes 2 and 3 are the shareable ones (1 is the buyer's own)
+            premiumCodes: premiumCodes.slice(1)
           });
           await resend.emails.send({
             from: "TapMyCar <noreply@tapmycar.io>",
@@ -177,25 +208,19 @@ async function handler(req, res) {
             html
           });
         }
-
         break;
       }
 
       // ═════════════════════════════════════════════════════════
-      // INVOICE PAYMENT SUCCEEDED
-      // Day 30: trial-end invoice charges sticker + starts subscription (activate flow)
-      //         or just starts subscription (direct flow)
-      // Later: annual renewals
+      // INVOICE PAYMENT SUCCEEDED (trial-end or annual renewal)
       // ═════════════════════════════════════════════════════════
       case "invoice.payment_succeeded": {
         const invoice = event.data.object;
-        const customerId = invoice.customer;
         const billingReason = invoice.billing_reason;
 
-        const { data: user } = await supabase.from("users").select("*").eq("stripe_customer_id", customerId).single();
+        const { data: user } = await supabase.from("users").select("*").eq("stripe_customer_id", invoice.customer).single();
         if (!user) break;
 
-        // Retrieve subscription to check its metadata (flow, plan)
         let subFlow, subPlan;
         if (invoice.subscription) {
           try {
@@ -205,39 +230,33 @@ async function handler(req, res) {
           } catch (e) { /* fall through */ }
         }
 
-        // FIRST invoice at trial end → for activate flow, this is day 30 "upgrade"
-        if (billingReason === 'subscription_create' || billingReason === 'subscription_cycle') {
-          // If this is the activate flow's trial-end invoice, upgrade the user's plan now
-          if (subFlow === 'activate' && subPlan && user.plan === 'etag') {
-            await supabase.from("users").update({ plan: subPlan }).eq("id", user.id);
-            await supabase.from("tags").update({ plan: subPlan }).eq("owner_id", user.id);
-            console.log(`✓ User ${user.id} upgraded from etag → ${subPlan} at trial-end (day 30)`);
+        // Activate flow trial-end: upgrade user from 'etag' → their chosen plan
+        if (subFlow === 'activate' && subPlan && user.plan === 'etag') {
+          await supabase.from("users").update({ plan: subPlan }).eq("id", user.id);
+          await supabase.from("tags").update({ plan: subPlan }).eq("owner_id", user.id);
+          console.log(`✓ User ${user.id} upgraded from etag → ${subPlan}`);
 
-            // Email the "sticker shipped, plan active" confirmation
-            if (user.email) {
-              await resend.emails.send({
-                from: "TapMyCar <noreply@tapmycar.io>",
-                to: user.email,
-                subject: `Welcome to ${subPlan[0].toUpperCase() + subPlan.slice(1)} · Your sticker ships now`,
-                html: buildStickerShippingEmail(subPlan)
-              });
-            }
+          if (user.email) {
+            await resend.emails.send({
+              from: "TapMyCar <noreply@tapmycar.io>",
+              to: user.email,
+              subject: `Welcome to ${subPlan[0].toUpperCase() + subPlan.slice(1)} · Your sticker ships now`,
+              html: buildStickerShippingEmail(subPlan)
+            });
           }
-
-          // Record invoice as order
-          await supabase.from("orders").insert({
-            user_id: user.id,
-            plan: user.plan || subPlan || 'unknown',
-            amount: invoice.amount_paid,
-            stripe_id: invoice.id,
-            subscription_id: invoice.subscription,
-            status: "paid",
-            order_status: billingReason === 'subscription_cycle' ? 'delivered' : 'processing',
-            shipping_fee: 0
-          });
         }
 
-        // Renewal email (only on actual cycle, not first trial-end)
+        await supabase.from("orders").insert({
+          user_id: user.id,
+          plan: user.plan || subPlan || 'unknown',
+          amount: invoice.amount_paid,
+          stripe_id: invoice.id,
+          subscription_id: invoice.subscription,
+          status: "paid",
+          order_status: billingReason === 'subscription_cycle' ? 'delivered' : 'processing',
+          shipping_fee: 0
+        });
+
         if (billingReason === 'subscription_cycle' && user.email) {
           await resend.emails.send({
             from: "TapMyCar <noreply@tapmycar.io>",
@@ -285,17 +304,15 @@ async function handler(req, res) {
         const subscription = event.data.object;
         const { data: user } = await supabase.from("users").select("*").eq("stripe_customer_id", subscription.customer).single();
         if (user) {
-          // Disable main user's tag
           await supabase.from("tags").update({ status: "disabled" }).eq("owner_id", user.id);
           await supabase.from("users").update({ subscription_id: null, plan: 'etag' }).eq("id", user.id);
 
-          // If Premium main buyer: also disable family members' tags
           if (user.plan === 'premium') {
-            const { data: familyMembers } = await supabase.from('users').select('id').eq('parent_user_id', user.id);
-            if (familyMembers && familyMembers.length > 0) {
-              const familyIds = familyMembers.map(f => f.id);
-              await supabase.from('tags').update({ status: 'disabled' }).in('owner_id', familyIds);
-              await supabase.from('users').update({ plan: 'etag' }).in('id', familyIds);
+            const { data: fam } = await supabase.from('users').select('id').eq('parent_user_id', user.id);
+            if (fam && fam.length > 0) {
+              const ids = fam.map(f => f.id);
+              await supabase.from('tags').update({ status: 'disabled' }).in('owner_id', ids);
+              await supabase.from('users').update({ plan: 'etag' }).in('id', ids);
             }
           }
 
@@ -323,11 +340,20 @@ async function handler(req, res) {
   }
 }
 
-// ─── VERCEL EXPORT (CRITICAL PATTERN) ───────────────────────────
 module.exports = handler;
-module.exports.config = {
-  api: { bodyParser: false }
-};
+module.exports.config = { api: { bodyParser: false } };
+
+// ═══════════════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════════════
+async function getOrCreateProduct(lookupKey, name) {
+  try {
+    const existing = await stripe.products.search({ query: `metadata['lookup_key']:'${lookupKey}'`, limit: 1 });
+    if (existing.data.length > 0) return existing.data[0].id;
+  } catch (e) { /* fall through */ }
+  const product = await stripe.products.create({ name, metadata: { lookup_key: lookupKey } });
+  return product.id;
+}
 
 // ═══════════════════════════════════════════════════════════════
 // EMAIL TEMPLATES
@@ -340,27 +366,22 @@ function buildOrderEmail({ plan, flow, prepay, amountToday, shipName, shipAddres
   let hdr, nextLine;
   if (flow === 'activate') {
     hdr = 'Activation confirmed';
-    if (prepay) {
-      nextLine = `You've prepaid year 1. Your ${planName} physical ${plan === 'premium' ? 'stickers ship' : 'sticker ships'} in 2-3 days. Your first annual renewal is in ~395 days.`;
-    } else {
-      nextLine = `Your tag is active now (day 1 of 30). On day 30, we'll charge ${sticker} and ship your ${planName} ${plan === 'premium' ? 'stickers' : 'sticker'}, upgrading you to the ${planName} plan. On day 60, your ${yearly}/year annual plan begins.`;
-    }
+    nextLine = prepay
+      ? `You've prepaid year 1. Your ${planName} physical ${plan === 'premium' ? 'stickers ship' : 'sticker ships'} in 2-3 days. Your first annual renewal is in ~395 days.`
+      : `Your tag is active now (day 1 of 30). On day 30, we'll charge ${sticker} and ship your ${planName} ${plan === 'premium' ? 'stickers' : 'sticker'}. On day 60, your ${yearly}/year annual plan begins.`;
   } else {
     hdr = `Welcome to ${planName}`;
-    if (prepay) {
-      nextLine = `You've prepaid year 1. Your ${plan === 'premium' ? '3 physical stickers ship' : 'physical sticker ships'} in 2-3 business days. Your first annual renewal is in 365 days.`;
-    } else {
-      nextLine = `Your ${plan === 'premium' ? '3 physical stickers ship' : 'physical sticker ships'} in 2-3 business days. On day 30, your first annual charge of ${yearly} begins your subscription, which renews yearly.`;
-    }
+    nextLine = prepay
+      ? `You've prepaid year 1. Your ${plan === 'premium' ? '3 physical stickers ship' : 'physical sticker ships'} in 2-3 business days. Your first annual renewal is in 365 days.`
+      : `Your ${plan === 'premium' ? '3 physical stickers ship' : 'physical sticker ships'} in 2-3 business days. On day 30, your first annual charge of ${yearly} begins your subscription, which renews yearly.`;
   }
 
   const codesBlock = premiumCodes && premiumCodes.length > 0 ? `
     <div style="background:#F3F4F6;border-radius:12px;padding:16px;margin-bottom:16px">
       <div style="font-size:13px;font-weight:700;color:#111;margin-bottom:10px">Your 2 Premium gift codes (for family)</div>
-      <div style="font-size:11px;color:#6B7280;margin-bottom:12px">Share these codes with 2 family members. They register at tapmycar.io and enter their code to claim their own Premium sticker. All managed under your Premium subscription.</div>
+      <div style="font-size:11px;color:#6B7280;margin-bottom:12px">Share with 2 family members. Each redeems their code at tapmycar.io to claim their own Premium sticker under your subscription.</div>
       ${premiumCodes.map(c => `<div style="background:#fff;border:1.5px dashed #D1D5DB;border-radius:8px;padding:10px;margin-bottom:8px;text-align:center;font-family:monospace;font-size:15px;font-weight:700;color:#111">${c}</div>`).join('')}
-    </div>
-  ` : '';
+    </div>` : '';
 
   return `<div style="font-family:Inter,sans-serif;max-width:520px;margin:0 auto;padding:40px 24px;background:#fff">
     <div style="font-size:24px;font-weight:800;color:#111;margin-bottom:4px">TapMyCar<span style="color:#FF6B00">.</span></div>
@@ -370,10 +391,7 @@ function buildOrderEmail({ plan, flow, prepay, amountToday, shipName, shipAddres
       <div style="font-size:13px;font-weight:700;color:#166534;margin-bottom:4px">Paid today: $${amountToday}</div>
       <div style="font-size:12px;color:#166534">Plan: ${planName}</div>
     </div>
-    ${shipAddress ? `<div style="background:#F9FAFB;border-radius:12px;padding:14px;margin-bottom:16px">
-      <div style="font-size:12px;font-weight:700;color:#111;margin-bottom:4px">Shipping to</div>
-      <div style="font-size:12px;color:#6B7280">${shipName}, ${shipAddress}</div>
-    </div>` : ''}
+    ${shipAddress ? `<div style="background:#F9FAFB;border-radius:12px;padding:14px;margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#111;margin-bottom:4px">Shipping to</div><div style="font-size:12px;color:#6B7280">${shipName}, ${shipAddress}</div></div>` : ''}
     ${codesBlock}
     <div style="background:#FFF3EC;border:1px solid #FFE4CC;border-radius:12px;padding:14px;margin-bottom:20px">
       <div style="font-size:12px;font-weight:700;color:#FF6B00;margin-bottom:4px">What happens next</div>
@@ -396,7 +414,7 @@ function buildStickerShippingEmail(plan) {
       <div style="font-size:13px;font-weight:700;color:#9A3800;margin-bottom:4px">Charged today: ${sticker}</div>
       <div style="font-size:12px;color:#78350F">Your ${plan === 'premium' ? '3 physical stickers ship' : 'physical sticker ships'} to your address in 2-3 business days.</div>
     </div>
-    <div style="background:#F9FAFB;border-radius:12px;padding:14px;margin-bottom:16px;font-size:12px;color:#6B7280;line-height:1.6">In 30 days, your first annual charge of ${yearly} begins your subscription. After that, it renews yearly. Cancel anytime.</div>
+    <div style="background:#F9FAFB;border-radius:12px;padding:14px;margin-bottom:16px;font-size:12px;color:#6B7280;line-height:1.6">In 30 days, your first annual charge of ${yearly} begins your subscription. Cancel anytime.</div>
     <a href="https://tapmycar.io/dashboard.html" style="display:block;background:#FF6B00;color:#fff;font-size:14px;font-weight:700;padding:14px 0;border-radius:13px;text-align:center;text-decoration:none">View dashboard</a>
   </div>`;
 }
@@ -417,7 +435,7 @@ function buildPaymentFailedEmail() {
     <div style="font-size:24px;font-weight:800;color:#111;margin-bottom:8px">TapMyCar<span style="color:#FF6B00">.</span></div>
     <div style="background:#FEE2E2;border:1.5px solid #FECACA;border-radius:14px;padding:16px;margin-bottom:20px">
       <div style="font-size:14px;font-weight:700;color:#DC2626;margin-bottom:4px">Payment failed</div>
-      <div style="font-size:12px;color:#B91C1C">We could not process your charge. Please update your payment method to keep your tag active.</div>
+      <div style="font-size:12px;color:#B91C1C">We could not process your charge. Please update your payment method.</div>
     </div>
     <a href="https://tapmycar.io/settings.html" style="display:block;background:#DC2626;color:#fff;font-size:14px;font-weight:700;padding:14px 0;border-radius:13px;text-align:center;text-decoration:none">Update payment method</a>
   </div>`;
@@ -439,7 +457,7 @@ function buildCancelConfirmationEmail() {
     <div style="font-size:24px;font-weight:800;color:#111;margin-bottom:8px">TapMyCar<span style="color:#FF6B00">.</span></div>
     <div style="background:#F9FAFB;border:1.5px solid #E5E7EB;border-radius:14px;padding:16px;margin-bottom:20px">
       <div style="font-size:14px;font-weight:700;color:#111;margin-bottom:4px">Subscription cancelled</div>
-      <div style="font-size:12px;color:#6B7280">Your tag is now inactive. You will not be charged again. Reactivate anytime from the dashboard.</div>
+      <div style="font-size:12px;color:#6B7280">Your tag is now inactive. You will not be charged again.</div>
     </div>
     <a href="https://tapmycar.io/dashboard.html" style="display:block;background:#FF6B00;color:#fff;font-size:14px;font-weight:700;padding:14px 0;border-radius:13px;text-align:center;text-decoration:none">Reactivate</a>
   </div>`;
