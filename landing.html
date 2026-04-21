@@ -357,36 +357,40 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 
+
+
 <script>
-// Dynamic reviews loader - replaces fake testimonial with real approved reviews if any exist
-(async function loadApprovedReviews() {
+// Dynamic testimonial loader - replaces fake Mike R. with most recent FEATURED review
+(async function() {
   try {
-    const res = await fetch('/api/get-reviews?status=approved&limit=3');
+    const res = await fetch('/api/get-reviews?status=approved&landing_only=true&limit=1');
     const data = await res.json();
-    if (!data.reviews || data.reviews.length === 0) return; // keep fallback Mike R.
+    if (!data.reviews || data.reviews.length === 0) return; // keep Mike R. fallback
 
-    // Find the testimonial card (the one containing Mike R. originally) and replace its inner content with first approved review
-    const testNames = document.querySelectorAll('.test-name');
-    if (testNames.length === 0) return;
-
-    // Build replacement HTML using the first approved review (most recent)
     const r = data.reviews[0];
-    const escape = s => String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const esc = s => String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-    // Replace name and city/sub fields with first review
-    testNames[0].textContent = escape(r.name);
-    const subs = document.querySelectorAll('.test-sub');
-    if (subs.length > 0 && r.city) subs[0].textContent = escape(r.city);
+    // Find the testimonial container
+    const testContainer = document.querySelector('.testimonial');
+    if (!testContainer) return;
 
-    // Find the matching quote element. The site uses a quote text right above the author block.
-    // Try to find the closest preceding paragraph or italic text and replace its content.
-    const card = testNames[0].closest('div').parentElement;
-    if (card) {
-      const quoteEl = card.querySelector('p, .test-quote, em, i');
-      if (quoteEl) quoteEl.textContent = '"' + escape(r.text) + '"';
-    }
+    // 1. Replace the quote paragraph (first <p> child of .testimonial)
+    const quoteEl = testContainer.querySelector('p');
+    if (quoteEl) quoteEl.innerHTML = '&quot;' + esc(r.text) + '&quot;';
+
+    // 2. Replace the avatar letter
+    const avEl = testContainer.querySelector('.test-av');
+    if (avEl) avEl.textContent = (r.name || 'U')[0].toUpperCase();
+
+    // 3. Replace name
+    const nameEl = testContainer.querySelector('.test-name');
+    if (nameEl) nameEl.textContent = r.name;
+
+    // 4. Replace city/subtitle (if present)
+    const subEl = testContainer.querySelector('.test-sub');
+    if (subEl) subEl.textContent = r.city || 'Verified user';
   } catch (e) {
-    // Silent fallback - landing keeps showing Mike R. testimonial
+    // Silent - landing keeps Mike R. fallback
   }
 })();
 </script>
