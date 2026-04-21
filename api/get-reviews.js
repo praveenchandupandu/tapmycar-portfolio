@@ -3,12 +3,7 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
 
 /**
  * GET /api/get-reviews
- * Query params:
- *   limit       — max number of reviews to return (default 50)
- *   status      — 'approved' (default) | 'pending' | 'rejected' (admin only for non-approved)
- *   admin_key   — required if status != 'approved'
- *
- * Returns: { reviews: [...] }
+ * Filters: status, visible_only, landing_only, limit, admin_key
  */
 
 module.exports = async function handler(req, res) {
@@ -16,22 +11,32 @@ module.exports = async function handler(req, res) {
 
   const limit = parseInt(req.query.limit || '50', 10);
   const status = req.query.status || 'approved';
+  const visibleOnly = req.query.visible_only === 'true';
+  const landingOnly = req.query.landing_only === 'true';
   const adminKey = req.query.admin_key || req.headers['x-admin-key'];
+  const isAdmin = adminKey === process.env.ADMIN_SECRET_KEY;
 
-  // Non-public statuses require admin key
-  if (status !== 'approved') {
-    if (!adminKey || adminKey !== process.env.ADMIN_SECRET_KEY) {
-      return res.status(401).json({ error: 'Admin authentication required' });
-    }
+  if (status !== 'approved' && !isAdmin) {
+    return res.status(401).json({ error: 'Admin authentication required' });
   }
 
   try {
-    const { data: reviews, error } = await supabase
+    let query = supabase
       .from('reviews')
-      .select('id, name, city, text, status, created_at, moderated_at')
-      .eq('status', status)
-      .order('created_at', { ascending: false })
-      .limit(Math.min(limit, 200));
+      .select('id, name, city, text, status, visible_on_reviews, featured_on_landing, landing_order, created_at, moderated_at')
+      .eq('status', status);
+
+    if (landingOnly) {
+      query = query.eq('featured_on_landing', true).order('landing_order', { ascending: true });
+    } else if (visibleOnly) {
+      query = query.eq('visible_on_reviews', true).order('created_at', { ascending: false });
+    } else {
+      query = query.order('created_at', { ascending: false });
+    }
+
+    query = query.limit(Math.min(limit, 200));
+
+    const { data: reviews, error } = await query;
 
     if (error) {
       console.error('Get reviews error:', error);
