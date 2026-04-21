@@ -1340,16 +1340,25 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 </div>
 
     
-      <!-- REVIEWS TAB -->
-<div class="panel" id="panel-reviews">
-  <div class="asl">Reviews moderation</div>
-  <div style="display:flex;gap:8px;margin-bottom:16px">
-    <button onclick="loadReviewsTab('pending')" class="rev-tab-btn" id="rev-tab-pending" style="background:#FF6B00;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Pending <span id="rev-pending-count" style="background:rgba(255,255,255,0.3);padding:2px 6px;border-radius:8px;margin-left:4px">0</span></button>
-    <button onclick="loadReviewsTab('approved')" class="rev-tab-btn" id="rev-tab-approved" style="background:#1E2D4A;color:#94A3B8;border:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Approved</button>
-    <button onclick="loadReviewsTab('rejected')" class="rev-tab-btn" id="rev-tab-rejected" style="background:#1E2D4A;color:#94A3B8;border:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Rejected</button>
-  </div>
-  <div id="reviews-list"><div class="empty">Click a tab to load reviews</div></div>
+      
 </div>
+      <!-- REVIEWS TAB -->
+      <div class="panel" id="panel-reviews">
+        <div class="kpi-grid">
+          <div class="kpi-mini"><div class="kpi-mini-label">Pending</div><div class="kpi-mini-value warn" id="rev-pending-count">0</div></div>
+          <div class="kpi-mini"><div class="kpi-mini-label">Approved</div><div class="kpi-mini-value green" id="rev-approved-count">0</div></div>
+          <div class="kpi-mini"><div class="kpi-mini-label">On landing</div><div class="kpi-mini-value orange" id="rev-landing-count">0</div></div>
+        </div>
+
+        <div class="pill-group" style="margin-bottom:20px">
+          <button class="pill active" id="rev-tab-pending" onclick="loadReviewsTab('pending')">Pending</button>
+          <button class="pill" id="rev-tab-approved" onclick="loadReviewsTab('approved')">Approved</button>
+          <button class="pill" id="rev-tab-rejected" onclick="loadReviewsTab('rejected')">Rejected</button>
+        </div>
+
+        <div id="reviews-list"><div class="empty">Loading reviews...</div></div>
+      </div>
+
 
     </div>
   </main>
@@ -2725,7 +2734,7 @@ function downloadFile(content, filename, mime) {
 <script>
 // ─── NAV HELPERS (defined AFTER preserved script so our showTab wins) ──
 const TAB_TITLES = {"home": "Home", "users": "Users", "orders": "Orders", "leads": "Leads", "tags": "Tags", "analytics": "Analytics", "scans": "Scans", "upgrade": "Upgrade tracker", "reviews": "Reviews", "generate": "Generate", "receive": "Receive", "inventory": "Inventory", "promos": "Promos", "audit": "Audit"};
-const TAB_SUBS = {"home": "At-a-glance view of the business", "users": "Search, manage, and gift plans", "orders": "Physical shipping and fulfillment", "leads": "Feedback emails captured on contact pages", "tags": "All tokens in the system", "analytics": "Revenue, scans, and growth metrics", "scans": "Raw scan history", "upgrade": "Users approaching day 30 auto-upgrade", "reviews": "Review moderation — approve, toggle visibility, feature on landing", "generate": "Create new NFC/QR token batches", "receive": "Verify stickers received from manufacturer", "inventory": "Stock levels by batch", "promos": "Gift plans and promo codes", "audit": "Admin actions and system health"};
+const TAB_SUBS = {"home": "At-a-glance view of the business", "users": "Search, manage, and gift plans", "orders": "Physical shipping and fulfillment", "leads": "Feedback emails captured on contact pages", "tags": "All tokens in the system", "analytics": "Revenue, scans, and growth metrics", "scans": "Raw scan history", "upgrade": "Users approaching day 30 auto-upgrade", "reviews": "Approve reviews, toggle visibility, feature on landing", "generate": "Create new NFC/QR token batches", "receive": "Verify stickers received from manufacturer", "inventory": "Stock levels by batch", "promos": "Gift plans and promo codes", "audit": "Admin actions and system health"};
 function navTo(id){
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   const panel = document.getElementById('panel-' + id);
@@ -2769,21 +2778,27 @@ window.showToast = showToast;
 </script>
 
 
+
 <script>
-let currentReviewTab = null;
+// ─── REVIEWS MODERATION ──────────────────────────────────
+let currentReviewTab = 'pending';
+
+function getAdminKey() {
+  if (typeof adminKey !== 'undefined' && adminKey) return adminKey;
+  return localStorage.getItem('tmc_admin_key') || '';
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
 
 async function loadReviewsTab(status) {
   currentReviewTab = status;
-  // Toggle button styling
-  document.querySelectorAll('.rev-tab-btn').forEach(b => {
-    b.style.background = '#1E2D4A';
-    b.style.color = '#94A3B8';
+  // Toggle pill style
+  ['pending','approved','rejected'].forEach(s => {
+    const btn = document.getElementById('rev-tab-' + s);
+    if (btn) btn.classList.toggle('active', s === status);
   });
-  const activeBtn = document.getElementById('rev-tab-' + status);
-  if (activeBtn) {
-    activeBtn.style.background = '#FF6B00';
-    activeBtn.style.color = '#fff';
-  }
 
   const container = document.getElementById('reviews-list');
   container.innerHTML = '<div class="empty">Loading...</div>';
@@ -2794,37 +2809,82 @@ async function loadReviewsTab(status) {
 
     if (!data.reviews || data.reviews.length === 0) {
       container.innerHTML = '<div class="empty">No ' + status + ' reviews</div>';
-      if (status === 'pending') document.getElementById('rev-pending-count').textContent = '0';
       return;
     }
 
-    if (status === 'pending') document.getElementById('rev-pending-count').textContent = data.reviews.length;
+    // Count featured on landing + sort
+    const featured = status === 'approved'
+      ? data.reviews.filter(r => r.featured_on_landing).sort((a,b) => (a.landing_order||0) - (b.landing_order||0))
+      : [];
 
-    container.innerHTML = data.reviews.map(r => {
-      const created = new Date(r.created_at).toLocaleString();
-      const cityLine = r.city ? ' · ' + escapeHtml(r.city) : '';
-      const actions = status === 'pending'
-        ? '<button onclick="moderateReview(\'' + r.id + '\', \'approve\')" style="background:#16A34A;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;margin-right:6px">Approve</button>' +
-          '<button onclick="moderateReview(\'' + r.id + '\', \'reject\')" style="background:#DC2626;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Reject</button>'
-        : '<button onclick="moderateReview(\'' + r.id + '\', \'delete\')" style="background:#1E2D4A;color:#fff;border:1px solid #94A3B8;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Delete</button>';
-
-      return '<div style="background:#0F172A;border:1px solid #1E2D4A;border-radius:12px;padding:16px;margin-bottom:12px">' +
-        '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">' +
-          '<div><div style="font-size:13px;font-weight:700;color:#fff">' + escapeHtml(r.name) + cityLine + '</div>' +
-          '<div style="font-size:10px;color:#64748B;margin-top:2px">' + created + '</div></div>' +
-          '<div>' + actions + '</div>' +
-        '</div>' +
-        '<div style="font-size:13px;color:#CBD5E1;line-height:1.5;font-style:italic">"' + escapeHtml(r.text) + '"</div>' +
-      '</div>';
-    }).join('');
+    container.innerHTML = data.reviews.map(r => renderReviewCard(r, status, featured)).join('');
   } catch (e) {
     container.innerHTML = '<div class="empty">Failed to load: ' + e.message + '</div>';
   }
 }
 
+function renderReviewCard(r, status, featuredList) {
+  const created = new Date(r.created_at).toLocaleString('en-US', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'});
+  const cityLine = r.city ? ' · ' + escapeHtml(r.city) : '';
+
+  // Top-right actions (approve/reject for pending, delete for rejected)
+  let topActions = '';
+  if (status === 'pending') {
+    topActions =
+      '<button class="gen-btn success" style="height:36px;padding:0 16px;font-size:12px" onclick="moderateReview(\'' + r.id + '\', \'approve\')">Approve</button>' +
+      '<button class="gen-btn danger" style="height:36px;padding:0 16px;font-size:12px" onclick="moderateReview(\'' + r.id + '\', \'reject\')">Reject</button>';
+  } else if (status === 'rejected') {
+    topActions = '<button class="gen-btn-outline" style="height:36px;border-color:var(--danger);color:var(--danger);padding:0 16px;font-size:12px" onclick="moderateReview(\'' + r.id + '\', \'delete\')">Delete</button>';
+  }
+
+  // Bottom controls (approved reviews only)
+  let controls = '';
+  if (status === 'approved') {
+    const visON = r.visible_on_reviews !== false;
+    const featON = r.featured_on_landing === true;
+    const landingIdx = featON && featuredList ? featuredList.findIndex(f => f.id === r.id) : -1;
+    const landingBadge = landingIdx >= 0
+      ? '<span class="ba" style="background:var(--brand-soft);color:var(--brand)">Landing #' + (landingIdx + 1) + '</span>'
+      : '';
+
+    const visBtn = '<button class="gen-btn-outline" style="height:32px;padding:0 12px;font-size:11px;' +
+      (visON ? 'border-color:var(--success);color:var(--success)' : 'border-color:var(--text-4);color:var(--text-4)') +
+      '" onclick="moderateReview(\'' + r.id + '\', \'toggle_reviews_page\')">Reviews page: ' + (visON ? 'ON' : 'OFF') + '</button>';
+
+    const featBtn = '<button class="gen-btn-outline" style="height:32px;padding:0 12px;font-size:11px;' +
+      (featON ? 'border-color:var(--brand);color:var(--brand)' : 'border-color:var(--text-4);color:var(--text-4)') +
+      '" onclick="moderateReview(\'' + r.id + '\', \'toggle_landing\')">Landing: ' + (featON ? 'ON' : 'OFF') + '</button>';
+
+    let arrows = '';
+    if (featON) {
+      arrows =
+        '<button class="gen-btn-outline" style="height:32px;width:32px;padding:0;font-size:14px" title="Move up" onclick="moderateReview(\'' + r.id + '\', \'move_up\')">↑</button>' +
+        '<button class="gen-btn-outline" style="height:32px;width:32px;padding:0;font-size:14px" title="Move down" onclick="moderateReview(\'' + r.id + '\', \'move_down\')">↓</button>';
+    }
+
+    controls =
+      '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px;align-items:center">' +
+        visBtn + featBtn + arrows + landingBadge +
+        '<button class="gen-btn-outline" style="height:32px;padding:0 12px;font-size:11px;border-color:var(--danger);color:var(--danger);margin-left:auto" onclick="moderateReview(\'' + r.id + '\', \'delete\')">Delete</button>' +
+      '</div>';
+  }
+
+  return '<div class="order-card">' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px;flex-wrap:wrap">' +
+      '<div style="min-width:0;flex:1">' +
+        '<div style="font-size:14px;font-weight:700;color:var(--text)">' + escapeHtml(r.name) + cityLine + '</div>' +
+        '<div style="font-size:11px;color:var(--text-4);margin-top:3px">' + created + '</div>' +
+      '</div>' +
+      (topActions ? '<div style="display:flex;gap:6px;flex-shrink:0">' + topActions + '</div>' : '') +
+    '</div>' +
+    '<div style="font-size:13px;color:var(--text-2);line-height:1.6;font-style:italic">"' + escapeHtml(r.text) + '"</div>' +
+    controls +
+  '</div>';
+}
+
 async function moderateReview(reviewId, action) {
-  const confirmText = action === 'delete' ? 'Permanently delete this review?' : action === 'reject' ? 'Reject this review?' : null;
-  if (confirmText && !confirm(confirmText)) return;
+  const confirmTexts = { 'delete': 'Permanently delete this review?', 'reject': 'Reject this review?' };
+  if (confirmTexts[action] && !confirm(confirmTexts[action])) return;
 
   try {
     const res = await fetch('/api/moderate-review', {
@@ -2834,38 +2894,42 @@ async function moderateReview(reviewId, action) {
     });
     const data = await res.json();
     if (data.success) {
-      // Reload current tab
       loadReviewsTab(currentReviewTab);
+      updateReviewCounts();
+      if (typeof showToast === 'function') showToast('Updated');
     } else {
       alert('Error: ' + (data.error || 'unknown'));
     }
   } catch (e) { alert('Network error: ' + e.message); }
 }
 
-function escapeHtml(s) {
-  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function updateReviewCounts() {
+  try {
+    const key = encodeURIComponent(getAdminKey());
+    const [pendingRes, approvedRes] = await Promise.all([
+      fetch('/api/get-reviews?status=pending&limit=200&admin_key=' + key).then(r => r.json()),
+      fetch('/api/get-reviews?status=approved&limit=200&admin_key=' + key).then(r => r.json())
+    ]);
+    const pendingCount = (pendingRes.reviews || []).length;
+    const approvedCount = (approvedRes.reviews || []).length;
+    const landingCount = (approvedRes.reviews || []).filter(r => r.featured_on_landing).length;
+    const pEl = document.getElementById('rev-pending-count'); if (pEl) pEl.textContent = pendingCount;
+    const aEl = document.getElementById('rev-approved-count'); if (aEl) aEl.textContent = approvedCount;
+    const lEl = document.getElementById('rev-landing-count'); if (lEl) lEl.textContent = landingCount;
+  } catch (e) { /* silent */ }
 }
 
-function getAdminKey() {
-  // Use the global adminKey variable that admin.html's login flow already populates
-  if (typeof adminKey !== 'undefined' && adminKey) return adminKey;
-  // Fall back to localStorage keys that admin.html uses
-  return localStorage.getItem('tmc_admin_key') || localStorage.getItem('admin_key') || '';
-}
+// Auto-load counts and first tab when navigating to reviews
+document.addEventListener('click', function(e) {
+  const t = e.target.closest('[data-tab="reviews"]');
+  if (t) setTimeout(() => { updateReviewCounts(); loadReviewsTab('pending'); }, 100);
+});
 
-// Auto-load pending count on admin page load
-window.addEventListener('load', () => {
-  setTimeout(() => {
-    fetch('/api/get-reviews?status=pending&limit=200&admin_key=' + encodeURIComponent(getAdminKey()))
-      .then(r => r.json())
-      .then(d => {
-        if (d.reviews) {
-          document.getElementById('rev-pending-count').textContent = d.reviews.length;
-        }
-      })
-      .catch(() => {});
-  }, 1000);
+// Also load counts once after admin login completes
+window.addEventListener('load', function() {
+  setTimeout(updateReviewCounts, 1500);
 });
 </script>
+
 </body>
 </html>
