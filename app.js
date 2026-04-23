@@ -415,7 +415,7 @@ function injectChatbot() {
     // Measures actual nav height + safe-area + gap — works on all screen sizes
     function positionBubbleAboveNav() {
       const nav = document.querySelector(
-        '.mobile-bottom, .bottom-nav, .bottom-tabs, .tab-bar, nav.bottom, [class*="bottom-nav"], [class*="mobile-nav"]'
+        '.mobile-bottom, .bnav, .bottom-nav, .bottom-tabs, .tab-bar, nav.bottom, [class*="bottom-nav"], [class*="mobile-nav"]'
       );
 
       // If user has dragged the bubble, don't overwrite their position
