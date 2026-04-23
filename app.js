@@ -411,17 +411,43 @@ function injectChatbot() {
     const badge = document.getElementById('tmc-chat-badge');
     if (!bubble) return;
 
-    // Auto-offset up when page has bottom nav (dashboard, tag, verify, activity, admin mobile)
-    const hasBottomNav = !!(
-      document.querySelector('.mobile-bottom') ||
-      document.querySelector('.bottom-nav') ||
-      document.querySelector('.bottom-tabs') ||
-      document.querySelector('.tab-bar')
-    );
-    if (hasBottomNav) {
-      bubble.style.bottom = '110px';
-      if (badge) badge.style.bottom = '158px';
+    // Dynamically position bubble above bottom nav (if present)
+    // Measures actual nav height + safe-area + gap — works on all screen sizes
+    function positionBubbleAboveNav() {
+      const nav = document.querySelector(
+        '.mobile-bottom, .bottom-nav, .bottom-tabs, .tab-bar, nav.bottom, [class*="bottom-nav"], [class*="mobile-nav"]'
+      );
+
+      // If user has dragged the bubble, don't overwrite their position
+      if (bubble.style.top && bubble.style.top !== 'auto') return;
+
+      let navHeight = 0;
+      if (nav) {
+        const rect = nav.getBoundingClientRect();
+        navHeight = rect.height;
+        // Only apply if nav is actually at/near bottom of viewport
+        const isAtBottom = (window.innerHeight - rect.bottom) < 50;
+        if (!isAtBottom) navHeight = 0;
+      }
+
+      if (navHeight > 0) {
+        const gap = 16; // breathing room between bubble and nav
+        const bubbleBottom = navHeight + gap;
+        bubble.style.bottom = bubbleBottom + 'px';
+        if (badge) badge.style.bottom = (bubbleBottom + 48) + 'px';
+      } else {
+        bubble.style.bottom = '24px';
+        if (badge) badge.style.bottom = '72px';
+      }
     }
+
+    // Position immediately and re-measure on resize/orientation change
+    positionBubbleAboveNav();
+    // Re-check after a moment in case nav loads with delay
+    setTimeout(positionBubbleAboveNav, 500);
+    setTimeout(positionBubbleAboveNav, 1500);
+    window.addEventListener('resize', positionBubbleAboveNav);
+    window.addEventListener('orientationchange', positionBubbleAboveNav);
 
     let pressTimer = null;
     let isDragging = false;
