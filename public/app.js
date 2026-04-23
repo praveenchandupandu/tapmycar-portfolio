@@ -419,8 +419,8 @@ function injectChatbot() {
       document.querySelector('.tab-bar')
     );
     if (hasBottomNav) {
-      bubble.style.bottom = '88px';
-      if (badge) badge.style.bottom = '136px';
+      bubble.style.bottom = '110px';
+      if (badge) badge.style.bottom = '158px';
     }
 
     let pressTimer = null;
