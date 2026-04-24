@@ -26,3 +26,6 @@ yarn-error.log*
 
 # Archived old patch scripts (kept locally for reference, not needed in repo)
 archive/
+
+tapmycar-logo-assets/
+tapmycar-logo-assets.zip
