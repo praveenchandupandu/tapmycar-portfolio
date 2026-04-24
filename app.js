@@ -30,19 +30,63 @@ function showToast(message) {
 
 function initOTP() {
   const boxes = document.querySelectorAll('.otp-box');
+  if (!boxes.length) return;
+
+  // Detect which submit to trigger (signin vs register)
+  function submitOTP() {
+    if (typeof window.signIn === 'function') window.signIn();
+    else if (typeof window.verifyOTP === 'function') window.verifyOTP();
+  }
+
+  // Spread a 6-digit string across the 6 boxes
+  function fillBoxes(digits) {
+    const clean = String(digits || '').replace(/\D/g, '').slice(0, boxes.length);
+    if (!clean) return;
+    for (let i = 0; i < boxes.length; i++) {
+      boxes[i].value = clean[i] || '';
+      if (clean[i]) boxes[i].classList.add('filled');
+      else boxes[i].classList.remove('filled');
+    }
+    const lastFilled = Math.min(clean.length, boxes.length) - 1;
+    if (lastFilled >= 0) boxes[lastFilled].focus();
+    // Auto-submit when all 6 are filled (great UX for iOS autofill)
+    if (clean.length === boxes.length) setTimeout(submitOTP, 200);
+  }
+
   boxes.forEach((box, i) => {
     box.addEventListener('input', (e) => {
       const val = e.target.value;
+      // If iOS autofill or paste dumped multiple digits into this box, spread them
+      if (val.length > 1) {
+        fillBoxes(val);
+        return;
+      }
       if (val.length >= 1) {
         box.value = val[val.length - 1];
         box.classList.add('filled');
         if (i < boxes.length - 1) boxes[i + 1].focus();
+      } else {
+        box.classList.remove('filled');
       }
     });
     box.addEventListener('keydown', (e) => {
       if (e.key === 'Backspace' && !box.value && i > 0) {
         boxes[i - 1].focus();
         boxes[i - 1].classList.remove('filled');
+      }
+      // Enter on any OTP box = submit (as long as all 6 are filled)
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const full = Array.from(boxes).map(b => b.value).join('');
+        if (full.length === boxes.length) submitOTP();
+      }
+    });
+    // Handle paste into any box
+    box.addEventListener('paste', (e) => {
+      const pasted = (e.clipboardData || window.clipboardData).getData('text');
+      if (pasted && /\d/.test(pasted)) {
+        e.preventDefault();
+        fillBoxes(pasted);
       }
     });
   });
