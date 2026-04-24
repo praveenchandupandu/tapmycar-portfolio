@@ -309,7 +309,7 @@ async function notifyScan(tagId, scanId) {
 //  PAUSED STATE HANDLER (for contact pages) 
 function showPausedState() {
   // Check if we're on a contact page and tag is paused
-  // This is called from contact.html/check.html when tag.status === 'paused'
+  // This is called from contact.html when tag.status === 'paused'
   const body = document.body;
   const pausedHTML = `
     <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;background:#FEF3C7">
