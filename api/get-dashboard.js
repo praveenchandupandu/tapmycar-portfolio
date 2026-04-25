@@ -1,4 +1,4 @@
-﻿const { createClient } = require('@supabase/supabase-js');
+const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -201,12 +201,46 @@ module.exports = async function handler(req, res) {
     .order('scanned_at', { ascending: false })
     .limit(50);
 
+  // ─── TMC_PREMIUM_CODES_FETCH: Premium codes (buyer view) ───
+  let premiumCodes = [];
+  if (user && user.plan === 'premium') {
+    const { data: codes } = await supabase
+      .from('premium_codes')
+      .select('code, redeemed_by_user_id, redeemed_at, revoked_at, created_at')
+      .eq('buyer_user_id', user_id)
+      .is('revoked_at', null)
+      .order('created_at', { ascending: true });
+
+    if (codes && codes.length > 0) {
+      // Resolve redeemer names for redeemed codes
+      const redeemerIds = codes.filter(c => c.redeemed_by_user_id).map(c => c.redeemed_by_user_id);
+      let nameMap = {};
+      if (redeemerIds.length > 0) {
+        const { data: redeemers } = await supabase
+          .from('users')
+          .select('id, name')
+          .in('id', redeemerIds);
+        if (redeemers) redeemers.forEach(r => { nameMap[r.id] = r.name; });
+      }
+      // Skip the buyer's auto-assigned code (they don't need to "share" their own)
+      premiumCodes = codes
+        .filter(c => c.redeemed_by_user_id !== user_id)
+        .map(c => ({
+          code: c.code,
+          redeemed: !!c.redeemed_at,
+          redeemed_by_name: c.redeemed_by_user_id ? (nameMap[c.redeemed_by_user_id] || 'Family member') : null,
+          redeemed_at: c.redeemed_at
+        }));
+    }
+  }
+
   res.json({
     user,
     tags: tags || [],
     scanCount,
     weekCount,
-    recentScans: recentScans || []
+    recentScans: recentScans || [],
+    premiumCodes
   });
 };
 

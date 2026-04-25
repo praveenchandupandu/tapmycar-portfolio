@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <link rel="manifest" href="/manifest.json">
@@ -80,6 +80,12 @@
       <input type="tel" id="phone" placeholder="(203) 555-0100" autocomplete="tel" style="flex:1">
     </div>
     <div class="hint">Used only for masked call forwarding  never shared</div>
+  </div>
+  <!-- TMC_GIFT_CODE_FIELD -->
+  <div class="field" style="margin-bottom:18px">
+    <label>Premium gift code <span style="color:var(--gy);font-weight:400">(optional)</span></label>
+    <input type="text" id="gift-code" placeholder="TMC-PREM-XXXXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="14" style="font-family:'Inter',sans-serif;letter-spacing:1px;text-transform:uppercase">
+    <div class="hint">Got a code from a family member on Premium? Enter it here to join their plan.</div>
   </div>
   <div style="margin-top:auto">
     <div style="font-size:11px;color:#6B7280;text-align:center;line-height:1.55;margin-bottom:12px;padding:0 8px">
@@ -183,6 +189,26 @@ async function verifyOTP() {
     if (data.token) {
       saveSession(data.token, data.phone || phone, data.name || name);
       localStorage.setItem('tmc_email', email);
+      // TMC_GIFT_CODE_REDEEM_CALL
+      const giftEl = document.getElementById('gift-code');
+      const giftCode = giftEl ? giftEl.value.trim().toUpperCase() : '';
+      if (giftCode) {
+        try {
+          const rr = await fetch('/api/redeem-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: data.token, code: giftCode })
+          });
+          const rd = await rr.json();
+          if (rd && rd.success) {
+            showToast(rd.alreadyRedeemed ? "You've already redeemed this code" : "Premium activated! Welcome to the family plan.");
+          } else {
+            showToast(rd && rd.error ? rd.error : "Couldn't redeem the code  but your account is created.");
+          }
+        } catch (e) {
+          showToast("Couldn't reach the server to redeem the code");
+        }
+      }
       window.location.href = '/dashboard.html';
     } else {
       showToast(data.error || 'Wrong code  try again');

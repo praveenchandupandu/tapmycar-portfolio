@@ -1,4 +1,4 @@
-﻿const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const { createClient } = require("@supabase/supabase-js");
 const { Resend } = require("resend");
 
@@ -204,7 +204,7 @@ async function handler(req, res) {
           await resend.emails.send({
             from: "TapMyCar <noreply@tapmycar.io>",
             to: orderUser.email,
-            subject: plan === 'premium' ? `Welcome to Premium · 3 gift codes inside` : `Order confirmed · TapMyCar ${plan[0].toUpperCase() + plan.slice(1)}`,
+            subject: plan === 'premium' ? `Welcome to Premium · 2 gift codes inside` : `Order confirmed · TapMyCar ${plan[0].toUpperCase() + plan.slice(1)}`,
             html
           });
         }

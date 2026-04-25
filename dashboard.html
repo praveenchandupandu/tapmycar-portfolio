@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <link rel="manifest" href="/manifest.json">
@@ -164,6 +164,16 @@
       </div>
     </div>
 
+    <!-- TMC_FAMILY_CODES_SECTION -->
+    <div id="family-codes-card" class="card" style="display:none;padding:14px 16px;margin-bottom:14px;border:1.5px solid #FFE4CC;background:#FFF8F2">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-size:14px;font-weight:800;color:var(--bk)">My family codes</div>
+        <div style="font-size:10px;color:var(--gy)">Premium plan</div>
+      </div>
+      <div style="font-size:11px;color:var(--gy);margin-bottom:12px;line-height:1.5">Share these with 2 family members. Each redeems theirs at sign-up to join your Premium plan.</div>
+      <div id="family-codes-list"></div>
+    </div>
+
     <!-- 6. RECENT ACTIVITY -->
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <div style="font-size:15px;font-weight:700;color:var(--bk)">Recent Activity</div>
@@ -232,6 +242,55 @@ if (s.name) {
 let tagToken = '';
 let tagURL = '';
 
+function renderFamilyCodes(plan, codes) {
+  const card = document.getElementById('family-codes-card');
+  const list = document.getElementById('family-codes-list');
+  if (!card || !list) return;
+  if (plan !== 'premium' || !codes || codes.length === 0) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = 'block';
+  list.innerHTML = '';
+  codes.forEach(function(c) {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:10px;padding:10px 12px;margin-bottom:8px;' + (c.redeemed ? 'border:1px solid #E5E7EB' : 'border:1.5px dashed #FFB37A');
+    const codeWrap = document.createElement('div');
+    const codeEl = document.createElement('div');
+    codeEl.textContent = c.code;
+    codeEl.style.cssText = 'font-family:monospace;font-size:14px;font-weight:800;letter-spacing:.5px;' + (c.redeemed ? 'color:#9CA3AF;text-decoration:line-through;font-size:13px' : 'color:#111');
+    codeWrap.appendChild(codeEl);
+    if (c.redeemed) {
+      const sub = document.createElement('div');
+      sub.textContent = 'Redeemed by ' + (c.redeemed_by_name || 'family member');
+      sub.style.cssText = 'font-size:10px;color:#16A34A;margin-top:2px';
+      codeWrap.appendChild(sub);
+    }
+    row.appendChild(codeWrap);
+    if (c.redeemed) {
+      const badge = document.createElement('div');
+      badge.textContent = 'REDEEMED';
+      badge.style.cssText = 'background:#DCFCE7;color:#166534;font-size:9px;font-weight:800;padding:4px 10px;border-radius:99px;letter-spacing:.5px';
+      row.appendChild(badge);
+    } else {
+      const btn = document.createElement('button');
+      btn.textContent = 'COPY';
+      btn.style.cssText = 'background:var(--or);color:#fff;border:none;font-size:10px;font-weight:700;padding:6px 12px;border-radius:99px;cursor:pointer;font-family:inherit';
+      btn.addEventListener('click', function() { copyCode(c.code); });
+      row.appendChild(btn);
+    }
+    list.appendChild(row);
+  });
+}
+
+function copyCode(code) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(code).then(function() {
+      if (typeof showToast === 'function') showToast('Code copied!');
+    });
+  }
+}
+
 async function loadDashboard() {
   try {
     const res = await fetch(`/api/get-dashboard?user_id=${s.token}`);
@@ -248,6 +307,8 @@ async function loadDashboard() {
         const label = userPlan === 'etag' ? 'Free' : userPlan === 'standard' ? 'Standard' : userPlan === 'premium' ? 'Premium' : userPlan;
         badge.textContent = label;
       }
+      // TMC_FAMILY_CODES_LOADER
+      renderFamilyCodes(userPlan, data.premiumCodes || []);
       if (userPlan === 'etag' || userPlan === 'free') {
         document.getElementById('upgrade-banner-etag').style.display = 'block';
       } else if (userPlan === 'standard') {
