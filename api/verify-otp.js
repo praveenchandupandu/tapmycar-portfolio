@@ -3,50 +3,84 @@ const twilio = require('twilio');
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
-// Auto-assign an unclaimed tag to a new user
+// Auto-assign a free eTag to a new user
+// IMPORTANT:
+//   - Free eTags use TMC-ET prefix to distinguish from physical TMC- stickers
+//   - Tags marked with tag_type='etag' are NEVER pulled from physical inventory
+//   - Limit: 1 free eTag per user account ever
 async function assignFreeTag(userId) {
   try {
-    const { data: tags } = await supabase
+    // 1. Check if user already has ANY tag - don't double-assign
+    const { data: existingTags } = await supabase
       .from('tags')
-      .select('*')
-      .eq('status', 'unclaimed')
-      .is('owner_id', null)
+      .select('token, tag_type, status')
+      .eq('owner_id', userId)
+      .neq('status', 'deleted')
       .limit(1);
 
-    if (tags && tags.length > 0) {
-      const tag = tags[0];
-      await supabase
-        .from('tags')
-        .update({
-          owner_id: userId,
-          status: 'claimed',
-          claimed_at: new Date().toISOString()
-        })
-        .eq('id', tag.id);
-      console.log('Auto-assigned tag', tag.token, 'to user', userId);
-      return tag.token;
-    } else {
-      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-      let random = '';
-      for (let i = 0; i < 6; i++) random += chars[Math.floor(Math.random() * chars.length)];
-      const newToken = 'TMC' + random;
-      const { data: newTag, error } = await supabase
-        .from('tags')
-        .insert({
-          token: newToken,
-          status: 'claimed',
-          owner_id: userId,
-          claimed_at: new Date().toISOString(),
-          plan: 'etag',
-          vehicle_label: 'My Vehicle'
-        })
-        .select()
-        .single();
-      if (error) { console.error('Failed to generate tag:', error); return null; }
-      console.log('Generated and assigned new tag', newToken, 'to user', userId);
-      return newToken;
+    if (existingTags && existingTags.length > 0) {
+      console.log('User', userId, 'already has tag', existingTags[0].token, '- skipping free eTag generation');
+      return existingTags[0].token;
     }
-  } catch(e) { console.error('Tag assignment error:', e); return null; }
+
+    // 2. Generate a fresh eTag with TMC-ET prefix
+    //    NOTE: We do NOT pull from unclaimed physical inventory.
+    //    Physical tags are reserved for paying users only.
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let attempt = 0;
+    let newToken = null;
+
+    while (attempt < 5 && !newToken) {
+      attempt++;
+      let random = '';
+      for (let i = 0; i < 5; i++) {
+        random += chars[Math.floor(Math.random() * chars.length)];
+      }
+      const candidate = 'TMC-ET' + random;
+
+      const { data: existing } = await supabase
+        .from('tags')
+        .select('token')
+        .eq('token', candidate)
+        .limit(1);
+
+      if (!existing || existing.length === 0) {
+        newToken = candidate;
+      }
+    }
+
+    if (!newToken) {
+      console.error('Could not generate unique eTag token after 5 attempts');
+      return null;
+    }
+
+    // 3. Insert the new eTag with tag_type='etag' so admin can filter
+    const { data: newTag, error } = await supabase
+      .from('tags')
+      .insert({
+        token: newToken,
+        status: 'claimed',
+        owner_id: userId,
+        claimed_at: new Date().toISOString(),
+        plan: 'etag',
+        tag_type: 'etag',
+        vehicle_label: 'My Vehicle'
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Failed to generate eTag:', error);
+      return null;
+    }
+
+    console.log('Generated free eTag', newToken, 'for user', userId);
+    return newToken;
+
+  } catch(e) {
+    console.error('Free eTag assignment error:', e);
+    return null;
+  }
 }
 
 module.exports = async function handler(req, res) {

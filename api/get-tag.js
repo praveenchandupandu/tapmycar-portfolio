@@ -48,6 +48,45 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'user_id required' });
     }
 
+    
+    // Auto-deactivate eTags when physical tag activates
+    // If the tag being activated is a physical sticker (not an eTag),
+    // deactivate any existing eTags owned by this user. Prevents user
+    // from having both eTag and physical active simultaneously.
+    try {
+      const { data: tagBeingActivated } = await supabase
+        .from('tags')
+        .select('tag_type, token')
+        .eq('token', cleanToken)
+        .single();
+
+      const isPhysicalActivation = tagBeingActivated && (
+        tagBeingActivated.tag_type === 'physical' ||
+        (tagBeingActivated.token && tagBeingActivated.token.indexOf('TMC-ET') !== 0)
+      );
+
+      if (isPhysicalActivation) {
+        const { data: existingEtags } = await supabase
+          .from('tags')
+          .select('id, token')
+          .eq('owner_id', user_id)
+          .eq('tag_type', 'etag')
+          .neq('token', cleanToken)
+          .in('status', ['claimed', 'active']);
+
+        if (existingEtags && existingEtags.length > 0) {
+          const etagIds = existingEtags.map(t => t.id);
+          await supabase
+            .from('tags')
+            .update({ status: 'inactive' })
+            .in('id', etagIds);
+          console.log('Deactivated', existingEtags.length, 'eTag(s) for user', user_id, 'after physical activation');
+        }
+      }
+    } catch (etagErr) {
+      console.error('eTag deactivation error (non-fatal):', etagErr);
+    }
+
     const updates = {
       owner_id: user_id,
       status: 'active',
