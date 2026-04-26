@@ -1,136 +1,95 @@
 /* ═══════════════════════════════════════════════════════════════
-   TAPMYCAR REDESIGN — v5 final
-   Floating swipe nav with labels + glow rings + smooth transitions
+   TAPMYCAR REDESIGN v6 — clean, conflict-free
    ═══════════════════════════════════════════════════════════════
-   This file is loaded AFTER app.css on every page that needs the
-   redesign. It contains:
-     1. Override rules for existing app.css elements (avatar, hero,
-        cards, buttons, dividers) to add glow rings & warm shadows.
-     2. New floating nav component styles (.tmc-fnav).
-     3. Page transition fade-in animation.
-   No existing layout, padding, or container size is changed.
-   To revert: delete this file and remove the <link> tag.
+   This file is the SINGLE source of truth for the redesign.
+   No edits to app.css. To revert: delete this file + tmc-redesign.js,
+   remove the floating nav HTML from the 5 main pages, remove
+   <link>/<script> tags from all patched pages.
    ═══════════════════════════════════════════════════════════════ */
 
-
-/* ─── 1. AVATAR & GEAR — squircle + orange glow ring ─── */
-.av {
-  border-radius: 12px !important;
-  box-shadow: 0 0 0 3px rgba(255,107,0,.15), 0 4px 10px rgba(255,107,0,.30);
-}
-.gear {
-  border-radius: 12px !important;
-}
-
-/* ─── 2. HERO CARD — vivid orange + warm shadow + radial highlights ─── */
-.hero-card {
+/* ─── HERO CARD ──
+   Keeps original size & padding (18px). Just adds:
+   - background-image radial highlights (NO pseudo-elements)
+   - warm orange shadow underneath
+   No layout changes. */
+body.tmc-redesign .hero-card {
+  background:
+    radial-gradient(circle at top right, rgba(255,255,255,.18), transparent 50%),
+    radial-gradient(circle at bottom left, rgba(255,153,71,.40), transparent 55%),
+    #FF6B00 !important;
   box-shadow: 0 4px 16px rgba(255,107,0,.25), 0 0 0 1px rgba(255,107,0,.08) !important;
 }
-.hero-card::before {
-  content: '';
-  position: absolute;
-  top: -40px; right: -40px;
-  width: 160px; height: 160px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,.22), transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-}
-.hero-card::after {
-  content: '';
-  position: absolute;
-  bottom: -30px; left: -20px;
-  width: 100px; height: 100px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,153,71,.45), transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-}
-.hero-card > * { position: relative; z-index: 1; }
 
-/* ─── 3. VEHICLE / FEATURED CARD — orange glow ring ─── */
-.card-or {
+/* ─── AVATAR & PLAN BADGE — squircle + glow ─── */
+body.tmc-redesign .av {
+  border-radius: 12px !important;
+  box-shadow: 0 0 0 3px rgba(255,107,0,.15), 0 4px 10px rgba(255,107,0,.30) !important;
+}
+body.tmc-redesign .gear { border-radius: 12px !important; }
+body.tmc-redesign #plan-badge {
+  border: 1.5px solid #FFB37A !important;
+  background: #fff !important;
+  color: #C73E00 !important;
+  box-shadow: 0 0 0 3px rgba(255,107,0,.10) !important;
+}
+
+/* ─── VEHICLE / FEATURED CARD — orange glow ring ─── */
+body.tmc-redesign .card-or {
   border: 1.5px solid #FFB37A !important;
   box-shadow: 0 0 0 4px rgba(255,107,0,.10), 0 4px 16px rgba(255,107,0,.12) !important;
 }
 
-/* ─── 4. PLAN BADGE — softer outline + glow ─── */
-[id="plan-badge"] {
-  border: 1.5px solid #FFB37A !important;
-  background: #fff !important;
-  color: #C73E00 !important;
-  box-shadow: 0 0 0 3px rgba(255,107,0,.10);
-}
-
-/* ─── 5. BUTTONS — glow shadow + hover lift ─── */
-.btn {
+/* ─── BUTTONS — glow + hover lift ─── */
+body.tmc-redesign .btn {
   box-shadow: 0 4px 12px rgba(255,107,0,.30);
   transition: transform .15s, box-shadow .15s;
 }
-.btn:hover {
+body.tmc-redesign .btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 18px rgba(255,107,0,.40), 0 0 0 3px rgba(255,107,0,.15);
 }
-.btn-o {
-  transition: transform .15s, border-color .15s;
-}
-.btn-o:hover {
-  transform: translateY(-1px);
-  border-color: #FFB37A;
-}
+body.tmc-redesign .btn-o { transition: transform .15s, border-color .15s; }
+body.tmc-redesign .btn-o:hover { transform: translateY(-1px); border-color: #FFB37A; }
 
-/* ─── 6. SECTION DIVIDERS — soft orange gradient line ─── */
-/* Replace orange/black tape with subtle gradient on most pages */
-body.tmc-redesign .chev {
+/* ─── DIVIDERS — soft gradient line (not on etag.html sticker) ─── */
+body.tmc-redesign:not(.tmc-keep-tape) .chev {
   background: linear-gradient(90deg, transparent, rgba(255,107,0,.30), transparent) !important;
   height: 1px !important;
 }
-/* Note: .tape (yellow/silver) and .sticker-chev stay as-is — they
-   make sense in etag.html where they sell "this is a real sticker" */
 
-/* ─── 7. ACTIVITY ITEM ICON — subtle ring ─── */
-.act-icon {
-  box-shadow: 0 0 0 1px #FFE4CC;
+/* ─── ACTIVITY / SETTINGS ICONS — subtle ring ─── */
+body.tmc-redesign .act-icon,
+body.tmc-redesign .set-ic {
+  box-shadow: 0 0 0 1px #FFE4CC !important;
 }
 
-/* ─── 8. SETTINGS ROW ICON — subtle ring ─── */
-.set-ic {
-  box-shadow: 0 0 0 1px #FFE4CC;
+/* ─── TOGGLE — glow when on ─── */
+body.tmc-redesign .tog.on {
+  box-shadow: 0 0 0 3px rgba(255,107,0,.15) !important;
 }
 
-/* ─── 9. TOGGLE — glow when on ─── */
-.tog.on {
-  box-shadow: 0 0 0 3px rgba(255,107,0,.15);
-}
+/* ─── CARD BORDERS — warmer tone ─── */
+body.tmc-redesign .card { border-color: #F1F0EE !important; }
 
-/* ─── 10. CARDS — warmer borders ─── */
-.card {
-  border-color: #F1F0EE !important;
-}
-
-/* ─── 11. TYPOGRAPHY — tighter headlines ─── */
-.hero-card h2,
-[id="greeting-name"] {
-  letter-spacing: -0.02em;
-}
+/* ─── HEADLINES — tighter ─── */
+body.tmc-redesign .hero-card h2,
+body.tmc-redesign #greeting-name { letter-spacing: -0.02em !important; }
 
 
 /* ═══════════════════════════════════════════════════════════════
-   FLOATING NAV COMPONENT
-   Replaces .bnav on the 5 main app pages
+   FLOATING NAV — embedded directly in HTML, never disappears
    ═══════════════════════════════════════════════════════════════ */
 
-/* Hide the old static .bnav when floating nav is active */
-body.tmc-floating-nav .bnav { display: none !important; }
+/* Hide the OLD .bnav (if present) — replaced by .tmc-fnav */
+body.tmc-redesign .bnav { display: none !important; }
 
 /* Push page content above the floating nav */
-body.tmc-floating-nav .page,
-body.tmc-floating-nav main,
-body.tmc-floating-nav .page-inner {
+body.tmc-redesign .page,
+body.tmc-redesign main {
   padding-bottom: 110px !important;
 }
 
-/* Floating nav wrapper */
+/* The floating nav itself */
 .tmc-fnav {
   position: fixed;
   bottom: 14px;
@@ -172,16 +131,13 @@ body.tmc-floating-nav .page-inner {
 .tmc-fnav-icon {
   width: 40px; height: 40px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   background: transparent;
   transition: background .25s, box-shadow .25s;
 }
 .tmc-fnav-icon svg {
   width: 18px; height: 18px;
-  stroke: #6B7280;
-  fill: transparent;
+  stroke: #6B7280; fill: transparent;
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -193,38 +149,33 @@ body.tmc-floating-nav .page-inner {
   font-weight: 600;
   color: #9CA3AF;
   letter-spacing: 0.02em;
-  transition: color .25s, font-weight .25s;
+  transition: color .25s;
   line-height: 1;
 }
 
-/* Active state — orange glow ring */
 .tmc-fnav-item.active .tmc-fnav-icon {
   background: #FF6B00;
   box-shadow: 0 0 0 3px rgba(255,107,0,.15), 0 4px 14px rgba(255,107,0,.40);
 }
 .tmc-fnav-item.active .tmc-fnav-icon svg {
-  stroke: #fff;
-  fill: #fff;
-  fill-opacity: 0.20;
+  stroke: #fff; fill: #fff; fill-opacity: 0.20;
 }
 .tmc-fnav-item.active .tmc-fnav-label {
-  color: #FF6B00;
-  font-weight: 700;
+  color: #FF6B00; font-weight: 700;
 }
 
-/* Hover (desktop) */
 .tmc-fnav-item:not(.active):hover .tmc-fnav-icon { background: rgba(255,107,0,.08); }
 .tmc-fnav-item:not(.active):hover .tmc-fnav-icon svg { stroke: #FF6B00; }
 .tmc-fnav-item:not(.active):hover .tmc-fnav-label { color: #FF6B00; }
 
 
 /* ═══════════════════════════════════════════════════════════════
-   PAGE TRANSITION — smooth iOS-style fade-in
+   PAGE TRANSITION — single subtle fade-in on load
    ═══════════════════════════════════════════════════════════════ */
-body.tmc-page-transitioning {
-  animation: tmc-page-fade .42s cubic-bezier(.32,.72,0,1);
+@keyframes tmc-page-fade-in {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
 }
-@keyframes tmc-page-fade {
-  0%   { opacity: 0; transform: scale(0.97); }
-  100% { opacity: 1; transform: scale(1); }
+body.tmc-redesign {
+  animation: tmc-page-fade-in .2s ease-out;
 }
