@@ -1955,17 +1955,21 @@ function scanToken() {
   const input = document.getElementById('scan-token');
   let token = input.value.trim().toUpperCase();
   if (!token) return;
-  // Clean  remove URL prefix, TMC- prefix, TMC. prefix
+  // Strip URL prefix only (e.g. https://tapmycar.io/tag/TMC-XXXXXX -> TMC-XXXXXX)
+  // We do NOT strip the TMC- prefix because we require full token match for safety.
   token = token.replace(/^HTTPS?:\/\/TAPMYCAR\.IO\/TAG\//i, '');
-  token = token.replace(/^TMC[-.]?/i, '');
+
+  // Validate: must be in exact TMC-XXXXXX format
+  if (!/^TMC-[A-Z0-9]+$/.test(token)) {
+    showToast('Invalid format. Token must be like TMC-XXXXXX');
+    input.value = ''; input.focus(); return;
+  }
 
   if (!currentVerifyBatch) { showToast('Select a batch first'); return; }
 
   const batchTokens = batchTokensMap[currentVerifyBatch] || [];
-  const found = batchTokens.find(t => {
-    const clean = t.token.replace(/^TMC/i, '');
-    return t.token.toUpperCase() === token || clean.toUpperCase() === token || t.token.toUpperCase() === 'TMC' + token;
-  });
+  // Strict match: full token equality (case-insensitive)
+  const found = batchTokens.find(t => t.token.toUpperCase() === token);
 
   if (!found) {
     showToast('Token not found in Batch ' + currentVerifyBatch);
