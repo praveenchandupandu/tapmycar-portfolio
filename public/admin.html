@@ -1472,15 +1472,15 @@ let currentDetailUser = null;
 
 // STRICT FORMAT: TMC-XXXXXX everywhere
 function formatToken(token) {
+  // DB stores tokens in canonical TMC-XXXXXX format already.
+  // Keep this helper for compatibility but just return as-is (uppercased).
   if (!token) return '';
-  // Remove any existing TMC, TMC-, TMC. prefix to get raw 6 chars
-  let raw = token.replace(/^TMC[-.]?/i, '');
-  return 'TMC-' + raw;
+  return String(token).toUpperCase();
 }
 function rawToken(token) {
-  // Get the clean database token: TMCXXXXXX
+  // DB tokens are already canonical TMC-XXXXXX. Return as-is.
   if (!token) return '';
-  return 'TMC' + token.replace(/^TMC[-.]?/i, '');
+  return String(token).toUpperCase();
 }
 
 function adminLogin() {
