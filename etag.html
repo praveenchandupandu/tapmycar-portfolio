@@ -32,6 +32,26 @@
 <meta name="twitter:title" content="Your free eTag — TapMyCar">
 <meta name="twitter:description" content="Your free TapMyCar eTag — print at home and start using immediately.">
 <meta name="twitter:image" content="https://tapmycar.io/og-image.png">
+<style id="etag-desktop-frame">
+  /* Desktop visual framing — soft gray background so the 430px white
+     content container is visually distinct and clearly centered.
+     Mobile (under 480px) still looks 100% the same. */
+  @media (min-width: 481px) {
+    html, body {
+      background: linear-gradient(180deg, #FFF7F0 0%, #F5F5F7 100%) !important;
+      min-height: 100vh;
+    }
+    body {
+      max-width: 430px !important;
+      margin: 0 auto !important;
+      background: #fff !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+      border-radius: 0;
+      min-height: 100vh;
+      position: relative;
+    }
+  }
+</style>
 </head>
 <body>
 <div class="nav"><div class="bk" onclick="history.back()"><div class="bkb"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><span class="bk-label">Your free eTag</span></div><div style="display:flex;align-items:center;gap:0"><a href="/dashboard.html" aria-label="TapMyCar" style="display:flex;align-items:center;text-decoration:none"><img src="/logo.png" alt="TapMyCar" class="nav-logo-img" style="height:36px;width:auto;margin-right:10px"></a><button class="gear" onclick="window.location.href='/settings.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button></div></div>
