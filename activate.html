@@ -310,7 +310,11 @@ function processManualToken() {
   const token = document.getElementById('manual-token').value.trim().toUpperCase();
   if (!token) { showToast('Enter a tag ID'); return; }
   // Clean token — remove TMC prefix and dots if user types TMC.XXXXX
-  const cleanToken = token.replace('TMC.','TMC').replace('TMC-','TMC');
+  let cleanToken = token.replace(/^HTTPS?:\/\/TAPMYCAR\.IO\/TAG\//i, '');
+  if (!/^TMC-[A-Z0-9]+$/.test(cleanToken)) {
+    showToast('Invalid format. Tag ID must be like TMC-XXXXXX');
+    return;
+  }
   processToken(cleanToken);
 }
 
