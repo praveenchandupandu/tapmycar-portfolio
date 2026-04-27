@@ -328,9 +328,14 @@ async function loadDashboard() {
         document.getElementById("stat-status").textContent = "OFF";
         document.getElementById("stat-status").style.color = "var(--rd,#DC2626)";
       }
-      const tok = tag.token; // DB token already in TMC-XXXXXX format
+            // Normalize token to TMC-XXXXXX format (in case DB has it without hyphen)
+      function formatTagToken(t) {
+        if (!t) return '';
+        return t.includes('-') ? t : ('TMC-' + t.replace(/^TMC[-.]?/, ''));
+      }
+      const tok = formatTagToken(tag.token);
       tagURL = `https://tapmycar.io/tag/${tok}`;
-      const displayToken = tag.token; // DB token already in TMC-XXXXXX format
+      const displayToken = tok;
 
       document.getElementById('vehicle-label').textContent = tag.vehicle_label || 'My Vehicle';
       document.getElementById('tag-token').textContent = displayToken;
