@@ -346,7 +346,7 @@ async function loadTag(){
     const data=await res.json();
     if(!data.tag){showState('invalid');return;}
     const tag=data.tag;
-    if(tag.status==='disabled'){showState('disabled');}
+    if(tag.status==='disabled'||tag.status==='inactive'){showState('disabled');}
     else if(tag.status==='unclaimed'){document.getElementById('unclaimed-token').textContent=tag.token;showState('unclaimed');}
     else if(tag.status==='paused'){showState('disabled');return;}
     else if(tag.status==='active')

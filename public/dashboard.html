@@ -318,7 +318,20 @@ async function loadDashboard() {
     }
 
     if (data.tags && data.tags.length > 0) {
-      const tag = data.tags[0];
+      // TMC_PICK_BEST_TAG: prefer active physical sticker over eTag.
+      // Token rule: physical = token does NOT start with "TMC-ET",
+      //             eTag     = token starts with "TMC-ET".
+      // Sort priority: active physical > active eTag > other.
+      function isPhysical(t) {
+        return t && t.token && !t.token.toUpperCase().startsWith('TMC-ET');
+      }
+      function tagScore(t) {
+        const active = (t.status === 'active') ? 2 : (t.status === 'paused' ? 1 : 0);
+        const physical = isPhysical(t) ? 4 : 0;
+        return active + physical;
+      }
+      const sortedTags = [...data.tags].sort((a, b) => tagScore(b) - tagScore(a));
+      const tag = sortedTags[0];
       tagToken = tag.token;
       currentTagToken = tag.token;
       currentTagStatus = tag.status || "active";

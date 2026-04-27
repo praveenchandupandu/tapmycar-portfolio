@@ -140,6 +140,37 @@ module.exports = async function handler(req, res) {
       return res.status(404).json({ error: 'Tag not found' });
     }
 
+    // TMC_AUTO_DEACTIVATE_ON_READ
+    // If this tag is an eTag (token starts with TMC-ET) and the same
+    // owner already has an active physical tag, mark this eTag inactive
+    // and tell the stranger it's no longer active. Defense in depth.
+    try {
+      const tokenUpper = (tag.token || '').toUpperCase();
+      const isEtag = tokenUpper.startsWith('TMC-ET') || tag.tag_type === 'etag';
+      if (isEtag && tag.owner_id && tag.status === 'active') {
+        const { data: physicalTags } = await supabase
+          .from('tags')
+          .select('token, status')
+          .eq('owner_id', tag.owner_id)
+          .eq('status', 'active')
+          .neq('id', tag.id);
+        const hasActivePhysical = physicalTags && physicalTags.some(t => {
+          const tk = (t.token || '').toUpperCase();
+          return !tk.startsWith('TMC-ET');
+        });
+        if (hasActivePhysical) {
+          await supabase
+            .from('tags')
+            .update({ status: 'inactive' })
+            .eq('id', tag.id);
+          tag.status = 'inactive';
+          console.log('Auto-deactivated eTag', tag.token, 'on read (owner has active physical)');
+        }
+      }
+    } catch (autoDeactivateErr) {
+      console.error('Auto-deactivate on read error (non-fatal):', autoDeactivateErr);
+    }
+
     let scan_id = null;
     if (tag.status === 'active' || tag.status === 'paused') {
       const userAgent = req.headers['user-agent'] || '';
