@@ -1,17 +1,14 @@
 /* ═══════════════════════════════════════════════════════════════
-   TAPMYCAR REDESIGN v6 — clean, conflict-free
+   TAPMYCAR REDESIGN v8
    ═══════════════════════════════════════════════════════════════
-   This file is the SINGLE source of truth for the redesign.
-   No edits to app.css. To revert: delete this file + tmc-redesign.js,
-   remove the floating nav HTML from the 5 main pages, remove
-   <link>/<script> tags from all patched pages.
+   v8 changes vs v7:
+     - Chat bubble lifted to bottom:100px (was 24px) — clears the nav
+     - "Need help?" badge lifted to bottom:160px (was 72px)
+     - Chat window lifted to bottom:170px (was 90px), max-height
+       adjusted so it still fits on small screens
    ═══════════════════════════════════════════════════════════════ */
 
-/* ─── HERO CARD ──
-   Keeps original size & padding (18px). Just adds:
-   - background-image radial highlights (NO pseudo-elements)
-   - warm orange shadow underneath
-   No layout changes. */
+/* ─── HERO CARD ─── */
 body.tmc-redesign .hero-card {
   background:
     radial-gradient(circle at top right, rgba(255,255,255,.18), transparent 50%),
@@ -20,7 +17,7 @@ body.tmc-redesign .hero-card {
   box-shadow: 0 4px 16px rgba(255,107,0,.25), 0 0 0 1px rgba(255,107,0,.08) !important;
 }
 
-/* ─── AVATAR & PLAN BADGE — squircle + glow ─── */
+/* ─── AVATAR & PLAN BADGE ─── */
 body.tmc-redesign .av {
   border-radius: 12px !important;
   box-shadow: 0 0 0 3px rgba(255,107,0,.15), 0 4px 10px rgba(255,107,0,.30) !important;
@@ -33,13 +30,13 @@ body.tmc-redesign #plan-badge {
   box-shadow: 0 0 0 3px rgba(255,107,0,.10) !important;
 }
 
-/* ─── VEHICLE / FEATURED CARD — orange glow ring ─── */
+/* ─── VEHICLE / FEATURED CARD ─── */
 body.tmc-redesign .card-or {
   border: 1.5px solid #FFB37A !important;
   box-shadow: 0 0 0 4px rgba(255,107,0,.10), 0 4px 16px rgba(255,107,0,.12) !important;
 }
 
-/* ─── BUTTONS — glow + hover lift ─── */
+/* ─── BUTTONS ─── */
 body.tmc-redesign .btn {
   box-shadow: 0 4px 12px rgba(255,107,0,.30);
   transition: transform .15s, box-shadow .15s;
@@ -51,45 +48,104 @@ body.tmc-redesign .btn:hover {
 body.tmc-redesign .btn-o { transition: transform .15s, border-color .15s; }
 body.tmc-redesign .btn-o:hover { transform: translateY(-1px); border-color: #FFB37A; }
 
-/* ─── DIVIDERS — soft gradient line (not on etag.html sticker) ─── */
+/* ─── DIVIDERS ─── */
 body.tmc-redesign:not(.tmc-keep-tape) .chev {
   background: linear-gradient(90deg, transparent, rgba(255,107,0,.30), transparent) !important;
   height: 1px !important;
 }
 
-/* ─── ACTIVITY / SETTINGS ICONS — subtle ring ─── */
+/* ─── ACTIVITY / SETTINGS ICONS ─── */
 body.tmc-redesign .act-icon,
 body.tmc-redesign .set-ic {
   box-shadow: 0 0 0 1px #FFE4CC !important;
 }
 
-/* ─── TOGGLE — glow when on ─── */
+/* ─── TOGGLE ─── */
 body.tmc-redesign .tog.on {
   box-shadow: 0 0 0 3px rgba(255,107,0,.15) !important;
 }
 
-/* ─── CARD BORDERS — warmer tone ─── */
+/* ─── CARD BORDERS ─── */
 body.tmc-redesign .card { border-color: #F1F0EE !important; }
 
-/* ─── HEADLINES — tighter ─── */
+/* ─── HEADLINES ─── */
 body.tmc-redesign .hero-card h2,
 body.tmc-redesign #greeting-name { letter-spacing: -0.02em !important; }
 
 
 /* ═══════════════════════════════════════════════════════════════
-   FLOATING NAV — embedded directly in HTML, never disappears
+   SCANNER UI (v7)
    ═══════════════════════════════════════════════════════════════ */
+body.tmc-redesign #qr-shaded-region { display: none !important; }
+body.tmc-redesign #scanner > svg { display: none !important; }
+body.tmc-redesign #scanner [class*="qrcode"][class*="dashboard"],
+body.tmc-redesign #scanner button[type="button"] { display: none !important; }
 
-/* Hide the OLD .bnav (if present) — replaced by .tmc-fnav */
-body.tmc-redesign .bnav { display: none !important; }
-
-/* Push page content above the floating nav */
-body.tmc-redesign .page,
-body.tmc-redesign main {
-  padding-bottom: 110px !important;
+body.tmc-redesign .scan-area {
+  border: 2px solid rgba(255,107,0,.30) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 0 0 4px rgba(255,107,0,.06), 0 8px 24px rgba(0,0,0,.08) !important;
+  position: relative !important;
 }
 
-/* The floating nav itself */
+body.tmc-redesign .scan-corners::before,
+body.tmc-redesign .scan-corners::after {
+  width: 36px !important;
+  height: 36px !important;
+  border-color: #FF6B00 !important;
+  border-width: 3px !important;
+  filter: drop-shadow(0 0 8px rgba(255,107,0,.7));
+}
+body.tmc-redesign .scan-corners::before {
+  top: 12px !important; left: 12px !important;
+  border-width: 3px 0 0 3px !important;
+  border-radius: 12px 0 0 0 !important;
+}
+body.tmc-redesign .scan-corners::after {
+  top: 12px !important; right: 12px !important;
+  border-width: 3px 3px 0 0 !important;
+  border-radius: 0 12px 0 0 !important;
+}
+
+body.tmc-redesign .scan-area::before,
+body.tmc-redesign .scan-area::after {
+  content: '' !important;
+  position: absolute !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-color: #FF6B00 !important;
+  border-style: solid !important;
+  z-index: 2 !important;
+  pointer-events: none !important;
+  filter: drop-shadow(0 0 8px rgba(255,107,0,.7));
+}
+body.tmc-redesign .scan-area::before {
+  bottom: 12px !important; left: 12px !important;
+  border-width: 0 0 3px 3px !important;
+  border-radius: 0 0 0 12px !important;
+}
+body.tmc-redesign .scan-area::after {
+  bottom: 12px !important; right: 12px !important;
+  border-width: 0 3px 3px 0 !important;
+  border-radius: 0 0 12px 0 !important;
+}
+
+body.tmc-redesign .scan-line {
+  height: 3px !important;
+  background: linear-gradient(90deg, transparent 0%, #FF6B00 20%, #FF6B00 80%, transparent 100%) !important;
+  box-shadow: 0 0 12px rgba(255,107,0,.8), 0 0 24px rgba(255,107,0,.4) !important;
+  left: 8% !important;
+  width: 84% !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   FLOATING NAV
+   ═══════════════════════════════════════════════════════════════ */
+body.tmc-redesign .bnav { display: none !important; }
+body.tmc-redesign .page,
+body.tmc-redesign main { padding-bottom: 110px !important; }
+
 .tmc-fnav {
   position: fixed;
   bottom: 14px;
@@ -112,14 +168,9 @@ body.tmc-redesign main {
 }
 
 .tmc-fnav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
   padding: 0 4px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
+  background: transparent; border: none; cursor: pointer;
   font-family: 'Inter', sans-serif;
   min-width: 52px;
   text-decoration: none;
@@ -141,7 +192,7 @@ body.tmc-redesign main {
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
-  transition: stroke .25s, fill .25s;
+  transition: stroke .25s, fill .25s, filter .25s;
 }
 
 .tmc-fnav-label {
@@ -149,24 +200,57 @@ body.tmc-redesign main {
   font-weight: 600;
   color: #9CA3AF;
   letter-spacing: 0.02em;
-  transition: color .25s;
+  transition: color .25s, text-shadow .25s;
   line-height: 1;
 }
 
+/* Active state — layered neon glow (v7) */
 .tmc-fnav-item.active .tmc-fnav-icon {
   background: #FF6B00;
-  box-shadow: 0 0 0 3px rgba(255,107,0,.15), 0 4px 14px rgba(255,107,0,.40);
+  box-shadow:
+    0 0 0 3px rgba(255,107,0,.20),
+    0 4px 14px rgba(255,107,0,.50),
+    0 0 28px rgba(255,107,0,.45);
 }
 .tmc-fnav-item.active .tmc-fnav-icon svg {
-  stroke: #fff; fill: #fff; fill-opacity: 0.20;
+  stroke: #fff;
+  fill: #fff;
+  fill-opacity: 0.20;
+  filter: drop-shadow(0 0 6px rgba(255,255,255,.8));
 }
 .tmc-fnav-item.active .tmc-fnav-label {
-  color: #FF6B00; font-weight: 700;
+  color: #FF6B00;
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(255,107,0,.5);
 }
 
 .tmc-fnav-item:not(.active):hover .tmc-fnav-icon { background: rgba(255,107,0,.08); }
 .tmc-fnav-item:not(.active):hover .tmc-fnav-icon svg { stroke: #FF6B00; }
 .tmc-fnav-item:not(.active):hover .tmc-fnav-label { color: #FF6B00; }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   v8 NEW: CHAT BUBBLE / WINDOW / BADGE — lifted above the nav
+   ═══════════════════════════════════════════════════════════════
+   The bubble is created by app.js with inline styles
+   (style="bottom:24px"), so we use !important to override it.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Chat bubble — lifted clear of the nav */
+body.tmc-redesign #tmc-chat-bubble {
+  bottom: calc(100px + env(safe-area-inset-bottom)) !important;
+}
+
+/* "Need help?" badge — sits just above the bubble */
+body.tmc-redesign #tmc-chat-badge {
+  bottom: calc(160px + env(safe-area-inset-bottom)) !important;
+}
+
+/* Chat window — opens above the bubble; max-height adjusted to fit */
+body.tmc-redesign #tmc-chat-window {
+  bottom: calc(170px + env(safe-area-inset-bottom)) !important;
+  max-height: calc(100vh - 220px) !important;
+}
 
 
 /* ═══════════════════════════════════════════════════════════════
