@@ -86,9 +86,10 @@
     </div>
     <div class="sticker-tape"></div><div class="sticker-chev"></div>
   </div>
+  <div id="etag-status-banner" style="display:none;border-radius:13px;margin-bottom:12px"></div>
   <div style="text-align:center"><div style="font-size:17px;font-weight:800;color:var(--bk);margin-bottom:3px" id="tag-name">Your eTag</div><div style="font-size:12px;color:var(--gy)">Privacy for you. Safety for your car.</div></div>
   <button class="btn-g" id="dl-btn" onclick="downloadEtag()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:9px;padding:14px 0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download free eTag PDF</button>
-  <div onclick="window.location.href='/activate.html'" style="width:100%;display:flex;align-items:center;gap:10px;background:var(--orl);border-radius:13px;padding:13px 16px;border:.5px solid var(--orl2);cursor:pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><div style="font-size:12px;color:#9A3800;font-weight:500;flex:1">Activate to enable masked calls</div><div style="font-size:12px;font-weight:700;color:var(--or)">Activate </div></div>
+  <div id="etag-activate-prompt" onclick="window.location.href='/activate.html'" style="width:100%;display:flex;align-items:center;gap:10px;background:var(--orl);border-radius:13px;padding:13px 16px;border:.5px solid var(--orl2);cursor:pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><div style="font-size:12px;color:#9A3800;font-weight:500;flex:1">Activate to enable masked calls</div><div style="font-size:12px;font-weight:700;color:var(--or)">Activate </div></div>
   </div>
   <div onclick="window.location.href='/dashboard.html'" style="width:100%;text-align:center;font-size:13px;color:var(--gy);cursor:pointer;padding:8px">Go to Dashboard</div>
 </div>
@@ -108,43 +109,132 @@ let tagToken = '';
 let tagURL = '';
 
 async function loadTagData() {
+  // TMC_ETAG_PICKER
   try {
     const res = await fetch('/api/get-dashboard?user_id=' + s.token);
     const data = await res.json();
-    if (data.tags && data.tags.length > 0) {
-      // Accept any tag status for eTag download
+    if (!data.tags || data.tags.length === 0) return;
 
-      const tag = data.tags[0];
-      tagToken = tag.token.includes("-") ? tag.token : "TMC-" + tag.token.replace(/^TMC/i,"");
-      tagURL = 'https://tapmycar.io/tag/' + tag.token;
-      const label = tag.vehicle_label || s.name || 'Your eTag';
-      document.getElementById('tag-name').textContent = label + '  #' + tagToken;
-      const etagTok = tag.token.includes('-') ? tag.token : 'TMC-' + tag.token.replace(/^TMC/i,'');
-      document.getElementById('sticker-token').textContent = '#' + etagTok;
+    // Pick the eTag specifically. Token format rule: TMC-ET... = eTag,
+    // anything else = physical. Fall back to tag_type if column exists.
+    const etag = data.tags.find(t => {
+      const tk = (t.token || '').toUpperCase();
+      return tk.startsWith('TMC-ET') || t.tag_type === 'etag';
+    });
 
-      document.getElementById('qr-preview').innerHTML = '';
-      new QRCode(document.getElementById('qr-preview'), {
-        text: tagURL, width: 90, height: 90,
-        colorDark: '#111111', colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.M
-      });
-
-      document.getElementById('qr-hidden').innerHTML = '';
-      new QRCode(document.getElementById('qr-hidden'), {
-        text: tagURL, width: 400, height: 400,
-        colorDark: '#111111', colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.H
-      });
-
-      // App download QR
-      document.getElementById('qr-app').innerHTML = '';
-      new QRCode(document.getElementById('qr-app'), {
-        text: 'https://tapmycar.io', width: 300, height: 300,
-        colorDark: '#111111', colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.H
-      });
+    if (!etag) {
+      // No eTag for this user (shouldn't normally happen). Just show
+      // a small message instead of pretending the physical IS an eTag.
+      const nameEl = document.getElementById('tag-name');
+      if (nameEl) nameEl.textContent = 'No free eTag available';
+      const skTok = document.getElementById('sticker-token');
+      if (skTok) skTok.textContent = '#-----';
+      return;
     }
+
+    // Set tag display
+    const tag = etag;
+    tagToken = tag.token.includes("-") ? tag.token : "TMC-" + tag.token.replace(/^TMC/i,"");
+    tagURL = 'https://tapmycar.io/tag/' + tag.token;
+    const label = tag.vehicle_label || s.name || 'Your eTag';
+    document.getElementById('tag-name').textContent = label + '  #' + tagToken;
+    document.getElementById('sticker-token').textContent = '#' + tagToken;
+
+    document.getElementById('qr-preview').innerHTML = '';
+    new QRCode(document.getElementById('qr-preview'), {
+      text: tagURL, width: 90, height: 90,
+      colorDark: '#111111', colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+
+    document.getElementById('qr-hidden').innerHTML = '';
+    new QRCode(document.getElementById('qr-hidden'), {
+      text: tagURL, width: 400, height: 400,
+      colorDark: '#111111', colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    document.getElementById('qr-app').innerHTML = '';
+    new QRCode(document.getElementById('qr-app'), {
+      text: 'https://tapmycar.io', width: 300, height: 300,
+      colorDark: '#111111', colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    // Show status banner based on eTag state
+    const banner = document.getElementById('etag-status-banner');
+    if (banner) {
+      const status = tag.status || 'unclaimed';
+      const expiresAt = tag.expires_at ? new Date(tag.expires_at) : null;
+
+      if (status === 'inactive' || status === 'disabled') {
+        // eTag is currently disabled — likely because user activated a
+        // physical sticker. Show banner with Reactivate option.
+        banner.style.display = 'block';
+        banner.style.background = '#FEF3C7';
+        banner.style.border = '1px solid #FDE68A';
+        banner.innerHTML = '<div style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-radius:13px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div style="font-size:12px;color:#78350F;font-weight:500;flex:1;line-height:1.5">This eTag is currently disabled. Reactivate to use it as a 30-day backup.</div><button onclick="reactivateEtag()" id="reactivate-btn" style="font-size:12px;font-weight:700;color:#fff;background:#F59E0B;border:none;padding:8px 14px;border-radius:9px;cursor:pointer;font-family:inherit;flex-shrink:0">Reactivate</button></div>';
+      } else if (status === 'active' && expiresAt) {
+        // eTag is active as a backup — show countdown
+        const msLeft = expiresAt.getTime() - Date.now();
+        const daysLeft = Math.max(0, Math.ceil(msLeft / 86400000));
+        banner.style.display = 'block';
+        banner.style.background = '#DCFCE7';
+        banner.style.border = '1px solid #BBF7D0';
+        banner.innerHTML = '<div style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-radius:13px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg><div style="font-size:12px;color:#14532D;font-weight:500;flex:1;line-height:1.5">Backup eTag is active. Expires in <strong>' + daysLeft + ' day' + (daysLeft === 1 ? '' : 's') + '</strong>.</div></div>';
+      } else if (status === 'active') {
+        // Normal active eTag — no banner
+        banner.style.display = 'none';
+      } else {
+        // Other states (unclaimed, paused) — keep banner hidden
+        banner.style.display = 'none';
+      }
+    }
+
+    // Hide the "Activate to enable masked calls" prompt if the eTag
+    // is already active or if there's a physical (in which case the
+    // user shouldn't be activating the eTag normally — they'd use Reactivate)
+    const oldActivatePrompt = document.getElementById('etag-activate-prompt');
+    if (oldActivatePrompt) {
+      const status = tag.status || 'unclaimed';
+      const hasPhysical = data.tags.some(t => {
+        const tk = (t.token || '').toUpperCase();
+        return !tk.startsWith('TMC-ET') && (t.status === 'active');
+      });
+      if (status === 'active' || status === 'inactive' || hasPhysical) {
+        oldActivatePrompt.style.display = 'none';
+      } else {
+        oldActivatePrompt.style.display = 'flex';
+      }
+    }
+
   } catch(e) { console.error(e); }
+}
+
+async function reactivateEtag() {
+  const btn = document.getElementById('reactivate-btn');
+  if (btn) { btn.textContent = 'Reactivating...'; btn.disabled = true; }
+  try {
+    const res = await fetch('/api/reactivate-etag', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: s.token })
+    });
+    const data = await res.json();
+    if (data.success) {
+      if (typeof showToast === 'function') {
+        showToast(data.expires_at ? 'eTag reactivated for 30 days' : 'eTag reactivated');
+      }
+      // Reload to refresh status
+      setTimeout(() => loadTagData(), 600);
+    } else {
+      if (typeof showToast === 'function') showToast(data.error || 'Could not reactivate');
+      if (btn) { btn.textContent = 'Reactivate'; btn.disabled = false; }
+    }
+  } catch(e) {
+    if (typeof showToast === 'function') showToast('Network error');
+    if (btn) { btn.textContent = 'Reactivate'; btn.disabled = false; }
+  }
 }
 
 function buildStickerImage() {

@@ -128,26 +128,78 @@ module.exports = async function handler(req, res) {
   const { token, user_id } = req.query;
 
   if (token) {
+    // TMC_GET_TAG_RESILIENT
     const cleanToken = token.toUpperCase().trim();
 
-    const { data: tag, error } = await supabase
-      .from('tags')
-      .select('*, users(name, phone, emergency_contact, emergency_name, welcome_message)')
-      .eq('token', cleanToken)
-      .single();
+    // Try the full query (with welcome_message). If the column doesn't
+    // exist yet (e.g. schema migration hasn't run, or PostgREST cache
+    // is stale), retry without welcome_message so strangers can still
+    // scan the tag. This protects against silent regressions.
+    let tag = null;
+    let queryError = null;
 
-    if (error || !tag) {
+    try {
+      const r = await supabase
+        .from('tags')
+        .select('*, users(name, phone, emergency_contact, emergency_name, welcome_message)')
+        .eq('token', cleanToken)
+        .single();
+      if (r.error) queryError = r.error;
+      else tag = r.data;
+    } catch (e) {
+      queryError = e;
+    }
+
+    if (!tag) {
+      // Fallback: query without welcome_message
+      try {
+        const r2 = await supabase
+          .from('tags')
+          .select('*, users(name, phone, emergency_contact, emergency_name)')
+          .eq('token', cleanToken)
+          .single();
+        if (!r2.error && r2.data) {
+          tag = r2.data;
+          if (tag.users) tag.users.welcome_message = null;
+        } else {
+          queryError = r2.error || queryError;
+        }
+      } catch (e) {
+        queryError = e;
+      }
+    }
+
+    if (!tag) {
+      console.error('get-tag GET error for', cleanToken, ':', queryError?.message || queryError);
       return res.status(404).json({ error: 'Tag not found' });
     }
 
-    // TMC_AUTO_DEACTIVATE_ON_READ
-    // If this tag is an eTag (token starts with TMC-ET) and the same
-    // owner already has an active physical tag, mark this eTag inactive
-    // and tell the stranger it's no longer active. Defense in depth.
+    // Auto-expire: if tag has expires_at set and it's past, mark inactive.
+    // This handles eTags that were reactivated for 30 days as a backup.
+    try {
+      if (tag.expires_at) {
+        const exp = new Date(tag.expires_at).getTime();
+        if (Number.isFinite(exp) && exp < Date.now() && tag.status === 'active') {
+          await supabase.from('tags')
+            .update({ status: 'inactive' })
+            .eq('id', tag.id);
+          tag.status = 'inactive';
+          console.log('Auto-expired tag', tag.token, '(expires_at passed)');
+        }
+      }
+    } catch (expErr) {
+      console.error('expires_at check error (non-fatal):', expErr);
+    }
+
+    // Auto-deactivate-on-read: if this is an eTag and the owner has an
+    // active physical, mark this eTag inactive — UNLESS the eTag has an
+    // expires_at set, which means the user explicitly reactivated it as
+    // a 30-day backup. In that case, leave it active.
     try {
       const tokenUpper = (tag.token || '').toUpperCase();
       const isEtag = tokenUpper.startsWith('TMC-ET') || tag.tag_type === 'etag';
-      if (isEtag && tag.owner_id && tag.status === 'active') {
+      const hasGracePeriod = !!tag.expires_at;
+      if (isEtag && tag.owner_id && tag.status === 'active' && !hasGracePeriod) {
         const { data: physicalTags } = await supabase
           .from('tags')
           .select('token, status')
@@ -164,13 +216,14 @@ module.exports = async function handler(req, res) {
             .update({ status: 'inactive' })
             .eq('id', tag.id);
           tag.status = 'inactive';
-          console.log('Auto-deactivated eTag', tag.token, 'on read (owner has active physical)');
+          console.log('Auto-deactivated eTag', tag.token, '(owner has active physical, no grace period)');
         }
       }
     } catch (autoDeactivateErr) {
-      console.error('Auto-deactivate on read error (non-fatal):', autoDeactivateErr);
+      console.error('Auto-deactivate-on-read error (non-fatal):', autoDeactivateErr);
     }
 
+    // Log scan
     let scan_id = null;
     if (tag.status === 'active' || tag.status === 'paused') {
       const userAgent = req.headers['user-agent'] || '';
