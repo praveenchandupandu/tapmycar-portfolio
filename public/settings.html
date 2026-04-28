@@ -169,6 +169,14 @@
       <input type="tel" id="edit-emergency-phone" placeholder="+1 (203) 555-0100">
       <div style="font-size:10px;color:#9CA3AF;margin-top:4px">Notified if you don't respond to a scan alert</div>
     </div>
+    <!-- TMC_WELCOME_MSG_UI -->
+    <div style="height:1px;background:#F3F4F6;margin:12px 0"></div>
+    <div style="font-size:11px;font-weight:700;color:#6B7280;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Note shown to strangers (optional)</div>
+    <div class="edit-field">
+      <label>A short message that appears when someone scans your tag</label>
+      <textarea id="edit-welcome-message" maxlength="120" rows="3" placeholder="e.g. If my lights are on please tap that — I respond fast." style="width:100%;border:1.5px solid #E5E7EB;border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit;resize:none;color:#111"></textarea>
+      <div style="font-size:10px;color:#9CA3AF;margin-top:4px">Max 120 chars. Phone numbers and email addresses are auto-removed for privacy.</div>
+    </div>
     <button class="btn" onclick="saveProfile()" id="save-btn">Save changes</button>
     <button class="btn-o" style="margin-top:8px" onclick="closeEdit()">Cancel</button>
   </div>
@@ -213,6 +221,7 @@ function openEditProfile() {
     document.getElementById('edit-email').value = userData.email || '';
     document.getElementById('edit-emergency-name').value = userData.emergency_name || '';
     document.getElementById('edit-emergency-phone').value = userData.emergency_contact || '';
+    document.getElementById('edit-welcome-message').value = userData.welcome_message || '';
   }
   document.getElementById('edit-overlay').classList.add('show');
 }
@@ -225,11 +234,12 @@ async function saveProfile() {
   const email = document.getElementById('edit-email').value.trim();
   const emergencyName = document.getElementById('edit-emergency-name').value.trim();
   const emergencyPhone = document.getElementById('edit-emergency-phone').value.trim();
+  const welcomeMessage = document.getElementById('edit-welcome-message').value.trim();
   if (!name) { showToast('Name is required'); return; }
   const btn = document.getElementById('save-btn');
   btn.textContent = 'Saving...'; btn.disabled = true;
   try {
-    const res = await fetch('/api/get-dashboard', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ user_id: s.token, name, phone, email, emergency_name: emergencyName, emergency_contact: emergencyPhone }) });
+    const res = await fetch('/api/get-dashboard', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ user_id: s.token, name, phone, email, emergency_name: emergencyName, emergency_contact: emergencyPhone, welcome_message: welcomeMessage }) });
     const data = await res.json();
     if (data.success) {
       localStorage.setItem('tmc_name', name); localStorage.setItem('tmc_phone', phone); localStorage.setItem('tmc_email', email);

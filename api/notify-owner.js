@@ -77,6 +77,64 @@ module.exports = async function handler(req, res) {
         </div>
         <a href="https://tapmycar.io/dashboard.html" style="display:block;background:#FF6B00;color:#fff;font-size:14px;font-weight:700;padding:14px 0;border-radius:13px;text-align:center;text-decoration:none">Check Dashboard</a>
       </div>`;
+    } else if (action === 'voice') {
+    // TMC_NOTIFY_VOICE_HANDLER
+    // Voice memo from stranger. Upload audio to Supabase Storage,
+    // build a public URL, send owner an SMS with the link.
+    const audioB64 = req.body.audio_base64;
+    const audioType = req.body.audio_type || 'audio/webm';
+    const duration = req.body.duration || 0;
+    let audioUrl = '';
+
+    if (audioB64) {
+      try {
+        const audioBuffer = Buffer.from(audioB64, 'base64');
+        const ext = audioType.includes('webm') ? 'webm' : (audioType.includes('mp4') ? 'm4a' : 'audio');
+        const fileName = 'voice-' + tag_id + '-' + Date.now() + '.' + ext;
+        const { data: uploadData, error: uploadErr } = await supabase
+          .storage
+          .from('tapmycar-voice-memos')
+          .upload(fileName, audioBuffer, { contentType: audioType, upsert: false });
+        if (uploadErr) {
+          console.error('Voice upload error:', uploadErr);
+        } else {
+          const { data: urlData } = supabase
+            .storage
+            .from('tapmycar-voice-memos')
+            .getPublicUrl(fileName);
+          audioUrl = urlData?.publicUrl || '';
+        }
+      } catch (e) {
+        console.error('Voice handling error:', e);
+      }
+    }
+
+    subject = 'Someone sent you a voice memo via TapMyCar';
+    const audioHtml = audioUrl
+      ? '<a href="' + audioUrl + '" style="display:inline-block;background:#6D28D9;color:#fff;font-size:13px;font-weight:700;padding:12px 20px;border-radius:10px;text-decoration:none;margin-bottom:12px">Listen to voice memo (' + duration + 's)</a>'
+      : '<p style="font-size:12px;color:#6B7280">Voice memo could not be processed. Please check your dashboard.</p>';
+    body =
+      '<div style="font-family:Inter,sans-serif;max-width:400px;margin:0 auto;padding:40px 20px">' +
+        '<div style="font-size:24px;font-weight:800;color:#111;margin-bottom:8px">TapMyCar<span style="color:#FF6B00">.</span></div>' +
+        '<div style="font-size:14px;color:#6B7280;margin-bottom:24px">Privacy for you. Safety for your car.</div>' +
+        '<div style="background:#F5F3FF;border:1px solid #DDD6FE;border-radius:14px;padding:16px;margin-bottom:20px">' +
+          '<div style="font-size:12px;color:#6D28D9;font-weight:600;margin-bottom:6px">Voice memo received</div>' +
+          '<div style="font-size:13px;color:#5B21B6;margin-bottom:12px">Someone scanned your tag for <strong>' + vehicleLabel + '</strong> and recorded a ' + duration + '-second voice memo.</div>' +
+          audioHtml +
+        '</div>' +
+        '<a href="https://tapmycar.io/activity.html" style="display:block;background:#FF6B00;color:#fff;font-size:14px;font-weight:700;padding:14px 0;border-radius:13px;text-align:center;text-decoration:none">View Activity</a>' +
+      '</div>';
+
+    // Stash audio_url on scan_logs so it shows on activity page
+    if (scan_id && audioUrl) {
+      try {
+        await supabase.from('scan_logs').update({
+          contact_action: 'voice',
+          audio_url: audioUrl
+        }).eq('id', scan_id);
+      } catch (e) { console.error('scan log voice update err:', e); }
+    }
+
   } else {
     // Generic scan notification
     subject = `Your TapMyCar tag was just scanned`;
@@ -113,8 +171,10 @@ module.exports = async function handler(req, res) {
     const twilio = require('twilio');
     const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
     const smsBody = action === 'quick_message'
-      ? `TapMyCar Alert: "${message}" â€” someone scanned your tag for ${vehicleLabel}. Check: tapmycar.io/dashboard.html`
-      : `Hi ${ownerName}! Someone just scanned your TapMyCar tag for ${vehicleLabel}. Check activity at tapmycar.io/dashboard.html`;
+      ? `TapMyCar Alert: "${message}" — someone scanned your tag for ${vehicleLabel}. Check: tapmycar.io/dashboard.html`
+      : action === 'voice'
+        ? `TapMyCar: someone left you a ${req.body.duration||0}s voice memo. Listen: tapmycar.io/activity.html`
+        : `Hi ${ownerName}! Someone just scanned your TapMyCar tag for ${vehicleLabel}. Check: tapmycar.io/dashboard.html`;
 
     await client.messages.create({
       body: smsBody,
@@ -138,7 +198,7 @@ module.exports = async function handler(req, res) {
   try {
     const { data: tag } = await supabase.from("tags").select("owner_id").eq("id", tag_id).single();
     if (tag && tag.owner_id) {
-      const actionLabels = { quick_message: "sent you a message", photo: "sent you a photo", call: "called you" };
+      const actionLabels = { quick_message: "sent you a message", photo: "sent you a photo", call: "called you", voice: "sent you a voice memo" };
       const label = actionLabels[action] || "scanned your tag";
       const baseUrl = process.env.VERCEL_URL ? "https://" + process.env.VERCEL_URL : "https://tapmycar.io";
       await fetch(baseUrl + "/api/send-push", {

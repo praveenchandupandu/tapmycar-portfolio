@@ -132,7 +132,7 @@ module.exports = async function handler(req, res) {
 
     const { data: tag, error } = await supabase
       .from('tags')
-      .select('*, users(name, phone, emergency_contact, emergency_name)')
+      .select('*, users(name, phone, emergency_contact, emergency_name, welcome_message)')
       .eq('token', cleanToken)
       .single();
 

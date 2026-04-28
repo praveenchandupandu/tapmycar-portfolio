@@ -78,6 +78,14 @@ module.exports = async function handler(req, res) {
       if (phone) updates.phone = phone;
         if (req.body.emergency_name !== undefined) updates.emergency_name = req.body.emergency_name;
         if (req.body.emergency_contact !== undefined) updates.emergency_contact = req.body.emergency_contact;
+        // TMC_WELCOME_MSG_FIELD
+        if (req.body.welcome_message !== undefined) {
+          // Sanitize: max 120 chars, strip phone-like and email-like patterns
+          let wm = String(req.body.welcome_message).slice(0, 120);
+          wm = wm.replace(/[\d][\d\-\s\(\)\+\.]{6,}[\d]/g, '');
+          wm = wm.replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, '');
+          updates.welcome_message = wm.trim();
+        }
 
       const { error } = await supabase
         .from('users')
