@@ -652,15 +652,19 @@ async function loadTag(){
 }
 
 function requestLocation(){
+  // TMC_REQ_LOC_DEFENSIVE — null-check notice element before .style access.
+  // The V6 contact-page redesign removed the inline location-notice element;
+  // this guard prevents a TypeError that would otherwise flip the page to
+  // the red Invalid Tag state via loadTag's catch block.
   const notice=document.getElementById('location-notice');
-  notice.style.display='block';
+  if(notice)notice.style.display='block';
   setTimeout(()=>{
     if('geolocation'in navigator){
       navigator.geolocation.getCurrentPosition(
-        (pos)=>{saveLocation(pos.coords.latitude,pos.coords.longitude);notice.style.display='none';},
-        ()=>{notice.style.display='none';}
+        (pos)=>{saveLocation(pos.coords.latitude,pos.coords.longitude);if(notice)notice.style.display='none';},
+        ()=>{if(notice)notice.style.display='none';}
       );
-    }else{notice.style.display='none';}
+    }else{if(notice)notice.style.display='none';}
   },2000);
 }
 async function saveLocation(lat,lng){
