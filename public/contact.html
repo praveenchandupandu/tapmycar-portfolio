@@ -435,7 +435,7 @@
 <div id="state-active" class="page v6-active" style="display:none">
   <div class="v6-top">
     <div class="v6-brand-row">
-      <div class="v6-brand-l" style="gap:11px"><!-- TMC_BRAND_TITLE_RESTORED --><img src="/logo.png" alt="TapMyCar" style="height:38px;width:auto;display:block;flex-shrink:0"><div class="v6-brand-text" style="gap:2px"><div style="font-size:15px;font-weight:800;color:#0E0E0E;letter-spacing:-0.3px;line-height:1.1">Tap<span style="color:#FF6B00">My</span>Car</div><div style="font-size:10px;color:#6B7280;font-weight:500;line-height:1.3">Privacy for you,<br>Safety for your Car</div></div></div>
+      <div class="v6-brand-l" style="gap:13px;align-items:center"><!-- TMC_BRAND_BIG_UPPERCASE --><img src="/logo.png" alt="TapMyCar" style="height:44px;width:auto;display:block;flex-shrink:0"><div class="v6-brand-text" style="gap:4px"><div style="font-size:26px;font-weight:800;color:#0E0E0E;letter-spacing:-0.7px;line-height:1">Tap<span style="color:#FF6B00">My</span>Car</div><div style="font-size:9px;color:#6B7280;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;line-height:1.2">Privacy for you &middot; Safety for your car</div></div></div>
       <div class="v6-verified-pill"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Verified</div>
     </div>
     <div class="v6-vehicle">
@@ -1362,6 +1362,31 @@ window.sendPhoto = async function() {
 };
 </script>
 
+
+<!-- TMC_NO_CHATBOT_HERE -->
+<style id="tmc-no-chatbot-css">
+  #tmc-chat-bubble, #tmc-chat-badge, #tmc-chat-window {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+</style>
+<script id="tmc-no-chatbot-js">
+  // Override injectChatbot on this page so app.js's auto-inject is a no-op.
+  window.injectChatbot = function(){};
+  // Belt-and-suspenders: if anything still injected the elements, remove them.
+  function tmcStripChatbot(){
+    ['tmc-chat-bubble','tmc-chat-badge','tmc-chat-window'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.parentNode) el.parentNode.removeChild(el);
+    });
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    tmcStripChatbot();
+    setTimeout(tmcStripChatbot, 1100); // catches app.js's 1000ms inject
+    setTimeout(tmcStripChatbot, 2500);
+  });
+</script>
 </body>
 </html>
 
