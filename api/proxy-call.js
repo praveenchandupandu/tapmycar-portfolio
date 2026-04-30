@@ -1,5 +1,23 @@
-﻿const twilio = require('twilio');
+// TapMyCar — proxy-call.js
+// Orchestrates the masked-call flow.
+//
+// Two modes:
+//   1. Normal call (caller_number = stranger's phone, no emergency_phone):
+//      Outbound call to STRANGER first. Stranger hears warm greeting +
+//      hold music + periodic nudges while we ring the OWNER. If owner
+//      picks up, owner hears greeting & IVR; on press-2, owner is
+//      bridged into the stranger's call.
+//
+//   2. Emergency call (emergency_phone provided):
+//      Direct ring to emergency contact with the emergency-contact
+//      script. Same IVR as normal but referencing "your friend's car".
+//
+// All voice is Polly.Joanna-Neural for consistency.
+
+const twilio = require('twilio');
 const { createClient } = require('@supabase/supabase-js');
+
+const VOICE = 'Polly.Joanna-Neural';
 
 const client = twilio(
   process.env.TWILIO_ACCOUNT_SID,
@@ -10,6 +28,20 @@ const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
 );
+
+function safeName(raw) {
+  if (!raw) return '';
+  const cleaned = String(raw)
+    .replace(/[^A-Za-z\s'\-]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 30);
+  return cleaned.replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function escapeXml(s) {
+  return String(s).replace(/[<>&'"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','"':'&quot;'}[c]));
+}
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -22,10 +54,6 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'token and caller_number required' });
   }
 
-  // Clean caller number
-  const cleaned = caller_number.replace(/\D/g, '');
-  const callerFormatted = cleaned.startsWith('1') ? '+' + cleaned : '+1' + cleaned;
-
   // Get tag and owner from database
   const { data: tag, error } = await supabase
     .from('tags')
@@ -37,33 +65,75 @@ module.exports = async function handler(req, res) {
     return res.status(404).json({ error: 'Tag not found' });
   }
 
-  if (tag.status === 'inactive') {
-    return res.status(400).json({ error: 'Tag not activated' });
+  if (tag.status === 'inactive' || tag.status === 'disabled') {
+    return res.status(400).json({ error: 'Tag not active' });
   }
 
-  const ownerPhone = emergency_phone || tag.users.phone;
-  const friendName = owner_name || tag.users.name || "your friend";
-  const isEmergency = !!emergency_phone;
+  const ownerPhone = tag.users && tag.users.phone;
+  const emergencyPhone = emergency_phone;
+  const rawName = owner_name || (tag.users && tag.users.name) || '';
+  const friendName = safeName(rawName);
+  const isEmergency = !!emergencyPhone;
+  const baseUrl = `https://${req.headers.host}`;
 
   try {
-    // Create Twilio call â€” caller hears ringing, owner gets called
+    if (isEmergency) {
+      // ── Emergency contact flow ──
+      const namePiece = friendName
+        ? `your friend ${escapeXml(friendName)}'s`
+        : "your friend's";
+      const goodbyePiece = friendName
+        ? `Looks like we missed you — we'll let ${escapeXml(friendName)} know.`
+        : "Looks like we missed you — we'll let them know.";
+
+      const call = await client.calls.create({
+        to: emergencyPhone,
+        from: process.env.TWILIO_PHONE_NUMBER,
+        twiml: `<Response>
+  <Gather input="dtmf" timeout="12" numDigits="1" action="${baseUrl}/api/voice-action${friendName ? '?name=' + encodeURIComponent(friendName) : ''}" method="POST">
+    <Say voice="${VOICE}">Hi there! It's TapMyCar. Someone just tapped ${namePiece} car sticker, but we couldn't get through to them. We're hoping you can help. Press one to send them a quick message. Or press two to speak with the caller directly.</Say>
+  </Gather>
+  <Say voice="${VOICE}">${goodbyePiece} Take care!</Say>
+</Response>`
+      });
+
+      await supabase
+        .from('scan_logs')
+        .insert({ tag_id: tag.id, action: 'call_emergency' });
+
+      return res.json({ success: true, call_sid: call.sid, mode: 'emergency' });
+    }
+
+    // ── Normal flow ──
+    // Clean stranger number
+    const cleaned = String(caller_number).replace(/\D/g, '');
+    if (cleaned.length < 10) {
+      return res.status(400).json({ error: 'Invalid caller number' });
+    }
+    const callerFormatted = cleaned.startsWith('1') ? '+' + cleaned : '+1' + cleaned;
+
+    // Step 1: Call the STRANGER first. Stranger hears the warm greeting
+    // and hold experience while we work on connecting them to the owner.
+    // The stranger-wait endpoint plays greeting + hold music + nudges,
+    // then dials the owner with the Joanna-Neural IVR.
+    const ownerCallbackUrl = `${baseUrl}/api/owner-callback?token=${encodeURIComponent(token)}&stranger=${encodeURIComponent(callerFormatted)}${friendName ? '&name=' + encodeURIComponent(friendName) : ''}`;
+    const strangerWaitUrl = `${baseUrl}/api/stranger-wait?stage=greeting&owner_url=${encodeURIComponent(ownerCallbackUrl)}`;
+
     const call = await client.calls.create({
-      to: ownerPhone,
+      to: callerFormatted,
       from: process.env.TWILIO_PHONE_NUMBER,
-      twiml: isEmergency ? `<Response><Gather input="dtmf" timeout="10" numDigits="1" action="https://${req.headers.host}/api/voice-action" method="POST"><Say voice="alice">Hello. Someone scanned your friend ${friendName}s TapMyCar tag but was unable to reach them. We are calling you as the emergency contact. Press 1 to send an automated message. Press 2 to speak with the caller directly.</Say></Gather><Say voice="alice">No input received. Goodbye.</Say></Response>` : `<Response><Say voice="alice">You have an incoming masked call from a TapMyCar scan. Connecting now.</Say><Dial callerId="${process.env.TWILIO_PHONE_NUMBER}"><Number>${callerFormatted}</Number></Dial></Response>`
+      url: strangerWaitUrl,
+      method: 'POST'
     });
 
-    // Log the scan as a call
     await supabase
       .from('scan_logs')
       .insert({ tag_id: tag.id, action: 'call' });
 
-    res.json({ success: true, call_sid: call.sid });
+    return res.json({ success: true, call_sid: call.sid, mode: 'normal' });
+
   } catch (err) {
     console.error('Call error:', err.message);
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 };
-
-
-
