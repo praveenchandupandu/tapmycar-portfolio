@@ -3,23 +3,8 @@ const { Resend } = require("resend");
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// TMC_PATCH2_ORIGIN_GUARD
-function checkOrigin(req) {
-  const origin = req.headers.origin;
-  // Missing origin = same-origin or server-to-server, allowed
-  if (!origin) return true;
-  // Allowlist: tapmycar.io domains and any *.vercel.app preview
-  if (origin === 'https://tapmycar.io') return true;
-  if (origin === 'https://www.tapmycar.io') return true;
-  if (/^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(origin)) return true;
-  return false;
-}
-
-
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
-  if (!checkOrigin(req)) return res.status(403).json({ error: 'Forbidden origin' });
-
 
   // TMC_PATCH1_ADMIN_CHECK
   const adminKey = req.headers['x-admin-key'];

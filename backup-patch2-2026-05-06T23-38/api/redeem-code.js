@@ -29,12 +29,6 @@ module.exports = async function handler(req, res) {
   if (!user_id) return res.status(400).json({ error: 'user_id required' });
   if (!code) return res.status(400).json({ error: 'code required' });
 
-  // TMC_PATCH2_UUID_VALIDATE
-  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  if (!UUID_RE.test(String(user_id))) {
-    return res.status(400).json({ error: 'Invalid user_id format' });
-  }
-
   const normalized = String(code).trim().toUpperCase();
 
   if (!CODE_FORMAT.test(normalized)) {

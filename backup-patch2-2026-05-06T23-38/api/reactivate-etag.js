@@ -18,12 +18,6 @@ module.exports = async function handler(req, res) {
   const { user_id } = req.body;
   if (!user_id) return res.status(400).json({ error: 'user_id required' });
 
-  // TMC_PATCH2_UUID_VALIDATE
-  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  if (!UUID_RE.test(String(user_id))) {
-    return res.status(400).json({ error: 'Invalid user_id format' });
-  }
-
   try {
     // Find user's tags
     const { data: tags, error: tagsErr } = await supabase

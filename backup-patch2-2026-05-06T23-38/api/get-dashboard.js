@@ -1,18 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
 
-// TMC_PATCH2_ORIGIN_GUARD
-function checkOrigin(req) {
-  const origin = req.headers.origin;
-  // Missing origin = same-origin or server-to-server, allowed
-  if (!origin) return true;
-  // Allowlist: tapmycar.io domains and any *.vercel.app preview
-  if (origin === 'https://tapmycar.io') return true;
-  if (origin === 'https://www.tapmycar.io') return true;
-  if (/^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(origin)) return true;
-  return false;
-}
-
-
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
@@ -22,7 +9,6 @@ module.exports = async function handler(req, res) {
 
   // â”€â”€ POST â€” admin actions (update user, suspend, reactivate, profile update) â”€â”€
   if (req.method === 'POST') {
-    if (!checkOrigin(req)) return res.status(403).json({ error: 'Forbidden origin' });
     const { action, admin_key, user_id, name, email, phone, plan } = req.body;
 
     // Admin actions require admin key
