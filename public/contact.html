@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -1002,7 +1002,7 @@ async function submitFeedback() {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ email, tag_id: window._tagId || null, rating: selectedRating || null })
     });
-    document.getElementById('feedback-overlay').innerHTML = '<div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:40px 20px 50px;text-align:center"><div style="font-size:40px;margin-bottom:12px"></div><div style="font-size:18px;font-weight:800;color:#111;margin-bottom:8px">Check your email!</div><div style="font-size:13px;color:#6B7280;line-height:1.6">We sent your free TapMyCar tag link to ' + email + '</div></div>';
+    document.getElementById('feedback-overlay').innerHTML = '<div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:40px 20px 50px;text-align:center"><div style="font-size:40px;margin-bottom:12px"></div><div style="font-size:18px;font-weight:800;color:#111;margin-bottom:8px">Check your email!</div><div style="font-size:13px;color:#6B7280;line-height:1.6">We sent your free TapMyCar tag link to ' + v6Esc(email) + '</div></div>';
     document.getElementById('feedback-overlay').style.display = 'flex';
     setTimeout(() => { document.getElementById('feedback-overlay').style.display = 'none'; }, 4000);
   } catch(e) { btn.textContent = 'Get My Free Tag'; btn.disabled = false; }

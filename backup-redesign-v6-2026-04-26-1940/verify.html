@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#FF6B00">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Verify — TapMyCar</title>
+  <link rel="stylesheet" href="/app.css">
+<link rel="stylesheet" href="/tmc-redesign.css">
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    #reader{width:100%;border-radius:16px;overflow:hidden}
+    #reader video{border-radius:16px}
+    .scan-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+    .scan-frame{width:220px;height:220px;border:3px solid #FF6B00;border-radius:16px;box-shadow:0 0 0 9999px rgba(0,0,0,.4)}
+  </style>
+<!-- Favicon -->
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<!-- SEO -->
+<meta name="description" content="Verify your TapMyCar tag.">
+<meta name="author" content="Praman Tech LLC">
+<!-- Open Graph -->
+<meta property="og:title" content="Verify — TapMyCar">
+<meta property="og:description" content="Verify your TapMyCar tag.">
+<meta property="og:image" content="https://tapmycar.io/og-image.png">
+<meta property="og:url" content="https://tapmycar.io/verify.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TapMyCar">
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Verify — TapMyCar">
+<meta name="twitter:description" content="Verify your TapMyCar tag.">
+<meta name="twitter:image" content="https://tapmycar.io/og-image.png">
+</head>
+<body>
+<div class="nav">
+  <div class="bk" onclick="history.back()">
+    <div class="bkb"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+    <span class="bk-label">Scan & Verify Tag</span>
+  </div>
+<a href="/dashboard.html" aria-label="TapMyCar" style="display:flex;align-items:center;text-decoration:none"><img src="/logo.png" alt="TapMyCar" class="nav-logo-img" style="height:36px;width:auto"></a></div>
+<div class="chev"></div>
+<div class="page">
+  <div class="page-inner">
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:15px;font-weight:700;color:var(--bk);margin-bottom:4px">Point camera at a TapMyCar tag</div>
+      <div style="font-size:12px;color:var(--gy)">Scan any QR code to verify it's an official tag</div>
+    </div>
+    <div style="position:relative;margin-bottom:16px;border-radius:16px;overflow:hidden;background:#000;min-height:300px">
+      <div id="reader"></div>
+      <div class="scan-overlay"><div class="scan-frame"></div></div>
+    </div>
+    <div id="scan-result" style="display:none" class="card" style="padding:16px">
+      <div id="result-content"></div>
+    </div>
+    <div id="scan-status" style="text-align:center;font-size:13px;color:var(--gy);padding:12px 0">Initializing camera...</div>
+    <div style="background:#FFF3EC;border-radius:14px;padding:14px;margin-top:8px">
+      <div style="font-size:12px;font-weight:700;color:#FF6B00;margin-bottom:4px">How to use</div>
+      <div style="font-size:11px;color:#374151;line-height:1.6">
+        Scan any TapMyCar QR code to verify it's official and contact the owner privately. Works on any TapMyCar tag.
+      </div>
+    </div>
+  </div>
+</div>
+<nav class="bnav">
+  <a href="/dashboard.html" class="bni"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></a>
+  <a href="/manage.html" class="bni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Tag</span></a>
+  <a href="/verify.html" class="bni active"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span>Verify</span></a>
+  <a href="/activity.html" class="bni"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Activity</span></a>
+  <a href="/settings.html" class="bni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></a>
+</nav>
+<div class="toast" id="toast"><div class="toast-ic"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span id="toast-msg"></span></div>
+<script src="/app.js"></script>
+<script>
+let scanner = null;
+let scanned = false;
+
+function onScanSuccess(decodedText) {
+  if (scanned) return;
+  scanned = true;
+  if (scanner) scanner.stop();
+
+  document.getElementById('scan-status').textContent = 'Tag found!';
+
+  // Check if it is a TapMyCar tag URL
+  if (decodedText.includes('tapmycar.io/tag/') || decodedText.includes('/tag/TMC')) {
+    const token = decodedText.split('/tag/')[1];
+    document.getElementById('scan-result').style.display = 'block';
+    document.getElementById('result-content').innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">' +
+      '<div style="width:40px;height:40px;border-radius:50%;background:#DCFCE7;display:flex;align-items:center;justify-content:center">' +
+      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>' +
+      '<div><div style="font-size:14px;font-weight:700;color:#111">Official TapMyCar Tag</div>' +
+      '<div style="font-size:11px;color:#16A34A;font-weight:600">Verified & Authentic</div></div></div>' +
+      '<div style="font-size:12px;color:#6B7280;margin-bottom:14px">Token: ' + token + '</div>' +
+      '<a href="' + decodedText + '" style="display:block;background:#FF6B00;color:#fff;font-size:14px;font-weight:700;padding:14px 0;border-radius:13px;text-align:center;text-decoration:none">Contact Car Owner</a>' +
+      '<button onclick="rescan()" style="width:100%;height:44px;border-radius:13px;border:1.5px solid #E5E7EB;background:#fff;font-size:13px;font-weight:600;color:#6B7280;cursor:pointer;font-family:inherit;margin-top:8px">Scan Another</button>';
+  } else {
+    document.getElementById('scan-result').style.display = 'block';
+    document.getElementById('result-content').innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">' +
+      '<div style="width:40px;height:40px;border-radius:50%;background:#FEE2E2;display:flex;align-items:center;justify-content:center">' +
+      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>' +
+      '<div><div style="font-size:14px;font-weight:700;color:#111">Not a TapMyCar Tag</div>' +
+      '<div style="font-size:11px;color:#DC2626;font-weight:600">This QR code is not verified</div></div></div>' +
+      '<div style="font-size:12px;color:#6B7280;margin-bottom:14px;word-break:break-all">' + decodedText + '</div>' +
+      '<button onclick="rescan()" style="width:100%;height:44px;border-radius:13px;border:1.5px solid #E5E7EB;background:#fff;font-size:13px;font-weight:600;color:#6B7280;cursor:pointer;font-family:inherit">Scan Another</button>';
+  }
+}
+
+function rescan() {
+  scanned = false;
+  document.getElementById('scan-result').style.display = 'none';
+  startScanner();
+}
+
+function startScanner() {
+  document.getElementById('reader').innerHTML = '';
+  document.getElementById('scan-status').textContent = 'Camera active — point at a QR code';
+  scanner = new Html5Qrcode("reader");
+  scanner.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: { width: 220, height: 220 } },
+    onScanSuccess,
+    () => {}
+  ).catch(err => {
+    document.getElementById('scan-status').textContent = 'Camera access denied. Please allow camera.';
+  });
+}
+
+startScanner();
+</script>
+<script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }</script>
+
+<div style="padding:20px 20px 32px;text-align:center;border-top:.5px solid #E5E7EB;margin-top:24px;background:#fff">
+  <p style="font-size:11px;color:#9CA3AF;margin:0 0 4px">
+    <a href="/privacy.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Privacy</a>
+    &nbsp;·&nbsp;
+    <a href="/terms.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Terms</a>
+    &nbsp;·&nbsp;
+    <a href="mailto:support@tapmycar.io" style="color:#FF6B00;text-decoration:none;font-weight:600">Support</a>
+  </p>
+  <p style="font-size:11px;color:#9CA3AF;margin:0">© 2026 Praman Tech LLC</p>
+</div>
+
+<script src="/tmc-redesign.js"></script>
+</body>
+</html>

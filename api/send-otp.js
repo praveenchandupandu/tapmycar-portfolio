@@ -1,4 +1,5 @@
 const { Resend } = require('resend');
+const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
 const twilio = require('twilio');
 
@@ -32,7 +33,7 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const code = crypto.randomInt(100000, 1000000).toString();
 
     // Delete old OTPs for this email
     const { error: delError } = await supabase

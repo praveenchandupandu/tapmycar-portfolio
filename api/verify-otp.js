@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
+const crypto = require('crypto');
 const twilio = require('twilio');
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
@@ -34,7 +35,7 @@ async function assignFreeTag(userId) {
       attempt++;
       let random = '';
       for (let i = 0; i < 5; i++) {
-        random += chars[Math.floor(Math.random() * chars.length)];
+        random += chars[crypto.randomInt(chars.length)];
       }
       const candidate = 'TMC-ET' + random;
 
@@ -180,7 +181,7 @@ module.exports = async function handler(req, res) {
       await assignFreeTag(user.id);
       const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
       let refCode = "TMC-";
-      for (let i = 0; i < 6; i++) refCode += chars[Math.floor(Math.random() * chars.length)];
+      for (let i = 0; i < 6; i++) refCode += chars[crypto.randomInt(chars.length)];
       const updates = { referral_code: refCode };
       if (token) updates.referred_by = token;
       await supabase.from('users').update(updates).eq('id', user.id);

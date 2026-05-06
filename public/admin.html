@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <link rel="manifest" href="/manifest.json">
@@ -1511,7 +1511,7 @@ let allLeads = [];
 
 async function loadLeads() {
   try {
-    const res = await fetch('/api/get-leads');
+    const res = await fetch('/api/get-leads', { headers: { 'x-admin-key': getAdminKey() } });
     const data = await res.json();
     if (!data.success) return;
     allLeads = data.leads || [];
@@ -1560,7 +1560,7 @@ function exportLeads() {
 
 async function loadOrders() {
   try {
-    const res = await fetch('/api/get-orders');
+    const res = await fetch('/api/get-orders', { headers: { 'x-admin-key': getAdminKey() } });
     const data = await res.json();
     if (!data.success) return;
     allOrders = data.orders || [];
@@ -1610,7 +1610,7 @@ async function updateOrder(orderId, status, tracking) {
   try {
     const res = await fetch('/api/update-order-status', {
       method: 'POST',
-      headers: {'Content-Type':'application/json'},
+      headers: {'Content-Type':'application/json', 'x-admin-key': getAdminKey()},
       body: JSON.stringify({ order_id: orderId, status, tracking_number: tracking || null })
     });
     const data = await res.json();

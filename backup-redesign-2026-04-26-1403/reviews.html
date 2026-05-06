@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#FF6B00">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer reviews — TapMyCar</title>
+  <link rel="stylesheet" href="/app.css">
+  <style>
+    .reviews-page{max-width:900px;margin:0 auto;padding:24px 24px 60px;font-family:Inter,sans-serif}
+    .rev-hdr{font-size:28px;font-weight:800;color:#111;margin:20px 0 8px}
+    .rev-sub{font-size:14px;color:#6B7280;margin-bottom:32px}
+    .rev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+    .rev-card{background:#fff;border:1.5px solid #E5E7EB;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px}
+    .rev-text{font-size:14px;color:#111;line-height:1.6;font-style:italic}
+    .rev-meta{display:flex;align-items:center;gap:10px;margin-top:auto;padding-top:8px;border-top:1px solid #F3F4F6}
+    .rev-av{width:36px;height:36px;border-radius:50%;background:#FF6B00;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .rev-name{font-size:13px;font-weight:700;color:#111}
+    .rev-city{font-size:11px;color:#6B7280}
+    .rev-empty{text-align:center;color:#9CA3AF;font-size:14px;padding:60px 20px}
+    .back-link{display:inline-block;font-size:13px;color:#FF6B00;text-decoration:none;font-weight:600;margin-bottom:20px}
+    .leave-btn{display:inline-block;background:#FF6B00;color:#fff;padding:12px 24px;border-radius:13px;font-size:14px;font-weight:700;text-decoration:none;margin-bottom:24px}
+    .leave-btn:hover{opacity:.92}
+  </style>
+<!-- Favicon -->
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<!-- SEO -->
+<meta name="description" content="Real reviews from verified TapMyCar customers.">
+<meta name="author" content="Praman Tech LLC">
+<!-- Open Graph -->
+<meta property="og:title" content="Customer reviews — TapMyCar">
+<meta property="og:description" content="Real reviews from verified TapMyCar customers.">
+<meta property="og:image" content="https://tapmycar.io/og-image.png">
+<meta property="og:url" content="https://tapmycar.io/reviews.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="TapMyCar">
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Customer reviews — TapMyCar">
+<meta name="twitter:description" content="Real reviews from verified TapMyCar customers.">
+<meta name="twitter:image" content="https://tapmycar.io/og-image.png">
+</head>
+<body class="wide-page">
+<div class="reviews-page">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+    <a href="/" aria-label="TapMyCar"><img src="/logo.png" alt="TapMyCar" style="height:48px;width:auto;display:block"></a>
+    <a href="/" class="back-link" style="margin:0">← Back</a>
+  </div>
+  <div class="rev-hdr">What people say about TapMyCar</div>
+  <div class="rev-sub">Real reviews from verified users.</div>
+
+  <a href="#" id="leave-review-btn" class="leave-btn" style="display:none">Leave a review</a>
+  <a href="/signin.html" id="signin-prompt-btn" class="leave-btn" style="display:none">Sign in to leave a review</a>
+
+  <div id="reviews-container">
+    <div class="rev-empty">Loading reviews...</div>
+  </div>
+
+  <div style="margin-top:40px;padding-top:20px;border-top:1px solid #E5E7EB;font-size:11px;color:#9CA3AF;text-align:center">
+    <a href="/terms.html" style="color:#FF6B00">Terms</a> · <a href="/privacy.html" style="color:#FF6B00">Privacy</a> · © 2026 Praman Tech LLC
+  </div>
+</div>
+
+<script src="/app.js"></script>
+<script>
+const session = getSession();
+if (session && session.token) {
+  document.getElementById('leave-review-btn').style.display = 'inline-block';
+  document.getElementById('leave-review-btn').href = '/settings.html#leave-review';
+} else {
+  document.getElementById('signin-prompt-btn').style.display = 'inline-block';
+}
+
+async function loadReviews() {
+  try {
+    const res = await fetch('/api/get-reviews?status=approved&limit=200');
+    const data = await res.json();
+    const container = document.getElementById('reviews-container');
+
+    if (!data.reviews || data.reviews.length === 0) {
+      container.innerHTML = '<div class="rev-empty">No reviews yet — be the first to share your experience!</div>';
+      return;
+    }
+
+    container.innerHTML = '<div class="rev-grid">' + data.reviews.map(r => {
+      const initial = (r.name || 'U')[0].toUpperCase();
+      const cityLine = r.city ? '<div class="rev-city">' + escapeHtml(r.city) + '</div>' : '';
+      return '<div class="rev-card">' +
+        '<div class="rev-text">"' + escapeHtml(r.text) + '"</div>' +
+        '<div class="rev-meta">' +
+          '<div class="rev-av">' + initial + '</div>' +
+          '<div>' +
+            '<div class="rev-name">' + escapeHtml(r.name) + '</div>' +
+            cityLine +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('') + '</div>';
+  } catch (e) {
+    document.getElementById('reviews-container').innerHTML = '<div class="rev-empty">Could not load reviews. Please try again.</div>';
+  }
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+loadReviews();
+</script>
+</body>
+</html>

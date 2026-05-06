@@ -1,0 +1,334 @@
+// ═══════════════════════════════════════════════════════════════
+// TapMyCar UI Redesign v8 — chatbot above the floating nav
+// ═══════════════════════════════════════════════════════════════
+// One small fix on top of v7:
+//
+//   Lift the chat bubble, "Need help?" badge, and chat window so
+//   they sit clearly ABOVE the floating nav. Currently the bubble
+//   is at bottom:24px while the nav extends to ~84px from the
+//   bottom — they overlap.
+//
+//   New positions:
+//     - Chat bubble:  bottom 100px (was 24px)  → 16px above nav
+//     - "Need help?": bottom 160px (was 72px)  → above the bubble
+//     - Chat window:  bottom 170px (was 90px)  → above the bubble
+//                     (max-height adjusted so it still fits screen)
+//
+// Run from project root:  node tapmycar-ui-redesign-v8.js
+// ═══════════════════════════════════════════════════════════════
+
+const fs = require('fs');
+const path = require('path');
+
+const ROOT = process.cwd();
+const PUBLIC = path.join(ROOT, 'public');
+
+if (!fs.existsSync(PUBLIC) || !fs.existsSync(path.join(PUBLIC, 'tmc-redesign.css'))) {
+  console.error('ERROR: public/tmc-redesign.css not found.');
+  console.error('Run earlier patches (v6, v7) first.');
+  process.exit(1);
+}
+
+// ─── BACKUP ──────────────────────────────────────────────────
+const now = new Date();
+const stamp = now.getFullYear() + '-' +
+  String(now.getMonth()+1).padStart(2,'0') + '-' +
+  String(now.getDate()).padStart(2,'0') + '-' +
+  String(now.getHours()).padStart(2,'0') +
+  String(now.getMinutes()).padStart(2,'0');
+
+const BACKUP = path.join(ROOT, 'backup-redesign-v8-' + stamp);
+fs.mkdirSync(BACKUP, { recursive: true });
+fs.copyFileSync(
+  path.join(PUBLIC, 'tmc-redesign.css'),
+  path.join(BACKUP, 'tmc-redesign.css')
+);
+console.log('  Backup: ' + path.relative(ROOT, BACKUP));
+
+// ─── REWRITE tmc-redesign.css with v8 styles ─────────────────
+// (Includes everything from v7, plus the new chatbot positioning)
+const REDESIGN_CSS = `/* ═══════════════════════════════════════════════════════════════
+   TAPMYCAR REDESIGN v8
+   ═══════════════════════════════════════════════════════════════
+   v8 changes vs v7:
+     - Chat bubble lifted to bottom:100px (was 24px) — clears the nav
+     - "Need help?" badge lifted to bottom:160px (was 72px)
+     - Chat window lifted to bottom:170px (was 90px), max-height
+       adjusted so it still fits on small screens
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── HERO CARD ─── */
+body.tmc-redesign .hero-card {
+  background:
+    radial-gradient(circle at top right, rgba(255,255,255,.18), transparent 50%),
+    radial-gradient(circle at bottom left, rgba(255,153,71,.40), transparent 55%),
+    #FF6B00 !important;
+  box-shadow: 0 4px 16px rgba(255,107,0,.25), 0 0 0 1px rgba(255,107,0,.08) !important;
+}
+
+/* ─── AVATAR & PLAN BADGE ─── */
+body.tmc-redesign .av {
+  border-radius: 12px !important;
+  box-shadow: 0 0 0 3px rgba(255,107,0,.15), 0 4px 10px rgba(255,107,0,.30) !important;
+}
+body.tmc-redesign .gear { border-radius: 12px !important; }
+body.tmc-redesign #plan-badge {
+  border: 1.5px solid #FFB37A !important;
+  background: #fff !important;
+  color: #C73E00 !important;
+  box-shadow: 0 0 0 3px rgba(255,107,0,.10) !important;
+}
+
+/* ─── VEHICLE / FEATURED CARD ─── */
+body.tmc-redesign .card-or {
+  border: 1.5px solid #FFB37A !important;
+  box-shadow: 0 0 0 4px rgba(255,107,0,.10), 0 4px 16px rgba(255,107,0,.12) !important;
+}
+
+/* ─── BUTTONS ─── */
+body.tmc-redesign .btn {
+  box-shadow: 0 4px 12px rgba(255,107,0,.30);
+  transition: transform .15s, box-shadow .15s;
+}
+body.tmc-redesign .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(255,107,0,.40), 0 0 0 3px rgba(255,107,0,.15);
+}
+body.tmc-redesign .btn-o { transition: transform .15s, border-color .15s; }
+body.tmc-redesign .btn-o:hover { transform: translateY(-1px); border-color: #FFB37A; }
+
+/* ─── DIVIDERS ─── */
+body.tmc-redesign:not(.tmc-keep-tape) .chev {
+  background: linear-gradient(90deg, transparent, rgba(255,107,0,.30), transparent) !important;
+  height: 1px !important;
+}
+
+/* ─── ACTIVITY / SETTINGS ICONS ─── */
+body.tmc-redesign .act-icon,
+body.tmc-redesign .set-ic {
+  box-shadow: 0 0 0 1px #FFE4CC !important;
+}
+
+/* ─── TOGGLE ─── */
+body.tmc-redesign .tog.on {
+  box-shadow: 0 0 0 3px rgba(255,107,0,.15) !important;
+}
+
+/* ─── CARD BORDERS ─── */
+body.tmc-redesign .card { border-color: #F1F0EE !important; }
+
+/* ─── HEADLINES ─── */
+body.tmc-redesign .hero-card h2,
+body.tmc-redesign #greeting-name { letter-spacing: -0.02em !important; }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   SCANNER UI (v7)
+   ═══════════════════════════════════════════════════════════════ */
+body.tmc-redesign #qr-shaded-region { display: none !important; }
+body.tmc-redesign #scanner > svg { display: none !important; }
+body.tmc-redesign #scanner [class*="qrcode"][class*="dashboard"],
+body.tmc-redesign #scanner button[type="button"] { display: none !important; }
+
+body.tmc-redesign .scan-area {
+  border: 2px solid rgba(255,107,0,.30) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 0 0 4px rgba(255,107,0,.06), 0 8px 24px rgba(0,0,0,.08) !important;
+  position: relative !important;
+}
+
+body.tmc-redesign .scan-corners::before,
+body.tmc-redesign .scan-corners::after {
+  width: 36px !important;
+  height: 36px !important;
+  border-color: #FF6B00 !important;
+  border-width: 3px !important;
+  filter: drop-shadow(0 0 8px rgba(255,107,0,.7));
+}
+body.tmc-redesign .scan-corners::before {
+  top: 12px !important; left: 12px !important;
+  border-width: 3px 0 0 3px !important;
+  border-radius: 12px 0 0 0 !important;
+}
+body.tmc-redesign .scan-corners::after {
+  top: 12px !important; right: 12px !important;
+  border-width: 3px 3px 0 0 !important;
+  border-radius: 0 12px 0 0 !important;
+}
+
+body.tmc-redesign .scan-area::before,
+body.tmc-redesign .scan-area::after {
+  content: '' !important;
+  position: absolute !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-color: #FF6B00 !important;
+  border-style: solid !important;
+  z-index: 2 !important;
+  pointer-events: none !important;
+  filter: drop-shadow(0 0 8px rgba(255,107,0,.7));
+}
+body.tmc-redesign .scan-area::before {
+  bottom: 12px !important; left: 12px !important;
+  border-width: 0 0 3px 3px !important;
+  border-radius: 0 0 0 12px !important;
+}
+body.tmc-redesign .scan-area::after {
+  bottom: 12px !important; right: 12px !important;
+  border-width: 0 3px 3px 0 !important;
+  border-radius: 0 0 12px 0 !important;
+}
+
+body.tmc-redesign .scan-line {
+  height: 3px !important;
+  background: linear-gradient(90deg, transparent 0%, #FF6B00 20%, #FF6B00 80%, transparent 100%) !important;
+  box-shadow: 0 0 12px rgba(255,107,0,.8), 0 0 24px rgba(255,107,0,.4) !important;
+  left: 8% !important;
+  width: 84% !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   FLOATING NAV
+   ═══════════════════════════════════════════════════════════════ */
+body.tmc-redesign .bnav { display: none !important; }
+body.tmc-redesign .page,
+body.tmc-redesign main { padding-bottom: 110px !important; }
+
+.tmc-fnav {
+  position: fixed;
+  bottom: 14px;
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 8px 6px;
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 28px;
+  box-shadow: 0 8px 28px rgba(0,0,0,.12), 0 0 0 1px rgba(255,255,255,.6), 0 2px 6px rgba(0,0,0,.05);
+  z-index: 100;
+  width: max-content;
+  max-width: calc(100vw - 24px);
+}
+
+.tmc-fnav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 0 4px;
+  background: transparent; border: none; cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  min-width: 52px;
+  text-decoration: none;
+  transition: transform .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.tmc-fnav-item:active { transform: scale(.94); }
+
+.tmc-fnav-icon {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent;
+  transition: background .25s, box-shadow .25s;
+}
+.tmc-fnav-icon svg {
+  width: 18px; height: 18px;
+  stroke: #6B7280; fill: transparent;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke .25s, fill .25s, filter .25s;
+}
+
+.tmc-fnav-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: #9CA3AF;
+  letter-spacing: 0.02em;
+  transition: color .25s, text-shadow .25s;
+  line-height: 1;
+}
+
+/* Active state — layered neon glow (v7) */
+.tmc-fnav-item.active .tmc-fnav-icon {
+  background: #FF6B00;
+  box-shadow:
+    0 0 0 3px rgba(255,107,0,.20),
+    0 4px 14px rgba(255,107,0,.50),
+    0 0 28px rgba(255,107,0,.45);
+}
+.tmc-fnav-item.active .tmc-fnav-icon svg {
+  stroke: #fff;
+  fill: #fff;
+  fill-opacity: 0.20;
+  filter: drop-shadow(0 0 6px rgba(255,255,255,.8));
+}
+.tmc-fnav-item.active .tmc-fnav-label {
+  color: #FF6B00;
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(255,107,0,.5);
+}
+
+.tmc-fnav-item:not(.active):hover .tmc-fnav-icon { background: rgba(255,107,0,.08); }
+.tmc-fnav-item:not(.active):hover .tmc-fnav-icon svg { stroke: #FF6B00; }
+.tmc-fnav-item:not(.active):hover .tmc-fnav-label { color: #FF6B00; }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   v8 NEW: CHAT BUBBLE / WINDOW / BADGE — lifted above the nav
+   ═══════════════════════════════════════════════════════════════
+   The bubble is created by app.js with inline styles
+   (style="bottom:24px"), so we use !important to override it.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Chat bubble — lifted clear of the nav */
+body.tmc-redesign #tmc-chat-bubble {
+  bottom: calc(100px + env(safe-area-inset-bottom)) !important;
+}
+
+/* "Need help?" badge — sits just above the bubble */
+body.tmc-redesign #tmc-chat-badge {
+  bottom: calc(160px + env(safe-area-inset-bottom)) !important;
+}
+
+/* Chat window — opens above the bubble; max-height adjusted to fit */
+body.tmc-redesign #tmc-chat-window {
+  bottom: calc(170px + env(safe-area-inset-bottom)) !important;
+  max-height: calc(100vh - 220px) !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE TRANSITION — single subtle fade-in on load
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes tmc-page-fade-in {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+body.tmc-redesign {
+  animation: tmc-page-fade-in .2s ease-out;
+}
+`;
+
+fs.writeFileSync(path.join(PUBLIC, 'tmc-redesign.css'), REDESIGN_CSS, 'utf8');
+console.log('  Updated public/tmc-redesign.css (' + REDESIGN_CSS.length + ' bytes)');
+
+console.log('\n═══════════════════════════════════════════════');
+console.log('  v8 PATCH COMPLETE');
+console.log('═══════════════════════════════════════════════');
+console.log('  Backup: ' + path.relative(ROOT, BACKUP));
+console.log('');
+console.log('Fix:');
+console.log('  ✓ Chat bubble lifted to bottom:100px (was 24px)');
+console.log('  ✓ "Need help?" badge follows up to bottom:160px');
+console.log('  ✓ Chat window opens at bottom:170px with adjusted max-height');
+console.log('');
+console.log('All v6 + v7 styles still intact — v8 just adds the');
+console.log('chat positioning override.');
+console.log('');
+console.log('Test: open public/dashboard.html locally, click the');
+console.log('chat bubble — it should now sit clearly above the nav.');

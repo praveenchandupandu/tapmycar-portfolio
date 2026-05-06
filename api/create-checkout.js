@@ -1,4 +1,4 @@
-﻿const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { createClient } = require('@supabase/supabase-js');
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
@@ -186,8 +186,8 @@ module.exports = async function handler(req, res) {
         subscription_price_id: SUB_PRICE_ID,
         referral_discount: String(referral_discount || 0)
       },
-      success_url: `${req.headers.origin}/payment-success.html?session_id={CHECKOUT_SESSION_ID}&plan=${plan}&flow=${flow}${prepay ? '&prepay=1' : ''}`,
-      cancel_url: `${req.headers.origin}/pricing.html`
+      success_url: `https://tapmycar.io/payment-success.html?session_id={CHECKOUT_SESSION_ID}&plan=${plan}&flow=${flow}${prepay ? '&prepay=1' : ''}`,
+      cancel_url: `https://tapmycar.io/pricing.html`
     };
 
     const session = await stripe.checkout.sessions.create(sessionParams);

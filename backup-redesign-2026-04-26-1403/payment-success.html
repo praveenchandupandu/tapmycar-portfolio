@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#FF6B00">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="TapMyCar">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Payment successful — TapMyCar</title>
+  <link rel="stylesheet" href="/app.css">
+<!-- Favicon -->
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<!-- SEO -->
+<meta name="description" content="Your TapMyCar payment was successful.">
+<meta name="author" content="Praman Tech LLC">
+<!-- Open Graph -->
+<meta property="og:title" content="Payment successful — TapMyCar">
+<meta property="og:description" content="Your TapMyCar payment was successful.">
+<meta property="og:image" content="https://tapmycar.io/og-image.png">
+<meta property="og:url" content="https://tapmycar.io/payment-success.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TapMyCar">
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Payment successful — TapMyCar">
+<meta name="twitter:description" content="Your TapMyCar payment was successful.">
+<meta name="twitter:image" content="https://tapmycar.io/og-image.png">
+</head>
+<body>
+<div class="chev"></div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:calc(100vh - 6px);padding:40px 24px 24px;text-align:center;gap:16px">
+
+  <!-- Success icon -->
+  <div style="width:80px;height:80px;border-radius:50%;background:var(--gnl);border:3px solid var(--gn);display:flex;align-items:center;justify-content:center;margin-bottom:8px">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gn)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+
+  <!-- Title (dynamic) -->
+  <div style="font-size:26px;font-weight:800;color:var(--bk)" id="title">Payment successful!</div>
+
+  <!-- Subtitle (dynamic) -->
+  <div style="font-size:14px;color:var(--gy);line-height:1.6;max-width:320px" id="subtitle">Loading...</div>
+
+  <!-- Plan confirmation card -->
+  <div style="background:var(--orl);border-radius:14px;padding:16px 20px;border:.5px solid var(--orl2);width:100%;max-width:340px" id="plan-card">
+    <div style="font-size:11px;font-weight:700;color:#9A3800;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em" id="plan-card-heading">Your order</div>
+    <div style="font-size:13px;color:#78350F;line-height:1.6" id="plan-card-body">Loading...</div>
+  </div>
+
+  <!-- What happens next (dynamic) -->
+  <div style="background:#F9FAFB;border-radius:14px;padding:16px 20px;border:.5px solid #E5E7EB;width:100%;max-width:340px">
+    <div style="font-size:12px;font-weight:700;color:#111;margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em">What happens next</div>
+    <div style="font-size:12px;color:#374151;line-height:1.7;text-align:left" id="next-steps">Loading...</div>
+  </div>
+
+  <!-- Premium gift codes (only shown for Premium buyers) -->
+  <div id="premium-codes-card" style="display:none;background:#FFF3EC;border:1.5px solid #FFE4CC;border-radius:14px;padding:16px 20px;width:100%;max-width:340px">
+    <div style="font-size:12px;font-weight:700;color:#9A3800;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em">Your Premium gift codes</div>
+    <div style="font-size:11px;color:#78350F;line-height:1.5;margin-bottom:12px">Share 2 of these with family members. Keep 1 for yourself. Each family member registers at tapmycar.io with their code to claim their sticker.</div>
+    <div id="codes-list" style="display:flex;flex-direction:column;gap:6px"></div>
+    <div style="font-size:10px;color:#78350F;margin-top:10px;line-height:1.4">These codes also arrived in your confirmation email. View them anytime on your dashboard.</div>
+  </div>
+
+  <!-- App banner -->
+  <div style="background:#111;border-radius:14px;padding:16px 20px;width:100%;max-width:340px;text-align:center">
+    <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:4px">Get the TapMyCar App</div>
+    <div style="font-size:11px;color:#9CA3AF;line-height:1.5">Manage your tag and privacy settings from your phone.</div>
+  </div>
+
+  <!-- Dashboard button -->
+  <a href="/dashboard.html" class="btn" style="width:100%;max-width:340px;text-decoration:none;display:block;padding:14px 0;margin-top:4px">Go to dashboard</a>
+
+  <!-- Terms footer -->
+  <div style="font-size:10px;color:#9CA3AF;line-height:1.5;max-width:300px;margin-top:4px">
+    Cancel anytime in Settings. Physical stickers are non-refundable once shipped.<br>
+    <a href="/terms.html" style="color:#FF6B00;text-decoration:none">Terms</a> · <a href="/privacy.html" style="color:#FF6B00;text-decoration:none">Privacy</a>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+<script>
+// ─── Read URL params ──────────────────────────────────────
+const params = new URLSearchParams(window.location.search);
+const plan = (params.get('plan') || '').toLowerCase();      // 'standard' | 'premium' | 'etag' | ''
+const flow = (params.get('flow') || '').toLowerCase();       // 'direct' | 'activate' | 'etag_free' | ''
+const prepay = params.get('prepay') === '1';                 // user chose to prepay year 1
+const sessionId = params.get('session_id');                  // Stripe checkout session id
+
+// ─── Build message for this specific purchase ────────────
+let title, subtitle, planCardBody, nextSteps;
+
+if (flow === 'etag_free') {
+  // Free eTag — no payment happened
+  title = 'Free eTag ready!';
+  subtitle = 'Your digital eTag has been created.';
+  planCardBody = '<b>Plan:</b> Free eTag<br><b>Amount charged:</b> $0.00';
+  nextSteps =
+    '<div style="margin-bottom:6px"><b>Step 1.</b> Open your dashboard and download your eTag PDF.</div>' +
+    '<div style="margin-bottom:6px"><b>Step 2.</b> Print it and put it on your car window.</div>' +
+    '<div><b>Step 3.</b> When you\'re ready, pay $1 to activate the tag and enable masked calls.</div>';
+
+} else if (flow === 'activate' && plan === 'standard') {
+  title = 'Activation confirmed!';
+  subtitle = 'Your tag is now live. Masked calls start working immediately.';
+  planCardBody = prepay
+    ? '<b>Plan:</b> Standard (prepaid year 1)<br><b>Paid today:</b> $19.98 ($1 activation + $9.99 sticker + $9.99 year 1)<br><b>Next charge:</b> ~395 days from today, $9.99/year renewal'
+    : '<b>Plan:</b> Standard (30-day trial begins)<br><b>Paid today:</b> $1.00 activation<br><b>Day 30:</b> $9.99 charged, your Standard sticker ships<br><b>Day 60:</b> $9.99/year annual plan begins';
+  nextSteps = prepay
+    ? '<div style="margin-bottom:6px"><b>Now:</b> Your Standard sticker ships in 2-3 business days.</div>' +
+      '<div><b>Next charge:</b> Your first annual renewal is in ~395 days for $9.99.</div>'
+    : '<div style="margin-bottom:6px"><b>Day 1-30:</b> Your tag is active. Test the product risk-free.</div>' +
+      '<div style="margin-bottom:6px"><b>Day 30:</b> We charge $9.99 and ship your physical Standard sticker.</div>' +
+      '<div style="margin-bottom:6px"><b>Day 60:</b> Your $9.99/year annual plan begins.</div>' +
+      '<div>Cancel anytime before day 30 for a full refund of the $1.</div>';
+
+} else if (flow === 'activate' && plan === 'premium') {
+  title = 'Activation confirmed!';
+  subtitle = 'Your tag is now live. Masked calls start working immediately.';
+  planCardBody = prepay
+    ? '<b>Plan:</b> Premium (prepaid year 1)<br><b>Paid today:</b> $45.98 ($1 activation + $24.99 3 stickers + $19.99 year 1)<br><b>Next charge:</b> ~395 days from today, $19.99/year renewal'
+    : '<b>Plan:</b> Premium (30-day trial begins)<br><b>Paid today:</b> $1.00 activation<br><b>Day 30:</b> $24.99 charged, 3 Premium stickers ship<br><b>Day 60:</b> $19.99/year annual plan begins';
+  nextSteps = prepay
+    ? '<div style="margin-bottom:6px"><b>Now:</b> Your 3 Premium stickers ship in 2-3 business days. Gift codes will appear on your dashboard.</div>' +
+      '<div><b>Next charge:</b> Your first annual renewal is in ~395 days for $19.99.</div>'
+    : '<div style="margin-bottom:6px"><b>Day 1-30:</b> Your tag is active. Test the product risk-free.</div>' +
+      '<div style="margin-bottom:6px"><b>Day 30:</b> We charge $24.99 and ship your 3 Premium stickers. Gift codes appear on your dashboard.</div>' +
+      '<div style="margin-bottom:6px"><b>Day 60:</b> Your $19.99/year annual plan begins.</div>' +
+      '<div>Cancel anytime before day 30 for a full refund of the $1.</div>';
+
+} else if (flow === 'direct' && plan === 'standard') {
+  title = 'Welcome to Standard!';
+  subtitle = 'Your tag is now active. Masked calls start working immediately.';
+  planCardBody = prepay
+    ? '<b>Plan:</b> Standard (prepaid year 1)<br><b>Paid today:</b> $19.98 ($9.99 sticker + $9.99 year 1)<br><b>Next charge:</b> 365 days from today, $9.99/year renewal'
+    : '<b>Plan:</b> Standard<br><b>Paid today:</b> $9.99 for your physical sticker (lifetime)<br><b>Day 30:</b> $9.99 annual plan begins';
+  nextSteps = prepay
+    ? '<div style="margin-bottom:6px"><b>Now:</b> Your Standard sticker ships in 2-3 business days.</div>' +
+      '<div><b>Next charge:</b> Your first annual renewal is in 365 days for $9.99.</div>'
+    : '<div style="margin-bottom:6px"><b>Now:</b> Your Standard sticker ships in 2-3 business days.</div>' +
+      '<div style="margin-bottom:6px"><b>Day 30:</b> Your $9.99/year annual plan begins (first annual charge).</div>' +
+      '<div>Your plan renews yearly after that. Cancel anytime in Settings.</div>';
+
+} else if (flow === 'direct' && plan === 'premium') {
+  title = 'Welcome to Premium!';
+  subtitle = 'Your tag is now active. Masked calls start working immediately.';
+  planCardBody = prepay
+    ? '<b>Plan:</b> Premium (prepaid year 1)<br><b>Paid today:</b> $44.98 ($24.99 3 stickers + $19.99 year 1)<br><b>Next charge:</b> 365 days from today, $19.99/year renewal'
+    : '<b>Plan:</b> Premium<br><b>Paid today:</b> $24.99 for 3 physical stickers (lifetime)<br><b>Day 30:</b> $19.99 annual plan begins';
+  nextSteps = prepay
+    ? '<div style="margin-bottom:6px"><b>Now:</b> Your 3 Premium stickers ship in 2-3 business days. Gift codes are shown below.</div>' +
+      '<div><b>Next charge:</b> Your first annual renewal is in 365 days for $19.99.</div>'
+    : '<div style="margin-bottom:6px"><b>Now:</b> Your 3 Premium stickers ship in 2-3 business days. Gift codes are shown below.</div>' +
+      '<div style="margin-bottom:6px"><b>Day 30:</b> Your $19.99/year annual plan begins (first annual charge).</div>' +
+      '<div>Your plan renews yearly after that. Cancel anytime in Settings.</div>';
+
+} else {
+  // Fallback for missing/unknown params
+  title = 'Payment successful!';
+  subtitle = 'Thank you for your order. Your tag is now active.';
+  planCardBody = 'Check your email for your order confirmation.';
+  nextSteps = '<div style="margin-bottom:6px">Your tag is active now.</div>' +
+              '<div style="margin-bottom:6px">Any physical sticker(s) will ship to your address in 2-3 business days.</div>' +
+              '<div>Full order details are on your dashboard.</div>';
+}
+
+// Apply to page
+document.getElementById('title').textContent = title;
+document.getElementById('subtitle').textContent = subtitle;
+document.getElementById('plan-card-body').innerHTML = planCardBody;
+document.getElementById('next-steps').innerHTML = nextSteps;
+
+// ─── Premium: fetch and show gift codes ──────────────────
+if (plan === 'premium') {
+  const s = getSession();
+  if (s && s.token) {
+    // Fetch user's premium codes (endpoint expected to exist; silent fallback if not)
+    fetch('/api/get-dashboard?user_id=' + s.token)
+      .then(r => r.json())
+      .then(data => {
+        if (data.premium_codes && data.premium_codes.length > 0) {
+          const shareable = data.premium_codes.filter(c => !c.redeemed_by_user_id || c.redeemed_by_user_id === s.token);
+          document.getElementById('premium-codes-card').style.display = 'block';
+          const listEl = document.getElementById('codes-list');
+          listEl.innerHTML = data.premium_codes.map(c => {
+            const isYours = c.redeemed_by_user_id === s.token;
+            const isRedeemed = c.redeemed_by_user_id && !isYours;
+            const label = isYours ? 'Your code' : isRedeemed ? 'Redeemed' : 'Share with family';
+            const bgColor = isYours ? '#DCFCE7' : isRedeemed ? '#F3F4F6' : '#fff';
+            const borderStyle = isRedeemed ? 'solid' : 'dashed';
+            return `<div style="background:${bgColor};border:1.5px ${borderStyle} #D1D5DB;border-radius:8px;padding:10px;font-family:monospace;font-size:14px;font-weight:700;color:#111;display:flex;justify-content:space-between;align-items:center"><span>${c.code}</span><span style="font-family:Inter;font-size:10px;font-weight:500;color:#6B7280;text-transform:uppercase;letter-spacing:.04em">${label}</span></div>`;
+          }).join('');
+        }
+      })
+      .catch(() => { /* silent — codes will still be in the email */ });
+  }
+}
+
+// Save locally so dashboard updates instantly
+if (plan && plan !== 'etag' && flow === 'direct') {
+  localStorage.setItem('tmc_plan', plan);
+}
+const s = getSession();
+if (s && s.token) localStorage.setItem('tmc_activated', 'true');
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js');
+}
+</script>
+</body>
+</html>

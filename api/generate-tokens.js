@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
+const crypto = require('crypto');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -10,7 +11,7 @@ function generateToken() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let random = '';
   for (let i = 0; i < 6; i++) {
-    random += chars[Math.floor(Math.random() * chars.length)];
+    random += chars[crypto.randomInt(chars.length)];
   }
   return 'TMC-' + random;
 }
