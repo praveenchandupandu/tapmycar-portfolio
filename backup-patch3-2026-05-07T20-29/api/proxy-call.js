@@ -28,7 +28,6 @@ const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
 );
-const { rateLimit, getClientIp } = require('./_rate-limit');
 
 function safeName(raw) {
   if (!raw) return '';
@@ -49,24 +48,11 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // TMC_PATCH3_RATE_LIMIT (IP gate)
-  const _tmcIp = getClientIp(req);
-  if (!await rateLimit(req, res, [
-    { key: 'proxy-call:ip:' + _tmcIp, max: 5, windowSeconds: 3600 }
-  ])) return;
-
-
   const { token, caller_number, emergency_phone, owner_name } = req.body;
 
   if (!token || !caller_number) {
     return res.status(400).json({ error: 'token and caller_number required' });
   }
-
-  // TMC_PATCH3_RATE_LIMIT (per-token limit)
-  if (!await rateLimit(req, res, [
-    { key: 'proxy-call:token:' + token, max: 3, windowSeconds: 3600 }
-  ])) return;
-
 
   // Get tag and owner from database
   const { data: tag, error } = await supabase

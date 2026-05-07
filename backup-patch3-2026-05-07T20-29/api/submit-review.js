@@ -1,6 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-const { rateLimit, getClientIp } = require('./_rate-limit');
 
 /**
  * POST /api/submit-review
@@ -16,22 +15,9 @@ const { rateLimit, getClientIp } = require('./_rate-limit');
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  // TMC_PATCH3_RATE_LIMIT (IP gate, applied first)
-  const _tmcIp = getClientIp(req);
-  if (!await rateLimit(req, res, [
-    { key: 'submit-review:ip:' + _tmcIp, max: 3, windowSeconds: 86400 }
-  ])) return;
-
-
   const { user_id, name, city, text } = req.body;
 
   if (!user_id) return res.status(400).json({ error: 'user_id required' });
-
-  // TMC_PATCH3_RATE_LIMIT (per-user limit)
-  if (!await rateLimit(req, res, [
-    { key: 'submit-review:user:' + user_id, max: 1, windowSeconds: 86400 }
-  ])) return;
-
   if (!name || name.trim().length < 1) return res.status(400).json({ error: 'Name required' });
   if (!text || text.trim().length < 10) return res.status(400).json({ error: 'Review text must be at least 10 characters' });
   if (text.length > 500) return res.status(400).json({ error: 'Review text must be 500 characters or less' });

@@ -18,20 +18,11 @@ const supabase = createClient(
  */
 
 const CODE_FORMAT = /^TMC-PREM-[A-HJ-NP-Z2-9]{6}$/;
-const { rateLimit, getClientIp } = require('./_rate-limit');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
-
-  // TMC_PATCH3_RATE_LIMIT
-  const _tmcIp = getClientIp(req);
-  const _tmcRateRules = [
-    { key: 'redeem-code:ip:' + _tmcIp, max: 10, windowSeconds: 60 }
-  ];
-  if (!await rateLimit(req, res, _tmcRateRules)) return;
-
 
   const { user_id, code } = req.body || {};
 

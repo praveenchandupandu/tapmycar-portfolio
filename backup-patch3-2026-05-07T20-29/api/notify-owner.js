@@ -1,4 +1,4 @@
-const { Resend } = require('resend');
+﻿const { Resend } = require('resend');
 const { createClient } = require('@supabase/supabase-js');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -6,28 +6,14 @@ const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
 );
-const { rateLimit, getClientIp } = require('./_rate-limit');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // TMC_PATCH3_RATE_LIMIT (IP gate)
-  const _tmcIp = getClientIp(req);
-  if (!await rateLimit(req, res, [
-    { key: 'notify-owner:ip:' + _tmcIp, max: 10, windowSeconds: 3600 }
-  ])) return;
-
-
   const { tag_id, action, message, scan_id } = req.body;
   if (!tag_id) return res.status(400).json({ error: 'tag_id required' });
-
-  // TMC_PATCH3_RATE_LIMIT (per-tag limit)
-  if (!await rateLimit(req, res, [
-    { key: 'notify-owner:tag:' + tag_id, max: 5, windowSeconds: 3600 }
-  ])) return;
-
 
   // Get tag and owner
   const { data: tag } = await supabase

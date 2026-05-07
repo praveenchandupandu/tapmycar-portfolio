@@ -5,7 +5,6 @@ const twilio = require('twilio');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-const { rateLimit, getClientIp } = require('./_rate-limit');
 
 // TMC_PATCH2_OTP_LOCKOUT_HELPER
 // Checks otp_lockouts table. Returns null if not locked, or a
@@ -41,13 +40,6 @@ function isValidEmail(s) {
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  // TMC_PATCH3_RATE_LIMIT (IP gate, applies to both email and phone OTP)
-  const _tmcIp = getClientIp(req);
-  if (!await rateLimit(req, res, [
-    { key: 'send-otp:ip:' + _tmcIp, max: 5, windowSeconds: 60 }
-  ])) return;
-
-
   // mode: 'signin' = check that email exists before sending OTP
   // mode: 'register' = allow any email (default)
   const { email, phone, type, mode } = req.body;
@@ -60,12 +52,6 @@ module.exports = async function handler(req, res) {
     if (!isValidEmail(email)) {
       return res.status(400).json({ error: 'Please enter a valid email address.' });
     }
-
-    // TMC_PATCH3_RATE_LIMIT (per-email limit)
-    if (!await rateLimit(req, res, [
-      { key: 'send-otp:email:' + email.toLowerCase(), max: 3, windowSeconds: 3600 }
-    ])) return;
-
 
     // TMC_PATCH2_OTP_LOCKOUT_CHECK_BEFORE_ISSUE — block locked-out emails before issuing
     const lockMsg = await checkLockout(email);

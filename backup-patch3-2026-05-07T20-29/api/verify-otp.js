@@ -3,7 +3,6 @@ const crypto = require('crypto');
 const twilio = require('twilio');
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-const { rateLimit, getClientIp } = require('./_rate-limit');
 
 // Auto-assign a free eTag to a new user
 // IMPORTANT:
@@ -87,14 +86,6 @@ async function assignFreeTag(userId) {
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-
-  // TMC_PATCH3_RATE_LIMIT
-  const _tmcIp = getClientIp(req);
-  const _tmcRateRules = [
-    { key: 'verify-otp:ip:' + _tmcIp, max: 10, windowSeconds: 60 }
-  ];
-  if (!await rateLimit(req, res, _tmcRateRules)) return;
-
 
   // mode: 'signin' = user must already exist (don't auto-create)
   // mode: 'register' = create user if not exists (default legacy behavior)

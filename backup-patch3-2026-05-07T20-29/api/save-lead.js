@@ -1,19 +1,10 @@
-const { createClient } = require("@supabase/supabase-js");
+﻿const { createClient } = require("@supabase/supabase-js");
 const { Resend } = require("resend");
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 const resend = new Resend(process.env.RESEND_API_KEY);
-const { rateLimit, getClientIp } = require('./_rate-limit');
 
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
-
-  // TMC_PATCH3_RATE_LIMIT
-  const _tmcIp = getClientIp(req);
-  const _tmcRateRules = [
-    { key: 'save-lead:ip:' + _tmcIp, max: 3, windowSeconds: 3600 }
-  ];
-  if (!await rateLimit(req, res, _tmcRateRules)) return;
-
   const { email, tag_id, rating, comment } = req.body;
   if (!email) return res.status(400).json({ error: "Email required" });
 
