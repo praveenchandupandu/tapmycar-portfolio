@@ -62,32 +62,6 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'token and caller_number required' });
   }
 
-  // TMC_PATCH4_PHONE_VERIFY_GATE
-  // Look up tag + owner phone_verified BEFORE Twilio is engaged.
-  // Strangers can't call tags whose owner hasn't verified their phone.
-  {
-    const { data: _tagCheck } = await supabase
-      .from('tags')
-      .select('status, users(phone_verified)')
-      .eq('token', String(token).toUpperCase().trim())
-      .single();
-    if (!_tagCheck) {
-      return res.status(404).json({ error: 'Tag not found' });
-    }
-    if (_tagCheck.status !== 'active') {
-      return res.status(403).json({
-        error: 'This tag is not yet active.',
-        not_active: true
-      });
-    }
-    if (!_tagCheck.users || !_tagCheck.users.phone_verified) {
-      return res.status(403).json({
-        error: 'This tag is not yet ready for calls. The owner needs to complete setup.',
-        unverified: true
-      });
-    }
-  }
-
   // TMC_PATCH3_RATE_LIMIT (per-token limit)
   if (!await rateLimit(req, res, [
     { key: 'proxy-call:token:' + token, max: 3, windowSeconds: 3600 }
@@ -97,7 +71,7 @@ module.exports = async function handler(req, res) {
   // Get tag and owner from database
   const { data: tag, error } = await supabase
     .from('tags')
-    .select('*, users(phone, name, phone_verified)')
+    .select('*, users(phone, name)')
     .eq('token', token)
     .single();
 

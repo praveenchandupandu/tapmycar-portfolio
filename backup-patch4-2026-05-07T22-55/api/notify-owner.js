@@ -32,7 +32,7 @@ module.exports = async function handler(req, res) {
   // Get tag and owner
   const { data: tag } = await supabase
     .from('tags')
-    .select('*, users(phone, name, email, phone_verified)')
+    .select('*, users(phone, name, email)')
     .eq('id', tag_id)
     .single();
 
@@ -40,8 +40,6 @@ module.exports = async function handler(req, res) {
   if (!tag.users) return res.status(404).json({ error: 'Tag owner not found' });
 
   const ownerName = tag.users.name || 'there';
-  // TMC_PATCH4_PHONE_VERIFY_GATE
-  const _ownerPhoneVerified = !!(tag.users && tag.users.phone_verified);
   const ownerEmail = tag.users.email;
   const vehicleLabel = tag.vehicle_label || 'your vehicle';
 
@@ -166,11 +164,6 @@ module.exports = async function handler(req, res) {
         <div style="font-size:11px;color:#9CA3AF;text-align:center">You received this because your TapMyCar tag was scanned.</div>
       </div>
     `;
-  }
-
-  // TMC_PATCH4_PHONE_VERIFY_GATE prepend setup-incomplete banner if needed
-  if (!_ownerPhoneVerified) {
-    body = '<div style="background:#FEF3C7;border:1px solid #F59E0B;color:#92400E;font-size:13px;padding:12px;border-radius:8px;margin-bottom:16px;font-family:Inter,sans-serif">Heads up: your account setup isn\'t complete yet. Strangers can\'t call you until you verify your phone number. <a href="https://tapmycar.io/dashboard.html" style="color:#92400E;text-decoration:underline">Verify now</a></div>' + body;
   }
 
   // Send email notification
