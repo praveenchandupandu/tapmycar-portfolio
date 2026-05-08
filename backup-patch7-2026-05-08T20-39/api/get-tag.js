@@ -93,7 +93,7 @@ module.exports = async function handler(req, res) {
           });
         }
         const ageMs = Date.now() - new Date(session.created_at).getTime();
-        if (ageMs > 15 * 60 * 1000) {
+        if (ageMs > 5 * 60 * 1000) {
           return res.status(403).json({
             error: 'Verification expired. Please verify your phone again.',
             needs_phone_verification: true

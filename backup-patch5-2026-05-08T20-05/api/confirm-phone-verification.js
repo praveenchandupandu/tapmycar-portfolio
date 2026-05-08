@@ -57,7 +57,7 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Wrong or expired code. Please try again.' });
   }
 
-  // Mark verified (account-level flag, informational)
+  // Mark verified
   const { error: updErr } = await supabase
     .from('users')
     .update({ phone_verified: true, phone_verified_at: new Date().toISOString() })
@@ -68,31 +68,5 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'Verification succeeded but database update failed. Please try again.' });
   }
 
-  // TMC_PATCH5_ACTIVATION_SESSION
-  // Issue a one-shot activation session token. The activation API
-  // (get-tag.js POST claim) requires this token to flip a tag to active.
-  // The token is consumable: used=true after activation, expires after
-  // 5 minutes if unused. This enforces "every activation needs fresh SMS".
-  let activation_session_id = null;
-  try {
-    const { data: sessionRow, error: sessionErr } = await supabase
-      .from('activation_sessions')
-      .insert({ user_id })
-      .select('id')
-      .single();
-    if (sessionErr) {
-      console.error('activation_sessions insert error:', sessionErr.message);
-      // Don't fail the verification — but log loudly. Frontend will get
-      // null session_id and show a clear error to retry.
-    } else {
-      activation_session_id = sessionRow.id;
-    }
-  } catch (e) {
-    console.error('activation_sessions insert exception:', e && e.message);
-  }
-
-  return res.json({
-    success: true,
-    activation_session_id
-  });
+  return res.json({ success: true });
 };

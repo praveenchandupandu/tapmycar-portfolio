@@ -57,11 +57,6 @@ async function assignFreeTag(userId) {
     }
 
     // 3. Insert the new eTag with tag_type='etag' so admin can filter
-    // TMC_PATCH5_ACTIVATION_SESSION
-    // status='claimed' is the DELIBERATE placeholder state. The eTag is
-    // owned by this user but is NOT yet usable by strangers. The user
-    // must explicitly activate it via activate.html with an SMS-verified
-    // one-shot session token (see Patch 5 + Patch 7).
     const { data: newTag, error } = await supabase
       .from('tags')
       .insert({

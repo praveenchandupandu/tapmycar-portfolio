@@ -27,8 +27,6 @@ const ANNUAL_PRICE = { standard: 999, premium: 1999 };
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  // TMC_PATCH7_ACTIVATE_SMS: accept activation_session_id + token from body
-  const { activation_session_id: _tmcActSession, token: _tmcTagToken } = req.body;
   const { user_id, flow, plan, prepay, referral_discount } = req.body;
 
   if (!user_id) return res.status(400).json({ error: 'user_id required' });
@@ -182,9 +180,6 @@ module.exports = async function handler(req, res) {
         user_id,
         plan,
         flow,
-        // TMC_PATCH7_ACTIVATE_SMS: pass through to webhook for activation gate
-        activation_session_id: _tmcActSession || '',
-        tag_token: _tmcTagToken || '',
         prepay: prepay ? 'true' : 'false',
         charge_today_cents: String(chargeTodayCents),
         sticker_count: plan === 'premium' ? '3' : '1',

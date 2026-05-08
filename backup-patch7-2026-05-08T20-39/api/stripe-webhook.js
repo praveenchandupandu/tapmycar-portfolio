@@ -57,7 +57,7 @@ async function handler(req, res) {
       // ═════════════════════════════════════════════════════════
       case "checkout.session.completed": {
         const session = event.data.object;
-        const { user_id, plan, flow, prepay, sticker_count, subscription_price_id, activation_session_id, tag_token } = session.metadata || {};
+        const { user_id, plan, flow, prepay, sticker_count, subscription_price_id } = session.metadata || {};
         if (!user_id || !plan || !flow) {
           console.warn("Missing metadata on session:", session.id);
           break;
@@ -135,52 +135,6 @@ async function handler(req, res) {
           sticker_count: nStickers,
           order_status: flow === 'activate' ? 'pending_sticker' : 'processing'
         }).select().single();
-        // TMC_PATCH7_ACTIVATE_SMS: validate and consume the activation_session_id from
-        // pre-checkout SMS verification. If invalid, log a critical error
-        // and DO NOT activate the tag. Customer paid but tag stays unclaimed.
-        // (Refund handling is a future concern; for now: alert via console
-        // and let the customer contact support.)
-        if (activation_session_id) {
-          try {
-            const { data: actSession } = await supabase
-              .from('activation_sessions')
-              .select('id, user_id, created_at, used')
-              .eq('id', activation_session_id)
-              .maybeSingle();
-
-            const ageMs = actSession ? Date.now() - new Date(actSession.created_at).getTime() : Infinity;
-            const valid = actSession &&
-              actSession.user_id === user_id &&
-              !actSession.used &&
-              ageMs <= 15 * 60 * 1000;
-
-            if (!valid) {
-              console.error('PATCH7 CRITICAL: activation_session_id invalid for paid checkout', {
-                session_id: activation_session_id,
-                user_id,
-                tag_token,
-                reason: !actSession ? 'not found' : actSession.user_id !== user_id ? 'user mismatch' : actSession.used ? 'already used' : 'expired'
-              });
-              break;
-            }
-
-            await supabase
-              .from('activation_sessions')
-              .update({ used: true, used_at: new Date().toISOString() })
-              .eq('id', activation_session_id)
-              .eq('used', false);
-          } catch (sessionErr) {
-            console.error('PATCH7 CRITICAL: activation_session validation threw', sessionErr.message);
-            break;
-          }
-        } else {
-          console.error('PATCH7 CRITICAL: no activation_session_id in checkout metadata', {
-            user_id,
-            tag_token,
-            session_id: session.id
-          });
-          break;
-        }
 
         // ─── ACTIVATE TAG ──────────────────────────────────────
         await supabase.from("tags").update({

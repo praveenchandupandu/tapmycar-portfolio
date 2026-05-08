@@ -35,26 +35,8 @@ module.exports = async function handler(req, res) {
         const updates = {};
         if (name !== undefined) updates.name = name;
         if (email !== undefined) updates.email = email;
+        if (phone !== undefined) updates.phone = phone;
         if (plan !== undefined) updates.plan = plan;
-
-        // TMC_PATCH6_PHONE_RESET
-        // If admin changes the phone number, reset phone_verified so the
-        // user must re-verify via SMS before activating new tags. The
-        // verification gate enforces this; without reset, a phone change
-        // would silently bypass it.
-        if (phone !== undefined) {
-          updates.phone = phone;
-          // Look up current phone to detect actual change
-          const { data: existing } = await supabase
-            .from('users')
-            .select('phone, phone_verified')
-            .eq('id', user_id)
-            .maybeSingle();
-          if (existing && existing.phone !== phone) {
-            updates.phone_verified = false;
-            updates.phone_verified_at = null;
-          }
-        }
 
         const { error } = await supabase
           .from('users')
@@ -107,22 +89,7 @@ module.exports = async function handler(req, res) {
     if (user_id && name) {
       const updates = { name };
       if (email) updates.email = email;
-      // TMC_PATCH6_PHONE_RESET
-      // If user changes their phone, reset phone_verified so they must
-      // re-verify via SMS before next activation. The activation gate
-      // enforces this on next attempt.
-      if (phone) {
-        updates.phone = phone;
-        const { data: existing } = await supabase
-          .from('users')
-          .select('phone')
-          .eq('id', user_id)
-          .maybeSingle();
-        if (existing && existing.phone !== phone) {
-          updates.phone_verified = false;
-          updates.phone_verified_at = null;
-        }
-      }
+      if (phone) updates.phone = phone;
         if (req.body.emergency_name !== undefined) updates.emergency_name = req.body.emergency_name;
         if (req.body.emergency_contact !== undefined) updates.emergency_contact = req.body.emergency_contact;
         // TMC_WELCOME_MSG_FIELD

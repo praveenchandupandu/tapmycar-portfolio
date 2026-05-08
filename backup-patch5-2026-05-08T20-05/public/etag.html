@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <link rel="manifest" href="/manifest.json">
@@ -89,7 +89,7 @@
   <div id="etag-status-banner" style="display:none;border-radius:13px;margin-bottom:12px"></div>
   <div style="text-align:center"><div style="font-size:17px;font-weight:800;color:var(--bk);margin-bottom:3px" id="tag-name">Your eTag</div><div style="font-size:12px;color:var(--gy)">Privacy for you. Safety for your car.</div></div>
   <button class="btn-g" id="dl-btn" onclick="downloadEtag()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:9px;padding:14px 0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download free eTag PDF</button>
-  <div id="etag-activate-prompt" onclick="goActivateEtag()" style="width:100%;display:flex;align-items:center;gap:10px;background:var(--orl);border-radius:13px;padding:13px 16px;border:.5px solid var(--orl2);cursor:pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><div style="font-size:12px;color:#9A3800;font-weight:500;flex:1">Activate to enable masked calls</div><div style="font-size:12px;font-weight:700;color:var(--or)">Activate </div></div>
+  <div id="etag-activate-prompt" onclick="window.location.href='/activate.html'" style="width:100%;display:flex;align-items:center;gap:10px;background:var(--orl);border-radius:13px;padding:13px 16px;border:.5px solid var(--orl2);cursor:pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><div style="font-size:12px;color:#9A3800;font-weight:500;flex:1">Activate to enable masked calls</div><div style="font-size:12px;font-weight:700;color:var(--or)">Activate </div></div>
   </div>
   <div onclick="window.location.href='/dashboard.html'" style="width:100%;text-align:center;font-size:13px;color:var(--gy);cursor:pointer;padding:8px">Go to Dashboard</div>
 </div>
@@ -106,17 +106,6 @@
 requireAuth();
 const s = getSession();
 let tagToken = '';
-
-// TMC_PATCH5_ACTIVATION_SESSION
-// Sends user to activate.html with their eTag token pre-filled.
-// activate.html (Patch 7) reads ?token= from URL and walks the SMS-verify flow.
-function goActivateEtag() {
-  if (!tagToken) {
-    showToast && showToast('Loading your eTag... please wait a moment');
-    return;
-  }
-  window.location.href = '/activate.html?token=' + encodeURIComponent(tagToken);
-}
 let tagURL = '';
 
 async function loadTagData() {

@@ -169,31 +169,6 @@
   </div>
 </div>
 
-<!-- ═══ TMC_PATCH7_ACTIVATE_SMS — STEP: PHONE VERIFY ═══ -->
-<div class="step-view" id="step-phone-verify">
-  <div class="nav"><div class="bk" onclick="showStep('vehicle')"><div class="bkb"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><span class="bk-label">Verify your phone</span></div></div>
-  <div class="chev"></div>
-  <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:14px">
-    <div style="font-size:18px;font-weight:800;color:var(--bk);margin-bottom:0">Verify your phone</div>
-    <div style="font-size:13px;color:var(--gy);line-height:1.5">For your security, we'll text a 6-digit code to <span id="pv-masked-phone" style="font-weight:700;color:var(--bk)">your phone</span>. Enter it below to activate this tag.</div>
-
-    <div id="pv-send-section" style="display:flex;flex-direction:column;gap:12px;margin-top:8px">
-      <button class="btn" id="pv-send-btn" onclick="pvSendCode()">Send code via SMS</button>
-      <div style="font-size:11px;color:var(--gy);text-align:center">Wrong number? <a href="/settings.html" style="color:var(--or);font-weight:600">Update in Settings</a></div>
-    </div>
-
-    <div id="pv-code-section" style="display:none;flex-direction:column;gap:12px">
-      <div class="field">
-        <label>6-digit code</label>
-        <input type="text" id="pv-code-input" placeholder="123456" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" style="font-size:24px;letter-spacing:8px;text-align:center;font-family:Menlo,monospace">
-      </div>
-      <button class="btn" id="pv-verify-btn" onclick="pvVerifyCode()">Verify and continue</button>
-      <button class="btn-o" id="pv-resend-btn" onclick="pvResendCode()" disabled style="opacity:.6">Resend code (60s)</button>
-      <div id="pv-error" style="font-size:12px;color:var(--rd);text-align:center;display:none"></div>
-    </div>
-  </div>
-</div>
-
 <!-- ═══ STEP 5: PAYMENT ═══ -->
 <div class="step-view" id="step-payment">
   <div class="nav"><div class="bk" onclick="showStep('vehicle')"><div class="bkb"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><span class="bk-label">Activate tag</span></div></div>
@@ -481,8 +456,12 @@ function proceedFromCarChoice() {
       car_color: existingTag.car_color
     };
 
-    // TMC_PATCH7_ACTIVATE_SMS: route through phone-verify step
-    flowAfterVehicle();
+    // Check if this is a paid upgrade (no payment needed)
+    if (isPhysicalUpgrade) {
+      activatePhysicalSticker();
+    } else {
+      showStep('payment');
+    }
   } else {
     showStep('vehicle');
   }
@@ -508,11 +487,14 @@ function proceedToPayment() {
     car_color: document.getElementById('v-color').value.trim()
   };
 
-  // TMC_PATCH7_ACTIVATE_SMS: route through phone-verify step (every activation needs fresh SMS)
-  flowAfterVehicle();
+  if (isPhysicalUpgrade) {
+    activatePhysicalSticker();
+  } else {
+    showStep('payment');
+  }
 }
 
-async function activatePhysicalSticker(activationSessionId) {
+async function activatePhysicalSticker() {
   // Deactivate old eTag
   if (existingTag) {
     try {
@@ -536,7 +518,6 @@ async function activatePhysicalSticker(activationSessionId) {
       body: JSON.stringify({
         token: scannedToken,
         user_id: s.token,
-        activation_session_id: activationSessionId,
         license_plate: vehicleData.license_plate,
         car_make: vehicleData.car_make,
         car_model: vehicleData.car_model,
@@ -585,9 +566,7 @@ async function processPayment() {
         flow: 'activate',
         plan: selectedPlan,
         prepay: prepayEnabled,
-        referral_discount: 0,
-        activation_session_id: pvActivationSessionId || (function(){ try { return localStorage.getItem('tmc_pending_activation_session'); } catch(e) { return null; } })(),
-        token: scannedToken
+        referral_discount: 0
       })
     });
     const data = await res.json();
@@ -708,267 +687,6 @@ if ('serviceWorker' in navigator) {
   <p style="font-size:11px;color:#9CA3AF;margin:0">© 2026 Praman Tech LLC</p>
 </div>
 
-<script src="/tmc-redesign.js">
-// ===== TMC_PATCH7_ACTIVATE_SMS =====================================================
-// SMS verification UI logic + flow routing.
-//
-// Per-activation SMS gate:
-//  1. After vehicle details, route through phone-verify step
-//  2. pvSendCode() -> POST /api/start-phone-verification
-//  3. SMS arrives, user types code
-//  4. pvVerifyCode() -> POST /api/confirm-phone-verification
-//     -> server returns { success, activation_session_id }
-//  5. session_id stored, control returns to flow handler:
-//     - eTag flow: call activateEtag(session_id)
-//     - Physical upgrade flow: call activatePhysicalSticker(session_id)
-//     - Paid flow: store session_id, proceed to payment step
-//
-// ────────────────────────────────────────────────────────────────────
-
-let pvActivationSessionId = null;
-let pvAfterVerifyCallback = null;
-let pvResendTimerId = null;
-
-function maskPhone(p) {
-  if (!p) return 'your phone';
-  const digits = String(p).replace(/\D/g, '');
-  if (digits.length < 4) return 'your phone';
-  return '***-***-' + digits.slice(-4);
-}
-
-function pvShow(callback) {
-  pvAfterVerifyCallback = callback;
-  // Reset UI
-  document.getElementById('pv-send-section').style.display = 'flex';
-  document.getElementById('pv-code-section').style.display = 'none';
-  document.getElementById('pv-code-input').value = '';
-  document.getElementById('pv-error').style.display = 'none';
-  document.getElementById('pv-send-btn').disabled = false;
-  document.getElementById('pv-send-btn').textContent = 'Send code via SMS';
-  // Show the user's phone (masked)
-  fetch('/api/get-dashboard?user_id=' + s.token).then(r => r.json()).then(d => {
-    if (d.user && d.user.phone) {
-      document.getElementById('pv-masked-phone').textContent = maskPhone(d.user.phone);
-    }
-  }).catch(() => {});
-  showStep('phone-verify');
-}
-
-async function pvSendCode() {
-  const btn = document.getElementById('pv-send-btn');
-  btn.disabled = true;
-  btn.textContent = 'Sending...';
-  try {
-    const res = await fetch('/api/start-phone-verification', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ user_id: s.token })
-    });
-    const data = await res.json();
-    if (!res.ok || !data.success) {
-      btn.disabled = false;
-      btn.textContent = 'Send code via SMS';
-      showToast(data.error || 'Could not send code. Please try again.');
-      return;
-    }
-    // Move to code-entry section
-    document.getElementById('pv-send-section').style.display = 'none';
-    document.getElementById('pv-code-section').style.display = 'flex';
-    document.getElementById('pv-code-input').focus();
-    pvStartResendCooldown();
-  } catch(e) {
-    btn.disabled = false;
-    btn.textContent = 'Send code via SMS';
-    showToast('Network error');
-  }
-}
-
-function pvStartResendCooldown() {
-  const btn = document.getElementById('pv-resend-btn');
-  let secs = 60;
-  btn.disabled = true;
-  btn.style.opacity = '.6';
-  btn.textContent = 'Resend code (' + secs + 's)';
-  if (pvResendTimerId) clearInterval(pvResendTimerId);
-  pvResendTimerId = setInterval(() => {
-    secs--;
-    if (secs <= 0) {
-      clearInterval(pvResendTimerId);
-      pvResendTimerId = null;
-      btn.disabled = false;
-      btn.style.opacity = '1';
-      btn.textContent = 'Resend code';
-    } else {
-      btn.textContent = 'Resend code (' + secs + 's)';
-    }
-  }, 1000);
-}
-
-async function pvResendCode() {
-  const btn = document.getElementById('pv-resend-btn');
-  if (btn.disabled) return;
-  btn.disabled = true;
-  btn.textContent = 'Sending...';
-  try {
-    const res = await fetch('/api/start-phone-verification', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ user_id: s.token })
-    });
-    const data = await res.json();
-    if (!res.ok || !data.success) {
-      btn.disabled = false;
-      btn.textContent = 'Resend code';
-      showToast(data.error || 'Could not resend');
-      return;
-    }
-    pvStartResendCooldown();
-    showToast('Code resent');
-  } catch(e) {
-    btn.disabled = false;
-    btn.textContent = 'Resend code';
-    showToast('Network error');
-  }
-}
-
-async function pvVerifyCode() {
-  const code = document.getElementById('pv-code-input').value.trim();
-  const errEl = document.getElementById('pv-error');
-  errEl.style.display = 'none';
-  if (!/^\d{6}$/.test(code)) {
-    errEl.textContent = 'Please enter the 6-digit code';
-    errEl.style.display = 'block';
-    return;
-  }
-  const btn = document.getElementById('pv-verify-btn');
-  btn.disabled = true;
-  btn.textContent = 'Verifying...';
-  try {
-    const res = await fetch('/api/confirm-phone-verification', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ user_id: s.token, code })
-    });
-    const data = await res.json();
-    if (!res.ok || !data.success) {
-      btn.disabled = false;
-      btn.textContent = 'Verify and continue';
-      errEl.textContent = data.error || 'Wrong or expired code. Please try again.';
-      errEl.style.display = 'block';
-      return;
-    }
-    if (!data.activation_session_id) {
-      btn.disabled = false;
-      btn.textContent = 'Verify and continue';
-      errEl.textContent = 'Verification succeeded but session creation failed. Please try again.';
-      errEl.style.display = 'block';
-      return;
-    }
-    pvActivationSessionId = data.activation_session_id;
-    btn.textContent = 'Continuing...';
-    if (pvAfterVerifyCallback) pvAfterVerifyCallback(pvActivationSessionId);
-  } catch(e) {
-    btn.disabled = false;
-    btn.textContent = 'Verify and continue';
-    errEl.textContent = 'Network error. Please try again.';
-    errEl.style.display = 'block';
-  }
-}
-
-// ===== TMC_PATCH7_ACTIVATE_SMS flow routing =========================================
-// Decides which activation path to take based on what kind of tag is being
-// activated. Called from proceedToPayment() and proceedFromCarChoice().
-
-function flowAfterVehicle() {
-  // Determine what kind of activation this is.
-  // - scannedTag.owner_id === s.token AND status === 'claimed' AND token starts with TMC-ET
-  //   -> own claimed eTag, free activation
-  // - isPhysicalUpgrade === true AND user is on paid plan -> free physical upgrade
-  // - else -> paid new physical (Stripe checkout)
-  //
-  // In all cases: SMS verify first, then route to activation.
-
-  const isOwnEtag = scannedTag &&
-    scannedTag.owner_id === s.token &&
-    (scannedTag.status === 'claimed' || scannedTag.status === 'unclaimed') &&
-    (scannedTag.token || '').toUpperCase().indexOf('TMC-ET') === 0;
-
-  if (isOwnEtag) {
-    // Free eTag activation: SMS verify, then activateEtag with session_id
-    pvShow((sessionId) => activateEtag(sessionId));
-    return;
-  }
-
-  if (isPhysicalUpgrade) {
-    // Free physical upgrade for paid user: SMS verify, then activatePhysicalSticker
-    pvShow((sessionId) => activatePhysicalSticker(sessionId));
-    return;
-  }
-
-  // Paid new physical: SMS verify first, then go to payment step.
-  // The session_id is stored in pvActivationSessionId and consumed by
-  // create-checkout (via Stripe metadata) and the webhook.
-  pvShow((sessionId) => {
-    // Store in localStorage as backup so it survives the Stripe round-trip
-    try { localStorage.setItem('tmc_pending_activation_session', sessionId); } catch(e) {}
-    showStep('payment');
-  });
-}
-
-// ===== TMC_PATCH7_ACTIVATE_SMS activateEtag =========================================
-// Free eTag activation. Parallel to activatePhysicalSticker but no payment,
-// no eTag deactivation, just claim + activate the user's own eTag.
-
-async function activateEtag(activationSessionId) {
-  try {
-    const res = await fetch('/api/get-tag', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        token: scannedToken,
-        user_id: s.token,
-        activation_session_id: activationSessionId,
-        license_plate: vehicleData.license_plate,
-        car_make: vehicleData.car_make,
-        car_model: vehicleData.car_model,
-        car_year: vehicleData.car_year,
-        car_color: vehicleData.car_color
-      })
-    });
-    const data = await res.json();
-    if (!res.ok || !data.success) {
-      showToast(data.error || 'Activation failed. Please try again.');
-      // Stay on phone-verify step so user can retry (with new SMS)
-      showStep('vehicle');
-      return;
-    }
-    document.getElementById('success-title').textContent = 'eTag Activated!';
-    document.getElementById('success-message').textContent = 'Your eTag is now active. Print or download it from the Free eTag page to use on your vehicle.';
-    showStep('success');
-  } catch(e) {
-    showToast('Network error. Please try again.');
-    showStep('vehicle');
-  }
-}
-
-// ===== TMC_PATCH7_ACTIVATE_SMS URL ?token= reading =================================
-// If activate.html is loaded with ?token=TMC-XXXXX in the URL, auto-process
-// that token as if it had been scanned. Lets etag.html link directly to
-// activate.html without forcing the user through the QR scanner.
-(function tmcReadUrlToken() {
-  try {
-    const params = new URLSearchParams(window.location.search);
-    const t = params.get('token');
-    if (!t) return;
-    const cleaned = t.toUpperCase().replace(/[^A-Z0-9-]/g, '');
-    if (!cleaned) return;
-    // Wait briefly so the page is initialized, then process
-    setTimeout(() => {
-      try { stopScanner(); } catch(e) {}
-      processToken(cleaned);
-    }, 300);
-  } catch(e) { /* noop */ }
-})();
-</script>
+<script src="/tmc-redesign.js"></script>
 </body>
 </html>

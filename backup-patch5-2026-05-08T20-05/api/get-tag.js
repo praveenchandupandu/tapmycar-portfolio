@@ -1,4 +1,4 @@
-const { createClient } = require('@supabase/supabase-js');
+﻿const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -46,75 +46,6 @@ module.exports = async function handler(req, res) {
     // Normal claim/update
     if (!user_id) {
       return res.status(400).json({ error: 'user_id required' });
-    }
-
-    // TMC_PATCH5_ACTIVATION_SESSION
-    // Activation requires a one-shot SMS session token issued by
-    // /api/confirm-phone-verification. The token must:
-    //   - belong to this user_id
-    //   - not be used yet
-    //   - have been created within last 5 minutes
-    // After consumption it is marked used=true.
-    //
-    // We ONLY enforce this when a tag is being flipped TO active.
-    // status_override paths and ownership-only updates are exempt.
-    const { activation_session_id } = req.body;
-    const isActivating = !req.body.status_override;
-    if (isActivating) {
-      if (!activation_session_id) {
-        return res.status(403).json({
-          error: 'Phone verification required to activate this tag.',
-          needs_phone_verification: true
-        });
-      }
-      try {
-        const { data: session, error: sessErr } = await supabase
-          .from('activation_sessions')
-          .select('id, user_id, created_at, used')
-          .eq('id', activation_session_id)
-          .maybeSingle();
-
-        if (sessErr || !session) {
-          return res.status(403).json({
-            error: 'Invalid or expired verification session. Please verify your phone again.',
-            needs_phone_verification: true
-          });
-        }
-        if (session.user_id !== user_id) {
-          return res.status(403).json({
-            error: 'Verification session does not match this account.',
-            needs_phone_verification: true
-          });
-        }
-        if (session.used) {
-          return res.status(403).json({
-            error: 'This verification has already been used. Please verify your phone again.',
-            needs_phone_verification: true
-          });
-        }
-        const ageMs = Date.now() - new Date(session.created_at).getTime();
-        if (ageMs > 15 * 60 * 1000) {
-          return res.status(403).json({
-            error: 'Verification expired. Please verify your phone again.',
-            needs_phone_verification: true
-          });
-        }
-
-        // Mark session used. Do this BEFORE activation to prevent races
-        // where two requests both consume the same session.
-        const { error: useErr } = await supabase
-          .from('activation_sessions')
-          .update({ used: true, used_at: new Date().toISOString() })
-          .eq('id', activation_session_id)
-          .eq('used', false);
-        if (useErr) {
-          console.error('activation_sessions consume error:', useErr.message);
-          return res.status(500).json({ error: 'Could not consume verification session. Please try again.' });
-        }
-      } catch (e) {
-        console.error('activation session check exception:', e && e.message);
-        return res.status(500).json({ error: 'Verification check failed. Please try again.' });
-      }
     }
 
     
