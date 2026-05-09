@@ -659,20 +659,7 @@ async function saveLocation(lat,lng){
   if(!currentScanId)return;
   try{await fetch('/api/update-scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scan_id:currentScanId,latitude:lat,longitude:lng})});}catch(e){}
 }
-// TMC_PATCH9_CALL_FLOW
-async function handleCall(){
-  updateScanAction('call');
-  showFeedback();
-  // Register intent server-side so the inbound webhook knows which owner to ring.
-  try {
-    await fetch('/api/register-pending-call', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ token: currentToken })
-    });
-  } catch(e) { /* don't block the dial on a network hiccup */ }
-  window.location.href = 'tel:+18605158987';
-}
+function handleCall(){updateScanAction('call');showFeedback();window.location.href='tel:+18605158987';}
 function handleText(){updateScanAction("text");showToast("Text messaging coming soon");}
 function handlePhotoSelected(input) {
   if (!input.files||!input.files[0]) return;
