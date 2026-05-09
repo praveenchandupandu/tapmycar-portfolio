@@ -1,17 +1,122 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#FF6B00">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Scan activity — TapMyCar</title>
-  <link rel="stylesheet" href="/app.css">
-<link rel="stylesheet" href="/tmc-redesign.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <style>
-    /* TMC_PATCH13_ACTIVITY_REDESIGN */
+// ============================================================================
+// TapMyCar - Patch 13: Activity page UI redesign (4 categories, color-coded)
+//
+// Rewrites the activity.html page with:
+//   - 4 stat cards (Calls, Messages, Photos, Voice memos) — clickable, jump
+//     to the matching tab
+//   - Map at top filters by selected category
+//   - 4 tabs only (no "All", no "Views"): Calls, Messages, Photos, Voice
+//   - Each category renders its own item layout:
+//       Calls: caller phone (masked), date/time, duration, status, location
+//       Messages: message text big, date/time, location pin
+//       Photos: thumbnail tile, date/time, tap-to-enlarge
+//       Voice memos: inline audio player, date/time, location
+//   - Color-coded per category:
+//       Calls = blue (#2563EB)
+//       Messages = orange (#FF6B00, brand)
+//       Photos = purple (#7C3AED)
+//       Voice = green (#16A34A)
+//   - Modern card design with subtle shadows and consistent spacing
+//
+// What changes in the file:
+//   - <div class="page-inner"> is fully rewritten (the main body)
+//   - <div class="detail-overlay"> simplified (no longer needed for messages
+//     since they render inline; kept for photo full-screen view)
+//   - The <script> block at the bottom is rewritten with new render funcs
+//   - The inline <style> block in <head> is extended with new classes
+//
+// What stays the same:
+//   - <head> meta tags, fonts, manifest links
+//   - <nav> top bar (back button + logo + settings gear)
+//   - <nav class="bnav"> bottom nav
+//   - All API endpoints (no backend changes needed)
+//   - The chev divider, toast element
+//
+// REQUIRES: Patches 1-12 already applied locally.
+//
+// Properties:
+//   - Idempotent (re-running is a no-op via marker check)
+//   - Backups activity.html to backup-patch13-{timestamp}/
+//
+// Run:
+//   Move-Item "$env:USERPROFILE\Downloads\tapmycar-patch13-activity-redesign.js" `
+//             "C:\Users\PRAVEEN CHANDU\Documents\tapmycar\tapmycar-patch13-activity-redesign.js" -Force
+//   cd "C:\Users\PRAVEEN CHANDU\Documents\tapmycar"
+//   node tapmycar-patch13-activity-redesign.js
+// ============================================================================
+
+const fs = require('fs');
+const path = require('path');
+
+const ROOT = __dirname;
+const PUBLIC = path.join(ROOT, 'public');
+
+const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 16);
+const BACKUP_DIR = path.join(ROOT, `backup-patch13-${ts}`);
+
+const log = (s) => console.log(s);
+const ok = (s) => console.log('  \u2713 ' + s);
+const skip = (s) => console.log('  \u00b7 ' + s + ' (already applied, skipped)');
+const errExit = (s) => { console.error('  \u2717 ' + s); process.exit(1); };
+
+function readFile(p) {
+  if (!fs.existsSync(p)) errExit('File not found: ' + p);
+  return fs.readFileSync(p, 'utf8');
+}
+function backup(file) {
+  if (!fs.existsSync(file)) return;
+  const rel = path.relative(ROOT, file);
+  const dest = path.join(BACKUP_DIR, rel);
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  fs.copyFileSync(file, dest);
+}
+function writeFile(p, content) {
+  if (content.charCodeAt(0) === 0xFEFF) content = content.slice(1);
+  fs.writeFileSync(p, content, 'utf8');
+}
+
+log('');
+log('TapMyCar Patch 13 \u2014 Activity page redesign');
+log('Backup directory: ' + path.relative(ROOT, BACKUP_DIR));
+log('');
+fs.mkdirSync(BACKUP_DIR, { recursive: true });
+
+const MARKER_13 = 'TMC_PATCH13_ACTIVITY_REDESIGN';
+
+// ===========================================================================
+// Rewrite activity.html
+// ===========================================================================
+
+{
+  const file = path.join(PUBLIC, 'activity.html');
+  const content = readFile(file);
+
+  if (content.includes(MARKER_13)) {
+    skip('activity.html (already redesigned)');
+  } else {
+    backup(file);
+
+    // We rewrite three sections:
+    //   1. <style> block additions (at end of existing <style>)
+    //   2. The <div class="page-inner">...</div> body
+    //   3. The <script>...</script> block at the bottom
+
+    // ── 1. Extended <style> block — replace existing inline <style>
+    const oldStyle = `<style>
+    #map{height:220px;border-radius:14px;overflow:hidden;margin-bottom:14px;z-index:1;background:#F3F4F6}
+    .filter-row{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px}
+    .filter-btn{background:#F3F4F6;border:none;border-radius:99px;padding:6px 14px;font-size:11px;font-weight:600;color:#6B7280;cursor:pointer;font-family:inherit;white-space:nowrap}
+    .filter-btn.active{background:#FF6B00;color:#fff}
+    .scan-item{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:.5px solid var(--bd);cursor:pointer}
+    .scan-item:last-child{border-bottom:none}
+    .scan-icon{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .detail-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center}
+    .detail-overlay.show{display:flex}
+    .detail-sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:24px 20px 34px;max-height:85vh;overflow-y:auto}
+  </style>`;
+
+    const newStyle = `<style>
+    /* ${MARKER_13} */
     #map{height:200px;border-radius:14px;overflow:hidden;margin-bottom:14px;z-index:1;background:#F3F4F6}
 
     /* Stat cards (top row, 4 categories) */
@@ -93,43 +198,76 @@
     .p13-lightbox img{max-width:100%;max-height:80vh;border-radius:12px}
     .p13-lightbox-close{position:absolute;top:18px;right:18px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;border:none;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center}
     .p13-lightbox-meta{position:absolute;left:0;right:0;bottom:24px;text-align:center;color:#fff;font-size:13px;font-weight:600;padding:0 20px}
-  </style>
-<!-- Favicon -->
-<link rel="icon" type="image/x-icon" href="/favicon.ico">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<!-- SEO -->
-<meta name="description" content="See every scan of your TapMyCar tag with location and time.">
-<meta name="author" content="Praman Tech LLC">
-<!-- Open Graph -->
-<meta property="og:title" content="Scan activity — TapMyCar">
-<meta property="og:description" content="See every scan of your TapMyCar tag with location and time.">
-<meta property="og:image" content="https://tapmycar.io/og-image.png">
-<meta property="og:url" content="https://tapmycar.io/activity.html">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="TapMyCar">
-<!-- Twitter Card -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Scan activity — TapMyCar">
-<meta name="twitter:description" content="See every scan of your TapMyCar tag with location and time.">
-<meta name="twitter:image" content="https://tapmycar.io/og-image.png">
-</head>
-<body>
-<div class="nav">
-  <div class="bk" onclick="history.back()">
-    <div class="bkb"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
-    <span class="bk-label">Scan history</span>
-  </div>
-  <div style="display:flex;align-items:center;gap:0"><a href="/dashboard.html" aria-label="TapMyCar" style="display:flex;align-items:center;text-decoration:none"><img src="/logo.png" alt="TapMyCar" class="nav-logo-img" style="height:36px;width:auto;margin-right:10px"></a><button class="gear" onclick="window.location.href='/settings.html'">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-  </button></div>
-</div>
-<div class="chev"></div>
-<div class="page">
+  </style>`;
+
+    if (!content.includes(oldStyle)) {
+      // Try CRLF
+      const oldCRLF = oldStyle.replace(/\n/g, '\r\n');
+      if (!content.includes(oldCRLF)) {
+        errExit('activity.html: original <style> block not found exactly');
+      }
+    }
+
+    let updated = content;
+    if (updated.includes(oldStyle)) {
+      updated = updated.replace(oldStyle, newStyle);
+    } else {
+      updated = updated.replace(oldStyle.replace(/\n/g, '\r\n'), newStyle);
+    }
+
+    // ── 2. New <div class="page-inner"> body
+    // The original page-inner has: stats grid + map + filter row + scan-list
+    // We replace the whole thing with the new structure.
+
+    const oldBody = `<div class="page">
+  <div class="page-inner">`;
+    const newBodyOpen = `<div class="page">
   <div class="page-inner">
-    <!-- TMC_PATCH13_ACTIVITY_REDESIGN -->
-    <!-- 4-stat header (clickable, jump to tab) -->
+    <!-- ${MARKER_13} -->`;
+
+    if (updated.includes(oldBody)) {
+      updated = updated.replace(oldBody, newBodyOpen);
+    } else {
+      const oldCRLF = oldBody.replace(/\n/g, '\r\n');
+      if (updated.includes(oldCRLF)) {
+        updated = updated.replace(oldCRLF, newBodyOpen.replace(/\n/g, '\r\n'));
+      } else {
+        errExit('activity.html: <div class="page-inner"> not found');
+      }
+    }
+
+    // Now replace the inner content (stats + map + filter + list).
+    // The inner content runs from after `<div class="page-inner">\n` to
+    // the matching `</div>` closing it. We anchor on the existing markup.
+
+    const oldInner = `    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+      <div class="card" style="text-align:center;padding:14px 8px"><div style="font-size:26px;font-weight:800;color:var(--or);line-height:1" id="total-scans">0</div><div style="font-size:9px;color:var(--gy);margin-top:4px">Total scans</div></div>
+      <div class="card" style="text-align:center;padding:14px 8px"><div style="font-size:26px;font-weight:800;color:var(--or);line-height:1" id="total-calls">0</div><div style="font-size:9px;color:var(--gy);margin-top:4px">Calls made</div></div>
+      <div class="card" style="text-align:center;padding:14px 8px"><div style="font-size:26px;font-weight:800;color:var(--or);line-height:1" id="total-msgs">0</div><div style="font-size:9px;color:var(--gy);margin-top:4px">Messages</div></div>
+    </div>
+    <div style="font-size:15px;font-weight:700;color:var(--bk);margin-bottom:10px">Scan Locations</div>
+    <div style="position:relative;margin-bottom:14px">
+      <div id="map"></div>
+      <div id="map-upgrade" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;z-index:10;background:rgba(255,255,255,.9);border-radius:14px;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px">
+        <div style="font-size:14px;font-weight:700;color:#111;margin-bottom:4px">Upgrade to see scan locations</div>
+        <div style="font-size:11px;color:#6B7280;margin-bottom:12px">Standard plan includes scan location map</div>
+        <a href="/pricing.html" style="background:#FF6B00;color:#fff;font-size:12px;font-weight:700;padding:8px 20px;border-radius:99px;text-decoration:none">Upgrade now</a>
+      </div>
+    </div>
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="filterScans('all',this)">All</button>
+      <button class="filter-btn" onclick="filterScans('view',this)">Views</button>
+      <button class="filter-btn" onclick="filterScans('call',this)">Calls</button>
+      <button class="filter-btn" onclick="filterScans('quick_message',this)">Messages</button>
+      <button class="filter-btn" onclick="filterScans('photo',this)">Photos</button>
+      <button class="filter-btn" onclick="filterScans('voice',this)">Voice memos</button> <!-- TMC_PATCH12_ACTIVITY_FIX -->
+    </div>
+    <div style="font-size:15px;font-weight:700;color:var(--bk);margin-bottom:10px">All Scans</div>
+    <div class="card" style="padding:0 16px" id="scan-list">
+      <div style="text-align:center;padding:30px 0;color:var(--gy);font-size:13px">No scans yet - share your QR code to get started.</div>
+    </div>`;
+
+    const newInner = `    <!-- 4-stat header (clickable, jump to tab) -->
     <div class="p13-stats">
       <button type="button" class="p13-stat active" data-cat="calls" onclick="p13SwitchCat('calls')">
         <div class="p13-stat-num" id="p13-num-calls">0</div>
@@ -174,29 +312,37 @@
     </div>
 
     <!-- Content area (renders per category) -->
-    <div id="p13-content"></div>
-  </div>
-</div>
+    <div id="p13-content"></div>`;
 
-<!-- TMC_PATCH13_ACTIVITY_REDESIGN photo lightbox -->
-<div class="p13-lightbox" id="p13-lightbox" onclick="if(event.target===this)p13CloseLightbox()">
-  <button class="p13-lightbox-close" onclick="p13CloseLightbox()" aria-label="Close">×</button>
-  <img id="p13-lightbox-img" alt="Photo" />
-  <div class="p13-lightbox-meta" id="p13-lightbox-meta"></div>
-</div>
+    if (updated.includes(oldInner)) {
+      updated = updated.replace(oldInner, newInner);
+    } else {
+      const oldCRLF = oldInner.replace(/\n/g, '\r\n');
+      if (updated.includes(oldCRLF)) {
+        updated = updated.replace(oldCRLF, newInner.replace(/\n/g, '\r\n'));
+      } else {
+        errExit('activity.html: original page-inner content not found');
+      }
+    }
 
-<nav class="bnav">
-  <a href="/dashboard.html" class="bni"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></a>
-  <a href="/manage.html" class="bni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Tag</span></a>
-  <a href="/activity.html" class="bni active"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Activity</span><div class="bni-dot"></div></a>
-  <a href="/settings.html" class="bni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></a>
-</nav>
+    // ── 3. Replace the inline <script> block at the bottom
+    // Anchor: `<script>\nrequireAuth();` ... up through `</script>` before `</body>`
 
-<div class="toast" id="toast"><div class="toast-ic"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span id="toast-msg"></span></div>
+    const oldScriptStart = updated.indexOf('<script>\nrequireAuth();');
+    let scriptStart = oldScriptStart;
+    if (scriptStart === -1) {
+      scriptStart = updated.indexOf('<script>\r\nrequireAuth();');
+    }
+    if (scriptStart === -1) {
+      errExit('activity.html: cannot find <script>\\nrequireAuth() block');
+    }
+    const scriptEnd = updated.indexOf('</script>', scriptStart);
+    if (scriptEnd === -1) {
+      errExit('activity.html: cannot find closing </script>');
+    }
 
-<script src="/app.js"></script>
-<script>
-// TMC_PATCH13_ACTIVITY_REDESIGN
+    const newScript = `<script>
+// ${MARKER_13}
 requireAuth();
 const s = getSession();
 
@@ -427,45 +573,71 @@ function p13RenderMapMarkers() {
 }
 
 p13Load();
-</script>
-<script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }</script>
+</script>`;
 
-<div style="padding:20px 20px 32px;text-align:center;border-top:.5px solid #E5E7EB;margin-top:24px;background:#fff">
-  <p style="font-size:11px;color:#9CA3AF;margin:0 0 4px">
-    <a href="/privacy.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Privacy</a>
-    &nbsp;·&nbsp;
-    <a href="/terms.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Terms</a>
-    &nbsp;·&nbsp;
-    <a href="mailto:support@tapmycar.io" style="color:#FF6B00;text-decoration:none;font-weight:600">Support</a>
-  </p>
-  <p style="font-size:11px;color:#9CA3AF;margin:0">© 2026 Praman Tech LLC</p>
-</div>
+    updated = updated.slice(0, scriptStart) + newScript + updated.slice(scriptEnd + '</script>'.length);
 
-<script src="/tmc-redesign.js"></script>
+    // ── 4. Replace the old detail-overlay (no longer used; replace with simpler lightbox)
+    const oldOverlay = `<div class="detail-overlay" id="detail-overlay" onclick="if(event.target===this)closeDetail()">
+  <div class="detail-sheet">
+    <div style="width:36px;height:4px;border-radius:2px;background:#E5E7EB;margin:0 auto 20px"></div>
+    <div style="font-size:16px;font-weight:800;color:#111;margin-bottom:4px" id="detail-title">Scan Details</div>
+    <div style="font-size:12px;color:#6B7280;margin-bottom:16px" id="detail-time"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+      <div style="background:#F9FAFB;border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:11px;color:#6B7280;margin-bottom:4px">Action</div>
+        <div style="font-size:13px;font-weight:700;color:#111" id="detail-action">-</div>
+      </div>
+      <div style="background:#F9FAFB;border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:11px;color:#6B7280;margin-bottom:4px">Device</div>
+        <div style="font-size:13px;font-weight:700;color:#111" id="detail-device">-</div>
+      </div>
+    </div>
+    <div id="detail-content"></div>
+    <button onclick="closeDetail()" style="width:100%;height:44px;border-radius:13px;border:1.5px solid #E5E7EB;background:#fff;font-size:13px;font-weight:600;color:#6B7280;cursor:pointer;font-family:inherit;margin-top:8px">Close</button>
+  </div>
+</div>`;
 
-<!-- TMC_FLOATING_NAV -->
-<nav class="tmc-fnav" aria-label="Main navigation">
-  <a href="/dashboard.html" class="tmc-fnav-item" data-match="/dashboard">
-    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
-    <span class="tmc-fnav-label">Home</span>
-  </a>
-  <a href="/manage.html" class="tmc-fnav-item" data-match="/manage">
-    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
-    <span class="tmc-fnav-label">Tag</span>
-  </a>
-  <a href="/verify.html" class="tmc-fnav-item" data-match="/verify">
-    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-    <span class="tmc-fnav-label">Verify</span>
-  </a>
-  <a href="/activity.html" class="tmc-fnav-item" data-match="/activity">
-    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-    <span class="tmc-fnav-label">Activity</span>
-  </a>
-  <a href="/settings.html" class="tmc-fnav-item" data-match="/settings">
-    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-    <span class="tmc-fnav-label">Profile</span>
-  </a>
-</nav>
-<!-- /TMC_FLOATING_NAV -->
-</body>
-</html>
+    const newOverlay = `<!-- ${MARKER_13} photo lightbox -->
+<div class="p13-lightbox" id="p13-lightbox" onclick="if(event.target===this)p13CloseLightbox()">
+  <button class="p13-lightbox-close" onclick="p13CloseLightbox()" aria-label="Close">\u00d7</button>
+  <img id="p13-lightbox-img" alt="Photo" />
+  <div class="p13-lightbox-meta" id="p13-lightbox-meta"></div>
+</div>`;
+
+    if (updated.includes(oldOverlay)) {
+      updated = updated.replace(oldOverlay, newOverlay);
+    } else {
+      const oldCRLF = oldOverlay.replace(/\n/g, '\r\n');
+      if (updated.includes(oldCRLF)) {
+        updated = updated.replace(oldCRLF, newOverlay.replace(/\n/g, '\r\n'));
+      }
+      // If neither matches, the old overlay is gone (already replaced) — non-fatal
+    }
+
+    writeFile(file, updated);
+    ok('activity.html: 4-category redesign applied (stats + map + tabs + per-category render)');
+  }
+}
+
+log('');
+log('==============================================================');
+log('Patch 13 complete.');
+log('Backup folder: ' + path.relative(ROOT, BACKUP_DIR));
+log('');
+log('Next steps:');
+log('  git add -A');
+log('  git commit -m "Patch 13: activity page redesign (4 categories, color-coded)"');
+log('  git push');
+log('  Wait ~60 seconds for Vercel.');
+log('');
+log('Test:');
+log('  Open activity.html in fresh incognito (signed in as owner).');
+log('  - Top: 4 stat cards (Calls/Messages/Photos/Voice), each clickable');
+log('  - Map below shows markers in the active category color');
+log('  - Below map: 4 tab pills');
+log('  - Click each tab to see only that category');
+log('  - Photos tab shows a 2-column grid of thumbnails — tap one for fullscreen');
+log('  - Voice tab shows audio player you can press Play on');
+log('  - Empty categories show a friendly empty state');
+log('==============================================================');
