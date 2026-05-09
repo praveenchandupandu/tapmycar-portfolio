@@ -76,7 +76,6 @@
       <button class="filter-btn" onclick="filterScans('call',this)">Calls</button>
       <button class="filter-btn" onclick="filterScans('quick_message',this)">Messages</button>
       <button class="filter-btn" onclick="filterScans('photo',this)">Photos</button>
-      <button class="filter-btn" onclick="filterScans('voice',this)">Voice memos</button> <!-- TMC_PATCH12_ACTIVITY_FIX -->
     </div>
     <div style="font-size:15px;font-weight:700;color:var(--bk);margin-bottom:10px">All Scans</div>
     <div class="card" style="padding:0 16px" id="scan-list">
@@ -227,10 +226,6 @@ function openDetail(index) {
     }
     if (scan.photo_url) {
       contentHTML += '<div style="margin-bottom:12px"><div style="font-size:11px;color:#7C3AED;font-weight:700;margin-bottom:8px">Photo sent by stranger</div><img src="' + scan.photo_url + '" style="width:100%;border-radius:12px;max-height:240px;object-fit:cover"></div>';
-    }
-    /* TMC_PATCH12_ACTIVITY_FIX: voice memo audio player */
-    if (scan.audio_url) {
-      contentHTML += '<div style="margin-bottom:12px"><div style="font-size:11px;color:#6D28D9;font-weight:700;margin-bottom:8px">Voice memo from stranger</div><audio controls preload="metadata" style="width:100%"><source src="' + scan.audio_url + '">Your browser does not support audio playback.</audio></div>';
     }
     if (scan.latitude && scan.longitude) {
       contentHTML += '<div id="detail-map-container" style="height:180px;border-radius:14px;overflow:hidden;margin-bottom:12px;background:#F3F4F6"></div><a href="https://maps.google.com/?q=' + scan.latitude + ',' + scan.longitude + '" target="_blank" style="display:block;background:#FF6B00;color:#fff;font-size:13px;font-weight:700;padding:13px 0;border-radius:13px;text-align:center;text-decoration:none;margin-bottom:8px">View on Google Maps</a>';

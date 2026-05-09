@@ -1179,7 +1179,7 @@ function v6SendAlert(type, label) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       tag_id: window._tagId,
-      scan_id: currentScanId || '' /* TMC_PATCH12_ACTIVITY_FIX */,
+      scan_id: window.currentScanId || '',
       action: 'quick_message',
       message: label
     })
@@ -1196,7 +1196,7 @@ function v6OpenCustom() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       tag_id: window._tagId,
-      scan_id: currentScanId || '' /* TMC_PATCH12_ACTIVITY_FIX */,
+      scan_id: window.currentScanId || '',
       action: 'quick_message',
       message: msg.trim()
     })
@@ -1302,7 +1302,7 @@ function v6SendVoice() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         tag_id: window._tagId,
-        scan_id: currentScanId || '' /* TMC_PATCH12_ACTIVITY_FIX */,
+        scan_id: window.currentScanId || '',
         action: 'voice',
         audio_base64: base64,
         audio_type: 'audio/webm',

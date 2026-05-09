@@ -46,31 +46,7 @@ module.exports = async function handler(req, res) {
     if (!ACTION_ALLOWLIST.has(String(contact_action))) {
       return res.status(400).json({ error: 'Invalid contact_action' });
     }
-    // TMC_PATCH12_ACTIVITY_FIX: don't let 'call' overwrite a more specific action
-    // (photo / voice / quick_message). The stranger may tap Call AFTER
-    // sending a photo; the photo is the more meaningful signal for the
-    // owner, so we keep it.
-    if (String(contact_action) === 'call' && scan_id) {
-      try {
-        const { data: existing } = await supabase
-          .from('scan_logs')
-          .select('contact_action')
-          .eq('id', scan_id)
-          .maybeSingle();
-        const prior = existing && existing.contact_action;
-        if (prior && prior !== 'view' && prior !== 'call') {
-          // Keep the more specific action; ignore the 'call' overwrite.
-          // Still allow location updates (handled by other fields above).
-        } else {
-          updates.contact_action = contact_action;
-        }
-      } catch (e) {
-        // On lookup error, fall back to the original behavior.
-        updates.contact_action = contact_action;
-      }
-    } else {
-      updates.contact_action = contact_action;
-    }
+    updates.contact_action = contact_action;
   }
 
   if (Object.keys(updates).length === 0) {
