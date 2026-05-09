@@ -174,17 +174,12 @@ async function handler(req, res) {
             break;
           }
         } else {
-          // TMC_PATCH8_HOTFIX: do NOT break here. pricing.html does not yet pass
-          // activation_session_id, so requiring it would block legitimate
-          // direct-flow purchases. Log a warning and continue with activation.
-          // Once pricing.html is updated to pass session_id (future patch),
-          // this branch should rarely fire for legitimate flows.
-          console.warn('PATCH8: checkout completed without activation_session_id (allowing for backwards compat)', {
+          console.error('PATCH7 CRITICAL: no activation_session_id in checkout metadata', {
             user_id,
             tag_token,
-            session_id: session.id,
-            flow
+            session_id: session.id
           });
+          break;
         }
 
         // ─── ACTIVATE TAG ──────────────────────────────────────
