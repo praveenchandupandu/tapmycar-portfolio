@@ -101,43 +101,14 @@ module.exports = async function handler(req, res) {
   }
 
   if (digit === '1') {
-    // TMC_PATCH10: notify stranger via outbound Twilio call before
-    // confirming to owner. Look up call_logs for stranger_phone.
-    let strangerPhone = '';
     if (callLogId) {
       try {
-        const { data: cl } = await supabase
-          .from('call_logs')
-          .select('stranger_phone')
-          .eq('id', callLogId)
-          .maybeSingle();
-        if (cl && cl.stranger_phone) strangerPhone = cl.stranger_phone;
-
         await supabase
           .from('call_logs')
           .update({ status: 'message_only', ended_at: new Date().toISOString() })
           .eq('id', callLogId);
       } catch (e) { console.error('call_logs message_only update error:', e && e.message); }
     }
-
-    // Fire-and-forget outbound call to the stranger with the
-    // owner-on-the-way message. Don't await — owner-leg TwiML returns
-    // immediately. If the stranger leg is still on hold inside the
-    // <Dial> verb, this outbound call will go to the stranger's phone
-    // separately. (The current call leg ends naturally when our owner
-    // TwiML finishes with <Hangup/>.)
-    if (strangerPhone) {
-      try {
-        const twilioLib = require('twilio');
-        const twClient = twilioLib(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-        twClient.calls.create({
-          to: strangerPhone,
-          from: process.env.TWILIO_PHONE_NUMBER,
-          twiml: `<Response><Say voice="${VOICE}">Great news! The owner got your message and is on their way to the car right now. Thanks so much for using TapMyCar - you really helped out today!</Say></Response>`
-        }).catch(err => console.error('press-1 stranger call error:', err && err.message));
-      } catch (e) { console.error('press-1 twilio init error:', e && e.message); }
-    }
-
     return res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Say voice="${VOICE}">Done${namePart}! They'll know you're on your way. Thanks for being part of TapMyCar.</Say>

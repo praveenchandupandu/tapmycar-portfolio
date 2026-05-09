@@ -51,7 +51,7 @@ module.exports = async function handler(req, res) {
 
   if (action === 'quick_message' && message) {
     // Quick message from stranger
-    subject = `Alert: "${message}" - someone scanned your TapMyCar tag`; /* TMC_PATCH10 */
+    subject = `Alert: "${message}" â€” someone scanned your TapMyCar tag`;
     body = `
       <div style="font-family:Inter,sans-serif;max-width:400px;margin:0 auto;padding:40px 20px">
         <div style="font-size:24px;font-weight:800;color:#111;margin-bottom:8px">TapMyCar<span style="color:#FF6B00">.</span></div>
