@@ -1,20 +1,22 @@
-// TMC_PATCH9_CALL_FLOW
+// TMC_PATCH11_PRESS1_SINGLE
 // TapMyCar - voice-action.js
-// Called when the owner presses a key during the IVR, OR when Dial finishes.
-// We are running on the OWNER leg here. The stranger is on hold on the
-// inbound leg waiting for us to bridge.
 //
-// Press 2: speak a confirmation, then bridge owner directly into the
-// stranger's incoming call leg via TwiML <Dial> with timeLimit=60s and
-// a 5-second warning.
+// Three paths:
+//   - Path A: Twilio webhooks back AFTER inbound <Dial> finished.
+//             DialCallStatus is set. Runs on STRANGER leg.
+//             We check call_logs.status:
+//               - If 'message_only' (owner pressed 1): speak the
+//                 "owner on the way" message to stranger, then hangup.
+//               - Otherwise (bridged/no_answer/etc): just hangup.
+//   - Path B-2: Owner pressed 2. Bridge by returning brief confirmation
+//               TwiML on the owner leg. Twilio resumes the parent <Dial>
+//               and bridges the legs. 60s timeLimit governs.
+//   - Path B-1: Owner pressed 1. Mark call_logs.status='message_only'.
+//               Return "Done!" TwiML to owner with <Hangup/>. The stranger
+//               will be notified via Path A (after Twilio fires the dial
+//               action callback on the stranger leg).
 //
-// Press 1: speak confirmation to owner, end owner leg. The inbound-call
-// flow already has a graceful goodbye for the stranger when dial ends.
-//
-// Dial-finished webhook: this same endpoint also receives Twilio's
-// DialCallStatus when the inbound-call's <Dial> verb completes. We use
-// the same call_log_id query param to update the call_logs row with
-// final status (answered, no-answer, busy, etc).
+// No separate outbound call. Same call from start to finish.
 
 const VOICE = 'Polly.Joanna-Neural';
 const { createClient } = require('@supabase/supabase-js');
@@ -42,19 +44,38 @@ module.exports = async function handler(req, res) {
   const name = safeName(rawName);
   const namePart = name ? ', ' + escapeXml(name) : '';
 
-  // Path A: Twilio is webhooking back AFTER the inbound <Dial> finished.
-  // We can tell because DialCallStatus is set.
+  // ────────────────────────────────────────────────────────────────────
+  // Path A: <Dial> action callback (runs on stranger leg)
+  // Twilio sets DialCallStatus when the parent <Dial> verb finishes.
+  // ────────────────────────────────────────────────────────────────────
   const dialStatus = (req.body && req.body.DialCallStatus) || (req.body && req.body.DialStatus) || '';
   if (dialStatus) {
-    // Update call_logs
+    // Look up the call_log first to see if owner pressed 1.
+    let priorStatus = '';
     if (callLogId) {
-      const finalStatus = dialStatus === 'completed' ? 'completed'
-        : dialStatus === 'answered' ? 'completed'
-        : dialStatus === 'no-answer' ? 'no_answer'
-        : dialStatus === 'busy' ? 'busy'
-        : dialStatus === 'failed' ? 'failed'
-        : dialStatus === 'canceled' ? 'canceled'
-        : dialStatus;
+      try {
+        const { data: cl } = await supabase
+          .from('call_logs')
+          .select('status')
+          .eq('id', callLogId)
+          .maybeSingle();
+        if (cl) priorStatus = cl.status || '';
+      } catch (e) { console.error('call_logs status read err:', e && e.message); }
+    }
+
+    // Compute the final status. If owner pressed 1 (message_only), keep it;
+    // otherwise map DialCallStatus to a clean value.
+    const finalStatus = priorStatus === 'message_only'
+      ? 'message_only'
+      : dialStatus === 'completed' ? 'completed'
+      : dialStatus === 'answered' ? 'completed'
+      : dialStatus === 'no-answer' ? 'no_answer'
+      : dialStatus === 'busy' ? 'busy'
+      : dialStatus === 'failed' ? 'failed'
+      : dialStatus === 'canceled' ? 'canceled'
+      : dialStatus;
+
+    if (callLogId) {
       const dialDuration = parseInt((req.body && req.body.DialCallDuration) || '0', 10) || 0;
       try {
         await supabase
@@ -64,18 +85,31 @@ module.exports = async function handler(req, res) {
       } catch (e) { console.error('call_logs update error:', e && e.message); }
     }
 
-    // After-dial goodbye (only fires if Dial verb did not already say goodbye).
+    // Branch on what we need to say to the stranger.
+    if (priorStatus === 'message_only') {
+      // Owner pressed 1. Speak the goodbye message to the stranger.
+      return res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Say voice="${VOICE}">Great news! The owner got your message and is on their way to the car right now. Thanks so much for using TapMyCar - you really helped out today!</Say>
+  <Hangup/>
+</Response>`);
+    }
+
+    // Bridged or other status: just hangup quietly.
     return res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Hangup/>
 </Response>`);
   }
 
-  // Path B: Owner pressed a key on the IVR.
+  // ────────────────────────────────────────────────────────────────────
+  // Path B: IVR keypress (runs on owner leg)
+  // ────────────────────────────────────────────────────────────────────
   const digit = (req.body && req.body.Digits) || '';
 
   if (digit === '2') {
-    // Mark log as bridged
+    // Press 2: bridge. Mark log as bridged and return brief confirmation.
+    // Twilio resumes the parent <Dial>; the legs get connected.
     if (callLogId) {
       try {
         await supabase
@@ -85,15 +119,6 @@ module.exports = async function handler(req, res) {
       } catch (e) { console.error('call_logs bridge update error:', e && e.message); }
     }
 
-    // Now bridge: continuing TwiML on the owner leg returns control to the
-    // inbound-call <Dial> verb, which means the inbound-call's <Dial timeLimit="60">
-    // is what governs the bridge timer. Twilio rule: when a <Number url> verb's
-    // returned TwiML ends, the leg is bridged into the parent <Dial>.
-    //
-    // We just say a confirmation and let the leg join. The 60s timer runs
-    // from when the inbound <Dial> initiated. We add a soft warning before
-    // hangup using <Pause> + <Say> would interrupt the bridge - so we rely
-    // on Twilio's automatic hangup at timeLimit.
     return res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Say voice="${VOICE}">Got it${namePart} - connecting you now. Heads up, this call ends in 60 seconds. One moment.</Say>
@@ -101,41 +126,15 @@ module.exports = async function handler(req, res) {
   }
 
   if (digit === '1') {
-    // TMC_PATCH10: notify stranger via outbound Twilio call before
-    // confirming to owner. Look up call_logs for stranger_phone.
-    let strangerPhone = '';
+    // Press 1: mark message_only and confirm to owner. The DialCallStatus
+    // callback (Path A) will speak to the stranger after this leg ends.
     if (callLogId) {
       try {
-        const { data: cl } = await supabase
-          .from('call_logs')
-          .select('stranger_phone')
-          .eq('id', callLogId)
-          .maybeSingle();
-        if (cl && cl.stranger_phone) strangerPhone = cl.stranger_phone;
-
         await supabase
           .from('call_logs')
-          .update({ status: 'message_only', ended_at: new Date().toISOString() })
+          .update({ status: 'message_only' })
           .eq('id', callLogId);
       } catch (e) { console.error('call_logs message_only update error:', e && e.message); }
-    }
-
-    // Fire-and-forget outbound call to the stranger with the
-    // owner-on-the-way message. Don't await — owner-leg TwiML returns
-    // immediately. If the stranger leg is still on hold inside the
-    // <Dial> verb, this outbound call will go to the stranger's phone
-    // separately. (The current call leg ends naturally when our owner
-    // TwiML finishes with <Hangup/>.)
-    if (strangerPhone) {
-      try {
-        const twilioLib = require('twilio');
-        const twClient = twilioLib(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-        twClient.calls.create({
-          to: strangerPhone,
-          from: process.env.TWILIO_PHONE_NUMBER,
-          twiml: `<Response><Say voice="${VOICE}">Great news! The owner got your message and is on their way to the car right now. Thanks so much for using TapMyCar - you really helped out today!</Say></Response>`
-        }).catch(err => console.error('press-1 stranger call error:', err && err.message));
-      } catch (e) { console.error('press-1 twilio init error:', e && e.message); }
     }
 
     return res.send(`<?xml version="1.0" encoding="UTF-8"?>
@@ -145,7 +144,7 @@ module.exports = async function handler(req, res) {
 </Response>`);
   }
 
-  // No digit / invalid
+  // No digit / invalid press
   return res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Say voice="${VOICE}">Sorry, I didn't catch that. Goodbye for now!</Say>
