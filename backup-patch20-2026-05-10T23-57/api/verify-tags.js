@@ -17,7 +17,6 @@
 // Auth: requires x-admin-key header matching ADMIN_SECRET_KEY.
 
 const { createClient } = require('@supabase/supabase-js');
-const { audit } = require('./_audit'); /* TMC_PATCH20_AUDIT_AND_OPS */
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -59,7 +58,6 @@ module.exports = async function handler(req, res) {
       .select('token');
 
     if (error) return res.status(500).json({ error: error.message });
-    audit({ actor: 'admin', action: 'verify_tokens', target_type: 'tokens', meta: { count: updated ? updated.length : 0 } });
     return res.json({
       success: true,
       verified_count: updated ? updated.length : 0,
@@ -87,7 +85,6 @@ module.exports = async function handler(req, res) {
       .select('token');
 
     if (error) return res.status(500).json({ error: error.message });
-    audit({ actor: 'admin', action: 'void_unverified_in_batch', target_type: 'batch', target_id: String(batch_number), meta: { count: voided ? voided.length : 0, reason: reason } });
     return res.json({
       success: true,
       voided_count: voided ? voided.length : 0,

@@ -1,6 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
-const { audit } = require('./_audit'); /* TMC_PATCH20_AUDIT_AND_OPS */
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -77,9 +76,6 @@ module.exports = async function handler(req, res) {
       });
     }
   }
-
-  /* TMC_PATCH20_AUDIT_AND_OPS: audit */
-  audit({ actor: 'admin', action: 'generate_tokens', target_type: 'batch', target_id: String(batch_number || ''), meta: { count: tokens.length, errors: errors.length } });
 
   res.json({
     success: true,

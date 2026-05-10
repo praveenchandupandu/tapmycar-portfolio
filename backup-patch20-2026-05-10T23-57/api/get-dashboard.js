@@ -143,55 +143,6 @@ module.exports = async function handler(req, res) {
       return res.json({ success: true });
     }
 
-    // TMC_PATCH20_AUDIT_AND_OPS: test-data actions (admin only)
-    if (action === 'create_test_user') {
-      if (admin_key !== process.env.ADMIN_SECRET_KEY) {
-        return res.status(401).json({ error: 'Unauthorized' });
-      }
-      const name = String(req.body.name || '').slice(0, 60);
-      const email = String(req.body.email || '').toLowerCase().slice(0, 120);
-      const phone = String(req.body.phone || '').slice(0, 20);
-      if (!email || !name) return res.status(400).json({ error: 'name and email required' });
-      try {
-        const { data: created, error } = await supabase
-          .from('users')
-          .insert({ name, email, phone, plan: 'etag', phone_verified: false })
-          .select()
-          .single();
-        if (error) return res.status(500).json({ error: error.message });
-        try {
-          const { audit } = require('./_audit');
-          audit({ actor: 'admin', action: 'create_test_user', target_type: 'user', target_id: created.id, meta: { email, name } });
-        } catch (e) {}
-        return res.json({ success: true, user: created });
-      } catch (e) {
-        return res.status(500).json({ error: e && e.message });
-      }
-    }
-
-    if (action === 'create_test_scan') {
-      if (admin_key !== process.env.ADMIN_SECRET_KEY) {
-        return res.status(401).json({ error: 'Unauthorized' });
-      }
-      const tag_id = String(req.body.tag_id || '');
-      if (!tag_id) return res.status(400).json({ error: 'tag_id required' });
-      try {
-        const { data: created, error } = await supabase
-          .from('scan_logs')
-          .insert({ tag_id, action: 'view', device_type: 'admin-test' })
-          .select()
-          .single();
-        if (error) return res.status(500).json({ error: error.message });
-        try {
-          const { audit } = require('./_audit');
-          audit({ actor: 'admin', action: 'create_test_scan', target_type: 'tag', target_id: tag_id, meta: { scan_id: created.id } });
-        } catch (e) {}
-        return res.json({ success: true, scan: created });
-      } catch (e) {
-        return res.status(500).json({ error: e && e.message });
-      }
-    }
-
     return res.status(400).json({ error: 'Invalid request' });
   }
 

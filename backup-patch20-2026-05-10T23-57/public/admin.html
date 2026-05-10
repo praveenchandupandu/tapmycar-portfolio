@@ -582,21 +582,6 @@ a { color: inherit; text-decoration: none; }
 }
 .gen-input:focus { border-color: var(--brand); box-shadow: 0 0 0 4px var(--brand-ring); }
 .gen-input::placeholder { color: var(--text-3) !important; opacity: 1; } /* TMC_PATCH16_ADMIN_COLORS */
-/* TMC_PATCH20_AUDIT_AND_OPS: notification badges + test-data + audit list */
-.p20-badge{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:#FF6B00;color:#fff;font-size:9px;font-weight:800;margin-left:auto;font-family:inherit}
-.sb-item .p20-badge{margin-left:auto}
-.p20-test-btn{background:#1A2D4A;border:1.5px dashed #334155;color:#94A3B8;font-size:11px;font-weight:600;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:inherit;margin:3px}
-.p20-test-btn:hover{background:#1F3559;color:#E5E7EB;border-color:#475569}
-.p20-test-section{background:rgba(20,30,50,.4);border:1.5px dashed #334155;border-radius:12px;padding:12px;margin-top:14px}
-.p20-test-section h4{font-size:11px;color:#64748B;text-transform:uppercase;letter-spacing:.5px;margin:0 0 8px;font-weight:700}
-.p20-audit-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:11.5px}
-.p20-audit-row:last-child{border-bottom:none}
-.p20-audit-row .dot{width:7px;height:7px;border-radius:50%;background:#FF6B00;flex-shrink:0}
-.p20-audit-row.warn .dot{background:#FCA5A5}
-.p20-audit-row.good .dot{background:#4ADE80}
-.p20-audit-action{color:#E5E7EB;font-weight:700;flex:1}
-.p20-audit-meta{color:#94A3B8;font-size:10.5px;margin-top:2px}
-.p20-audit-time{color:#64748B;font-size:10px;flex-shrink:0;white-space:nowrap}
 /* TMC_PATCH19_TAGS_AND_CSV: tag filters + voided + CSV export */
 .p19-filter-row{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding:2px;scrollbar-width:none}
 .p19-filter-row::-webkit-scrollbar{display:none}
@@ -1206,15 +1191,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
     <div class="gen-result" id="repl-result"></div>
   </div>
 
-  <!-- TMC_PATCH20_AUDIT_AND_OPS: dev/test data helpers -->
-<div class="p20-test-section" id="p20-test-section">
-  <h4>Dev / Test data</h4>
-  <div style="font-size:11px;color:#64748B;margin-bottom:10px;line-height:1.4">Quick helpers to create test data for QA. All actions are audit-logged.</div>
-  <button type="button" class="p20-test-btn" onclick="p20CreateTestUser()">+ Test user</button>
-  <button type="button" class="p20-test-btn" onclick="p20CreateTestScan()">+ Test scan (random tag)</button>
-</div>
-
-<div class="danger-box">
+  <div class="danger-box">
     <h3>Delete entire batch</h3>
     <p>Created a batch by mistake? Delete all unclaimed tokens from a specific batch. Requires admin password. Active or claimed tags are protected and will NOT be removed.</p>
     <div class="form-row">
@@ -1651,173 +1628,6 @@ let allUsersData = [];
 /* TMC_PATCH19_TAGS_AND_CSV */
 window.allOrdersData = window.allOrdersData || [];
 window.allLeadsData = window.allLeadsData || [];
-
-// TMC_PATCH20_AUDIT_AND_OPS: helpers
-function p20Esc(s) {
-  return String(s == null ? '' : s).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-// TMC_PATCH20_AUDIT_AND_OPS: detect carrier from tracking number format and link to carrier site
-function p20TrackingUrl(tn) {
-  if (!tn) return '#';
-  const s = String(tn).replace(/\s+/g, '').toUpperCase();
-  // UPS: starts with 1Z
-  if (/^1Z[A-Z0-9]{16}$/.test(s)) return 'https://www.ups.com/track?tracknum=' + encodeURIComponent(s);
-  // USPS: 20-22 digit numeric
-  if (/^9[0-9]{19,21}$/.test(s) || /^[0-9]{20,22}$/.test(s)) return 'https://tools.usps.com/go/TrackConfirmAction?qtc_tLabels1=' + encodeURIComponent(s);
-  // FedEx: 12 or 15 digits, all numeric
-  if (/^[0-9]{12}$/.test(s) || /^[0-9]{15}$/.test(s)) return 'https://www.fedex.com/fedextrack/?trknbr=' + encodeURIComponent(s);
-  // DHL: 10 digits
-  if (/^[0-9]{10}$/.test(s)) return 'https://www.dhl.com/us-en/home/tracking/tracking-express.html?submit=1&tracking-id=' + encodeURIComponent(s);
-  // Fallback: Google search
-  return 'https://www.google.com/search?q=' + encodeURIComponent('track ' + s);
-}
-window.p20TrackingUrl = p20TrackingUrl;
-window.p20Esc = p20Esc;
-
-// TMC_PATCH20_AUDIT_AND_OPS: notification badges
-function p20UpdateBadges() {
-  try {
-    // Orders: count pending (order_status not in ['shipped','delivered','canceled'])
-    const orders = window.allOrdersData || [];
-    const pending = orders.filter(o => o.order_status && !['shipped', 'delivered', 'canceled'].includes(o.order_status)).length;
-    p20SetBadge('orders', pending);
-    // Reviews: from API (uses cached count we update via review polling) — for now skip if not loaded.
-    fetch('/api/get-reviews?status=pending&admin=' + encodeURIComponent(adminKey))
-      .then(r => r.json())
-      .then(d => p20SetBadge('reviews', d && d.reviews ? d.reviews.length : 0))
-      .catch(() => {});
-  } catch (e) {}
-}
-
-function p20SetBadge(tab, count) {
-  document.querySelectorAll('[data-tab="' + tab + '"]').forEach(el => {
-    let b = el.querySelector('.p20-badge');
-    if (count > 0) {
-      if (!b) {
-        b = document.createElement('span');
-        b.className = 'p20-badge';
-        el.appendChild(b);
-      }
-      b.textContent = count;
-    } else {
-      if (b) b.remove();
-    }
-  });
-}
-
-// Refresh badges every 30s while signed in
-setInterval(() => { if (typeof adminKey === 'string' && adminKey) p20UpdateBadges(); }, 30000);
-// Also right after dashboard loads
-(function() {
-  const orig = window.renderDashboard;
-  if (typeof orig === 'function') {
-    window.renderDashboard = function(d) {
-      const ret = orig.apply(this, arguments);
-      try { p20UpdateBadges(); } catch (e) {}
-      return ret;
-    };
-  }
-})();
-
-// TMC_PATCH20_AUDIT_AND_OPS: audit panel — overrides renderAuditLog to load from DB
-async function p20LoadAuditFromDb() {
-  if (typeof adminKey !== 'string' || !adminKey) return;
-  try {
-    const r = await fetch('/api/get-audit-log?admin=' + encodeURIComponent(adminKey) + '&limit=100');
-    const d = await r.json();
-    if (!d || !d.success) return;
-    const list = document.getElementById('audit-list');
-    if (!list) return;
-    if (!d.entries || d.entries.length === 0) {
-      list.innerHTML = '<div class="empty">No admin actions yet</div>';
-      return;
-    }
-    list.innerHTML = d.entries.map(e => {
-      const time = new Date(e.created_at).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
-      const isDestructive = /delete|suspend|void|disable/i.test(e.action);
-      const isPositive = /verify|gift|activate|create|generate/i.test(e.action);
-      const cls = isDestructive ? 'warn' : (isPositive ? 'good' : '');
-      let meta = '';
-      if (e.meta) {
-        try {
-          const m = typeof e.meta === 'string' ? JSON.parse(e.meta) : e.meta;
-          meta = Object.entries(m).map(([k, v]) => k + '=' + (v == null ? '' : v)).join(' · ');
-        } catch (_) { meta = String(e.meta).slice(0, 80); }
-      }
-      const target = e.target_type ? (' on ' + p20Esc(e.target_type) + (e.target_id ? ' ' + p20Esc(e.target_id) : '')) : '';
-      return '<div class="p20-audit-row ' + cls + '"><div class="dot"></div>' +
-        '<div style="flex:1;min-width:0">' +
-          '<div class="p20-audit-action">' + p20Esc(e.action) + p20Esc(target) + '</div>' +
-          (meta ? '<div class="p20-audit-meta">' + p20Esc(meta) + '</div>' : '') +
-        '</div>' +
-        '<div class="p20-audit-time">' + p20Esc(time) + '</div>' +
-      '</div>';
-    }).join('');
-  } catch (e) { console.error('audit load err:', e); }
-}
-
-// Wrap navTo so opening the Audit panel loads the DB log
-(function() {
-  const orig = window.navTo;
-  if (typeof orig === 'function') {
-    window.navTo = function(id) {
-      const ret = orig.apply(this, arguments);
-      if (id === 'audit') p20LoadAuditFromDb();
-      return ret;
-    };
-  }
-})();
-
-// TMC_PATCH20_AUDIT_AND_OPS: test data buttons
-async function p20CreateTestUser() {
-  if (!adminKey) { showToast('Sign in first'); return; }
-  const ts = Date.now().toString(36);
-  const name = 'Test User ' + ts.slice(-4).toUpperCase();
-  const email = 'test+' + ts + '@tapmycar.io';
-  const phone = '+1555' + Math.floor(1000000 + Math.random() * 9000000);
-  if (!confirm('Create a test user?\n\nName: ' + name + '\nEmail: ' + email + '\nPhone: ' + phone)) return;
-  try {
-    const r = await fetch('/api/get-dashboard', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'create_test_user', admin_key: adminKey, name: name, email: email, phone: phone })
-    });
-    const d = await r.json();
-    if (d.success) {
-      showToast('Test user created: ' + email);
-      if (typeof refreshAdmin === 'function') refreshAdmin();
-    } else {
-      showToast((typeof p18ErrText === 'function' ? p18ErrText(d && d.error) : (d && d.error)) || 'Failed');
-    }
-  } catch (e) { showToast('Network error: ' + (e && e.message)); }
-}
-
-async function p20CreateTestScan() {
-  if (!adminKey) { showToast('Sign in first'); return; }
-  // Pick a random active tag
-  const tags = (window.allTagsData || []).filter(t => t.status === 'active' || t.status === 'unclaimed');
-  if (tags.length === 0) { showToast('No tags available'); return; }
-  const tag = tags[Math.floor(Math.random() * tags.length)];
-  if (!confirm('Create a test scan on tag ' + tag.token + '?')) return;
-  try {
-    const r = await fetch('/api/get-dashboard', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'create_test_scan', admin_key: adminKey, tag_id: tag.id })
-    });
-    const d = await r.json();
-    if (d.success) {
-      showToast('Test scan added to ' + tag.token);
-      if (typeof refreshAdmin === 'function') refreshAdmin();
-    } else {
-      showToast((typeof p18ErrText === 'function' ? p18ErrText(d && d.error) : (d && d.error)) || 'Failed');
-    }
-  } catch (e) { showToast('Network error: ' + (e && e.message)); }
-}
-window.p20CreateTestUser = p20CreateTestUser;
-window.p20CreateTestScan = p20CreateTestScan;
-window.p20LoadAuditFromDb = p20LoadAuditFromDb;
 let allTagsData = [];
 let allScansData = [];
 let currentDetailUser = null;
@@ -1970,7 +1780,7 @@ function renderOrders(orders) {
     if (o.order_status === 'packed') actions += '<button onclick="promptShip(\'' + o.id + '\')" style="flex:1;background:#16A34A;color:#fff;font-size:10px;font-weight:700;padding:7px 0;border-radius:8px;border:none;cursor:pointer;font-family:inherit">Mark Shipped</button>';
     if (o.order_status === 'shipped') actions += '<button onclick="updateOrder(\'' + o.id + '\',\'delivered\')" style="flex:1;background:#1E3A5F;color:#4ADE80;font-size:10px;font-weight:700;padding:7px 0;border-radius:8px;border:none;cursor:pointer;font-family:inherit">Mark Delivered</button>';
     actions += '<button onclick="copyToClipboard(this.dataset.addr)" data-addr="' + shipAddr.replace(/"/g,'') + '" style="background:#1E2D4A;color:#94A3B8;font-size:10px;font-weight:700;padding:7px 10px;border-radius:8px;border:none;cursor:pointer;font-family:inherit">Copy Addr</button>';
-    return '<div class="order-card"><div class="order-header"><div class="order-name">' + (user.name || 'Unknown') + '</div><span style="background:rgba(255,255,255,.08);color:' + statusColor + ';padding:3px 8px;border-radius:99px;font-size:9px;font-weight:700">' + (o.order_status || 'pending').toUpperCase() + '</span></div><div class="order-detail"><div>' + (user.email || 'No email') + ' - ' + (user.phone || 'No phone') + '</div><div>Plan: <b style="color:#FF6B00">' + (o.plan || 'unknown').toUpperCase() + '</b> - $' + ((o.amount || 0)/100).toFixed(2) + ' - ' + date + '</div><div style="color:#94A3B8;margin-top:4px">Ship to: ' + shipAddr + '</div>' + (o.tracking_number ? '<div style="color:#4ADE80;margin-top:2px">Tracking: <a href="' + p20TrackingUrl(o.tracking_number) + '" target="_blank" rel="noopener" style="color:#4ADE80;text-decoration:underline">' + p20Esc(o.tracking_number) + '</a></div>' : '') /* TMC_PATCH20_AUDIT_AND_OPS */ + '</div><div class="order-actions">' + actions + '</div></div>';
+    return '<div class="order-card"><div class="order-header"><div class="order-name">' + (user.name || 'Unknown') + '</div><span style="background:rgba(255,255,255,.08);color:' + statusColor + ';padding:3px 8px;border-radius:99px;font-size:9px;font-weight:700">' + (o.order_status || 'pending').toUpperCase() + '</span></div><div class="order-detail"><div>' + (user.email || 'No email') + ' - ' + (user.phone || 'No phone') + '</div><div>Plan: <b style="color:#FF6B00">' + (o.plan || 'unknown').toUpperCase() + '</b> - $' + ((o.amount || 0)/100).toFixed(2) + ' - ' + date + '</div><div style="color:#94A3B8;margin-top:4px">Ship to: ' + shipAddr + '</div>' + (o.tracking_number ? '<div style="color:#4ADE80;margin-top:2px">Tracking: ' + o.tracking_number + '</div>' : '') + '</div><div class="order-actions">' + actions + '</div></div>';
   }).join('');
 }
 
