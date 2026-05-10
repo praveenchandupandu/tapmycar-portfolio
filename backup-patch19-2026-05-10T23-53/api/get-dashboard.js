@@ -160,20 +160,16 @@ module.exports = async function handler(req, res) {
     }
 
     // Get all users
-    // TMC_PATCH19_TAGS_AND_CSV: explicit range to defeat Supabase implicit 1000-row default
     const { data: users } = await supabase
       .from('users')
       .select('*')
-      .order('created_at', { ascending: false })
-      .range(0, 4999);
+      .order('created_at', { ascending: false });
 
     // Get all tags
-    // TMC_PATCH19_TAGS_AND_CSV: explicit range to defeat Supabase implicit 1000-row default
     const { data: tags } = await supabase
       .from('tags')
       .select('*')
-      .order('created_at', { ascending: false })
-      .range(0, 4999);
+      .order('created_at', { ascending: false });
 
     // Get total scan count
     const { count: scanCount } = await supabase
@@ -181,12 +177,11 @@ module.exports = async function handler(req, res) {
       .select('*', { count: 'exact', head: true });
 
     // Get recent scans
-    // TMC_PATCH19_TAGS_AND_CSV: scan limit 20 → 200 for admin visibility
     const { data: recentScans } = await supabase
       .from('scan_logs')
       .select('*')
       .order('scanned_at', { ascending: false })
-      .limit(200);
+      .limit(20);
 
     // Get revenue from orders
     const { data: orders } = await supabase

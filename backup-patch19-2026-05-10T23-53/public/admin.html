@@ -582,22 +582,6 @@ a { color: inherit; text-decoration: none; }
 }
 .gen-input:focus { border-color: var(--brand); box-shadow: 0 0 0 4px var(--brand-ring); }
 .gen-input::placeholder { color: var(--text-3) !important; opacity: 1; } /* TMC_PATCH16_ADMIN_COLORS */
-/* TMC_PATCH19_TAGS_AND_CSV: tag filters + voided + CSV export */
-.p19-filter-row{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding:2px;scrollbar-width:none}
-.p19-filter-row::-webkit-scrollbar{display:none}
-.p19-filter-pill{background:var(--bg-elev);border:1.5px solid var(--border);border-radius:99px;padding:6px 14px;font-size:11px;font-weight:600;color:var(--text-2);cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
-.p19-filter-pill:hover{border-color:var(--border-strong)}
-.p19-filter-pill.active{background:var(--brand);color:#fff;border-color:var(--brand)}
-.p19-filter-pill .p19-count{font-size:10px;opacity:.7;font-weight:700}
-.p19-filter-pill.active .p19-count{opacity:1}
-.p19-search-row{display:flex;gap:8px;align-items:center;margin-bottom:14px}
-.p19-search-row input{flex:1;height:38px;border:1.5px solid var(--border);border-radius:var(--r);padding:0 14px;font-size:13px;background-color:var(--bg-elev) !important;color:var(--text) !important;outline:none;font-family:inherit}
-.p19-search-row input:focus{border-color:var(--brand)}
-.p19-search-count{font-size:11px;color:var(--text-3);font-weight:600;white-space:nowrap}
-.p19-csv-btn{background:transparent;border:1.5px solid var(--border);border-radius:var(--r);color:var(--text-2);font-size:12px;font-weight:600;padding:0 14px;height:36px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;transition:all .15s}
-.p19-csv-btn:hover{background:var(--bg-elev);border-color:var(--brand);color:var(--brand)}
-.p19-csv-btn svg{width:12px;height:12px;stroke:currentColor;stroke-width:2.4;fill:none}
-.p19-tab-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap}
 /* TMC_PATCH18_USER_SUPPORT: user-detail support panel */
 .p18-row{display:flex;align-items:center;gap:8px;font-size:11.5px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
 .p18-row:last-child{border-bottom:none}
@@ -1130,16 +1114,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 
 <!-- TAGS TAB -->
 <div class="panel" id="panel-tags">
-  <!-- TMC_PATCH19_TAGS_AND_CSV: filterable tag list with CSV export -->
-  <div class="p19-tab-bar">
-    <div class="asl" style="margin:0">All Tags</div>
-    <button class="p19-csv-btn" onclick="p19ExportCsv('tags')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV</button>
-  </div>
-  <div class="p19-filter-row" id="p19-tag-filters"></div>
-  <div class="p19-search-row">
-    <input type="text" id="p19-tag-search" placeholder="Search by token, plate, or batch…" oninput="p19RenderTags()">
-    <span class="p19-search-count" id="p19-tag-count"></span>
-  </div>
+  <div class="asl">All Tags</div>
   <div id="tag-list"><div class="empty">Loading tags…</div></div>
 </div>
 
@@ -1625,9 +1600,6 @@ let scannedTokens = new Set();
 let batchTokensMap = {};
 let currentVerifyBatch = null;
 let allUsersData = [];
-/* TMC_PATCH19_TAGS_AND_CSV */
-window.allOrdersData = window.allOrdersData || [];
-window.allLeadsData = window.allLeadsData || [];
 let allTagsData = [];
 let allScansData = [];
 let currentDetailUser = null;
@@ -3129,204 +3101,6 @@ function navTo(id){
   closeSidebar();
   try { document.querySelector('.main').scrollTo({top:0,behavior:'smooth'}); window.scrollTo({top:0,behavior:'smooth'}); } catch(e){}
 }
-// TMC_PATCH19_TAGS_AND_CSV: Tag filters, search, CSV export, refresh helper
-
-// State
-let p19TagFilter = 'all';
-const p19TagStatusList = ['all', 'active', 'unclaimed', 'claimed', 'voided', 'disabled', 'inactive'];
-
-function p19Esc(s) {
-  return String(s == null ? '' : s).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-function p19CsvEsc(v) {
-  if (v == null) return '';
-  const s = String(v);
-  if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
-  return s;
-}
-
-function p19Download(filename, content, mime) {
-  const blob = new Blob([content], { type: (mime || 'text/csv;charset=utf-8') });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
-}
-
-function p19ExportCsv(kind) {
-  const dateStr = new Date().toISOString().slice(0, 10);
-  let rows = [];
-  let headers = [];
-  if (kind === 'users') {
-    headers = ['id','name','email','phone','phone_verified','plan','subscription_id','created_at'];
-    rows = (allUsersData || []).map(u => headers.map(h => u[h]));
-  } else if (kind === 'tags') {
-    headers = ['token','status','verified','tag_type','batch_number','owner_id','car_year','car_make','car_model','car_color','license_plate','vehicle_label','created_at','claimed_at','activated_at','voided_at','void_reason'];
-    rows = (allTagsData || []).map(t => headers.map(h => t[h]));
-  } else if (kind === 'scans') {
-    headers = ['id','tag_id','action','contact_action','scanned_at','device_type','latitude','longitude','message_text','photo_url','audio_url'];
-    rows = (allScansData || []).map(s => headers.map(h => s[h]));
-  } else if (kind === 'orders') {
-    headers = ['id','user_email','plan','amount','status','order_status','tracking_number','created_at'];
-    rows = (allOrdersData || []).map(o => headers.map(h => o[h]));
-  } else if (kind === 'leads') {
-    headers = ['email','name','message','tag_token','created_at'];
-    rows = (allLeadsData || []).map(l => headers.map(h => l[h]));
-  } else {
-    showToast('Unknown export type');
-    return;
-  }
-  if (rows.length === 0) {
-    showToast('Nothing to export');
-    return;
-  }
-  const csv = [headers.join(','), ...rows.map(r => r.map(p19CsvEsc).join(','))].join('\n');
-  p19Download('tapmycar_' + kind + '_' + dateStr + '.csv', csv, 'text/csv;charset=utf-8');
-  showToast('Exported ' + rows.length + ' ' + kind);
-}
-
-function p19SetTagFilter(f) {
-  p19TagFilter = f;
-  document.querySelectorAll('#p19-tag-filters .p19-filter-pill').forEach(el => {
-    el.classList.toggle('active', el.dataset.filter === f);
-  });
-  p19RenderTags();
-}
-
-function p19RenderTagFilters() {
-  const wrap = document.getElementById('p19-tag-filters');
-  if (!wrap) return;
-  const counts = {};
-  p19TagStatusList.forEach(s => counts[s] = 0);
-  (allTagsData || []).forEach(t => {
-    counts.all++;
-    if (counts.hasOwnProperty(t.status)) counts[t.status]++;
-  });
-  const labels = { all:'All', active:'Active', unclaimed:'Unclaimed', claimed:'Claimed', voided:'Voided', disabled:'Disabled', inactive:'Inactive' };
-  wrap.innerHTML = p19TagStatusList.map(s => {
-    const c = counts[s];
-    const isActive = s === p19TagFilter;
-    return '<button type="button" class="p19-filter-pill' + (isActive ? ' active' : '') + '" data-filter="' + s + '" onclick="p19SetTagFilter(\'' + s + '\')">' + labels[s] + '<span class="p19-count">' + c + '</span></button>';
-  }).join('');
-}
-
-function p19RenderTags() {
-  const list = document.getElementById('tag-list');
-  if (!list) return;
-  const q = (document.getElementById('p19-tag-search')?.value || '').toLowerCase().trim();
-  let tags = allTagsData || [];
-  // Apply status filter
-  if (p19TagFilter !== 'all') {
-    tags = tags.filter(t => t.status === p19TagFilter);
-  }
-  // Apply search
-  if (q) {
-    tags = tags.filter(t => {
-      const hay = (
-        (t.token || '') + ' ' +
-        (t.license_plate || '') + ' ' +
-        (t.vehicle_label || '') + ' ' +
-        (t.car_make || '') + ' ' +
-        (t.car_model || '') + ' ' +
-        (t.batch_number || '')
-      ).toLowerCase();
-      return hay.includes(q);
-    });
-  }
-  const countEl = document.getElementById('p19-tag-count');
-  if (countEl) countEl.textContent = tags.length + (q ? ' match' + (tags.length === 1 ? '' : 'es') : ' total');
-
-  if (tags.length === 0) {
-    list.innerHTML = '<div class="empty">No tags match the current filter</div>';
-    return;
-  }
-  list.innerHTML = tags.map(t => {
-    const statusClass = t.status === 'active' ? 'ba' : t.status === 'unclaimed' ? 'bw' : t.status === 'voided' ? 'br' : 'br';
-    const label = t.vehicle_label || '';
-    const batch = t.batch_number ? 'Batch ' + t.batch_number : 'No batch';
-    const verifiedTag = (t.verified === false && t.status === 'unclaimed') ? ' <span style="background:#713F12;color:#FDE047;font-size:8px;font-weight:700;padding:2px 6px;border-radius:99px;margin-left:4px">UNVERIFIED</span>' : '';
-    const voidReason = t.status === 'voided' && t.void_reason ? '<div style="font-size:9px;color:#FCA5A5;margin-top:2px;font-style:italic">' + p19Esc(t.void_reason) + '</div>' : '';
-    return '<div class="ar"><div><div class="un" style="font-family:monospace">' + p19Esc(typeof formatToken === 'function' ? formatToken(t.token) : t.token) + verifiedTag + '</div><div class="us">' + p19Esc(label) + ' · ' + p19Esc(t.license_plate || 'No plate') + ' · ' + p19Esc(batch) + '</div>' + voidReason + '</div><span class="' + statusClass + '">' + p19Esc(t.status) + '</span></div>';
-  }).join('');
-}
-
-// Wrap renderDashboard to also update Voided KPI + tag filters
-(function() {
-  const orig = window.renderDashboard;
-  if (typeof orig === 'function') {
-    window.renderDashboard = function(data) {
-      const ret = orig.apply(this, arguments);
-      try {
-        const voidedCount = (data && data.tags ? data.tags : []).filter(t => t.status === 'voided').length;
-        const vEl = document.getElementById('s-voided');
-        if (vEl) vEl.textContent = voidedCount;
-        p19RenderTagFilters();
-        p19RenderTags();
-      } catch (e) { console.error('p19 post-render error:', e); }
-      return ret;
-    };
-  }
-})();
-
-// Refresh helper - call after any admin action
-async function refreshAdmin() {
-  if (typeof adminKey !== 'string' || !adminKey) return;
-  try {
-    const r = await fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey));
-    const d = await r.json();
-    if (d && d.admin && typeof renderDashboard === 'function') {
-      renderDashboard(d);
-      if (typeof loadBatchOptions === 'function') loadBatchOptions(d.tags || []);
-    }
-  } catch (e) { console.error('refreshAdmin error:', e); }
-}
-window.refreshAdmin = refreshAdmin;
-window.p19ExportCsv = p19ExportCsv;
-window.p19SetTagFilter = p19SetTagFilter;
-window.p19RenderTags = p19RenderTags;
-
-// Inject CSV "Export" buttons into panels via JS (anchors vary by panel)
-function p19InjectCsvButtons() {
-  // Users panel: add to top
-  const usersPanel = document.getElementById('panel-users');
-  if (usersPanel && !usersPanel.querySelector('.p19-csv-btn')) {
-    const btnUsers = document.createElement('div');
-    btnUsers.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:10px';
-    btnUsers.innerHTML = '<button class="p19-csv-btn" onclick="p19ExportCsv(\'users\')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV</button>';
-    usersPanel.insertBefore(btnUsers, usersPanel.firstChild);
-  }
-  // Orders panel: insert near the pill-group
-  const ordersPanel = document.getElementById('panel-orders');
-  if (ordersPanel && !ordersPanel.querySelector('.p19-csv-btn')) {
-    const pillGroup = ordersPanel.querySelector('.pill-group');
-    if (pillGroup) {
-      const btn = document.createElement('button');
-      btn.className = 'p19-csv-btn';
-      btn.style.marginLeft = 'auto';
-      btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV';
-      btn.onclick = () => p19ExportCsv('orders');
-      pillGroup.style.display = 'flex';
-      pillGroup.style.alignItems = 'center';
-      pillGroup.appendChild(btn);
-    }
-  }
-  // Scans panel: at top
-  const scansPanel = document.getElementById('panel-scans');
-  if (scansPanel && !scansPanel.querySelector('.p19-csv-btn')) {
-    const btnScans = document.createElement('div');
-    btnScans.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:10px';
-    btnScans.innerHTML = '<button class="p19-csv-btn" onclick="p19ExportCsv(\'scans\')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV</button>';
-    scansPanel.insertBefore(btnScans, scansPanel.firstChild);
-  }
-  // Leads panel: already has exportLeads button.
-}
-window.p19InjectCsvButtons = p19InjectCsvButtons;
-if (document.readyState !== 'loading') p19InjectCsvButtons();
-else document.addEventListener('DOMContentLoaded', p19InjectCsvButtons);
-
 // Keep the old showTab name working for any inline onclicks that still use it
 function showTab(id, ev){ navTo(id); }
 window.showTab = showTab; window.navTo = navTo;
