@@ -235,21 +235,6 @@
 <script>
 requireAuth();
 const s = getSession();
-/* TMC_PATCH17_IDLE_LOGOUT */
-if (typeof installIdleLogout === 'function') {
-  installIdleLogout({
-    minutes: 10,
-    warningSeconds: 60,
-    onLogout: function() {
-      try {
-        localStorage.removeItem('tmc_token');
-        localStorage.removeItem('tmc_phone');
-        localStorage.removeItem('tmc_name');
-      } catch (e) {}
-      window.location.href = '/signin.html?reason=idle';
-    }
-  });
-}
 if (s.name) {
   document.getElementById('greeting-name').textContent = s.name;
   document.getElementById('av-btn').textContent = s.name[0].toUpperCase();

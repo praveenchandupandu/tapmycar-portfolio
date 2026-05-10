@@ -1628,18 +1628,6 @@ function adminLogin() {
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('admin-content').classList.remove('is-hidden');
         localStorage.setItem('tmc_admin_key', adminKey);
-        /* TMC_PATCH17_IDLE_LOGOUT: arm idle logout once admin is signed in */
-        if (typeof installIdleLogout === 'function') {
-          installIdleLogout({
-            minutes: 10,
-            warningSeconds: 60,
-            onLogout: function() {
-              try { localStorage.removeItem('tmc_admin_key'); } catch (e) {}
-              if (typeof adminLogout === 'function') adminLogout();
-              else window.location.reload();
-            }
-          });
-        }
         renderDashboard(data);
         loadBatchOptions(data.tags || []);
       } else {
@@ -1651,10 +1639,6 @@ function adminLogin() {
 
 const savedKey = localStorage.getItem('tmc_admin_key');
 if (savedKey) { adminKey = savedKey; document.getElementById('admin-key').value = savedKey; adminLogin(); }
-/* TMC_PATCH17_IDLE_LOGOUT: also arm idle logout when auto-signed-in via saved key
-   (covered by adminLogin's success path, but harmless if adminLogin fails
-   because installIdleLogout just tracks activity and never logs out anyone
-   who isn't actually signed in — adminLogout is a no-op in that case). */
 
 let allOrders = [];
 let allLeads = [];
@@ -3104,25 +3088,6 @@ function navTo(id){
 // Keep the old showTab name working for any inline onclicks that still use it
 function showTab(id, ev){ navTo(id); }
 window.showTab = showTab; window.navTo = navTo;
-
-/* TMC_PATCH17_IDLE_LOGOUT: force-refresh batch dropdown when navigating to Receive */
-(function() {
-  var origNavTo = window.navTo;
-  window.navTo = function(id) {
-    var ret = origNavTo.apply(this, arguments);
-    if (id === 'receive' && typeof adminKey === 'string' && adminKey) {
-      // Re-fetch dashboard so loadBatchOptions sees the freshest tags.
-      fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey))
-        .then(function(r) { return r.json(); })
-        .then(function(d) {
-          if (d && d.admin && typeof loadBatchOptions === 'function') {
-            loadBatchOptions(d.tags || []);
-          }
-        }).catch(function() {});
-    }
-    return ret;
-  };
-})();
 
 function openSidebar(){
   document.getElementById('sidebar').classList.add('open');
