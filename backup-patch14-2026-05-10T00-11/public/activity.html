@@ -21,14 +21,19 @@
     .p13-stat.active{background:#FFF8F2;border-color:#FFD7BA;box-shadow:0 4px 14px rgba(255,107,0,.10)}
     .p13-stat-num{font-size:22px;font-weight:800;line-height:1;letter-spacing:-.5px}
     .p13-stat-lbl{font-size:9.5px;color:#6B7280;margin-top:5px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
-    /* TMC_PATCH14_ACTIVITY_POLISH: orange-led palette (C3) */
-    .p13-stat .p13-stat-num{color:#FF6B00}
+    .p13-stat[data-cat="calls"] .p13-stat-num{color:#2563EB}
+    .p13-stat[data-cat="messages"] .p13-stat-num{color:#FF6B00}
+    .p13-stat[data-cat="photos"] .p13-stat-num{color:#7C3AED}
+    .p13-stat[data-cat="voice"] .p13-stat-num{color:#16A34A}
 
     /* Tab pills */
     .p13-tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding:2px;scrollbar-width:none}
     .p13-tabs::-webkit-scrollbar{display:none}
     .p13-tab{background:#F3F4F6;border:none;border-radius:99px;padding:8px 16px;font-size:12px;font-weight:600;color:#6B7280;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .15s,color .15s}
-    .p13-tab.active{background:#FF6B00;color:#fff}
+    .p13-tab.active[data-cat="calls"]{background:#2563EB;color:#fff}
+    .p13-tab.active[data-cat="messages"]{background:#FF6B00;color:#fff}
+    .p13-tab.active[data-cat="photos"]{background:#7C3AED;color:#fff}
+    .p13-tab.active[data-cat="voice"]{background:#16A34A;color:#fff}
 
     /* Section header */
     .p13-sec-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
@@ -48,7 +53,9 @@
     .p13-item-head{display:flex;align-items:center;gap:10px;margin-bottom:0}
     .p13-item-ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
     .p13-item-ic svg{width:16px;height:16px;stroke-width:2;fill:none;stroke:#fff}
-    .p13-item .p13-item-ic{background:#FF6B00}
+    .p13-item[data-cat="calls"] .p13-item-ic{background:#2563EB}
+    .p13-item[data-cat="messages"] .p13-item-ic{background:#FF6B00}
+    .p13-item[data-cat="voice"] .p13-item-ic{background:#16A34A}
     .p13-item-meta{flex:1;min-width:0}
     .p13-item-when{font-size:13px;font-weight:700;color:#111}
     .p13-item-loc{font-size:11px;color:#6B7280;margin-top:2px;display:flex;align-items:center;gap:3px}
@@ -69,15 +76,6 @@
     /* Message bubble */
     .p13-msg-body{margin-top:12px;background:linear-gradient(180deg,#FFF8F2,#FFF3EC);border:1.5px solid #FFD7BA;border-radius:12px;padding:14px 16px}
     .p13-msg-text{font-size:14.5px;color:#111;font-weight:600;line-height:1.45}
-
-    /* TMC_PATCH14_ACTIVITY_POLISH: call location row */
-    .p13-call-loc{display:flex;align-items:center;gap:6px;margin-top:8px;padding-top:8px;border-top:1px dashed #F3F4F6;font-size:11.5px;color:#6B7280}
-    .p13-call-loc svg{width:12px;height:12px;stroke-width:2.2;fill:none;stroke:#9CA3AF;flex-shrink:0}
-    .p13-call-loc-coords{font-family:Menlo,Consolas,monospace;font-size:11px;color:#374151;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .p13-call-loc-link{display:inline-flex;align-items:center;gap:4px;color:#FF6B00;font-weight:700;font-size:11px;text-decoration:none;flex-shrink:0;padding:4px 10px;border-radius:99px;background:#FFF3EC;transition:background .15s}
-    .p13-call-loc-link:hover{background:#FFE4CC}
-    .p13-call-loc-link svg{width:11px;height:11px;stroke:#FF6B00}
-    .p13-call-loc-empty{color:#9CA3AF;font-style:italic;font-size:11.5px}
 
     /* Photo grid */
     .p13-photo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:0}
@@ -209,7 +207,7 @@ let currentCat = 'calls';
 const CAT = {
   calls: {
     title: 'Calls',
-    color: '#FF6B00',
+    color: '#2563EB',
     match: (x) => x.action === 'call' || x.contact_action === 'call',
     emptyTitle: 'No calls yet',
     emptySub: 'When strangers tap "Call" on your tag, the call history appears here.',
@@ -225,7 +223,7 @@ const CAT = {
   },
   photos: {
     title: 'Photos',
-    color: '#FF6B00',
+    color: '#7C3AED',
     match: (x) => x.photo_url && x.photo_url.length > 10,
     emptyTitle: 'No photos yet',
     emptySub: 'When strangers take a photo of your car (damage, parking issue), the photos show up here.',
@@ -233,7 +231,7 @@ const CAT = {
   },
   voice: {
     title: 'Voice memos',
-    color: '#FF6B00',
+    color: '#16A34A',
     match: (x) => x.audio_url && x.audio_url.length > 10,
     emptyTitle: 'No voice memos yet',
     emptySub: 'Recorded voice messages from strangers will appear here, ready to play.',
@@ -315,24 +313,6 @@ function p13Esc(s) {
   return String(s).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-function p13CallLocRow(scan) {
-  // TMC_PATCH14_ACTIVITY_POLISH: rich location row for call cards (L3 - coords + maps link)
-  if (scan.latitude && scan.longitude) {
-    const lat = Number(scan.latitude).toFixed(4);
-    const lng = Number(scan.longitude).toFixed(4);
-    const mapsUrl = 'https://www.google.com/maps?q=' + encodeURIComponent(scan.latitude + ',' + scan.longitude);
-    return '<div class="p13-call-loc">' +
-      '<svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' +
-      '<div class="p13-call-loc-coords">' + p13Esc(lat) + ', ' + p13Esc(lng) + '</div>' +
-      '<a class="p13-call-loc-link" href="' + p13Esc(mapsUrl) + '" target="_blank" rel="noopener noreferrer">' +
-        'View on map' +
-        '<svg viewBox="0 0 24 24"><path d="M7 17L17 7"/><polyline points="7 7 17 7 17 17"/></svg>' +
-      '</a>' +
-    '</div>';
-  }
-  return '<div class="p13-call-loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span class="p13-call-loc-empty">Location not shared</span></div>';
-}
-
 function p13RenderCall(scan) {
   const duration = scan.duration_seconds || 0;
   const durTxt = duration > 0 ? Math.floor(duration / 60) + 'm ' + (duration % 60) + 's' : '';
@@ -356,7 +336,6 @@ function p13RenderCall(scan) {
       '<div class="p13-call-num">Stranger called</div>' +
       '<span class="p13-call-stat ' + p13Esc(status) + '">' + p13Esc(statusLabel) + '</span>' +
     '</div>' +
-    p13CallLocRow(scan) +
   '</div>';
 }
 
