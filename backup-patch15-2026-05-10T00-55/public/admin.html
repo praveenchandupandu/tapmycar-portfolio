@@ -563,7 +563,7 @@ a { color: inherit; text-decoration: none; }
 
 .form-stack { display: flex; flex-direction: column; gap: 14px; }
 .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.field-label { font-size: 12px; color: var(--text-2); font-weight: 600; } /* TMC_PATCH15_VERIFY_GATE */
+.field-label { font-size: 12px; color: var(--text-3); font-weight: 600; }
 
 .gen-input {
   height: 44px;
@@ -579,28 +579,6 @@ a { color: inherit; text-decoration: none; }
 }
 .gen-input:focus { border-color: var(--brand); box-shadow: 0 0 0 4px var(--brand-ring); }
 .gen-input::placeholder { color: var(--text-4); }
-/* TMC_PATCH15_VERIFY_GATE: keep autofill in dark theme */
-.gen-input:-webkit-autofill,
-.gen-input:-webkit-autofill:hover,
-.gen-input:-webkit-autofill:focus {
-  -webkit-text-fill-color: var(--text);
-  -webkit-box-shadow: 0 0 0px 1000px var(--bg-elev) inset;
-  caret-color: var(--text);
-  transition: background-color 5000s ease-in-out 0s;
-}
-/* TMC_PATCH15_VERIFY_GATE: camera scanner */
-.p15-scan-toggle{display:flex;gap:8px;margin-bottom:14px}
-.p15-scan-toggle button{flex:1;height:40px;border-radius:var(--r);border:1.5px solid var(--border);background:var(--bg-elev);color:var(--text-2);font-weight:600;font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s}
-.p15-scan-toggle button.active{background:var(--brand);color:#fff;border-color:var(--brand)}
-.p15-camera-box{display:none;background:#000;border-radius:var(--r);overflow:hidden;margin-bottom:14px;position:relative}
-.p15-camera-box.show{display:block}
-.p15-camera-box video{width:100%;display:block}
-.p15-camera-status{position:absolute;top:8px;left:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:6px 10px;border-radius:6px;text-align:center}
-.p15-voided-list{margin-top:12px}
-.p15-voided-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px}
-.p15-voided-item:last-child{border-bottom:none}
-.p15-voided-token{font-family:'SF Mono',Monaco,Consolas,monospace;font-size:13px;color:var(--text-2)}
-.p15-voided-meta{font-size:11px;color:var(--text-3);margin-top:2px}
 select.gen-input {
   appearance: none; -webkit-appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
@@ -1139,15 +1117,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
         <option value="">— Select batch —</option>
       </select>
     </div>
-    <!-- TMC_PATCH15_VERIFY_GATE: scan mode toggle (manual vs camera) -->
-    <div class="p15-scan-toggle">
-      <button type="button" id="p15-mode-manual" class="active" onclick="p15SetScanMode('manual')">Type / paste</button>
-      <button type="button" id="p15-mode-camera" onclick="p15SetScanMode('camera')">Camera scan</button>
-    </div>
-    <div class="p15-camera-box" id="p15-camera-box">
-      <div class="p15-camera-status" id="p15-camera-status">Starting camera…</div>
-      <div id="p15-camera-reader" style="width:100%;min-height:240px"></div>
-    </div>
     <div class="scan-entry">
       <input type="text" class="scan-input" id="scan-token" placeholder="Scan or type token…" onkeydown="if(event.key==='Enter')scanToken()">
       <button class="gen-btn success" onclick="scanToken()">Scan</button>
@@ -1158,9 +1127,9 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
       <div class="verify-stat"><span class="verify-label">Not yet scanned</span><span class="verify-val yellow" id="v-remaining">0</span></div>
     </div>
     <div class="scanned-list" id="scanned-list"></div>
-    <button class="danger-btn" id="finalize-btn" onclick="finalizeReceive()" style="display:none" disabled>Finalize — verify scanned, void unverified</button>
+    <button class="danger-btn" id="finalize-btn" onclick="finalizeReceive()" style="display:none" disabled>Finalize — delete unscanned from this batch only</button>
     <div id="finalize-warning" style="display:none;margin-top:10px;background:var(--danger-soft);border-radius:var(--r-sm);padding:12px;font-size:12px;color:var(--danger);line-height:1.5">
-      This voids all unscanned tokens from Batch <strong id="fw-batch"></strong> (kept for audit, never activatable). Other batches are NOT affected.
+      This will permanently delete all unscanned tokens from Batch <strong id="fw-batch"></strong> only. Other batches are NOT affected. Cannot be undone.
     </div>
   </div>
 </div>
@@ -2033,55 +2002,38 @@ function scanToken() {
 
 async function finalizeReceive() {
   if (!currentVerifyBatch) return;
-  // TMC_PATCH15_VERIFY_GATE: use new verify-tags endpoint to verify scanned + void unverified
   const batchTokens = batchTokensMap[currentVerifyBatch] || [];
-  const scannedArr = Array.from(scannedTokens);
   const unscanned = batchTokens.filter(t => !scannedTokens.has(t.token));
 
-  if (scannedArr.length === 0 && unscanned.length === 0) {
-    showToast('Nothing to do.');
+  if (unscanned.length === 0) {
+    showToast('All tokens received  nothing to delete!');
     return;
   }
 
-  const msg = 'Finalize Batch ' + currentVerifyBatch + '?\n\n' +
-    'Verify ' + scannedArr.length + ' scanned token(s) (will become activatable).\n' +
-    'Void ' + unscanned.length + ' unscanned token(s) (kept for audit, but cannot be activated).\n\n' +
-    'Other batches are NOT touched.';
-  if (!confirm(msg)) return;
+  const confirmed = confirm(
+    `Delete ${unscanned.length} unscanned token(s) from Batch ${currentVerifyBatch} ONLY?\n\n` +
+    `Tokens to delete:\n${unscanned.map(t => '#' + t.token).join('\n')}\n\n` +
+    `Other batches are NOT touched. This cannot be undone.`
+  );
+  if (!confirmed) return;
 
   const btn = document.getElementById('finalize-btn');
-  btn.textContent = 'Finalizing...'; btn.disabled = true;
-  let verifiedCount = 0, voidedCount = 0, errs = 0;
+  btn.textContent = 'Deleting...'; btn.disabled = true;
 
-  // Step 1: verify scanned tokens
-  if (scannedArr.length > 0) {
+  let deleted = 0, errors = 0;
+  for (const t of unscanned) {
     try {
-      const res = await fetch('/api/verify-tags', {
+      const res = await fetch('/api/get-tag', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
-        body: JSON.stringify({ mode: 'verify', tokens: scannedArr })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: t.token, user_id: 'admin-delete', status_override: 'deleted' })
       });
       const data = await res.json();
-      if (data.success) verifiedCount = data.verified_count || 0;
-      else errs++;
-    } catch (e) { errs++; }
+      if (data.success) deleted++; else errors++;
+    } catch(e) { errors++; }
   }
 
-  // Step 2: void unverified in this batch
-  if (unscanned.length > 0) {
-    try {
-      const res = await fetch('/api/verify-tags', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
-        body: JSON.stringify({ mode: 'void_unverified_in_batch', batch_number: currentVerifyBatch, void_reason: 'not received from manufacturer' })
-      });
-      const data = await res.json();
-      if (data.success) voidedCount = data.voided_count || 0;
-      else errs++;
-    } catch (e) { errs++; }
-  }
-
-  showToast('Verified ' + verifiedCount + ', voided ' + voidedCount + (errs ? ' (' + errs + ' errors)' : ''));
+  showToast(`Deleted ${deleted} unscanned tokens from Batch ${currentVerifyBatch}` + (errors ? ` (${errors} errors)` : ''));
 
   const rr = await fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey));
   const rd = await rr.json();
@@ -2577,7 +2529,7 @@ async function executeDeleteBatch() {
     try {
       const res = await fetch('/api/get-tag', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey } /* TMC_PATCH15_VERIFY_GATE */,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: t.token, user_id: 'admin-delete', status_override: 'deleted' })
       });
       const data = await res.json();
@@ -2983,68 +2935,5 @@ window.addEventListener('load', function() {
 });
 </script>
 
-
-<!-- TMC_PATCH15_VERIFY_GATE: camera QR scanner library (loaded only if user opens camera mode) -->
-<script>
-let p15Html5QrLoaded = false;
-let p15Html5QrInstance = null;
-function p15LoadQrLib(cb) {
-  if (p15Html5QrLoaded) return cb();
-  const s = document.createElement('script');
-  s.src = 'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';
-  s.onload = () => { p15Html5QrLoaded = true; cb(); };
-  s.onerror = () => { showToast('Could not load camera scanner library'); };
-  document.head.appendChild(s);
-}
-function p15SetScanMode(mode) {
-  const btnM = document.getElementById('p15-mode-manual');
-  const btnC = document.getElementById('p15-mode-camera');
-  const camBox = document.getElementById('p15-camera-box');
-  btnM.classList.toggle('active', mode === 'manual');
-  btnC.classList.toggle('active', mode === 'camera');
-  if (mode === 'camera') {
-    camBox.classList.add('show');
-    p15LoadQrLib(p15StartCamera);
-  } else {
-    camBox.classList.remove('show');
-    p15StopCamera();
-  }
-}
-function p15StartCamera() {
-  if (typeof Html5Qrcode === 'undefined') { showToast('Scanner not loaded'); return; }
-  const status = document.getElementById('p15-camera-status');
-  status.textContent = 'Point camera at a QR code…';
-  if (p15Html5QrInstance) {
-    try { p15Html5QrInstance.stop().catch(()=>{}); } catch(e){}
-  }
-  p15Html5QrInstance = new Html5Qrcode('p15-camera-reader');
-  Html5Qrcode.getCameras().then(devices => {
-    if (!devices || devices.length === 0) { status.textContent = 'No cameras found'; return; }
-    // Prefer back camera
-    const cam = devices.find(d => /back|rear|environment/i.test(d.label)) || devices[0];
-    p15Html5QrInstance.start(
-      cam.id,
-      { fps: 10, qrbox: { width: 240, height: 240 } },
-      decodedText => {
-        // Each successful scan: drop into the manual input and submit.
-        document.getElementById('scan-token').value = decodedText;
-        scanToken();
-        status.textContent = 'Scanned. Point at next sticker…';
-      },
-      _err => {} // ignore per-frame decode failures
-    ).catch(err => {
-      status.textContent = 'Camera error: ' + (err && err.message ? err.message : 'unknown');
-    });
-  }).catch(err => {
-    status.textContent = 'Camera permission denied or unavailable';
-  });
-}
-function p15StopCamera() {
-  if (p15Html5QrInstance) {
-    try { p15Html5QrInstance.stop().catch(()=>{}); } catch(e){}
-    p15Html5QrInstance = null;
-  }
-}
-</script>
 </body>
 </html>

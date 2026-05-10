@@ -59,8 +59,7 @@ module.exports = async function handler(req, res) {
         token,
         status: 'unclaimed',
         batch_number: batch_number || null,
-        tag_type: 'physical',
-        verified: false /* TMC_PATCH15_VERIFY_GATE: must be verified by admin before activation */
+        tag_type: 'physical'
       })
       .select()
       .single();

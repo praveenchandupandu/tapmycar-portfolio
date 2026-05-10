@@ -19,14 +19,6 @@ module.exports = async function handler(req, res) {
 
     // Handle status override (deactivate, delete, etc.)
     if (status_override) {
-      // TMC_PATCH15_VERIFY_GATE: destructive overrides require admin auth. Other status
-      // changes ('paused', 'inactive', 'active') remain user-accessible.
-      if (status_override === 'deleted' || status_override === 'voided') {
-        const _adminKey = req.headers['x-admin-key'] || (req.body && req.body.admin_key) || '';
-        if (_adminKey !== process.env.ADMIN_SECRET_KEY) {
-          return res.status(401).json({ error: 'Unauthorized' });
-        }
-      }
       if (status_override === 'deleted') {
         const { error } = await supabase
           .from('tags')
@@ -162,40 +154,6 @@ module.exports = async function handler(req, res) {
       }
     } catch (etagErr) {
       console.error('eTag deactivation error (non-fatal):', etagErr);
-    }
-
-    // TMC_PATCH15_VERIFY_GATE: verification gate
-    // Block activation of tokens that haven't been verified by admin yet.
-    // Tokens flow:  generated (verified=false) -> admin scans (verified=true) -> customer can activate.
-    // Voided tokens (status='voided') are never activatable.
-    try {
-      const { data: vtag } = await supabase
-        .from('tags')
-        .select('verified, status, tag_type')
-        .eq('token', cleanToken)
-        .maybeSingle();
-      if (!vtag) {
-        return res.status(404).json({ error: 'Tag not found.' });
-      }
-      if (vtag.status === 'voided') {
-        return res.status(403).json({
-          error: 'This sticker has been voided and cannot be activated. If you bought this from TapMyCar, please contact support.',
-          voided: true
-        });
-      }
-      // eTags are auto-issued by the system, never go to a manufacturer,
-      // so they're inherently trusted. Only physical tags need verification.
-      if (vtag.tag_type === 'physical' && !vtag.verified) {
-        return res.status(403).json({
-          error: 'This sticker has not been activated by TapMyCar yet. If you bought this from us, please contact support@tapmycar.io.',
-          unverified: true
-        });
-      }
-    } catch (e) {
-      console.error('verification gate error:', e && e.message);
-      // Fail closed on errors — better to delay a real customer than
-      // accidentally allow an unverified tag.
-      return res.status(500).json({ error: 'Verification check failed. Please try again.' });
     }
 
     const updates = {
