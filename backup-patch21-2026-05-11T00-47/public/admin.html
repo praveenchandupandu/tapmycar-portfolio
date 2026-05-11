@@ -582,29 +582,6 @@ a { color: inherit; text-decoration: none; }
 }
 .gen-input:focus { border-color: var(--brand); box-shadow: 0 0 0 4px var(--brand-ring); }
 .gen-input::placeholder { color: var(--text-3) !important; opacity: 1; } /* TMC_PATCH16_ADMIN_COLORS */
-/* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: voided multi-select + scans-by-user */
-.p21-voided-controls{display:flex;align-items:center;gap:10px;background:#1A2D4A;border-radius:10px;padding:10px 14px;margin-bottom:10px}
-.p21-voided-controls label{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--text-2);cursor:pointer;font-weight:600}
-.p21-voided-controls .p21-sel-count{font-size:12px;color:var(--text-3);margin-left:auto;font-weight:600}
-.p21-voided-controls button{height:34px;padding:0 14px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
-.p21-delete-btn{background:#DC2626;color:#fff}
-.p21-delete-btn:disabled{opacity:.4;cursor:not-allowed}
-.p21-delete-btn:hover:not(:disabled){background:#B91C1C}
-.p21-row-cb{margin-right:10px;width:18px;height:18px;accent-color:var(--brand);cursor:pointer;flex-shrink:0}
-.p21-ar-wrap{display:flex;align-items:center}
-.p21-ar-wrap .ar{flex:1;min-width:0}
-
-/* Scans-by-user view */
-.p21-scans-user-row{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:all .15s}
-.p21-scans-user-row:hover{border-color:var(--brand);background:var(--bg-elev)}
-.p21-su-avatar{width:38px;height:38px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0}
-.p21-su-info{flex:1;min-width:0}
-.p21-su-name{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
-.p21-su-meta{font-size:11px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.p21-su-stat{text-align:right;flex-shrink:0}
-.p21-su-stat-num{font-size:18px;font-weight:800;color:var(--brand);line-height:1}
-.p21-su-stat-lbl{font-size:10px;color:var(--text-3);font-weight:600;margin-top:3px;text-transform:uppercase;letter-spacing:.4px}
-.p21-su-time{font-size:10.5px;color:var(--text-3);text-align:right;margin-top:4px}
 /* TMC_PATCH20_AUDIT_AND_OPS: notification badges + test-data + audit list */
 .p20-badge{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:#FF6B00;color:#fff;font-size:9px;font-weight:800;margin-left:auto;font-family:inherit}
 .sb-item .p20-badge{margin-left:auto}
@@ -1193,7 +1170,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
       </div>
       <div class="field">
         <label class="field-label">Batch #</label>
-        <input type="text" class="gen-input" id="gen-batch" placeholder="e.g. 1 or HOLIDAY-2026" maxlength="40"> <!-- TMC_PATCH21_BATCH_TEXT_AND_FILTERS -->
+        <input type="number" class="gen-input" id="gen-batch" placeholder="e.g. 1">
       </div>
       <div class="field">
         <label class="field-label">&nbsp;</label>
@@ -1216,7 +1193,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
       </div>
       <div class="field">
         <label class="field-label">Original batch #</label>
-        <input type="text" class="gen-input" id="repl-batch" placeholder="e.g. 1" maxlength="40"> <!-- TMC_PATCH21_BATCH_TEXT_AND_FILTERS -->
+        <input type="number" class="gen-input" id="repl-batch" placeholder="e.g. 1">
       </div>
       <div class="field">
         <label class="field-label">&nbsp;</label>
@@ -1243,7 +1220,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
     <div class="form-row">
       <div class="field">
         <label class="field-label">Batch #</label>
-        <input type="text" class="gen-input" id="del-batch" placeholder="Batch to delete" maxlength="40"> <!-- TMC_PATCH21_BATCH_TEXT_AND_FILTERS -->
+        <input type="number" class="gen-input" id="del-batch" placeholder="Batch to delete">
       </div>
       <div class="field">
         <label class="field-label">&nbsp;</label>
@@ -1509,14 +1486,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 
 <!-- SCANS TAB -->
 <div class="panel" id="panel-scans">
-  <!-- TMC_PATCH21_BATCH_TEXT_AND_FILTERS: scans-by-user view -->
-  <div class="p19-search-row" style="margin-bottom:14px">
-    <input type="text" id="p21-scans-search" placeholder="Search users by name, email, or phone…" oninput="p21RenderScansByUser()">
-    <span class="p21-sel-count" id="p21-scans-count"></span>
-  </div>
-  <div id="p21-scans-by-user-list"></div>
-  <!-- legacy flat scan-list kept for compatibility but hidden -->
-  <div id="scan-list-wrap" style="display:none">
   <div class="asl">Recent scans</div>
   <div id="scan-list"><div class="empty">Loading…</div></div>
 </div>
@@ -2218,12 +2187,7 @@ function loadBatchOptions(tags) {
 
   const sel = document.getElementById('verify-batch');
   sel.innerHTML = '<option value=""> Select batch </option>';
-  Object.keys(batchTokensMap).sort((a,b) => {
-    /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: numeric-aware alphanumeric sort */
-    const na = parseFloat(a), nb = parseFloat(b);
-    if (!isNaN(na) && !isNaN(nb)) return na - nb;
-    return String(a).localeCompare(String(b));
-  }).forEach(b => {
+  Object.keys(batchTokensMap).sort((a,b) => a-b).forEach(b => {
     const count = batchTokensMap[b].length;
     sel.innerHTML += `<option value="${b}">Batch ${b} (${count} tokens)</option>`;
   });
@@ -2234,8 +2198,7 @@ function loadBatchOptions(tags) {
 //  GENERATE NEW BATCH 
 async function generateTokens() {
   const count = parseInt(document.getElementById('gen-count').value) || 1;
-  /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: batch is text now */
-  const batch = (document.getElementById('gen-batch').value || '').trim() || null;
+  const batch = document.getElementById('gen-batch').value || null;
   const btn = document.getElementById('gen-btn');
   if (count > 500) { showToast('Max 500 per batch'); return; }
   if (!batch) { showToast('Enter a batch number'); return; }
@@ -2244,7 +2207,7 @@ async function generateTokens() {
     const res = await fetch('/api/generate-tokens', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
-      body: JSON.stringify({ count, batch_number: batch }) /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS */
+      body: JSON.stringify({ count, batch_number: parseInt(batch) })
     });
     const data = await res.json();
     if (data.success) {
@@ -2282,7 +2245,7 @@ async function generateReplacements() {
   if (!count || count < 1) { showToast('Enter how many replacements'); return; }
   if (count > 500) { showToast('Max 500'); return; }
   if (!batch) { showToast('Enter the original batch number'); return; }
-  const batchNum = String(batch).trim(); /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: text batch */
+  const batchNum = parseInt(batch);
   btn.textContent = 'Generating...'; btn.disabled = true;
   try {
     // Get current batch size to determine starting unit number
@@ -2290,7 +2253,7 @@ async function generateReplacements() {
     const checkData = await checkRes.json();
     let existingCount = 0;
     if (checkData.tags) {
-      existingCount = checkData.tags.filter(t => String(t.batch_number) === batchNum).length;
+      existingCount = checkData.tags.filter(t => t.batch_number === batchNum).length;
     }
     // Generate with same batch number
     const res = await fetch('/api/generate-tokens', {
@@ -3067,10 +3030,9 @@ function generatePromoCode() {
 
 //  DELETE ENTIRE BATCH 
 function showDeleteConfirm() {
-  /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: text batch */
-  const batch = (document.getElementById('del-batch').value || '').trim();
+  const batch = document.getElementById('del-batch').value;
   if (!batch) { showToast('Enter a batch number'); return; }
-  const batchNum = batch;
+  const batchNum = parseInt(batch);
   const batchTokens = batchTokensMap[batchNum];
   if (!batchTokens || batchTokens.length === 0) {
     showToast('No tokens found in Batch ' + batchNum);
@@ -3094,7 +3056,7 @@ function cancelDelete() {
 }
 
 async function executeDeleteBatch() {
-  const batch = (document.getElementById('del-batch').value || '').trim(); /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS */
+  const batch = parseInt(document.getElementById('del-batch').value);
   const password = document.getElementById('del-password').value.trim();
   if (!password) { showToast('Enter admin password'); return; }
 
@@ -3361,8 +3323,7 @@ function navTo(id){
 
 // State
 let p19TagFilter = 'all';
-/* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: split "unclaimed" into "verified" + "unverified" */
-const p19TagStatusList = ['all', 'active', 'verified', 'unverified', 'claimed', 'voided', 'disabled', 'inactive'];
+const p19TagStatusList = ['all', 'active', 'unclaimed', 'claimed', 'voided', 'disabled', 'inactive'];
 
 function p19Esc(s) {
   return String(s == null ? '' : s).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
@@ -3432,15 +3393,9 @@ function p19RenderTagFilters() {
   p19TagStatusList.forEach(s => counts[s] = 0);
   (allTagsData || []).forEach(t => {
     counts.all++;
-    /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: split unclaimed into verified vs unverified */
-    if (t.status === 'unclaimed') {
-      if (t.verified) counts.verified++;
-      else counts.unverified++;
-    } else if (counts.hasOwnProperty(t.status)) {
-      counts[t.status]++;
-    }
+    if (counts.hasOwnProperty(t.status)) counts[t.status]++;
   });
-  const labels = { all:'All', active:'Active', verified:'Verified', unverified:'Unverified', claimed:'Claimed', voided:'Voided', disabled:'Disabled', inactive:'Inactive' };
+  const labels = { all:'All', active:'Active', unclaimed:'Unclaimed', claimed:'Claimed', voided:'Voided', disabled:'Disabled', inactive:'Inactive' };
   wrap.innerHTML = p19TagStatusList.map(s => {
     const c = counts[s];
     const isActive = s === p19TagFilter;
@@ -3454,12 +3409,7 @@ function p19RenderTags() {
   const q = (document.getElementById('p19-tag-search')?.value || '').toLowerCase().trim();
   let tags = allTagsData || [];
   // Apply status filter
-  /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: handle derived verified/unverified */
-  if (p19TagFilter === 'verified') {
-    tags = tags.filter(t => t.status === 'unclaimed' && t.verified === true);
-  } else if (p19TagFilter === 'unverified') {
-    tags = tags.filter(t => t.status === 'unclaimed' && t.verified === false);
-  } else if (p19TagFilter !== 'all') {
+  if (p19TagFilter !== 'all') {
     tags = tags.filter(t => t.status === p19TagFilter);
   }
   // Apply search
@@ -3483,174 +3433,15 @@ function p19RenderTags() {
     list.innerHTML = '<div class="empty">No tags match the current filter</div>';
     return;
   }
-  /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: voided multi-select controls */
-  const showVoidedControls = (p19TagFilter === 'voided' && tags.length > 0);
-  let controlsHtml = '';
-  if (showVoidedControls) {
-    controlsHtml =
-      '<div class="p21-voided-controls">' +
-        '<label><input type="checkbox" id="p21-select-all" onchange="p21ToggleAll(this.checked)"> Select all</label>' +
-        '<span class="p21-sel-count" id="p21-sel-count">0 selected</span>' +
-        '<button class="p21-delete-btn" id="p21-delete-selected" onclick="p21DeleteSelected()" disabled>Delete selected</button>' +
-      '</div>';
-  }
-
-  list.innerHTML = controlsHtml + tags.map(t => {
+  list.innerHTML = tags.map(t => {
     const statusClass = t.status === 'active' ? 'ba' : t.status === 'unclaimed' ? 'bw' : t.status === 'voided' ? 'br' : 'br';
     const label = t.vehicle_label || '';
     const batch = t.batch_number ? 'Batch ' + t.batch_number : 'No batch';
     const verifiedTag = (t.verified === false && t.status === 'unclaimed') ? ' <span style="background:#713F12;color:#FDE047;font-size:8px;font-weight:700;padding:2px 6px;border-radius:99px;margin-left:4px">UNVERIFIED</span>' : '';
-    const verifiedBadge = (t.verified === true && t.status === 'unclaimed') ? ' <span style="background:#14532D;color:#4ADE80;font-size:8px;font-weight:700;padding:2px 6px;border-radius:99px;margin-left:4px">VERIFIED</span>' : '';
     const voidReason = t.status === 'voided' && t.void_reason ? '<div style="font-size:9px;color:#FCA5A5;margin-top:2px;font-style:italic">' + p19Esc(t.void_reason) + '</div>' : '';
-    /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: checkbox for voided */
-    const cb = showVoidedControls
-      ? '<input type="checkbox" class="p21-row-cb" data-token="' + p19Esc(t.token) + '" onchange="p21UpdateSelCount()">'
-      : '';
-    return '<div class="p21-ar-wrap">' + cb +
-      '<div class="ar"><div><div class="un" style="font-family:monospace">' + p19Esc(typeof formatToken === 'function' ? formatToken(t.token) : t.token) + verifiedTag + verifiedBadge + '</div><div class="us">' + p19Esc(label) + ' · ' + p19Esc(t.license_plate || 'No plate') + ' · ' + p19Esc(batch) + '</div>' + voidReason + '</div><span class="' + statusClass + '">' + p19Esc(t.status) + '</span></div>' +
-    '</div>';
-  }).join('');
-  /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: refresh select-all state */
-  if (showVoidedControls) p21UpdateSelCount();
-}
-
-/* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: voided multi-select helpers */
-function p21ToggleAll(checked) {
-  document.querySelectorAll('.p21-row-cb').forEach(cb => cb.checked = checked);
-  p21UpdateSelCount();
-}
-function p21UpdateSelCount() {
-  const cbs = document.querySelectorAll('.p21-row-cb');
-  const sel = Array.from(cbs).filter(c => c.checked);
-  const ct = document.getElementById('p21-sel-count');
-  const btn = document.getElementById('p21-delete-selected');
-  const all = document.getElementById('p21-select-all');
-  if (ct) ct.textContent = sel.length + ' selected';
-  if (btn) btn.disabled = sel.length === 0;
-  if (all) {
-    if (sel.length === 0) { all.checked = false; all.indeterminate = false; }
-    else if (sel.length === cbs.length) { all.checked = true; all.indeterminate = false; }
-    else { all.checked = false; all.indeterminate = true; }
-  }
-}
-async function p21DeleteSelected() {
-  const sel = Array.from(document.querySelectorAll('.p21-row-cb')).filter(c => c.checked);
-  if (sel.length === 0) return;
-  const tokens = sel.map(c => c.dataset.token);
-  if (!confirm('Permanently delete ' + tokens.length + ' voided token(s)?\n\nThis cannot be undone. Audit log entries remain.')) return;
-  const btn = document.getElementById('p21-delete-selected');
-  if (btn) { btn.disabled = true; btn.textContent = 'Deleting…'; }
-  let okCount = 0, errCount = 0, lastErr = '';
-  for (const tok of tokens) {
-    try {
-      const r = await fetch('/api/get-tag', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
-        body: JSON.stringify({ token: tok, user_id: 'admin-delete', status_override: 'deleted' })
-      });
-      const d = await r.json();
-      if (d.success) okCount++; else { errCount++; lastErr = d.error || lastErr; }
-    } catch (e) { errCount++; lastErr = e && e.message; }
-  }
-  showToast('Deleted ' + okCount + (errCount ? ' (' + errCount + ' err: ' + (lastErr || 'unknown') + ')' : ''));
-  if (typeof refreshAdmin === 'function') refreshAdmin();
-}
-window.p21ToggleAll = p21ToggleAll;
-window.p21UpdateSelCount = p21UpdateSelCount;
-window.p21DeleteSelected = p21DeleteSelected;
-
-/* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: render Scans tab as users sorted by recent activity */
-function p21RenderScansByUser() {
-  const list = document.getElementById('p21-scans-by-user-list');
-  if (!list) return;
-  const q = (document.getElementById('p21-scans-search')?.value || '').toLowerCase().trim();
-  const scans = allScansData || [];
-  const users = allUsersData || [];
-  const tags = allTagsData || [];
-
-  // Map tag_id → tag → owner_id
-  const tagOwner = {};
-  tags.forEach(t => { tagOwner[t.id] = t.owner_id; });
-
-  // Group scans by owner_id
-  const byOwner = {};
-  scans.forEach(s => {
-    const owner = tagOwner[s.tag_id];
-    if (!owner) return;
-    if (!byOwner[owner]) byOwner[owner] = { count: 0, last: null };
-    byOwner[owner].count++;
-    const t = new Date(s.scanned_at);
-    if (!byOwner[owner].last || t > byOwner[owner].last) byOwner[owner].last = t;
-  });
-
-  // Build user rows with scan info
-  let rows = users
-    .filter(u => byOwner[u.id])
-    .map(u => {
-      const tag = tags.find(t => t.owner_id === u.id);
-      return {
-        user: u,
-        scanCount: byOwner[u.id].count,
-        lastScan: byOwner[u.id].last,
-        vehicle: tag ? [tag.car_year, tag.car_make, tag.car_model].filter(Boolean).join(' ') : ''
-      };
-    });
-
-  // Apply search filter
-  if (q) {
-    rows = rows.filter(r => {
-      const hay = (
-        (r.user.name || '') + ' ' +
-        (r.user.email || '') + ' ' +
-        (r.user.phone || '') + ' ' +
-        (r.vehicle || '')
-      ).toLowerCase();
-      return hay.includes(q);
-    });
-  }
-
-  // Sort by last scan, most recent first
-  rows.sort((a, b) => (b.lastScan || 0) - (a.lastScan || 0));
-
-  const ct = document.getElementById('p21-scans-count');
-  if (ct) ct.textContent = rows.length + ' user' + (rows.length === 1 ? '' : 's') + ' with activity';
-
-  if (rows.length === 0) {
-    list.innerHTML = '<div class="empty">No scan activity yet</div>';
-    return;
-  }
-
-  list.innerHTML = rows.map(r => {
-    const ts = r.lastScan ? r.lastScan.toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : '—';
-    const initial = (r.user.name || 'U')[0].toUpperCase();
-    const meta = (r.user.email || r.user.phone || 'No contact') + (r.vehicle ? ' · ' + r.vehicle : '');
-    return '<div class="p21-scans-user-row" onclick="openUserDetail(\'' + p19Esc(r.user.id) + '\')">' +
-      '<div class="p21-su-avatar">' + p19Esc(initial) + '</div>' +
-      '<div class="p21-su-info">' +
-        '<div class="p21-su-name">' + p19Esc(r.user.name || 'Unknown user') + '</div>' +
-        '<div class="p21-su-meta">' + p19Esc(meta) + '</div>' +
-      '</div>' +
-      '<div class="p21-su-stat">' +
-        '<div class="p21-su-stat-num">' + r.scanCount + '</div>' +
-        '<div class="p21-su-stat-lbl">scans</div>' +
-        '<div class="p21-su-time">' + p19Esc(ts) + '</div>' +
-      '</div>' +
-    '</div>';
+    return '<div class="ar"><div><div class="un" style="font-family:monospace">' + p19Esc(typeof formatToken === 'function' ? formatToken(t.token) : t.token) + verifiedTag + '</div><div class="us">' + p19Esc(label) + ' · ' + p19Esc(t.license_plate || 'No plate') + ' · ' + p19Esc(batch) + '</div>' + voidReason + '</div><span class="' + statusClass + '">' + p19Esc(t.status) + '</span></div>';
   }).join('');
 }
-window.p21RenderScansByUser = p21RenderScansByUser;
-
-/* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: wrap renderDashboard to also render scans-by-user */
-(function() {
-  const orig = window.renderDashboard;
-  if (typeof orig === 'function') {
-    window.renderDashboard = function(d) {
-      const ret = orig.apply(this, arguments);
-      try { p21RenderScansByUser(); } catch (e) { console.error('p21 scans render:', e); }
-      return ret;
-    };
-  }
-})();
 
 // Wrap renderDashboard to also update Voided KPI + tag filters
 (function() {

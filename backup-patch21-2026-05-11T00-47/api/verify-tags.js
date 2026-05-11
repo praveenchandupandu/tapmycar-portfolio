@@ -59,17 +59,7 @@ module.exports = async function handler(req, res) {
       .select('token');
 
     if (error) return res.status(500).json({ error: error.message });
-    /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: audit batch */
-    // Look up batches of these tokens to include in audit meta
-    let _batches = [];
-    try {
-      const { data: tagsForAudit } = await supabase
-        .from('tags')
-        .select('batch_number')
-        .in('token', updated ? updated.map(t => t.token) : []);
-      if (tagsForAudit) _batches = [...new Set(tagsForAudit.map(t => t.batch_number).filter(Boolean))];
-    } catch (e) {}
-    audit({ actor: 'admin', action: 'verify_tokens', target_type: _batches.length === 1 ? 'batch' : 'tokens', target_id: _batches.length === 1 ? String(_batches[0]) : null, meta: { count: updated ? updated.length : 0, batches: _batches } });
+    audit({ actor: 'admin', action: 'verify_tokens', target_type: 'tokens', meta: { count: updated ? updated.length : 0 } });
     return res.json({
       success: true,
       verified_count: updated ? updated.length : 0,
