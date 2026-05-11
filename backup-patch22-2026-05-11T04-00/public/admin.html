@@ -1714,7 +1714,7 @@ function p20UpdateBadges() {
     const pending = orders.filter(o => o.order_status && !['shipped', 'delivered', 'canceled'].includes(o.order_status)).length;
     p20SetBadge('orders', pending);
     // Reviews: from API (uses cached count we update via review polling) — for now skip if not loaded.
-    fetch('/api/get-reviews?status=pending&admin_key=' + encodeURIComponent(adminKey)) /* TMC_PATCH22_HOTFIX: was admin= */
+    fetch('/api/get-reviews?status=pending&admin=' + encodeURIComponent(adminKey))
       .then(r => r.json())
       .then(d => p20SetBadge('reviews', d && d.reviews ? d.reviews.length : 0))
       .catch(() => {});

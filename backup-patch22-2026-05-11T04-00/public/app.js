@@ -159,7 +159,7 @@ window.installIdleLogout = function(opts) {
     div.innerHTML = '<div style="background:#fff;border-radius:18px;padding:24px 22px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.3)">' +
       '<div style="width:48px;height:48px;border-radius:50%;background:#FFF3EC;display:flex;align-items:center;justify-content:center;margin:0 auto 14px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B00" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>' +
       '<div style="font-size:16px;font-weight:800;color:#111;margin-bottom:6px">Still there?</div>' +
-      '<div style="font-size:13px;color:#6B7280;margin-bottom:18px;line-height:1.5">You&#39;ll be signed out in <span id="tmc-idle-count">60</span> <span id="tmc-idle-unit">seconds</span> for inactivity.</div>' /* TMC_PATCH22_HOTFIX */ +
+      '<div style="font-size:13px;color:#6B7280;margin-bottom:18px;line-height:1.5">You&#39;ll be signed out in <span id="tmc-idle-count">60</span> seconds for inactivity.</div>' +
       '<button id="tmc-idle-stay" style="width:100%;height:44px;border:none;border-radius:12px;background:#FF6B00;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Stay signed in</button>' +
     '</div>';
     document.body.appendChild(div);
@@ -195,9 +195,6 @@ window.installIdleLogout = function(opts) {
       var remaining = Math.max(0, Math.ceil((LIMIT_MS - elapsed) / 1000));
       var c = document.getElementById('tmc-idle-count');
       if (c) c.textContent = remaining;
-      /* TMC_PATCH22_HOTFIX: pluralize "second" vs "seconds" */
-      var u = document.getElementById('tmc-idle-unit');
-      if (u) u.textContent = (remaining === 1 ? 'second' : 'seconds');
     } else {
       hideWarning();
     }
