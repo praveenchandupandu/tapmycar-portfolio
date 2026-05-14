@@ -4023,14 +4023,11 @@ async function moderateReview(reviewId, action) {
 }
 
 async function updateReviewCounts() {
-  /* TMC_PATCH25_REVIEW_GUARD: skip when admin not signed in yet */
-  const _k = getAdminKey();
-  if (!_k) return;
   try {
-    const key = encodeURIComponent(_k);
+    const key = encodeURIComponent(getAdminKey());
     const [pendingRes, approvedRes] = await Promise.all([
-      fetch('/api/get-reviews?status=pending&limit=200&admin_key=' + key).then(r => r.ok ? r.json() : { reviews: [] }),
-      fetch('/api/get-reviews?status=approved&limit=200&admin_key=' + key).then(r => r.ok ? r.json() : { reviews: [] })
+      fetch('/api/get-reviews?status=pending&limit=200&admin_key=' + key).then(r => r.json()),
+      fetch('/api/get-reviews?status=approved&limit=200&admin_key=' + key).then(r => r.json())
     ]);
     const pendingCount = (pendingRes.reviews || []).length;
     const approvedCount = (approvedRes.reviews || []).length;
