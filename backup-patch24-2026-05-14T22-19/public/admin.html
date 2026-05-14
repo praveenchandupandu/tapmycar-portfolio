@@ -793,22 +793,6 @@ input[type="date"].gen-input { color-scheme: dark; }
 .gen-token-url { font-size: 10px; color: var(--text-4); margin-top: 3px; word-break: break-all; }
 
 .empty { text-align: center; padding: 56px 20px; color: var(--text-4); font-size: 14px; }
-/* TMC_PATCH24_CATCHUP_ALERTS: home quick-action alerts */
-.p23-alert-stack{display:flex;flex-direction:column;gap:8px;margin:14px 0 6px}
-.p23-alert{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;cursor:pointer;border:1.5px solid;transition:all .15s;font-family:inherit;width:100%;text-align:left;background:transparent}
-.p23-alert.warn{background:rgba(253,224,71,.06);border-color:rgba(253,224,71,.3);color:#FDE047}
-.p23-alert.warn:hover{background:rgba(253,224,71,.12);border-color:rgba(253,224,71,.5)}
-.p23-alert.danger{background:rgba(252,165,165,.06);border-color:rgba(252,165,165,.3);color:#FCA5A5}
-.p23-alert.danger:hover{background:rgba(252,165,165,.12);border-color:rgba(252,165,165,.5)}
-.p23-alert-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.p23-alert.warn .p23-alert-icon{background:rgba(253,224,71,.15)}
-.p23-alert.danger .p23-alert-icon{background:rgba(252,165,165,.15)}
-.p23-alert-icon svg{width:16px;height:16px;stroke:currentColor;stroke-width:2.4;fill:none}
-.p23-alert-body{flex:1;min-width:0}
-.p23-alert-title{font-size:13px;font-weight:700;margin-bottom:2px}
-.p23-alert-sub{font-size:11px;opacity:.85;font-weight:500}
-.p23-alert-arrow{flex-shrink:0;opacity:.7}
-.p23-alert-arrow svg{width:14px;height:14px;stroke:currentColor;stroke-width:2.5;fill:none}
 
 /* List rows (.ar) used by Tags, Scans, etc. */
 .ar {
@@ -1137,8 +1121,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
             <div class="kpi-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/></svg>Active Tags</div>
             <div class="kpi-value orange" id="s-active">-</div>
             <div class="kpi-sub"><span id="s-unclaimed">-</span> unclaimed in stock</div>
-<!-- TMC_PATCH24_CATCHUP_ALERTS: home alerts container -->
-<div class="p23-alert-stack" id="p23-alerts" style="grid-column:1/-1"></div>
           </div>
           <div class="kpi">
             <div class="kpi-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Scans</div>
@@ -1320,8 +1302,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
     </div>
     <div class="scanned-list" id="scanned-list"></div>
     <button class="danger-btn" id="finalize-btn" onclick="finalizeReceive()" style="display:none" disabled>Finalize — verify scanned, void unverified</button>
-    <!-- TMC_PATCH24_CATCHUP_BTN: manual void unverified for current batch -->
-    <button type="button" id="p21-manual-void-btn" onclick="p21ManualVoidUnverified()" style="display:none;background:transparent;border:1.5px dashed #FCA5A5;color:#FCA5A5;font-size:11.5px;font-weight:600;padding:9px 14px;border-radius:10px;cursor:pointer;font-family:inherit;margin-top:10px;width:100%">Void all unverified in this batch (no scan needed)</button>
     <div id="finalize-warning" style="display:none;margin-top:10px;background:var(--danger-soft);border-radius:var(--r-sm);padding:12px;font-size:12px;color:var(--danger);line-height:1.5">
       This voids all unscanned tokens from Batch <strong id="fw-batch"></strong> (kept for audit, never activatable). Other batches are NOT affected.
     </div>
@@ -1734,13 +1714,10 @@ function p20UpdateBadges() {
     const pending = orders.filter(o => o.order_status && !['shipped', 'delivered', 'canceled'].includes(o.order_status)).length;
     p20SetBadge('orders', pending);
     // Reviews: from API (uses cached count we update via review polling) — for now skip if not loaded.
-    /* TMC_PATCH24_CATCHUP_GUARD: skip fetch when admin not signed in yet */
-    if (typeof adminKey === 'string' && adminKey) {
-      fetch('/api/get-reviews?status=pending&admin_key=' + encodeURIComponent(adminKey))
-        .then(r => r.ok ? r.json() : null)
-        .then(d => p20SetBadge('reviews', d && d.reviews ? d.reviews.length : 0))
-        .catch(() => {});
-    }
+    fetch('/api/get-reviews?status=pending&admin_key=' + encodeURIComponent(adminKey)) /* TMC_PATCH22_HOTFIX: was admin= */
+      .then(r => r.json())
+      .then(d => p20SetBadge('reviews', d && d.reviews ? d.reviews.length : 0))
+      .catch(() => {});
   } catch (e) {}
 }
 
@@ -2375,9 +2352,6 @@ function loadBatchForVerify() {
   document.getElementById('scanned-list').innerHTML = '';
   document.getElementById('finalize-btn').style.display = 'block';
   document.getElementById('finalize-btn').disabled = true;
-  /* TMC_PATCH24_CATCHUP_LOAD: show manual void button when batch is loaded */
-  const _mvBtn = document.getElementById('p21-manual-void-btn');
-  if (_mvBtn) _mvBtn.style.display = 'block';
   document.getElementById('finalize-warning').style.display = 'none';
   document.getElementById('scan-token').focus();
 }
@@ -3665,104 +3639,6 @@ function p21RenderScansByUser() {
   }).join('');
 }
 window.p21RenderScansByUser = p21RenderScansByUser;
-
-/* TMC_PATCH24_CATCHUP_FN: manual force-void for current batch */
-async function p21ManualVoidUnverified() {
-  if (!currentVerifyBatch) { showToast('Select a batch first'); return; }
-  if (!confirm('Void all UNVERIFIED tokens in Batch ' + currentVerifyBatch + '?\n\nThis affects ONLY tokens with verified=false in that batch. Verified tokens are not touched.')) return;
-  try {
-    const res = await fetch('/api/verify-tags', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
-      body: JSON.stringify({ mode: 'void_unverified_in_batch', batch_number: String(currentVerifyBatch), void_reason: 'manual void (admin)' })
-    });
-    const d = await res.json();
-    if (d.success) {
-      showToast('Voided ' + (d.voided_count || 0) + ' unverified token(s) in Batch ' + currentVerifyBatch);
-      if (typeof refreshAdmin === 'function') refreshAdmin();
-    } else {
-      showToast('Failed: ' + (d.error || 'unknown'));
-    }
-  } catch (e) {
-    showToast('Network error: ' + (e && e.message));
-  }
-}
-window.p21ManualVoidUnverified = p21ManualVoidUnverified;
-
-// TMC_PATCH24_CATCHUP_ALERTS: home-tab quick action alerts
-function p23RenderAlerts(data) {
-  const root = document.getElementById('p23-alerts');
-  if (!root) return;
-  const tags = (data && data.tags) || (window.allTagsData) || [];
-  const unverifiedByBatch = {};
-  let totalUnverified = 0;
-  let totalVoided = 0;
-  tags.forEach(t => {
-    if (t.status === 'unclaimed' && t.verified === false) {
-      const b = t.batch_number || '(no batch)';
-      unverifiedByBatch[b] = (unverifiedByBatch[b] || 0) + 1;
-      totalUnverified++;
-    } else if (t.status === 'voided') {
-      totalVoided++;
-    }
-  });
-
-  const alerts = [];
-  if (totalUnverified > 0) {
-    const batchList = Object.entries(unverifiedByBatch)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3)
-      .map(function(pair) { return 'Batch ' + pair[0] + ' (' + pair[1] + ')'; })
-      .join(', ');
-    const extra = Object.keys(unverifiedByBatch).length > 3 ? ' …' : '';
-    alerts.push(
-      '<button type="button" class="p23-alert warn" onclick="navTo(&#39;receive&#39;)">' +
-        '<div class="p23-alert-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>' +
-        '<div class="p23-alert-body">' +
-          '<div class="p23-alert-title">' + totalUnverified + ' unverified token' + (totalUnverified === 1 ? '' : 's') + ' awaiting review</div>' +
-          '<div class="p23-alert-sub">' + batchList + extra + ' — tap to verify or void</div>' +
-        '</div>' +
-        '<div class="p23-alert-arrow"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></div>' +
-      '</button>'
-    );
-  }
-  if (totalVoided > 0) {
-    alerts.push(
-      '<button type="button" class="p23-alert danger" onclick="p23OpenVoided()">' +
-        '<div class="p23-alert-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>' +
-        '<div class="p23-alert-body">' +
-          '<div class="p23-alert-title">' + totalVoided + ' voided token' + (totalVoided === 1 ? '' : 's') + '</div>' +
-          '<div class="p23-alert-sub">Review or permanently delete them</div>' +
-        '</div>' +
-        '<div class="p23-alert-arrow"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></div>' +
-      '</button>'
-    );
-  }
-  root.innerHTML = alerts.join('');
-}
-
-function p23OpenVoided() {
-  if (typeof navTo === 'function') navTo('tags');
-  setTimeout(function() {
-    if (typeof p19SetTagFilter === 'function') p19SetTagFilter('voided');
-  }, 150);
-}
-window.p23RenderAlerts = p23RenderAlerts;
-window.p23OpenVoided = p23OpenVoided;
-
-// TMC_PATCH24_CATCHUP_ALERTS: wrap renderDashboard so alerts auto-render after each refresh
-(function() {
-  const orig = window.renderDashboard;
-  if (typeof orig === 'function' && !orig.__p24wrapped) {
-    const wrapped = function(d) {
-      const ret = orig.apply(this, arguments);
-      try { p23RenderAlerts(d); } catch (e) {}
-      return ret;
-    };
-    wrapped.__p24wrapped = true;
-    window.renderDashboard = wrapped;
-  }
-})();
 
 /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: wrap renderDashboard to also render scans-by-user */
 (function() {
