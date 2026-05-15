@@ -214,56 +214,10 @@ async function loadSettings() {
   } catch(e) { console.error('Settings load error:', e); }
 }
 
-/* TMC_PATCH30_PHONE_SPLIT: split stored E.164 phone into country-code + local number */
-function _p30SplitPhone(stored) {
-  var s = (stored == null ? '' : String(stored)).trim();
-  if (!s) return { cc: '+1', local: '' };
-  /* Build a list of dropdown option values, sorted by length (descending)
-     so longer prefixes match first ("+971" before "+9", "+44" before "+1"). */
-  var sel = document.getElementById('edit-country-code');
-  var values = [];
-  if (sel && sel.options) {
-    for (var i = 0; i < sel.options.length; i++) {
-      var v = sel.options[i].value;
-      if (v) values.push(v);
-    }
-  }
-  values.sort(function(a, b) {
-    /* Compare by the "+digits" part length, ignoring suffixes like "-CA" */
-    var na = a.replace(/-.*$/, '').length;
-    var nb = b.replace(/-.*$/, '').length;
-    return nb - na;
-  });
-  for (var j = 0; j < values.length; j++) {
-    var cc = values[j].replace(/-.*$/, ''); /* "+1-CA" -> "+1" for matching */
-    if (s.indexOf(cc) === 0) {
-      return { cc: values[j], local: s.slice(cc.length) };
-    }
-  }
-  /* Stored doesn't start with any known cc -> treat as local-only US number. */
-  if (s.charAt(0) === '+') {
-    /* Has a + but unknown country. Keep as local for display. */
-    return { cc: '+1', local: s };
-  }
-  return { cc: '+1', local: s };
-}
-
 function openEditProfile() {
   if (userData) {
     document.getElementById('edit-name').value = userData.name || '';
-    /* TMC_PATCH30_PHONE_SPLIT: split phone into dropdown + input */
-    var _p30 = _p30SplitPhone(userData.phone);
-    var _ccSel = document.getElementById('edit-country-code');
-    if (_ccSel) {
-      /* Try exact match first; if a country-specific variant like "+1-CA"
-         exists in stored data, prefer it. Otherwise fall back to plain cc. */
-      var found = false;
-      for (var i = 0; i < _ccSel.options.length; i++) {
-        if (_ccSel.options[i].value === _p30.cc) { _ccSel.value = _p30.cc; found = true; break; }
-      }
-      if (!found) _ccSel.value = '+1';
-    }
-    document.getElementById('edit-phone').value = _p30.local;
+    document.getElementById('edit-phone').value = userData.phone || '';
     document.getElementById('edit-email').value = userData.email || '';
     document.getElementById('edit-emergency-name').value = userData.emergency_name || '';
     document.getElementById('edit-emergency-phone').value = userData.emergency_contact || '';
