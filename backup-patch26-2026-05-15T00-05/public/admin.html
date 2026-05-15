@@ -793,21 +793,6 @@ input[type="date"].gen-input { color-scheme: dark; }
 .gen-token-url { font-size: 10px; color: var(--text-4); margin-top: 3px; word-break: break-all; }
 
 .empty { text-align: center; padding: 56px 20px; color: var(--text-4); font-size: 14px; }
-/* TMC_PATCH26_APP_SETTINGS: Settings panel */
-.p26-settings-list{display:flex;flex-direction:column;gap:14px}
-.p26-setting-row{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:14px}
-.p26-setting-label{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
-.p26-setting-desc{font-size:11px;color:var(--text-3);margin-bottom:10px;line-height:1.4}
-.p26-setting-input{width:100%;height:40px;border:1.5px solid var(--border);border-radius:var(--r);padding:0 14px;font-size:13px;background-color:var(--bg-elev) !important;color:var(--text) !important;outline:none;font-family:inherit;margin-bottom:10px}
-.p26-setting-input:focus{border-color:var(--brand)}
-.p26-slots-label{font-size:10px;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-.p26-slots-grid{display:flex;flex-wrap:wrap;gap:6px}
-.p26-slot-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;background:var(--bg-elev);border:1.5px solid var(--border);border-radius:99px;font-size:11px;color:var(--text-3);font-weight:600;cursor:pointer;transition:all .15s}
-.p26-slot-chip.on{background:rgba(255,107,0,.12);border-color:var(--brand);color:var(--brand)}
-.p26-slot-chip input{margin:0;width:12px;height:12px;accent-color:var(--brand);cursor:pointer}
-.p26-save-bar{position:sticky;bottom:0;background:rgba(7,10,23,.95);backdrop-filter:blur(8px);padding:14px 0;margin:0 -14px -14px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center;justify-content:flex-end}
-.p26-save-bar .gen-btn{height:40px;padding:0 24px}
-.p26-save-status{font-size:11px;color:var(--text-3);font-weight:600}
 /* TMC_PATCH24_CATCHUP_ALERTS: home quick-action alerts */
 .p23-alert-stack{display:flex;flex-direction:column;gap:8px;margin:14px 0 6px}
 .p23-alert{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;cursor:pointer;border:1.5px solid;transition:all .15s;font-family:inherit;width:100%;text-align:left;background:transparent}
@@ -1107,8 +1092,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
     <button class="sb-item" data-tab="upgrade" onclick="navTo('upgrade')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg><span>Upgrades</span></button>
       <div class="sb-group-label">Operations</div>
       <button class="sb-item" data-tab="generate" onclick="navTo('generate')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span>Generate</span></button>
-    <button class="sb-item" data-tab="settings" onclick="navTo('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Settings</span></button>
-<button class="sb-item" data-tab="receive" onclick="navTo('receive')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Receive</span></button>
+    <button class="sb-item" data-tab="receive" onclick="navTo('receive')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Receive</span></button>
     <button class="sb-item" data-tab="inventory" onclick="navTo('inventory')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><span>Inventory</span></button>
     <button class="sb-item" data-tab="promos" onclick="navTo('promos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg><span>Promos</span></button>
     <button class="sb-item" data-tab="audit" onclick="navTo('audit')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6a2 2 0 012 2v0H7v0a2 2 0 012-2z"/><path d="M8 4H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg><span>Audit</span></button>
@@ -1198,17 +1182,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
     <input type="text" class="search-input" id="user-search" placeholder="Search by name, email, or phone…" oninput="filterUsers()">
   </div>
   <div id="user-list" class="users-grid"><div class="empty">Loading users…</div></div>
-</div>
-
-<!-- TMC_PATCH26_APP_SETTINGS: Settings panel -->
-<div class="panel" id="panel-settings">
-  <div class="asl">Site Settings</div>
-  <div class="kpi-sub" style="margin-bottom:14px;padding:0 4px">Configure URLs and toggles that appear on landing, dashboard, and sign-in pages.</div>
-  <div id="p26-settings-list" class="p26-settings-list"><div class="empty">Loading settings…</div></div>
-  <div class="p26-save-bar">
-    <span class="p26-save-status" id="p26-save-status"></span>
-    <button class="gen-btn" id="p26-save-btn" onclick="p26Save()">Save all changes</button>
-  </div>
 </div>
 
 <!-- TAGS TAB -->
@@ -3776,136 +3749,6 @@ function p23OpenVoided() {
 }
 window.p23RenderAlerts = p23RenderAlerts;
 window.p23OpenVoided = p23OpenVoided;
-
-// TMC_PATCH26_APP_SETTINGS: Settings panel
-let p26Settings = {};
-const P26_SLOTS = [
-  { id: 'landing.hero',     label: 'Landing hero' },
-  { id: 'landing.demo',     label: 'Landing demo video' },
-  { id: 'landing.footer',   label: 'Landing footer' },
-  { id: 'dashboard.banner', label: 'Dashboard banner' },
-  { id: 'dashboard.help',   label: 'Dashboard help' },
-  { id: 'signin.footer',    label: 'Sign-in footer' }
-];
-
-function p26Esc(s) {
-  return String(s == null ? '' : s).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-async function p26Load() {
-  const list = document.getElementById('p26-settings-list');
-  if (!list) return;
-  list.innerHTML = '<div class="empty">Loading settings…</div>';
-  try {
-    const res = await fetch('/api/get-settings');
-    const data = await res.json();
-    if (!data || !data.settings) { list.innerHTML = '<div class="empty">No settings found</div>'; return; }
-    p26Settings = data.settings;
-    p26Render();
-  } catch (e) {
-    list.innerHTML = '<div class="empty">Failed to load: ' + p26Esc(e && e.message) + '</div>';
-  }
-}
-
-function p26Render() {
-  const list = document.getElementById('p26-settings-list');
-  if (!list) return;
-  const keys = Object.keys(p26Settings).sort(function(a, b) {
-    return (p26Settings[a] && (p26Settings[a].sort_order || 0)) - (p26Settings[b] && (p26Settings[b].sort_order || 0));
-  });
-  if (keys.length === 0) {
-    list.innerHTML = '<div class="empty">No settings configured. Seed the table first.</div>';
-    return;
-  }
-  list.innerHTML = keys.map(function(key) {
-    const s = p26Settings[key];
-    const v = s.value || '';
-    const slots = s.slots || [];
-    const inputType = s.type === 'email' ? 'email' : (s.type === 'phone' ? 'tel' : 'url');
-    const slotsHtml = P26_SLOTS.map(function(slot) {
-      const on = slots.indexOf(slot.id) >= 0;
-      return '<label class="p26-slot-chip ' + (on ? 'on' : '') + '">' +
-        '<input type="checkbox" data-key="' + p26Esc(key) + '" data-slot="' + p26Esc(slot.id) + '"' + (on ? ' checked' : '') + ' onchange="p26ToggleSlot(this)">' +
-        p26Esc(slot.label) +
-      '</label>';
-    }).join('');
-    return '<div class="p26-setting-row">' +
-      '<div class="p26-setting-label">' + p26Esc(s.label || key) + '</div>' +
-      (s.description ? '<div class="p26-setting-desc">' + p26Esc(s.description) + '</div>' : '') +
-      '<input type="' + inputType + '" class="p26-setting-input" data-key="' + p26Esc(key) + '" value="' + p26Esc(v) + '" oninput="p26TouchValue(this)" placeholder="Leave blank to hide everywhere">' +
-      '<div class="p26-slots-label">Show on these pages:</div>' +
-      '<div class="p26-slots-grid">' + slotsHtml + '</div>' +
-    '</div>';
-  }).join('');
-}
-
-function p26TouchValue(input) {
-  const key = input.dataset.key;
-  if (p26Settings[key]) p26Settings[key].value = input.value;
-  p26MarkDirty();
-}
-function p26ToggleSlot(checkbox) {
-  const key = checkbox.dataset.key;
-  const slot = checkbox.dataset.slot;
-  if (!p26Settings[key]) return;
-  const slots = (p26Settings[key].slots || []).slice();
-  const idx = slots.indexOf(slot);
-  if (checkbox.checked && idx < 0) slots.push(slot);
-  if (!checkbox.checked && idx >= 0) slots.splice(idx, 1);
-  p26Settings[key].slots = slots;
-  // Update parent chip styling
-  checkbox.parentElement.classList.toggle('on', checkbox.checked);
-  p26MarkDirty();
-}
-function p26MarkDirty() {
-  const st = document.getElementById('p26-save-status');
-  if (st) st.textContent = 'Unsaved changes';
-}
-
-async function p26Save() {
-  const btn = document.getElementById('p26-save-btn');
-  const st = document.getElementById('p26-save-status');
-  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
-  const updates = Object.keys(p26Settings).map(function(key) {
-    return { key, value: p26Settings[key].value || '', slots: p26Settings[key].slots || [] };
-  });
-  try {
-    const res = await fetch('/api/update-settings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
-      body: JSON.stringify({ updates })
-    });
-    const data = await res.json();
-    if (data.success) {
-      if (st) st.textContent = 'Saved ✓';
-      setTimeout(function() { if (st && st.textContent === 'Saved ✓') st.textContent = ''; }, 3000);
-    } else {
-      if (st) st.textContent = 'Save failed: ' + (data.error || 'unknown');
-    }
-  } catch (e) {
-    if (st) st.textContent = 'Network error';
-  }
-  if (btn) { btn.disabled = false; btn.textContent = 'Save all changes'; }
-}
-
-// Auto-load Settings panel on navigation
-(function() {
-  const orig = window.navTo;
-  if (typeof orig === 'function' && !orig.__p26wrapped) {
-    const wrapped = function(id) {
-      const ret = orig.apply(this, arguments);
-      if (id === 'settings') p26Load();
-      return ret;
-    };
-    wrapped.__p26wrapped = true;
-    window.navTo = wrapped;
-  }
-})();
-
-window.p26Load = p26Load;
-window.p26Save = p26Save;
-window.p26ToggleSlot = p26ToggleSlot;
-window.p26TouchValue = p26TouchValue;
 
 // TMC_PATCH24_CATCHUP_ALERTS: wrap renderDashboard so alerts auto-render after each refresh
 (function() {

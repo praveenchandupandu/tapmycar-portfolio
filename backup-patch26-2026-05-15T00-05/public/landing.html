@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <link rel="manifest" href="/manifest.json">
@@ -381,15 +381,7 @@ body { font-family: 'Inter', sans-serif; background: #fff; color: #111; max-widt
   <a href="/register.html" style="background:#FF6B00;color:#fff;font-size:12px;font-weight:700;padding:8px 16px;border-radius:10px;text-decoration:none">Get App</a>
 </div>
 
-<!-- TMC_PATCH26_APP_SETTINGS: landing.hero slot (download badges) -->
-<div data-tmc-slot="landing.hero" style="padding:20px 24px 8px;display:flex;justify-content:center"></div>
-
-<!-- TMC_PATCH26_APP_SETTINGS: landing.demo slot (demo video) -->
-<div data-tmc-slot="landing.demo" style="padding:24px;display:flex;justify-content:center"></div>
-
 <!-- FOOTER -->
-<!-- TMC_PATCH26_APP_SETTINGS: landing.footer slot (social + support) -->
-<div data-tmc-slot="landing.footer" style="padding:14px 24px 0;text-align:center"></div>
 <div class="footer">
   <p style="margin-bottom:6px"><a href="/register.html">Sign up</a> <span style="color:#D1D5DB;margin:0 6px">|</span> <a href="/signin.html">Sign in</a> <span style="color:#D1D5DB;margin:0 6px">|</span> <a href="/pricing.html">Pricing</a></p>
   <p> 2026 Praman Tech LLC  Connecticut, USA  <a href="#" onclick="event.preventDefault();if(typeof toggleChat==='function'){toggleChat();}else{window.location.href='mailto:support@tapmycar.io';}">Contact</a></p>
@@ -399,8 +391,6 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js');
 }
 </script>
-<!-- TMC_PATCH26_APP_SETTINGS: settings renderer -->
-<script src="/app-settings.js" defer></script>
 
 
 
