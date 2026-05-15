@@ -301,43 +301,25 @@ async function loadDashboard() {
     const res = await fetch(`/api/get-dashboard?user_id=${s.token}`);
     const data = await res.json();
 
-    /* TMC_PATCH29_PLAN_BADGE_FIX: plan-badge + banner logic — run regardless of scanCount.
-       scanCount can be a number (including 0). Plan-related UI shouldn't
-       depend on scan presence. */
     if (data.scanCount !== undefined) {
       document.getElementById('stat-scans').textContent = data.scanCount;
       document.getElementById('stat-week').textContent = data.weekCount;
+      // Show upgrade banner based on plan
+      const userPlan = data.user ? (data.user.plan || 'etag') : 'etag';
+      // Update plan badge label dynamically
+      const badge = document.getElementById('plan-badge');
+      if (badge) {
+        const label = userPlan === 'etag' ? 'Free' : userPlan === 'standard' ? 'Standard' : userPlan === 'premium' ? 'Premium' : userPlan;
+        badge.textContent = label;
+      }
+      // TMC_FAMILY_CODES_LOADER
+      renderFamilyCodes(userPlan, data.premiumCodes || []);
+      if (userPlan === 'etag' || userPlan === 'free') {
+        document.getElementById('upgrade-banner-etag').style.display = 'block';
+      } else if (userPlan === 'standard') {
+        document.getElementById('upgrade-banner-standard').style.display = 'block';
+      }
     }
-
-    /* TMC_PATCH29_PLAN_BADGE_FIX: derive plan ONCE, then apply to badge + banners. */
-    var _userPlan = 'etag';
-    if (data && data.user && typeof data.user.plan === 'string' && data.user.plan) {
-      _userPlan = data.user.plan.toLowerCase().trim();
-    }
-    console.log('[dashboard] userPlan=' + _userPlan + ' (raw=' + JSON.stringify(data && data.user && data.user.plan) + ')');
-
-    var _planLabels = { etag: 'Free', free: 'Free', standard: 'Standard', premium: 'Premium', business: 'Business' };
-    var _badge = document.getElementById('plan-badge');
-    if (_badge) _badge.textContent = _planLabels[_userPlan] || _userPlan.charAt(0).toUpperCase() + _userPlan.slice(1);
-
-    /* TMC_PATCH29_PLAN_BADGE_FIX: Reset BOTH banners to hidden, then decide. */
-    var _bEtag = document.getElementById('upgrade-banner-etag');
-    var _bStd = document.getElementById('upgrade-banner-standard');
-    if (_bEtag) _bEtag.style.display = 'none';
-    if (_bStd) _bStd.style.display = 'none';
-
-    /* TMC_PATCH29_PLAN_BADGE_FIX: Only free/etag users see "Upgrade to Standard".
-       Only standard users see "Upgrade to Premium".
-       Premium/business users see no upgrade banner. */
-    if (_userPlan === 'etag' || _userPlan === 'free' || !_userPlan) {
-      if (_bEtag) _bEtag.style.display = 'block';
-    } else if (_userPlan === 'standard') {
-      if (_bStd) _bStd.style.display = 'block';
-    }
-    /* premium / business / anything else: no banner shown */
-
-    // TMC_FAMILY_CODES_LOADER
-    renderFamilyCodes(_userPlan, data.premiumCodes || []);
 
     if (data.tags && data.tags.length > 0) {
       // TMC_PICK_BEST_TAG: prefer active physical sticker over eTag.
