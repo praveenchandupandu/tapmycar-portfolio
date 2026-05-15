@@ -132,33 +132,18 @@ function requireAuth() {
 //     re-checks; if elapsed time is past the limit, logs out at once.
 //   - On storage event for 'tmc_last_activity' from another tab,
 //     refreshes its in-memory copy.
-/* TMC_PATCH27_IDLE_FIX: rewrite installIdleLogout to fix Stay-button race */
 window.installIdleLogout = function(opts) {
   opts = opts || {};
   var minutes = opts.minutes || 10;
   var warningSeconds = opts.warningSeconds || 60;
   var onLogout = opts.onLogout || function() { window.location.href = '/signin.html'; };
+  var checkIntervalMs = 5000;
 
-  var IDLE_INTERVAL_MS = 5000;
-  var WARN_INTERVAL_MS = 250;
   var LIMIT_MS = minutes * 60 * 1000;
   var WARN_MS = LIMIT_MS - warningSeconds * 1000;
 
   var warningEl = null;
   var loggedOut = false;
-  var pollHandle = null;
-  var currentInterval = IDLE_INTERVAL_MS;
-  var justClickedUntil = 0;
-
-  // Global handle for the Stay button (called via onclick attribute).
-  // Re-assigning each install is safe; only one idle helper ever runs.
-  window.__tmcStaySignedIn = function() {
-    var now = Date.now();
-    try { localStorage.setItem('tmc_last_activity', String(now)); } catch (e) {}
-    justClickedUntil = now + 1500; // suppress logout for 1.5s after click
-    hideWarning();
-    rescheduleTick(IDLE_INTERVAL_MS);
-  };
 
   function recordActivity() {
     if (loggedOut) return;
@@ -174,11 +159,12 @@ window.installIdleLogout = function(opts) {
     div.innerHTML = '<div style="background:#fff;border-radius:18px;padding:24px 22px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.3)">' +
       '<div style="width:48px;height:48px;border-radius:50%;background:#FFF3EC;display:flex;align-items:center;justify-content:center;margin:0 auto 14px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B00" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>' +
       '<div style="font-size:16px;font-weight:800;color:#111;margin-bottom:6px">Still there?</div>' +
-      '<div style="font-size:13px;color:#6B7280;margin-bottom:18px;line-height:1.5">You&#39;ll be signed out in <span id="tmc-idle-count">60</span> <span id="tmc-idle-unit">seconds</span> for inactivity.</div>' +
-      '<button id="tmc-idle-stay" type="button" onclick="window.__tmcStaySignedIn()" style="width:100%;height:44px;border:none;border-radius:12px;background:#FF6B00;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Stay signed in</button>' +
+      '<div style="font-size:13px;color:#6B7280;margin-bottom:18px;line-height:1.5">You&#39;ll be signed out in <span id="tmc-idle-count">60</span> <span id="tmc-idle-unit">seconds</span> for inactivity.</div>' /* TMC_PATCH22_HOTFIX */ +
+      '<button id="tmc-idle-stay" style="width:100%;height:44px;border:none;border-radius:12px;background:#FF6B00;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Stay signed in</button>' +
     '</div>';
     document.body.appendChild(div);
     warningEl = div;
+    document.getElementById('tmc-idle-stay').addEventListener('click', recordActivity);
   }
 
   function hideWarning() {
@@ -186,63 +172,47 @@ window.installIdleLogout = function(opts) {
   }
 
   function getLastActivity() {
-    try {
-      var v = parseInt(localStorage.getItem('tmc_last_activity') || '0', 10);
-      return v > 0 ? v : Date.now();
-    } catch (e) { return Date.now(); }
+    try { return parseInt(localStorage.getItem('tmc_last_activity') || '0', 10) || Date.now(); }
+    catch (e) { return Date.now(); }
   }
 
   function doLogout() {
     if (loggedOut) return;
     loggedOut = true;
-    if (pollHandle) { clearInterval(pollHandle); pollHandle = null; }
     try { localStorage.removeItem('tmc_last_activity'); } catch (e) {}
     try { onLogout(); } catch (e) { console.error('logout callback error:', e); }
   }
 
-  function rescheduleTick(intervalMs) {
-    if (currentInterval === intervalMs && pollHandle) return;
-    if (pollHandle) clearInterval(pollHandle);
-    currentInterval = intervalMs;
-    pollHandle = setInterval(tick, intervalMs);
-  }
-
   function tick() {
     if (loggedOut) return;
-    var now = Date.now();
-    // Suppress logout briefly after a "Stay signed in" click, to ride out
-    // any race conditions.
-    if (now < justClickedUntil) {
-      rescheduleTick(IDLE_INTERVAL_MS);
-      return;
-    }
-    var elapsed = now - getLastActivity();
+    var elapsed = Date.now() - getLastActivity();
     if (elapsed >= LIMIT_MS) {
       doLogout();
       return;
     }
     if (elapsed >= WARN_MS) {
       showWarning();
-      rescheduleTick(WARN_INTERVAL_MS); // smooth countdown when warning shown
       var remaining = Math.max(0, Math.ceil((LIMIT_MS - elapsed) / 1000));
       var c = document.getElementById('tmc-idle-count');
       if (c) c.textContent = remaining;
+      /* TMC_PATCH22_HOTFIX: pluralize "second" vs "seconds" */
       var u = document.getElementById('tmc-idle-unit');
       if (u) u.textContent = (remaining === 1 ? 'second' : 'seconds');
     } else {
       hideWarning();
-      rescheduleTick(IDLE_INTERVAL_MS);
     }
   }
 
-  // Initialize last-activity to "now" on install.
+  // Initialize last-activity to "now" on install so the user gets a full
+  // 10-min window from page load.
   recordActivity();
 
-  // Activity listeners (throttled writes).
+  // Activity listeners
   var events = ['mousemove', 'keydown', 'scroll', 'touchstart', 'click'];
   var lastWrite = 0;
   events.forEach(function(ev) {
     window.addEventListener(ev, function() {
+      // Throttle: only update localStorage at most once per 5 seconds.
       var now = Date.now();
       if (now - lastWrite < 5000) return;
       lastWrite = now;
@@ -257,14 +227,11 @@ window.installIdleLogout = function(opts) {
 
   // Multi-tab: respond to last-activity updates from other tabs
   window.addEventListener('storage', function(e) {
-    if (e.key === 'tmc_last_activity') {
-      hideWarning();
-      rescheduleTick(IDLE_INTERVAL_MS);
-    }
+    if (e.key === 'tmc_last_activity') hideWarning();
   });
 
-  // Start polling
-  rescheduleTick(IDLE_INTERVAL_MS);
+  // Polling tick
+  setInterval(tick, checkIntervalMs);
 };
 
 
