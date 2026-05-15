@@ -22,33 +22,6 @@ function escapeXml(s) {
 }
 
 module.exports = async function handler(req, res) {
-  /* TMC_PATCH28_TWILIO_SIG: verify Twilio signature on POSTs.
-     Skipped on GET (Twilio sometimes uses GET for status callbacks).
-     Skipped if no auth token is configured (dev only). */
-  if (req.method === 'POST') {
-    try {
-      const _twAuth = process.env.TWILIO_AUTH_TOKEN;
-      if (_twAuth) {
-        const _twilio = require('twilio');
-        const _sig = req.headers['x-twilio-signature'] || req.headers['X-Twilio-Signature'];
-        const _proto = req.headers['x-forwarded-proto'] || 'https';
-        const _host = req.headers['host'];
-        const _path = req.url || '';
-        const _fullUrl = _proto + '://' + _host + _path;
-        const _params = (req.body && typeof req.body === 'object') ? req.body : {};
-        const _valid = _sig && _twilio.validateRequest(_twAuth, _sig, _fullUrl, _params);
-        if (!_valid) {
-          console.warn('Twilio signature invalid for ' + _fullUrl);
-          res.setHeader('Content-Type', 'text/xml');
-          return res.status(403).send('<?xml version="1.0" encoding="UTF-8"?><Response><Hangup/></Response>');
-        }
-      }
-    } catch (_sigErr) {
-      console.warn('Twilio signature check error (continuing):', _sigErr && _sigErr.message);
-      // Don't block on infra error — better to accept a call than drop it.
-    }
-  }
-
   const baseUrl = `https://${req.headers.host}`;
   const rawName = (req.query && req.query.name) || '';
   const callLogId = (req.query && req.query.call_log_id) || '';

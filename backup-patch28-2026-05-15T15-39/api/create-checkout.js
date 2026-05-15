@@ -44,33 +44,6 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  // TMC_PATCH28_EXISTING_SUB_GUARD: stronger existing-subscription guard.
-  // If the user has a subscription_id, ask Stripe whether it's still active.
-  // Active/trialing -> refuse new checkout (prevents Vishnu-style double-pay).
-  // Canceled/incomplete_expired/past_due -> allow (user is re-subscribing).
-  if ((flow === 'activate' || flow === 'direct') && user.subscription_id) {
-    try {
-      const existingSub = await stripe.subscriptions.retrieve(user.subscription_id);
-      const blockingStatuses = ['active', 'trialing', 'past_due', 'unpaid'];
-      if (existingSub && blockingStatuses.indexOf(existingSub.status) >= 0) {
-        return res.status(400).json({
-          error: 'You already have an active subscription. Manage it in your dashboard.',
-          code: 'existing_subscription',
-          subscription_status: existingSub.status,
-          dashboard_url: '/dashboard.html'
-        });
-      }
-      // Otherwise (canceled, incomplete_expired): fall through and allow new checkout.
-    } catch (subErr) {
-      // If Stripe says "no such subscription" (id stale), allow checkout.
-      // For any other error, log but don't block — we don't want a Stripe
-      // outage to lock the user out of paying.
-      if (subErr && subErr.code !== 'resource_missing') {
-        console.warn('existing-sub check failed (continuing):', subErr.message);
-      }
-    }
-  }
-
   // ─── FLOW 1: Free eTag ─────────────────────────────────────────
   if (flow === 'etag_free') {
     const { data: tag } = await supabase.from('tags').select('*').eq('owner_id', user_id).eq('status', 'unclaimed').single();

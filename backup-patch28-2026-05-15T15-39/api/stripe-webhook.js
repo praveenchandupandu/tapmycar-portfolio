@@ -49,37 +49,6 @@ async function handler(req, res) {
 
   console.log(`Webhook: ${event.type}`);
 
-  // TMC_PATCH28_WEBHOOK_IDEMPOTENT: idempotency — reject duplicate event deliveries.
-  // Stripe retries webhooks on timeout/non-2xx. Without this, we would
-  // process the same event twice and create duplicate subscriptions.
-  try {
-    const { data: existing, error: existsErr } = await supabase
-      .from('webhook_events')
-      .select('event_id')
-      .eq('event_id', event.id)
-      .maybeSingle();
-    if (existsErr) {
-      console.warn('idempotency check failed (continuing):', existsErr.message);
-    } else if (existing) {
-      console.log(`Webhook ${event.id} already processed, skipping`);
-      return res.status(200).json({ received: true, duplicate: true });
-    }
-    // Best-effort: mark this event id as in-progress.
-    // If insertion fails due to race (PK violation), another worker is
-    // already handling it -> we should also bail out.
-    const { error: insertErr } = await supabase
-      .from('webhook_events')
-      .insert({ event_id: event.id, type: event.type });
-    if (insertErr) {
-      console.log(`Webhook ${event.id} insert failed (race?): ${insertErr.message}, skipping`);
-      return res.status(200).json({ received: true, race: true });
-    }
-  } catch (idempErr) {
-    console.warn('idempotency error (continuing):', idempErr && idempErr.message);
-    // Do NOT block processing on idempotency-infra failure. Better to
-    // double-process rarely than to drop events entirely.
-  }
-
   try {
     switch (event.type) {
 
