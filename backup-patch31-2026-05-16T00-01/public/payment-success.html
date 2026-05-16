@@ -78,8 +78,7 @@
 
   <!-- Terms footer -->
   <div style="font-size:10px;color:#9CA3AF;line-height:1.5;max-width:300px;margin-top:4px">
-    <!-- TMC_PATCH31_REFUND: clearer footer -->
-    Cancel anytime in Settings. Annual subscription refundable within 14 days ($1 service fee retained). Activation and sticker fees are non-refundable.<br>
+    Cancel anytime in Settings. Physical stickers are non-refundable once shipped.<br>
     <a href="/terms.html" style="color:#FF6B00;text-decoration:none">Terms</a> · <a href="/privacy.html" style="color:#FF6B00;text-decoration:none">Privacy</a>
   </div>
 </div>
@@ -118,8 +117,7 @@ if (flow === 'etag_free') {
     : '<div style="margin-bottom:6px"><b>Day 1-30:</b> Your tag is active. Test the product risk-free.</div>' +
       '<div style="margin-bottom:6px"><b>Day 30:</b> We charge $9.99 and ship your physical Standard sticker.</div>' +
       '<div style="margin-bottom:6px"><b>Day 60:</b> Your $9.99/year annual plan begins.</div>' +
-      /* TMC_PATCH31_REFUND: accurate — $1 is NOT refundable */
-      '<div>Cancel before day 30 to stop the $9.99 annual charge. The $1 activation fee is non-refundable.</div>';
+      '<div>Cancel anytime before day 30 for a full refund of the $1.</div>';
 
 } else if (flow === 'activate' && plan === 'premium') {
   title = 'Activation confirmed!';
@@ -133,8 +131,7 @@ if (flow === 'etag_free') {
     : '<div style="margin-bottom:6px"><b>Day 1-30:</b> Your tag is active. Test the product risk-free.</div>' +
       '<div style="margin-bottom:6px"><b>Day 30:</b> We charge $24.99 and ship your 3 Premium stickers. Gift codes appear on your dashboard.</div>' +
       '<div style="margin-bottom:6px"><b>Day 60:</b> Your $19.99/year annual plan begins.</div>' +
-      /* TMC_PATCH31_REFUND: accurate — $1 is NOT refundable */
-      '<div>Cancel before day 30 to stop the $9.99 annual charge. The $1 activation fee is non-refundable.</div>';
+      '<div>Cancel anytime before day 30 for a full refund of the $1.</div>';
 
 } else if (flow === 'direct' && plan === 'standard') {
   title = 'Welcome to Standard!';
