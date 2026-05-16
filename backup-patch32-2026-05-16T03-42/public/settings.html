@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#FF6B00">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="TapMyCar">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Settings — TapMyCar</title>
+<link rel="stylesheet" href="/app.css">
+<link rel="stylesheet" href="/tmc-redesign.css">
+<style>
+.edit-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center}
+.edit-overlay.show{display:flex}
+.edit-sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:24px 20px 34px;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.edit-sheet h3{font-size:16px;font-weight:800;color:#111;margin-bottom:16px}
+.edit-field{margin-bottom:14px}
+.edit-field label{display:block;font-size:11px;font-weight:600;color:#111;margin-bottom:5px}
+.edit-field input{width:100%;height:46px;border:1.5px solid #E5E7EB;border-radius:11px;padding:0 14px;font-size:14px;font-family:'Inter',sans-serif;background:#F9FAFB;outline:none}
+.edit-field input:focus{border-color:#FF6B00}
+</style>
+<!-- Favicon -->
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<!-- SEO -->
+<meta name="description" content="Manage your TapMyCar account, plan, referrals, and notifications.">
+<meta name="author" content="Praman Tech LLC">
+<!-- Open Graph -->
+<meta property="og:title" content="Settings — TapMyCar">
+<meta property="og:description" content="Manage your TapMyCar account, plan, referrals, and notifications.">
+<meta property="og:image" content="https://tapmycar.io/og-image.png">
+<meta property="og:url" content="https://tapmycar.io/settings.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TapMyCar">
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Settings — TapMyCar">
+<meta name="twitter:description" content="Manage your TapMyCar account, plan, referrals, and notifications.">
+<meta name="twitter:image" content="https://tapmycar.io/og-image.png">
+</head>
+<body>
+<div class="nav"><div class="bk" onclick="history.back()"><div class="bkb"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><span class="bk-label">Settings</span></div><a href="/dashboard.html" aria-label="TapMyCar" style="display:flex;align-items:center;text-decoration:none"><img src="/logo.png" alt="TapMyCar" class="nav-logo-img" style="height:36px;width:auto"></a></div>
+<div class="chev"></div>
+<div class="page">
+  <!-- Profile header -->
+  <div style="padding:20px 20px 14px;text-align:center">
+    <div style="width:68px;height:68px;border-radius:50%;background:var(--or);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff" id="profile-av">U</div>
+    <div style="font-size:18px;font-weight:800;color:var(--bk);margin-bottom:3px" id="profile-name">Loading...</div>
+    <div style="font-size:12px;color:var(--gy);margin-bottom:4px" id="profile-email"></div>
+    <div style="font-size:12px;color:var(--gy);margin-bottom:10px" id="profile-phone"></div>
+    <div style="display:inline-flex;align-items:center;gap:4px;background:var(--orl);border:.5px solid var(--orl2);border-radius:99px;padding:4px 14px;font-size:11px;font-weight:600;color:var(--or)" id="profile-plan">Loading...</div>
+  </div>
+
+  <!-- Edit profile -->
+  <div class="sl">Profile</div>
+  <div class="set-row" onclick="openEditProfile()"><div class="set-l"><div class="set-ic" style="background:var(--orl)"><svg viewBox="0 0 24 24" stroke="var(--or)"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="set-t">Edit profile</div><div class="set-s">Name, phone, email</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+
+  <!-- Tag -->
+  <div class="sl">Tag</div>
+  <div class="set-row" onclick="window.location.href='/etag.html'"><div class="set-l"><div class="set-ic" style="background:var(--orl)"><svg viewBox="0 0 24 24" stroke="var(--or)"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div><div><div class="set-t">Manage tag</div><div class="set-s" id="tag-info">View your eTag</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+
+  <!-- Notifications -->
+  <div class="sl">Notifications</div>
+  <div class="set-row"><div class="set-l"><div class="set-ic" style="background:var(--orl)"><svg viewBox="0 0 24 24" stroke="var(--or)"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div><div class="set-t">SMS alerts</div><div class="set-s">When tag is scanned</div></div></div><button class="tog on" id="sms-tog" onclick="toggleSMS()"><div class="tog-d"></div></button></div>
+
+  <!-- Plan -->
+  <div class="sl">Plan & billing</div>
+  <div class="set-row" onclick="window.location.href='/pricing.html'"><div class="set-l"><div class="set-ic" style="background:var(--orl)"><svg viewBox="0 0 24 24" stroke="var(--or)"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div><div><div class="set-t">Manage plan</div><div class="set-s" id="plan-info">View pricing</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+
+  <!-- App -->
+  <div class="sl">App</div>
+  <div class="set-row" onclick="window.location.href='/landing.html'"><div class="set-l"><div class="set-ic" style="background:var(--orl)"><svg viewBox="0 0 24 24" stroke="var(--or)"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><div class="set-t">About TapMyCar</div><div class="set-s">Privacy for you. Safety for your car.</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+  <div class="set-row" onclick="openReviewModal()" id="leave-review-row"><div class="set-l"><div class="set-ic" style="background:var(--orl)"><svg viewBox="0 0 24 24" stroke="var(--or)"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div><div><div class="set-t">Leave a review</div><div class="set-s">Share your experience with TapMyCar</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+  <div class="set-row" onclick="window.location.href='/reviews.html'"><div class="set-l"><div class="set-ic" style="background:var(--orl)"><svg viewBox="0 0 24 24" stroke="var(--or)"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div><div><div class="set-t">All reviews</div><div class="set-s">See what others say</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+
+  <!-- Legal -->
+  <div class="sl">Legal</div>
+  <div class="set-row" onclick="window.location.href='/privacy.html'"><div class="set-l"><div class="set-ic" style="background:var(--orl)"><svg viewBox="0 0 24 24" stroke="var(--or)" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><div class="set-t">Privacy Policy</div><div class="set-s">How we handle your data</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+  <div class="set-row" onclick="window.location.href='/terms.html'"><div class="set-l"><div class="set-ic" style="background:var(--orl)"><svg viewBox="0 0 24 24" stroke="var(--or)" fill="none" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div><div class="set-t">Terms of Service</div><div class="set-s">Rules for using TapMyCar</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+
+  <!-- Support -->
+  <div class="sl">Support</div>
+  <div class="set-row" onclick="window.location.href='mailto:support@tapmycar.io'"><div class="set-l"><div class="set-ic" style="background:var(--gb)"><svg viewBox="0 0 24 24" stroke="var(--gy)"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div><div class="set-t">Help & FAQ</div><div class="set-s">support@tapmycar.io</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+
+  <!-- Referrals -->
+  <div class="sl">Referrals</div>
+  <div class="card" style="margin:0 16px 8px;padding:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div><div style="font-size:13px;font-weight:700;color:#111">Your referral code</div><div style="font-size:20px;font-weight:800;color:var(--or);letter-spacing:1px;margin-top:2px" id="ref-code">Loading...</div></div>
+      <button onclick="shareRefLink()" style="background:var(--or);color:#fff;border:none;border-radius:11px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Share Link</button>
+    </div>
+    <input type="text" id="ref-link" readonly onclick="copyRefLink()" style="width:100%;height:40px;border:1.5px solid #E5E7EB;border-radius:11px;padding:0 12px;font-size:11px;color:#6B7280;background:#F9FAFB;cursor:pointer;font-family:inherit;box-sizing:border-box" placeholder="Loading...">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+      <div style="text-align:center"><div style="font-size:22px;font-weight:800;color:var(--or)" id="ref-count">0</div><div style="font-size:10px;color:#6B7280">Friends referred</div></div>
+      <div id="ref-credits" style="display:none;background:#DCFCE7;border-radius:10px;padding:6px 12px;font-size:12px;font-weight:700;color:#16A34A"></div>
+    </div>
+    <div style="background:#FFF3EC;border-radius:10px;padding:10px 12px;margin-top:12px;font-size:11px;color:#FF6B00;font-weight:600" id="ref-next">Loading...</div>
+    <div id="ref-reward-box" style="display:none;background:#DCFCE7;border:1.5px solid #BBF7D0;border-radius:10px;padding:12px;margin-top:12px">
+      <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:8px">You earned a reward! Choose one:</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button id="claim-free_standard" onclick="claimReward('free_standard')" style="background:#16A34A;color:#fff;border:none;border-radius:10px;padding:10px 6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Free Standard Plan</button>
+        <button id="claim-coupon" onclick="claimReward('coupon')" style="background:#FF6B00;color:#fff;border:none;border-radius:10px;padding:10px 6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">$4.99 Coupon</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cancel Subscription (only shown if user has an active subscription) -->
+  <div class="set-row" id="cancel-sub-row" style="display:none" onclick="cancelSubscription()"><div class="set-l"><div class="set-ic" style="background:#FFF3EC"><svg viewBox="0 0 24 24" stroke="var(--or)"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div><div><div class="set-t">Cancel subscription</div><div class="set-s">Stop future charges. Keeps tag active until paid period ends.</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+
+  <!-- Danger zone -->
+  <div class="sl" style="color:var(--rd)">Danger zone</div>
+  <div class="set-row" onclick="deleteAccount()"><div class="set-l"><div class="set-ic" style="background:var(--rdl)"><svg viewBox="0 0 24 24" stroke="var(--rd)"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div><div><div class="set-t" style="color:var(--rd)">Delete account</div><div class="set-s">Permanently delete your account and all data.</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+
+  <!-- Sign out -->
+  <div class="set-row" onclick="signOut()"><div class="set-l"><div class="set-ic" style="background:var(--rdl)"><svg viewBox="0 0 24 24" stroke="var(--rd)"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div><div><div class="set-t" style="color:var(--rd)">Sign out</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+
+  <div style="padding:20px;text-align:center"><div style="font-size:11px;color:#CCC">TapMyCar v1.0.0  Praman Tech LLC  Connecticut</div></div>
+</div>
+
+<!-- Edit Profile Sheet -->
+<div class="edit-overlay" id="edit-overlay" onclick="if(event.target===this)closeEdit()">
+  <div class="edit-sheet">
+    <h3>Edit Profile</h3>
+    <div class="edit-field">
+      <label>Full name</label>
+      <input type="text" id="edit-name" placeholder="Your name">
+    </div>
+    <div class="edit-field">
+      <label>Phone number</label>
+      <div style="display:flex;gap:8px;align-items:stretch">
+      <select id="edit-country-code" style="height:46px;border:1.5px solid #E5E7EB;border-radius:11px;padding:0 10px;font-size:14px;font-family:'Inter',sans-serif;background:#F9FAFB;outline:none;color:#111;min-width:90px">
+                <option value="+1">US +1</option>
+        <option value="+44">UK +44</option>
+        <option value="+91">IN +91</option>
+        <option value="+61">AU +61</option>
+        <option value="+1-CA">CA +1</option>
+        <option value="+49">DE +49</option>
+        <option value="+33">FR +33</option>
+        <option value="+39">IT +39</option>
+        <option value="+34">ES +34</option>
+        <option value="+55">BR +55</option>
+        <option value="+52">MX +52</option>
+        <option value="+971">AE +971</option>
+        <option value="+65">SG +65</option>
+        <option value="+81">JP +81</option>
+        <option value="+82">KR +82</option>
+        <option value="+86">CN +86</option>
+      </select>
+      <input type="tel" id="edit-phone" placeholder="(203) 555-0100" style="flex:1;height:46px;border:1.5px solid #E5E7EB;border-radius:11px;padding:0 14px;font-size:14px;font-family:'Inter',sans-serif;background:#F9FAFB;outline:none">
+    </div>
+    </div>
+    <div class="edit-field">
+      <label>Email address</label>
+      <input type="email" id="edit-email" placeholder="jane@example.com">
+    </div>
+    <div style="height:1px;background:#F3F4F6;margin:4px 0 12px"></div>
+    <div style="font-size:11px;font-weight:700;color:#6B7280;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Emergency Contact (optional)</div>
+    <div class="edit-field">
+      <label>Contact name</label>
+      <input type="text" id="edit-emergency-name" placeholder="e.g. John Smith">
+    </div>
+    <div class="edit-field">
+      <label>Contact phone</label>
+      <input type="tel" id="edit-emergency-phone" placeholder="+1 (203) 555-0100">
+      <div style="font-size:10px;color:#9CA3AF;margin-top:4px">Notified if you don't respond to a scan alert</div>
+    </div>
+    <!-- TMC_WELCOME_MSG_UI -->
+    <div style="height:1px;background:#F3F4F6;margin:12px 0"></div>
+    <div style="font-size:11px;font-weight:700;color:#6B7280;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Note shown to strangers (optional)</div>
+    <div class="edit-field">
+      <label>A short message that appears when someone scans your tag</label>
+      <textarea id="edit-welcome-message" maxlength="120" rows="3" placeholder="e.g. If my lights are on please tap that — I respond fast." style="width:100%;border:1.5px solid #E5E7EB;border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit;resize:none;color:#111"></textarea>
+      <div style="font-size:10px;color:#9CA3AF;margin-top:4px">Max 120 chars. Phone numbers and email addresses are auto-removed for privacy.</div>
+    </div>
+    <button class="btn" onclick="saveProfile()" id="save-btn">Save changes</button>
+    <button class="btn-o" style="margin-top:8px" onclick="closeEdit()">Cancel</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"><div class="toast-ic"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span id="toast-msg"></span></div>
+
+<script src="/app.js"></script>
+<script>
+requireAuth();
+const s = getSession();
+let userData = null;
+let tagData = null;
+
+async function loadSettings() {
+  try {
+    const res = await fetch('/api/get-dashboard?user_id=' + s.token);
+    const data = await res.json();
+    if (data.user) {
+      userData = data.user;
+      document.getElementById('profile-name').textContent = data.user.name || 'User';
+      document.getElementById('profile-av').textContent = (data.user.name || 'U')[0].toUpperCase();
+      document.getElementById('profile-phone').textContent = data.user.phone || '';
+      document.getElementById('profile-email').textContent = data.user.email || '';
+      const plan = data.user.plan || 'etag';
+      const planNames = { etag: 'eTag (Free)', standard: 'Standard', premium: 'Premium', business: 'Business' };
+      if (data.user.subscription_id) { document.getElementById('cancel-sub-row').style.display = 'flex'; }
+      document.getElementById('profile-plan').textContent = ' ' + (planNames[plan] || plan);
+      document.getElementById('plan-info').textContent = (planNames[plan] || plan) + ' plan';
+    }
+    if (data.tags && data.tags.length > 0) {
+      tagData = data.tags[0];
+      document.getElementById('tag-info').textContent = (tagData.token.includes('-') ? tagData.token : 'TMC-' + tagData.token.replace(/^TMC[-.]?/,'')) + ' - ' + (tagData.status || 'unknown');
+    }
+  } catch(e) { console.error('Settings load error:', e); }
+}
+
+/* TMC_PATCH30_PHONE_SPLIT: split stored E.164 phone into country-code + local number */
+function _p30SplitPhone(stored) {
+  var s = (stored == null ? '' : String(stored)).trim();
+  if (!s) return { cc: '+1', local: '' };
+  /* Build a list of dropdown option values, sorted by length (descending)
+     so longer prefixes match first ("+971" before "+9", "+44" before "+1"). */
+  var sel = document.getElementById('edit-country-code');
+  var values = [];
+  if (sel && sel.options) {
+    for (var i = 0; i < sel.options.length; i++) {
+      var v = sel.options[i].value;
+      if (v) values.push(v);
+    }
+  }
+  values.sort(function(a, b) {
+    /* Compare by the "+digits" part length, ignoring suffixes like "-CA" */
+    var na = a.replace(/-.*$/, '').length;
+    var nb = b.replace(/-.*$/, '').length;
+    return nb - na;
+  });
+  for (var j = 0; j < values.length; j++) {
+    var cc = values[j].replace(/-.*$/, ''); /* "+1-CA" -> "+1" for matching */
+    if (s.indexOf(cc) === 0) {
+      return { cc: values[j], local: s.slice(cc.length) };
+    }
+  }
+  /* Stored doesn't start with any known cc -> treat as local-only US number. */
+  if (s.charAt(0) === '+') {
+    /* Has a + but unknown country. Keep as local for display. */
+    return { cc: '+1', local: s };
+  }
+  return { cc: '+1', local: s };
+}
+
+function openEditProfile() {
+  if (userData) {
+    document.getElementById('edit-name').value = userData.name || '';
+    /* TMC_PATCH30_PHONE_SPLIT: split phone into dropdown + input */
+    var _p30 = _p30SplitPhone(userData.phone);
+    var _ccSel = document.getElementById('edit-country-code');
+    if (_ccSel) {
+      /* Try exact match first; if a country-specific variant like "+1-CA"
+         exists in stored data, prefer it. Otherwise fall back to plain cc. */
+      var found = false;
+      for (var i = 0; i < _ccSel.options.length; i++) {
+        if (_ccSel.options[i].value === _p30.cc) { _ccSel.value = _p30.cc; found = true; break; }
+      }
+      if (!found) _ccSel.value = '+1';
+    }
+    document.getElementById('edit-phone').value = _p30.local;
+    document.getElementById('edit-email').value = userData.email || '';
+    document.getElementById('edit-emergency-name').value = userData.emergency_name || '';
+    document.getElementById('edit-emergency-phone').value = userData.emergency_contact || '';
+    document.getElementById('edit-welcome-message').value = userData.welcome_message || '';
+  }
+  document.getElementById('edit-overlay').classList.add('show');
+}
+
+function closeEdit() { document.getElementById('edit-overlay').classList.remove('show'); }
+
+async function saveProfile() {
+  const name = document.getElementById('edit-name').value.trim();
+  const editCC = document.getElementById('edit-country-code').value.replace('-CA',''); const phoneRaw = document.getElementById('edit-phone').value.trim().replace(/[^0-9]/g,''); const phone = phoneRaw ? editCC + phoneRaw : '';
+  const email = document.getElementById('edit-email').value.trim();
+  const emergencyName = document.getElementById('edit-emergency-name').value.trim();
+  const emergencyPhone = document.getElementById('edit-emergency-phone').value.trim();
+  const welcomeMessage = document.getElementById('edit-welcome-message').value.trim();
+  if (!name) { showToast('Name is required'); return; }
+  const btn = document.getElementById('save-btn');
+  btn.textContent = 'Saving...'; btn.disabled = true;
+  try {
+    const res = await fetch('/api/get-dashboard', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ user_id: s.token, name, phone, email, emergency_name: emergencyName, emergency_contact: emergencyPhone, welcome_message: welcomeMessage }) });
+    const data = await res.json();
+    if (data.success) {
+      localStorage.setItem('tmc_name', name); localStorage.setItem('tmc_phone', phone); localStorage.setItem('tmc_email', email);
+      document.getElementById('profile-name').textContent = name;
+      document.getElementById('profile-av').textContent = name[0].toUpperCase();
+      document.getElementById('profile-phone').textContent = phone || '';
+      document.getElementById('profile-email').textContent = email || '';
+      closeEdit(); showToast('Profile updated!');
+    } else { showToast(data.error || 'Failed to save'); }
+  } catch(e) { showToast('Network error'); }
+  btn.textContent = 'Save changes'; btn.disabled = false;
+}
+
+function toggleSMS() {
+  const tog = document.getElementById('sms-tog');
+  tog.classList.toggle('on');
+  showToast(tog.classList.contains('on') ? 'SMS alerts enabled' : 'SMS alerts disabled');
+}
+
+/* TMC_PATCH31_REFUND: cache refund eligibility, refresh when settings loaded */
+let _p31Elig = null;
+
+async function _p31LoadEligibility() {
+  try {
+    const r = await fetch('/api/cancel-subscription-preview?user_id=' + encodeURIComponent(s.token));
+    if (!r.ok) return null;
+    const data = await r.json();
+    if (!data || !data.success) return null;
+    _p31Elig = data;
+    // Update the cancel row's subtitle if user is eligible for refund
+    const sub = document.querySelector('#cancel-sub-row .set-s');
+    if (sub && data.eligible && data.refund_cents > 0) {
+      const dollars = (data.refund_cents / 100).toFixed(2);
+      sub.textContent = 'Refund 
+
+async function deleteAccount() {
+  const first = confirm('Delete your TapMyCar account permanently?\n\nThis will:\n• Cancel any active subscription\n• Disable all your tags (scans will show "inactive")\n• Permanently delete your personal data\n\nThis cannot be undone.');
+  if (!first) return;
+  const typed = prompt('To confirm, type DELETE (all caps) in the box below:');
+  if (typed !== 'DELETE') {
+    if (typed !== null) showToast('Delete cancelled — confirmation text did not match');
+    return;
+  }
+  try {
+    const res = await fetch('/api/delete-account', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ user_id: s.token, confirm: 'DELETE' })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Account deleted. Goodbye!');
+      localStorage.clear();
+      setTimeout(() => { window.location.href = '/landing.html'; }, 1500);
+    } else {
+      showToast(data.error || 'Failed to delete account. Please contact support@tapmycar.io.');
+    }
+  } catch(e) { showToast('Network error — please try again'); }
+}
+
+async function loadReferrals() {
+  try {
+    const res = await fetch('/api/get-referral?user_id=' + s.token);
+    const data = await res.json();
+    if (!data.success) return;
+    if (!data.referral_code) {
+      await fetch('/api/generate-referral-code', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ user_id: s.token }) });
+      setTimeout(loadReferrals, 1000);
+      return;
+    }
+    const link = 'https://tapmycar.io/register.html?ref=' + data.referral_code;
+    document.getElementById('ref-code').textContent = data.referral_code;
+    document.getElementById('ref-link').value = link;
+    document.getElementById('ref-count').textContent = (data.referral_count || 0);
+    if (data.referral_credits > 0) {
+      document.getElementById('ref-credits').textContent = '$' + parseFloat(data.referral_credits).toFixed(2) + ' discount earned';
+      document.getElementById('ref-credits').style.display = 'block';
+    }
+    if (data.referral_reward_pending === 'choice') { document.getElementById('ref-reward-box').style.display = 'block'; }
+    const count = data.referral_count || 0;
+    document.getElementById('ref-next').textContent = count === 0 ? 'Refer 1 friend who buys a plan - get $3 off!' : count === 1 ? 'Refer 1 more friend - Free Standard or $4.99 coupon!' : 'Keep referring - earn more rewards!';
+  } catch(e) { console.error(e); }
+}
+
+async function claimReward(choice) {
+  const btn = document.getElementById('claim-' + choice);
+  btn.textContent = 'Claiming...'; btn.disabled = true;
+  try {
+    const res = await fetch('/api/claim-reward', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ user_id: s.token, choice }) });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('ref-reward-box').style.display = 'none';
+      showToast(choice === 'free_standard' ? 'Free Standard credited!' : '$4.99 coupon applied!');
+      loadReferrals();
+    } else { showToast(data.error || 'Failed to claim'); }
+  } catch(e) { showToast('Network error'); }
+  btn.textContent = choice === 'free_standard' ? 'Free Standard' : '$4.99 Coupon';
+  btn.disabled = false;
+}
+
+function copyRefLink() {
+  navigator.clipboard.writeText(document.getElementById('ref-link').value).then(() => showToast('Link copied!')).catch(() => showToast('Copy failed'));
+}
+
+function shareRefLink() {
+  const link = document.getElementById('ref-link').value;
+  if (navigator.share) { navigator.share({ title: 'TapMyCar', text: 'Protect your car with TapMyCar! Use my referral link:', url: link }); }
+  else { copyRefLink(); }
+}
+
+function signOut() { localStorage.clear(); window.location.href = '/signin.html'; }
+
+loadSettings();
+loadReferrals();
+</script>
+<script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }</script>
+
+<div style="padding:20px 20px 32px;text-align:center;border-top:.5px solid #E5E7EB;margin-top:24px;background:#fff">
+  <p style="font-size:11px;color:#9CA3AF;margin:0 0 4px">
+    <a href="/privacy.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Privacy</a>
+    &nbsp;·&nbsp;
+    <a href="/terms.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Terms</a>
+    &nbsp;·&nbsp;
+    <a href="mailto:support@tapmycar.io" style="color:#FF6B00;text-decoration:none;font-weight:600">Support</a>
+  </p>
+  <p style="font-size:11px;color:#9CA3AF;margin:0">© 2026 Praman Tech LLC</p>
+</div>
+
+<!-- Review Modal -->
+<div id="review-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:flex-end;justify-content:center" onclick="if(event.target===this)closeReviewModal()">
+  <div style="background:#fff;width:100%;max-width:430px;border-radius:20px 20px 0 0;padding:24px 20px;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:20px;font-weight:800;color:#111">Share your experience</div>
+      <button onclick="closeReviewModal()" style="background:none;border:none;font-size:24px;color:#9CA3AF;cursor:pointer;padding:4px">×</button>
+    </div>
+    <div style="font-size:13px;color:#6B7280;margin-bottom:16px;line-height:1.5">Your review will be visible after our team approves it. Reviews help others trust TapMyCar.</div>
+
+    <label style="font-size:12px;font-weight:700;color:#111;display:block;margin-bottom:6px">Your name</label>
+    <input type="text" id="rev-name" placeholder="e.g. Sarah M." maxlength="60" style="width:100%;height:42px;border:1.5px solid #E5E7EB;border-radius:11px;padding:0 12px;font-size:14px;margin-bottom:14px;font-family:inherit;box-sizing:border-box">
+
+    <label style="font-size:12px;font-weight:700;color:#111;display:block;margin-bottom:6px">City <span style="color:#9CA3AF;font-weight:400">(optional)</span></label>
+    <input type="text" id="rev-city" placeholder="e.g. Hartford, CT" maxlength="60" style="width:100%;height:42px;border:1.5px solid #E5E7EB;border-radius:11px;padding:0 12px;font-size:14px;margin-bottom:14px;font-family:inherit;box-sizing:border-box">
+
+    <label style="font-size:12px;font-weight:700;color:#111;display:block;margin-bottom:6px">Your review</label>
+    <textarea id="rev-text" placeholder="What do you love about TapMyCar? Share specifics about how it helped you." maxlength="500" rows="5" style="width:100%;border:1.5px solid #E5E7EB;border-radius:11px;padding:10px 12px;font-size:14px;margin-bottom:6px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>
+    <div style="font-size:11px;color:#9CA3AF;margin-bottom:16px"><span id="rev-count">0</span> / 500 characters (min 10)</div>
+
+    <button class="btn" id="rev-submit-btn" onclick="submitReview()" style="margin-bottom:8px">Submit review</button>
+    <button class="btn-o" onclick="closeReviewModal()">Cancel</button>
+  </div>
+</div>
+
+<script>
+function openReviewModal() {
+  if (!s || !s.token) { window.location.href = '/signin.html'; return; }
+  document.getElementById('rev-name').value = (localStorage.getItem('tmc_name') || '').slice(0, 60);
+  document.getElementById('rev-modal-update-count')();
+  document.getElementById('review-modal').style.display = 'flex';
+}
+function closeReviewModal() {
+  document.getElementById('review-modal').style.display = 'none';
+}
+async function submitReview() {
+  const name = document.getElementById('rev-name').value.trim();
+  const city = document.getElementById('rev-city').value.trim();
+  const text = document.getElementById('rev-text').value.trim();
+
+  if (!name) { showToast('Please enter your name'); return; }
+  if (text.length < 10) { showToast('Review must be at least 10 characters'); return; }
+
+  const btn = document.getElementById('rev-submit-btn');
+  btn.textContent = 'Submitting...'; btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/submit-review', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ user_id: s.token, name, city, text })
+    });
+    const data = await res.json();
+    if (data.success) {
+      closeReviewModal();
+      showToast('Thank you! Your review is awaiting approval.');
+      document.getElementById('rev-text').value = '';
+      document.getElementById('rev-city').value = '';
+    } else {
+      showToast(data.error || 'Failed to submit review');
+    }
+  } catch (e) { showToast('Network error — please try again'); }
+  btn.textContent = 'Submit review'; btn.disabled = false;
+}
+
+// Live character count
+window.addEventListener('DOMContentLoaded', () => {
+  const ta = document.getElementById('rev-text');
+  const counter = document.getElementById('rev-count');
+  // Provide a wrapper that the open function can call
+  const updateCount = () => { counter.textContent = ta.value.length; };
+  document.getElementById('rev-modal-update-count') === null;
+  // Attach a no-arg handler accessible by id-style call we used above
+  Object.defineProperty(document.getElementById('rev-text'), 'updateCount', { value: updateCount });
+  ta.addEventListener('input', updateCount);
+  // Patch openReviewModal call to safely update
+  const realOpen = openReviewModal;
+  window.openReviewModal = function() {
+    if (!s || !s.token) { window.location.href = '/signin.html'; return; }
+    document.getElementById('rev-name').value = (localStorage.getItem('tmc_name') || '').slice(0, 60);
+    updateCount();
+    document.getElementById('review-modal').style.display = 'flex';
+  };
+});
+
+// Auto-open if user came via #leave-review hash
+window.addEventListener('load', () => {
+  if (window.location.hash === '#leave-review') {
+    setTimeout(() => openReviewModal(), 300);
+  }
+});
+</script>
+<script src="/tmc-redesign.js"></script>
+
+<!-- TMC_FLOATING_NAV -->
+<nav class="tmc-fnav" aria-label="Main navigation">
+  <a href="/dashboard.html" class="tmc-fnav-item" data-match="/dashboard">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+    <span class="tmc-fnav-label">Home</span>
+  </a>
+  <a href="/manage.html" class="tmc-fnav-item" data-match="/manage">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+    <span class="tmc-fnav-label">Tag</span>
+  </a>
+  <a href="/verify.html" class="tmc-fnav-item" data-match="/verify">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+    <span class="tmc-fnav-label">Verify</span>
+  </a>
+  <a href="/activity.html" class="tmc-fnav-item" data-match="/activity">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+    <span class="tmc-fnav-label">Activity</span>
+  </a>
+  <a href="/settings.html" class="tmc-fnav-item" data-match="/settings">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+    <span class="tmc-fnav-label">Profile</span>
+  </a>
+</nav>
+<!-- /TMC_FLOATING_NAV -->
+</body>
+</html> + dollars + ' available (within 14 days)';
+    }
+    return data;
+  } catch (e) { return null; }
+}
+
+async function cancelSubscription() {
+  /* TMC_PATCH31_REFUND: refresh eligibility right before showing dialog */
+  await _p31LoadEligibility();
+
+  let confirmed = false;
+  if (_p31Elig && _p31Elig.eligible && _p31Elig.refund_cents > 0) {
+    const dollars = (_p31Elig.refund_cents / 100).toFixed(2);
+    confirmed = confirm(
+      'Cancel and refund 
+
+async function deleteAccount() {
+  const first = confirm('Delete your TapMyCar account permanently?\n\nThis will:\n• Cancel any active subscription\n• Disable all your tags (scans will show "inactive")\n• Permanently delete your personal data\n\nThis cannot be undone.');
+  if (!first) return;
+  const typed = prompt('To confirm, type DELETE (all caps) in the box below:');
+  if (typed !== 'DELETE') {
+    if (typed !== null) showToast('Delete cancelled — confirmation text did not match');
+    return;
+  }
+  try {
+    const res = await fetch('/api/delete-account', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ user_id: s.token, confirm: 'DELETE' })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Account deleted. Goodbye!');
+      localStorage.clear();
+      setTimeout(() => { window.location.href = '/landing.html'; }, 1500);
+    } else {
+      showToast(data.error || 'Failed to delete account. Please contact support@tapmycar.io.');
+    }
+  } catch(e) { showToast('Network error — please try again'); }
+}
+
+async function loadReferrals() {
+  try {
+    const res = await fetch('/api/get-referral?user_id=' + s.token);
+    const data = await res.json();
+    if (!data.success) return;
+    if (!data.referral_code) {
+      await fetch('/api/generate-referral-code', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ user_id: s.token }) });
+      setTimeout(loadReferrals, 1000);
+      return;
+    }
+    const link = 'https://tapmycar.io/register.html?ref=' + data.referral_code;
+    document.getElementById('ref-code').textContent = data.referral_code;
+    document.getElementById('ref-link').value = link;
+    document.getElementById('ref-count').textContent = (data.referral_count || 0);
+    if (data.referral_credits > 0) {
+      document.getElementById('ref-credits').textContent = '$' + parseFloat(data.referral_credits).toFixed(2) + ' discount earned';
+      document.getElementById('ref-credits').style.display = 'block';
+    }
+    if (data.referral_reward_pending === 'choice') { document.getElementById('ref-reward-box').style.display = 'block'; }
+    const count = data.referral_count || 0;
+    document.getElementById('ref-next').textContent = count === 0 ? 'Refer 1 friend who buys a plan - get $3 off!' : count === 1 ? 'Refer 1 more friend - Free Standard or $4.99 coupon!' : 'Keep referring - earn more rewards!';
+  } catch(e) { console.error(e); }
+}
+
+async function claimReward(choice) {
+  const btn = document.getElementById('claim-' + choice);
+  btn.textContent = 'Claiming...'; btn.disabled = true;
+  try {
+    const res = await fetch('/api/claim-reward', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ user_id: s.token, choice }) });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('ref-reward-box').style.display = 'none';
+      showToast(choice === 'free_standard' ? 'Free Standard credited!' : '$4.99 coupon applied!');
+      loadReferrals();
+    } else { showToast(data.error || 'Failed to claim'); }
+  } catch(e) { showToast('Network error'); }
+  btn.textContent = choice === 'free_standard' ? 'Free Standard' : '$4.99 Coupon';
+  btn.disabled = false;
+}
+
+function copyRefLink() {
+  navigator.clipboard.writeText(document.getElementById('ref-link').value).then(() => showToast('Link copied!')).catch(() => showToast('Copy failed'));
+}
+
+function shareRefLink() {
+  const link = document.getElementById('ref-link').value;
+  if (navigator.share) { navigator.share({ title: 'TapMyCar', text: 'Protect your car with TapMyCar! Use my referral link:', url: link }); }
+  else { copyRefLink(); }
+}
+
+function signOut() { localStorage.clear(); window.location.href = '/signin.html'; }
+
+loadSettings();
+loadReferrals();
+</script>
+<script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }</script>
+
+<div style="padding:20px 20px 32px;text-align:center;border-top:.5px solid #E5E7EB;margin-top:24px;background:#fff">
+  <p style="font-size:11px;color:#9CA3AF;margin:0 0 4px">
+    <a href="/privacy.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Privacy</a>
+    &nbsp;·&nbsp;
+    <a href="/terms.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Terms</a>
+    &nbsp;·&nbsp;
+    <a href="mailto:support@tapmycar.io" style="color:#FF6B00;text-decoration:none;font-weight:600">Support</a>
+  </p>
+  <p style="font-size:11px;color:#9CA3AF;margin:0">© 2026 Praman Tech LLC</p>
+</div>
+
+<!-- Review Modal -->
+<div id="review-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:flex-end;justify-content:center" onclick="if(event.target===this)closeReviewModal()">
+  <div style="background:#fff;width:100%;max-width:430px;border-radius:20px 20px 0 0;padding:24px 20px;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:20px;font-weight:800;color:#111">Share your experience</div>
+      <button onclick="closeReviewModal()" style="background:none;border:none;font-size:24px;color:#9CA3AF;cursor:pointer;padding:4px">×</button>
+    </div>
+    <div style="font-size:13px;color:#6B7280;margin-bottom:16px;line-height:1.5">Your review will be visible after our team approves it. Reviews help others trust TapMyCar.</div>
+
+    <label style="font-size:12px;font-weight:700;color:#111;display:block;margin-bottom:6px">Your name</label>
+    <input type="text" id="rev-name" placeholder="e.g. Sarah M." maxlength="60" style="width:100%;height:42px;border:1.5px solid #E5E7EB;border-radius:11px;padding:0 12px;font-size:14px;margin-bottom:14px;font-family:inherit;box-sizing:border-box">
+
+    <label style="font-size:12px;font-weight:700;color:#111;display:block;margin-bottom:6px">City <span style="color:#9CA3AF;font-weight:400">(optional)</span></label>
+    <input type="text" id="rev-city" placeholder="e.g. Hartford, CT" maxlength="60" style="width:100%;height:42px;border:1.5px solid #E5E7EB;border-radius:11px;padding:0 12px;font-size:14px;margin-bottom:14px;font-family:inherit;box-sizing:border-box">
+
+    <label style="font-size:12px;font-weight:700;color:#111;display:block;margin-bottom:6px">Your review</label>
+    <textarea id="rev-text" placeholder="What do you love about TapMyCar? Share specifics about how it helped you." maxlength="500" rows="5" style="width:100%;border:1.5px solid #E5E7EB;border-radius:11px;padding:10px 12px;font-size:14px;margin-bottom:6px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>
+    <div style="font-size:11px;color:#9CA3AF;margin-bottom:16px"><span id="rev-count">0</span> / 500 characters (min 10)</div>
+
+    <button class="btn" id="rev-submit-btn" onclick="submitReview()" style="margin-bottom:8px">Submit review</button>
+    <button class="btn-o" onclick="closeReviewModal()">Cancel</button>
+  </div>
+</div>
+
+<script>
+function openReviewModal() {
+  if (!s || !s.token) { window.location.href = '/signin.html'; return; }
+  document.getElementById('rev-name').value = (localStorage.getItem('tmc_name') || '').slice(0, 60);
+  document.getElementById('rev-modal-update-count')();
+  document.getElementById('review-modal').style.display = 'flex';
+}
+function closeReviewModal() {
+  document.getElementById('review-modal').style.display = 'none';
+}
+async function submitReview() {
+  const name = document.getElementById('rev-name').value.trim();
+  const city = document.getElementById('rev-city').value.trim();
+  const text = document.getElementById('rev-text').value.trim();
+
+  if (!name) { showToast('Please enter your name'); return; }
+  if (text.length < 10) { showToast('Review must be at least 10 characters'); return; }
+
+  const btn = document.getElementById('rev-submit-btn');
+  btn.textContent = 'Submitting...'; btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/submit-review', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ user_id: s.token, name, city, text })
+    });
+    const data = await res.json();
+    if (data.success) {
+      closeReviewModal();
+      showToast('Thank you! Your review is awaiting approval.');
+      document.getElementById('rev-text').value = '';
+      document.getElementById('rev-city').value = '';
+    } else {
+      showToast(data.error || 'Failed to submit review');
+    }
+  } catch (e) { showToast('Network error — please try again'); }
+  btn.textContent = 'Submit review'; btn.disabled = false;
+}
+
+// Live character count
+window.addEventListener('DOMContentLoaded', () => {
+  const ta = document.getElementById('rev-text');
+  const counter = document.getElementById('rev-count');
+  // Provide a wrapper that the open function can call
+  const updateCount = () => { counter.textContent = ta.value.length; };
+  document.getElementById('rev-modal-update-count') === null;
+  // Attach a no-arg handler accessible by id-style call we used above
+  Object.defineProperty(document.getElementById('rev-text'), 'updateCount', { value: updateCount });
+  ta.addEventListener('input', updateCount);
+  // Patch openReviewModal call to safely update
+  const realOpen = openReviewModal;
+  window.openReviewModal = function() {
+    if (!s || !s.token) { window.location.href = '/signin.html'; return; }
+    document.getElementById('rev-name').value = (localStorage.getItem('tmc_name') || '').slice(0, 60);
+    updateCount();
+    document.getElementById('review-modal').style.display = 'flex';
+  };
+});
+
+// Auto-open if user came via #leave-review hash
+window.addEventListener('load', () => {
+  if (window.location.hash === '#leave-review') {
+    setTimeout(() => openReviewModal(), 300);
+  }
+});
+</script>
+<script src="/tmc-redesign.js"></script>
+
+<!-- TMC_FLOATING_NAV -->
+<nav class="tmc-fnav" aria-label="Main navigation">
+  <a href="/dashboard.html" class="tmc-fnav-item" data-match="/dashboard">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+    <span class="tmc-fnav-label">Home</span>
+  </a>
+  <a href="/manage.html" class="tmc-fnav-item" data-match="/manage">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+    <span class="tmc-fnav-label">Tag</span>
+  </a>
+  <a href="/verify.html" class="tmc-fnav-item" data-match="/verify">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+    <span class="tmc-fnav-label">Verify</span>
+  </a>
+  <a href="/activity.html" class="tmc-fnav-item" data-match="/activity">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+    <span class="tmc-fnav-label">Activity</span>
+  </a>
+  <a href="/settings.html" class="tmc-fnav-item" data-match="/settings">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+    <span class="tmc-fnav-label">Profile</span>
+  </a>
+</nav>
+<!-- /TMC_FLOATING_NAV -->
+</body>
+</html> + dollars + '?\n\n' +
+      'You paid your annual subscription within the last 14 days, so we will refund 
+
+async function deleteAccount() {
+  const first = confirm('Delete your TapMyCar account permanently?\n\nThis will:\n• Cancel any active subscription\n• Disable all your tags (scans will show "inactive")\n• Permanently delete your personal data\n\nThis cannot be undone.');
+  if (!first) return;
+  const typed = prompt('To confirm, type DELETE (all caps) in the box below:');
+  if (typed !== 'DELETE') {
+    if (typed !== null) showToast('Delete cancelled — confirmation text did not match');
+    return;
+  }
+  try {
+    const res = await fetch('/api/delete-account', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ user_id: s.token, confirm: 'DELETE' })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Account deleted. Goodbye!');
+      localStorage.clear();
+      setTimeout(() => { window.location.href = '/landing.html'; }, 1500);
+    } else {
+      showToast(data.error || 'Failed to delete account. Please contact support@tapmycar.io.');
+    }
+  } catch(e) { showToast('Network error — please try again'); }
+}
+
+async function loadReferrals() {
+  try {
+    const res = await fetch('/api/get-referral?user_id=' + s.token);
+    const data = await res.json();
+    if (!data.success) return;
+    if (!data.referral_code) {
+      await fetch('/api/generate-referral-code', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ user_id: s.token }) });
+      setTimeout(loadReferrals, 1000);
+      return;
+    }
+    const link = 'https://tapmycar.io/register.html?ref=' + data.referral_code;
+    document.getElementById('ref-code').textContent = data.referral_code;
+    document.getElementById('ref-link').value = link;
+    document.getElementById('ref-count').textContent = (data.referral_count || 0);
+    if (data.referral_credits > 0) {
+      document.getElementById('ref-credits').textContent = '$' + parseFloat(data.referral_credits).toFixed(2) + ' discount earned';
+      document.getElementById('ref-credits').style.display = 'block';
+    }
+    if (data.referral_reward_pending === 'choice') { document.getElementById('ref-reward-box').style.display = 'block'; }
+    const count = data.referral_count || 0;
+    document.getElementById('ref-next').textContent = count === 0 ? 'Refer 1 friend who buys a plan - get $3 off!' : count === 1 ? 'Refer 1 more friend - Free Standard or $4.99 coupon!' : 'Keep referring - earn more rewards!';
+  } catch(e) { console.error(e); }
+}
+
+async function claimReward(choice) {
+  const btn = document.getElementById('claim-' + choice);
+  btn.textContent = 'Claiming...'; btn.disabled = true;
+  try {
+    const res = await fetch('/api/claim-reward', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ user_id: s.token, choice }) });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('ref-reward-box').style.display = 'none';
+      showToast(choice === 'free_standard' ? 'Free Standard credited!' : '$4.99 coupon applied!');
+      loadReferrals();
+    } else { showToast(data.error || 'Failed to claim'); }
+  } catch(e) { showToast('Network error'); }
+  btn.textContent = choice === 'free_standard' ? 'Free Standard' : '$4.99 Coupon';
+  btn.disabled = false;
+}
+
+function copyRefLink() {
+  navigator.clipboard.writeText(document.getElementById('ref-link').value).then(() => showToast('Link copied!')).catch(() => showToast('Copy failed'));
+}
+
+function shareRefLink() {
+  const link = document.getElementById('ref-link').value;
+  if (navigator.share) { navigator.share({ title: 'TapMyCar', text: 'Protect your car with TapMyCar! Use my referral link:', url: link }); }
+  else { copyRefLink(); }
+}
+
+function signOut() { localStorage.clear(); window.location.href = '/signin.html'; }
+
+loadSettings();
+loadReferrals();
+</script>
+<script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }</script>
+
+<div style="padding:20px 20px 32px;text-align:center;border-top:.5px solid #E5E7EB;margin-top:24px;background:#fff">
+  <p style="font-size:11px;color:#9CA3AF;margin:0 0 4px">
+    <a href="/privacy.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Privacy</a>
+    &nbsp;·&nbsp;
+    <a href="/terms.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Terms</a>
+    &nbsp;·&nbsp;
+    <a href="mailto:support@tapmycar.io" style="color:#FF6B00;text-decoration:none;font-weight:600">Support</a>
+  </p>
+  <p style="font-size:11px;color:#9CA3AF;margin:0">© 2026 Praman Tech LLC</p>
+</div>
+
+<!-- Review Modal -->
+<div id="review-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:flex-end;justify-content:center" onclick="if(event.target===this)closeReviewModal()">
+  <div style="background:#fff;width:100%;max-width:430px;border-radius:20px 20px 0 0;padding:24px 20px;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:20px;font-weight:800;color:#111">Share your experience</div>
+      <button onclick="closeReviewModal()" style="background:none;border:none;font-size:24px;color:#9CA3AF;cursor:pointer;padding:4px">×</button>
+    </div>
+    <div style="font-size:13px;color:#6B7280;margin-bottom:16px;line-height:1.5">Your review will be visible after our team approves it. Reviews help others trust TapMyCar.</div>
+
+    <label style="font-size:12px;font-weight:700;color:#111;display:block;margin-bottom:6px">Your name</label>
+    <input type="text" id="rev-name" placeholder="e.g. Sarah M." maxlength="60" style="width:100%;height:42px;border:1.5px solid #E5E7EB;border-radius:11px;padding:0 12px;font-size:14px;margin-bottom:14px;font-family:inherit;box-sizing:border-box">
+
+    <label style="font-size:12px;font-weight:700;color:#111;display:block;margin-bottom:6px">City <span style="color:#9CA3AF;font-weight:400">(optional)</span></label>
+    <input type="text" id="rev-city" placeholder="e.g. Hartford, CT" maxlength="60" style="width:100%;height:42px;border:1.5px solid #E5E7EB;border-radius:11px;padding:0 12px;font-size:14px;margin-bottom:14px;font-family:inherit;box-sizing:border-box">
+
+    <label style="font-size:12px;font-weight:700;color:#111;display:block;margin-bottom:6px">Your review</label>
+    <textarea id="rev-text" placeholder="What do you love about TapMyCar? Share specifics about how it helped you." maxlength="500" rows="5" style="width:100%;border:1.5px solid #E5E7EB;border-radius:11px;padding:10px 12px;font-size:14px;margin-bottom:6px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>
+    <div style="font-size:11px;color:#9CA3AF;margin-bottom:16px"><span id="rev-count">0</span> / 500 characters (min 10)</div>
+
+    <button class="btn" id="rev-submit-btn" onclick="submitReview()" style="margin-bottom:8px">Submit review</button>
+    <button class="btn-o" onclick="closeReviewModal()">Cancel</button>
+  </div>
+</div>
+
+<script>
+function openReviewModal() {
+  if (!s || !s.token) { window.location.href = '/signin.html'; return; }
+  document.getElementById('rev-name').value = (localStorage.getItem('tmc_name') || '').slice(0, 60);
+  document.getElementById('rev-modal-update-count')();
+  document.getElementById('review-modal').style.display = 'flex';
+}
+function closeReviewModal() {
+  document.getElementById('review-modal').style.display = 'none';
+}
+async function submitReview() {
+  const name = document.getElementById('rev-name').value.trim();
+  const city = document.getElementById('rev-city').value.trim();
+  const text = document.getElementById('rev-text').value.trim();
+
+  if (!name) { showToast('Please enter your name'); return; }
+  if (text.length < 10) { showToast('Review must be at least 10 characters'); return; }
+
+  const btn = document.getElementById('rev-submit-btn');
+  btn.textContent = 'Submitting...'; btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/submit-review', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ user_id: s.token, name, city, text })
+    });
+    const data = await res.json();
+    if (data.success) {
+      closeReviewModal();
+      showToast('Thank you! Your review is awaiting approval.');
+      document.getElementById('rev-text').value = '';
+      document.getElementById('rev-city').value = '';
+    } else {
+      showToast(data.error || 'Failed to submit review');
+    }
+  } catch (e) { showToast('Network error — please try again'); }
+  btn.textContent = 'Submit review'; btn.disabled = false;
+}
+
+// Live character count
+window.addEventListener('DOMContentLoaded', () => {
+  const ta = document.getElementById('rev-text');
+  const counter = document.getElementById('rev-count');
+  // Provide a wrapper that the open function can call
+  const updateCount = () => { counter.textContent = ta.value.length; };
+  document.getElementById('rev-modal-update-count') === null;
+  // Attach a no-arg handler accessible by id-style call we used above
+  Object.defineProperty(document.getElementById('rev-text'), 'updateCount', { value: updateCount });
+  ta.addEventListener('input', updateCount);
+  // Patch openReviewModal call to safely update
+  const realOpen = openReviewModal;
+  window.openReviewModal = function() {
+    if (!s || !s.token) { window.location.href = '/signin.html'; return; }
+    document.getElementById('rev-name').value = (localStorage.getItem('tmc_name') || '').slice(0, 60);
+    updateCount();
+    document.getElementById('review-modal').style.display = 'flex';
+  };
+});
+
+// Auto-open if user came via #leave-review hash
+window.addEventListener('load', () => {
+  if (window.location.hash === '#leave-review') {
+    setTimeout(() => openReviewModal(), 300);
+  }
+});
+</script>
+<script src="/tmc-redesign.js"></script>
+
+<!-- TMC_FLOATING_NAV -->
+<nav class="tmc-fnav" aria-label="Main navigation">
+  <a href="/dashboard.html" class="tmc-fnav-item" data-match="/dashboard">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+    <span class="tmc-fnav-label">Home</span>
+  </a>
+  <a href="/manage.html" class="tmc-fnav-item" data-match="/manage">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+    <span class="tmc-fnav-label">Tag</span>
+  </a>
+  <a href="/verify.html" class="tmc-fnav-item" data-match="/verify">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+    <span class="tmc-fnav-label">Verify</span>
+  </a>
+  <a href="/activity.html" class="tmc-fnav-item" data-match="/activity">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+    <span class="tmc-fnav-label">Activity</span>
+  </a>
+  <a href="/settings.html" class="tmc-fnav-item" data-match="/settings">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+    <span class="tmc-fnav-label">Profile</span>
+  </a>
+</nav>
+<!-- /TMC_FLOATING_NAV -->
+</body>
+</html> + dollars + ' to your card now.\n' +
+      '($1 service fee retained per refund policy.)\n\n' +
+      'After the refund:\n' +
+      '• Your subscription stops immediately\n' +
+      '• Your tag becomes inactive\n' +
+      '• Physical stickers you have are yours to keep\n' +
+      '• You can re-subscribe anytime\n\n' +
+      'Refund arrives in 3-5 business days.'
+    );
+  } else {
+    confirmed = confirm(
+      'Cancel your TapMyCar subscription?\n\n' +
+      'You will not be charged again. Your tag stays active until the end of your current paid period.\n\n' +
+      'Physical stickers already shipped are yours to keep.\n\n' +
+      'Note: refunds are only available within 14 days of an annual charge.'
+    );
+  }
+  if (!confirmed) return;
+
+  try {
+    const res = await fetch('/api/cancel-subscription', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ user_id: s.token })
+    });
+    const data = await res.json();
+    if (data.success) {
+      if (data.refund_issued && data.refund_amount_cents > 0) {
+        const d = (data.refund_amount_cents / 100).toFixed(2);
+        showToast('Canceled. Refund of 
+
+async function deleteAccount() {
+  const first = confirm('Delete your TapMyCar account permanently?\n\nThis will:\n• Cancel any active subscription\n• Disable all your tags (scans will show "inactive")\n• Permanently delete your personal data\n\nThis cannot be undone.');
+  if (!first) return;
+  const typed = prompt('To confirm, type DELETE (all caps) in the box below:');
+  if (typed !== 'DELETE') {
+    if (typed !== null) showToast('Delete cancelled — confirmation text did not match');
+    return;
+  }
+  try {
+    const res = await fetch('/api/delete-account', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ user_id: s.token, confirm: 'DELETE' })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Account deleted. Goodbye!');
+      localStorage.clear();
+      setTimeout(() => { window.location.href = '/landing.html'; }, 1500);
+    } else {
+      showToast(data.error || 'Failed to delete account. Please contact support@tapmycar.io.');
+    }
+  } catch(e) { showToast('Network error — please try again'); }
+}
+
+async function loadReferrals() {
+  try {
+    const res = await fetch('/api/get-referral?user_id=' + s.token);
+    const data = await res.json();
+    if (!data.success) return;
+    if (!data.referral_code) {
+      await fetch('/api/generate-referral-code', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ user_id: s.token }) });
+      setTimeout(loadReferrals, 1000);
+      return;
+    }
+    const link = 'https://tapmycar.io/register.html?ref=' + data.referral_code;
+    document.getElementById('ref-code').textContent = data.referral_code;
+    document.getElementById('ref-link').value = link;
+    document.getElementById('ref-count').textContent = (data.referral_count || 0);
+    if (data.referral_credits > 0) {
+      document.getElementById('ref-credits').textContent = '$' + parseFloat(data.referral_credits).toFixed(2) + ' discount earned';
+      document.getElementById('ref-credits').style.display = 'block';
+    }
+    if (data.referral_reward_pending === 'choice') { document.getElementById('ref-reward-box').style.display = 'block'; }
+    const count = data.referral_count || 0;
+    document.getElementById('ref-next').textContent = count === 0 ? 'Refer 1 friend who buys a plan - get $3 off!' : count === 1 ? 'Refer 1 more friend - Free Standard or $4.99 coupon!' : 'Keep referring - earn more rewards!';
+  } catch(e) { console.error(e); }
+}
+
+async function claimReward(choice) {
+  const btn = document.getElementById('claim-' + choice);
+  btn.textContent = 'Claiming...'; btn.disabled = true;
+  try {
+    const res = await fetch('/api/claim-reward', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ user_id: s.token, choice }) });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('ref-reward-box').style.display = 'none';
+      showToast(choice === 'free_standard' ? 'Free Standard credited!' : '$4.99 coupon applied!');
+      loadReferrals();
+    } else { showToast(data.error || 'Failed to claim'); }
+  } catch(e) { showToast('Network error'); }
+  btn.textContent = choice === 'free_standard' ? 'Free Standard' : '$4.99 Coupon';
+  btn.disabled = false;
+}
+
+function copyRefLink() {
+  navigator.clipboard.writeText(document.getElementById('ref-link').value).then(() => showToast('Link copied!')).catch(() => showToast('Copy failed'));
+}
+
+function shareRefLink() {
+  const link = document.getElementById('ref-link').value;
+  if (navigator.share) { navigator.share({ title: 'TapMyCar', text: 'Protect your car with TapMyCar! Use my referral link:', url: link }); }
+  else { copyRefLink(); }
+}
+
+function signOut() { localStorage.clear(); window.location.href = '/signin.html'; }
+
+loadSettings();
+loadReferrals();
+</script>
+<script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }</script>
+
+<div style="padding:20px 20px 32px;text-align:center;border-top:.5px solid #E5E7EB;margin-top:24px;background:#fff">
+  <p style="font-size:11px;color:#9CA3AF;margin:0 0 4px">
+    <a href="/privacy.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Privacy</a>
+    &nbsp;·&nbsp;
+    <a href="/terms.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Terms</a>
+    &nbsp;·&nbsp;
+    <a href="mailto:support@tapmycar.io" style="color:#FF6B00;text-decoration:none;font-weight:600">Support</a>
+  </p>
+  <p style="font-size:11px;color:#9CA3AF;margin:0">© 2026 Praman Tech LLC</p>
+</div>
+
+<!-- Review Modal -->
+<div id="review-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:flex-end;justify-content:center" onclick="if(event.target===this)closeReviewModal()">
+  <div style="background:#fff;width:100%;max-width:430px;border-radius:20px 20px 0 0;padding:24px 20px;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:20px;font-weight:800;color:#111">Share your experience</div>
+      <button onclick="closeReviewModal()" style="background:none;border:none;font-size:24px;color:#9CA3AF;cursor:pointer;padding:4px">×</button>
+    </div>
+    <div style="font-size:13px;color:#6B7280;margin-bottom:16px;line-height:1.5">Your review will be visible after our team approves it. Reviews help others trust TapMyCar.</div>
+
+    <label style="font-size:12px;font-weight:700;color:#111;display:block;margin-bottom:6px">Your name</label>
+    <input type="text" id="rev-name" placeholder="e.g. Sarah M." maxlength="60" style="width:100%;height:42px;border:1.5px solid #E5E7EB;border-radius:11px;padding:0 12px;font-size:14px;margin-bottom:14px;font-family:inherit;box-sizing:border-box">
+
+    <label style="font-size:12px;font-weight:700;color:#111;display:block;margin-bottom:6px">City <span style="color:#9CA3AF;font-weight:400">(optional)</span></label>
+    <input type="text" id="rev-city" placeholder="e.g. Hartford, CT" maxlength="60" style="width:100%;height:42px;border:1.5px solid #E5E7EB;border-radius:11px;padding:0 12px;font-size:14px;margin-bottom:14px;font-family:inherit;box-sizing:border-box">
+
+    <label style="font-size:12px;font-weight:700;color:#111;display:block;margin-bottom:6px">Your review</label>
+    <textarea id="rev-text" placeholder="What do you love about TapMyCar? Share specifics about how it helped you." maxlength="500" rows="5" style="width:100%;border:1.5px solid #E5E7EB;border-radius:11px;padding:10px 12px;font-size:14px;margin-bottom:6px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>
+    <div style="font-size:11px;color:#9CA3AF;margin-bottom:16px"><span id="rev-count">0</span> / 500 characters (min 10)</div>
+
+    <button class="btn" id="rev-submit-btn" onclick="submitReview()" style="margin-bottom:8px">Submit review</button>
+    <button class="btn-o" onclick="closeReviewModal()">Cancel</button>
+  </div>
+</div>
+
+<script>
+function openReviewModal() {
+  if (!s || !s.token) { window.location.href = '/signin.html'; return; }
+  document.getElementById('rev-name').value = (localStorage.getItem('tmc_name') || '').slice(0, 60);
+  document.getElementById('rev-modal-update-count')();
+  document.getElementById('review-modal').style.display = 'flex';
+}
+function closeReviewModal() {
+  document.getElementById('review-modal').style.display = 'none';
+}
+async function submitReview() {
+  const name = document.getElementById('rev-name').value.trim();
+  const city = document.getElementById('rev-city').value.trim();
+  const text = document.getElementById('rev-text').value.trim();
+
+  if (!name) { showToast('Please enter your name'); return; }
+  if (text.length < 10) { showToast('Review must be at least 10 characters'); return; }
+
+  const btn = document.getElementById('rev-submit-btn');
+  btn.textContent = 'Submitting...'; btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/submit-review', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ user_id: s.token, name, city, text })
+    });
+    const data = await res.json();
+    if (data.success) {
+      closeReviewModal();
+      showToast('Thank you! Your review is awaiting approval.');
+      document.getElementById('rev-text').value = '';
+      document.getElementById('rev-city').value = '';
+    } else {
+      showToast(data.error || 'Failed to submit review');
+    }
+  } catch (e) { showToast('Network error — please try again'); }
+  btn.textContent = 'Submit review'; btn.disabled = false;
+}
+
+// Live character count
+window.addEventListener('DOMContentLoaded', () => {
+  const ta = document.getElementById('rev-text');
+  const counter = document.getElementById('rev-count');
+  // Provide a wrapper that the open function can call
+  const updateCount = () => { counter.textContent = ta.value.length; };
+  document.getElementById('rev-modal-update-count') === null;
+  // Attach a no-arg handler accessible by id-style call we used above
+  Object.defineProperty(document.getElementById('rev-text'), 'updateCount', { value: updateCount });
+  ta.addEventListener('input', updateCount);
+  // Patch openReviewModal call to safely update
+  const realOpen = openReviewModal;
+  window.openReviewModal = function() {
+    if (!s || !s.token) { window.location.href = '/signin.html'; return; }
+    document.getElementById('rev-name').value = (localStorage.getItem('tmc_name') || '').slice(0, 60);
+    updateCount();
+    document.getElementById('review-modal').style.display = 'flex';
+  };
+});
+
+// Auto-open if user came via #leave-review hash
+window.addEventListener('load', () => {
+  if (window.location.hash === '#leave-review') {
+    setTimeout(() => openReviewModal(), 300);
+  }
+});
+</script>
+<script src="/tmc-redesign.js"></script>
+
+<!-- TMC_FLOATING_NAV -->
+<nav class="tmc-fnav" aria-label="Main navigation">
+  <a href="/dashboard.html" class="tmc-fnav-item" data-match="/dashboard">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+    <span class="tmc-fnav-label">Home</span>
+  </a>
+  <a href="/manage.html" class="tmc-fnav-item" data-match="/manage">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+    <span class="tmc-fnav-label">Tag</span>
+  </a>
+  <a href="/verify.html" class="tmc-fnav-item" data-match="/verify">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+    <span class="tmc-fnav-label">Verify</span>
+  </a>
+  <a href="/activity.html" class="tmc-fnav-item" data-match="/activity">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+    <span class="tmc-fnav-label">Activity</span>
+  </a>
+  <a href="/settings.html" class="tmc-fnav-item" data-match="/settings">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+    <span class="tmc-fnav-label">Profile</span>
+  </a>
+</nav>
+<!-- /TMC_FLOATING_NAV -->
+</body>
+</html> + d + ' on its way.');
+      } else {
+        showToast('Subscription canceled');
+      }
+      document.getElementById('cancel-sub-row').style.display = 'none';
+    } else {
+      showToast(data.error || 'Failed to cancel');
+    }
+  } catch(e) {
+    showToast('Network error');
+  }
+}
+
+/* TMC_PATCH31_REFUND: load eligibility on page load (after settings render) */
+(function() {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { setTimeout(_p31LoadEligibility, 800); });
+  } else {
+    setTimeout(_p31LoadEligibility, 800);
+  }
+})();
+
+async function deleteAccount() {
+  const first = confirm('Delete your TapMyCar account permanently?\n\nThis will:\n• Cancel any active subscription\n• Disable all your tags (scans will show "inactive")\n• Permanently delete your personal data\n\nThis cannot be undone.');
+  if (!first) return;
+  const typed = prompt('To confirm, type DELETE (all caps) in the box below:');
+  if (typed !== 'DELETE') {
+    if (typed !== null) showToast('Delete cancelled — confirmation text did not match');
+    return;
+  }
+  try {
+    const res = await fetch('/api/delete-account', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ user_id: s.token, confirm: 'DELETE' })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Account deleted. Goodbye!');
+      localStorage.clear();
+      setTimeout(() => { window.location.href = '/landing.html'; }, 1500);
+    } else {
+      showToast(data.error || 'Failed to delete account. Please contact support@tapmycar.io.');
+    }
+  } catch(e) { showToast('Network error — please try again'); }
+}
+
+async function loadReferrals() {
+  try {
+    const res = await fetch('/api/get-referral?user_id=' + s.token);
+    const data = await res.json();
+    if (!data.success) return;
+    if (!data.referral_code) {
+      await fetch('/api/generate-referral-code', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ user_id: s.token }) });
+      setTimeout(loadReferrals, 1000);
+      return;
+    }
+    const link = 'https://tapmycar.io/register.html?ref=' + data.referral_code;
+    document.getElementById('ref-code').textContent = data.referral_code;
+    document.getElementById('ref-link').value = link;
+    document.getElementById('ref-count').textContent = (data.referral_count || 0);
+    if (data.referral_credits > 0) {
+      document.getElementById('ref-credits').textContent = '$' + parseFloat(data.referral_credits).toFixed(2) + ' discount earned';
+      document.getElementById('ref-credits').style.display = 'block';
+    }
+    if (data.referral_reward_pending === 'choice') { document.getElementById('ref-reward-box').style.display = 'block'; }
+    const count = data.referral_count || 0;
+    document.getElementById('ref-next').textContent = count === 0 ? 'Refer 1 friend who buys a plan - get $3 off!' : count === 1 ? 'Refer 1 more friend - Free Standard or $4.99 coupon!' : 'Keep referring - earn more rewards!';
+  } catch(e) { console.error(e); }
+}
+
+async function claimReward(choice) {
+  const btn = document.getElementById('claim-' + choice);
+  btn.textContent = 'Claiming...'; btn.disabled = true;
+  try {
+    const res = await fetch('/api/claim-reward', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ user_id: s.token, choice }) });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('ref-reward-box').style.display = 'none';
+      showToast(choice === 'free_standard' ? 'Free Standard credited!' : '$4.99 coupon applied!');
+      loadReferrals();
+    } else { showToast(data.error || 'Failed to claim'); }
+  } catch(e) { showToast('Network error'); }
+  btn.textContent = choice === 'free_standard' ? 'Free Standard' : '$4.99 Coupon';
+  btn.disabled = false;
+}
+
+function copyRefLink() {
+  navigator.clipboard.writeText(document.getElementById('ref-link').value).then(() => showToast('Link copied!')).catch(() => showToast('Copy failed'));
+}
+
+function shareRefLink() {
+  const link = document.getElementById('ref-link').value;
+  if (navigator.share) { navigator.share({ title: 'TapMyCar', text: 'Protect your car with TapMyCar! Use my referral link:', url: link }); }
+  else { copyRefLink(); }
+}
+
+function signOut() { localStorage.clear(); window.location.href = '/signin.html'; }
+
+loadSettings();
+loadReferrals();
+</script>
+<script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }</script>
+
+<div style="padding:20px 20px 32px;text-align:center;border-top:.5px solid #E5E7EB;margin-top:24px;background:#fff">
+  <p style="font-size:11px;color:#9CA3AF;margin:0 0 4px">
+    <a href="/privacy.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Privacy</a>
+    &nbsp;·&nbsp;
+    <a href="/terms.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Terms</a>
+    &nbsp;·&nbsp;
+    <a href="mailto:support@tapmycar.io" style="color:#FF6B00;text-decoration:none;font-weight:600">Support</a>
+  </p>
+  <p style="font-size:11px;color:#9CA3AF;margin:0">© 2026 Praman Tech LLC</p>
+</div>
+
+<!-- Review Modal -->
+<div id="review-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:flex-end;justify-content:center" onclick="if(event.target===this)closeReviewModal()">
+  <div style="background:#fff;width:100%;max-width:430px;border-radius:20px 20px 0 0;padding:24px 20px;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:20px;font-weight:800;color:#111">Share your experience</div>
+      <button onclick="closeReviewModal()" style="background:none;border:none;font-size:24px;color:#9CA3AF;cursor:pointer;padding:4px">×</button>
+    </div>
+    <div style="font-size:13px;color:#6B7280;margin-bottom:16px;line-height:1.5">Your review will be visible after our team approves it. Reviews help others trust TapMyCar.</div>
+
+    <label style="font-size:12px;font-weight:700;color:#111;display:block;margin-bottom:6px">Your name</label>
+    <input type="text" id="rev-name" placeholder="e.g. Sarah M." maxlength="60" style="width:100%;height:42px;border:1.5px solid #E5E7EB;border-radius:11px;padding:0 12px;font-size:14px;margin-bottom:14px;font-family:inherit;box-sizing:border-box">
+
+    <label style="font-size:12px;font-weight:700;color:#111;display:block;margin-bottom:6px">City <span style="color:#9CA3AF;font-weight:400">(optional)</span></label>
+    <input type="text" id="rev-city" placeholder="e.g. Hartford, CT" maxlength="60" style="width:100%;height:42px;border:1.5px solid #E5E7EB;border-radius:11px;padding:0 12px;font-size:14px;margin-bottom:14px;font-family:inherit;box-sizing:border-box">
+
+    <label style="font-size:12px;font-weight:700;color:#111;display:block;margin-bottom:6px">Your review</label>
+    <textarea id="rev-text" placeholder="What do you love about TapMyCar? Share specifics about how it helped you." maxlength="500" rows="5" style="width:100%;border:1.5px solid #E5E7EB;border-radius:11px;padding:10px 12px;font-size:14px;margin-bottom:6px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>
+    <div style="font-size:11px;color:#9CA3AF;margin-bottom:16px"><span id="rev-count">0</span> / 500 characters (min 10)</div>
+
+    <button class="btn" id="rev-submit-btn" onclick="submitReview()" style="margin-bottom:8px">Submit review</button>
+    <button class="btn-o" onclick="closeReviewModal()">Cancel</button>
+  </div>
+</div>
+
+<script>
+function openReviewModal() {
+  if (!s || !s.token) { window.location.href = '/signin.html'; return; }
+  document.getElementById('rev-name').value = (localStorage.getItem('tmc_name') || '').slice(0, 60);
+  document.getElementById('rev-modal-update-count')();
+  document.getElementById('review-modal').style.display = 'flex';
+}
+function closeReviewModal() {
+  document.getElementById('review-modal').style.display = 'none';
+}
+async function submitReview() {
+  const name = document.getElementById('rev-name').value.trim();
+  const city = document.getElementById('rev-city').value.trim();
+  const text = document.getElementById('rev-text').value.trim();
+
+  if (!name) { showToast('Please enter your name'); return; }
+  if (text.length < 10) { showToast('Review must be at least 10 characters'); return; }
+
+  const btn = document.getElementById('rev-submit-btn');
+  btn.textContent = 'Submitting...'; btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/submit-review', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ user_id: s.token, name, city, text })
+    });
+    const data = await res.json();
+    if (data.success) {
+      closeReviewModal();
+      showToast('Thank you! Your review is awaiting approval.');
+      document.getElementById('rev-text').value = '';
+      document.getElementById('rev-city').value = '';
+    } else {
+      showToast(data.error || 'Failed to submit review');
+    }
+  } catch (e) { showToast('Network error — please try again'); }
+  btn.textContent = 'Submit review'; btn.disabled = false;
+}
+
+// Live character count
+window.addEventListener('DOMContentLoaded', () => {
+  const ta = document.getElementById('rev-text');
+  const counter = document.getElementById('rev-count');
+  // Provide a wrapper that the open function can call
+  const updateCount = () => { counter.textContent = ta.value.length; };
+  document.getElementById('rev-modal-update-count') === null;
+  // Attach a no-arg handler accessible by id-style call we used above
+  Object.defineProperty(document.getElementById('rev-text'), 'updateCount', { value: updateCount });
+  ta.addEventListener('input', updateCount);
+  // Patch openReviewModal call to safely update
+  const realOpen = openReviewModal;
+  window.openReviewModal = function() {
+    if (!s || !s.token) { window.location.href = '/signin.html'; return; }
+    document.getElementById('rev-name').value = (localStorage.getItem('tmc_name') || '').slice(0, 60);
+    updateCount();
+    document.getElementById('review-modal').style.display = 'flex';
+  };
+});
+
+// Auto-open if user came via #leave-review hash
+window.addEventListener('load', () => {
+  if (window.location.hash === '#leave-review') {
+    setTimeout(() => openReviewModal(), 300);
+  }
+});
+</script>
+<script src="/tmc-redesign.js"></script>
+
+<!-- TMC_FLOATING_NAV -->
+<nav class="tmc-fnav" aria-label="Main navigation">
+  <a href="/dashboard.html" class="tmc-fnav-item" data-match="/dashboard">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+    <span class="tmc-fnav-label">Home</span>
+  </a>
+  <a href="/manage.html" class="tmc-fnav-item" data-match="/manage">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+    <span class="tmc-fnav-label">Tag</span>
+  </a>
+  <a href="/verify.html" class="tmc-fnav-item" data-match="/verify">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+    <span class="tmc-fnav-label">Verify</span>
+  </a>
+  <a href="/activity.html" class="tmc-fnav-item" data-match="/activity">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+    <span class="tmc-fnav-label">Activity</span>
+  </a>
+  <a href="/settings.html" class="tmc-fnav-item" data-match="/settings">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+    <span class="tmc-fnav-label">Profile</span>
+  </a>
+</nav>
+<!-- /TMC_FLOATING_NAV -->
+</body>
+</html>
