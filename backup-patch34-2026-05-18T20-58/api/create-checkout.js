@@ -25,20 +25,6 @@ const STICKER_PRICE = { standard: 999, premium: 2499 };
 const ANNUAL_PRICE = { standard: 999, premium: 1999 };
 
 module.exports = async function handler(req, res) {
-  /* TMC_PATCH34_AUTOMATIC_TAX: per-item tax code. CT 6.35% standard rate on all items
-     for now. When CPA confirms a different SaaS rate, change the tax_code
-     on subscription/activation line items. */
-  const _STRIPE_TAX_CODE = 'txcd_99999999'; // General — Tangible Goods (standard rate)
-
-  function _withTax(item) {
-    if (item && item.price_data) {
-      item.price_data.tax_behavior = 'exclusive';
-      item.price_data.product_data = item.price_data.product_data || {};
-      item.price_data.product_data.tax_code = _STRIPE_TAX_CODE;
-    }
-    return item;
-  }
-
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   // TMC_PATCH7_ACTIVATE_SMS: accept activation_session_id + token from body
@@ -128,7 +114,7 @@ module.exports = async function handler(req, res) {
 
     if (flow === 'activate') {
       // $1 activation fee
-      lineItems.push(_withTax({
+      lineItems.push({
         price_data: {
           currency: 'usd',
           product_data: {
@@ -138,12 +124,12 @@ module.exports = async function handler(req, res) {
           unit_amount: ACTIVATION_FEE
         },
         quantity: 1
-      }));
+      });
       chargeTodayCents += ACTIVATION_FEE;
 
       if (prepay) {
         // Bundle sticker + year 1 into today's charge
-        lineItems.push(_withTax({
+        lineItems.push({
           price_data: {
             currency: 'usd',
             product_data: {
@@ -152,22 +138,22 @@ module.exports = async function handler(req, res) {
             unit_amount: STICKER
           },
           quantity: 1
-        }));
-        lineItems.push(_withTax({
+        });
+        lineItems.push({
           price_data: {
             currency: 'usd',
             product_data: { name: `Year 1 ${plan === 'standard' ? 'Standard' : 'Premium'} annual subscription` },
             unit_amount: ANNUAL
           },
           quantity: 1
-        }));
+        });
         chargeTodayCents += STICKER + ANNUAL;
       }
     }
 
     if (flow === 'direct') {
       // Sticker fee today
-      lineItems.push(_withTax({
+      lineItems.push({
         price_data: {
           currency: 'usd',
           product_data: {
@@ -181,18 +167,18 @@ module.exports = async function handler(req, res) {
           unit_amount: STICKER
         },
         quantity: 1
-      }));
+      });
       chargeTodayCents += STICKER;
 
       if (prepay) {
-        lineItems.push(_withTax({
+        lineItems.push({
           price_data: {
             currency: 'usd',
             product_data: { name: `Year 1 ${plan === 'standard' ? 'Standard' : 'Premium'} annual subscription` },
             unit_amount: ANNUAL
           },
           quantity: 1
-        }));
+        });
         chargeTodayCents += ANNUAL;
       }
     }
@@ -219,10 +205,6 @@ module.exports = async function handler(req, res) {
         setup_future_usage: 'off_session'
       },
       shipping_address_collection: { allowed_countries: ['US'] },
-      billing_address_collection: 'required',
-      /* TMC_PATCH34_AUTOMATIC_TAX: Stripe Tax — calculates tax based on shipping address */
-      automatic_tax: { enabled: true },
-      customer_update: { address: 'auto', shipping: 'auto', name: 'auto' },
       metadata: {
         user_id,
         plan,
