@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FF6B00">
+<title>TapMyCar — Privacy for you. Safety for your car.</title>
+<meta name="description" content="Get the TapMyCar app, follow us on social, and visit our website.">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/logo.png">
+
+<!-- TMC_PATCH36AFIX_LINKHUB: link-hub promo page for sticker-back scans -->
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: #FFF7F0;
+    color: #111;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+  a { color: inherit; text-decoration: none; }
+  img, svg { display: block; max-width: 100%; }
+
+  /* ===== Animated background ===== */
+  .km-bg {
+    position: fixed; inset: 0; z-index: -2;
+    background:
+      radial-gradient(ellipse at top, #FFE4CC 0%, #FFF7F0 60%),
+      #FFF7F0;
+    overflow: hidden;
+  }
+  .km-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(70px);
+    opacity: .55;
+    will-change: transform;
+  }
+  .km-blob-1 {
+    width: 380px; height: 380px;
+    background: radial-gradient(circle, #FFB57E 0%, transparent 70%);
+    top: -100px; left: -100px;
+    animation: km-drift-1 16s ease-in-out infinite;
+  }
+  .km-blob-2 {
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, #FF6B00 0%, transparent 70%);
+    top: 50%; right: -120px;
+    animation: km-drift-2 20s ease-in-out infinite;
+    opacity: .25;
+  }
+  .km-blob-3 {
+    width: 280px; height: 280px;
+    background: radial-gradient(circle, #FFC9A0 0%, transparent 70%);
+    bottom: -80px; left: 30%;
+    animation: km-drift-3 22s ease-in-out infinite;
+  }
+  @keyframes km-drift-1 {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(80px, 100px) scale(1.15); }
+  }
+  @keyframes km-drift-2 {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(-100px, 60px) scale(1.1); }
+  }
+  @keyframes km-drift-3 {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(40px, -60px) scale(1.1); }
+  }
+
+  /* ===== Page container ===== */
+  .km-wrap {
+    position: relative;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 32px 20px 24px;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+  }
+
+  /* ===== Brand mark (top) ===== */
+  .km-brand {
+    display: flex; align-items: center; gap: 11px;
+    justify-content: center;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: km-fade-down .6s ease-out .1s both;
+  }
+  .km-brand-logo {
+    width: 44px; height: 44px;
+    background: #fff; border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(255, 107, 0, .15);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .km-brand-logo::before {
+    content: ''; position: absolute; inset: -4px;
+    border: 1.5px solid rgba(255, 107, 0, .25);
+    border-radius: 16px;
+    animation: km-ring-pulse 3s ease-in-out infinite;
+  }
+  .km-brand-logo img { width: 30px; height: 30px; }
+  .km-brand-text {
+    font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: #0E0E0E;
+  }
+  .km-brand-text span { color: #FF6B00; }
+  @keyframes km-ring-pulse {
+    0%, 100% { transform: scale(1); opacity: .25; }
+    50% { transform: scale(1.18); opacity: 0; }
+  }
+
+  /* ===== Hero ===== */
+  .km-hero { text-align: center; margin-bottom: 36px; }
+  .km-chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(255, 107, 0, .1);
+    border: 1px solid rgba(255, 107, 0, .25);
+    color: #C2400A;
+    font-size: 11px; font-weight: 700;
+    padding: 6px 12px; border-radius: 100px;
+    margin-bottom: 18px;
+    opacity: 0;
+    animation: km-fade-up .6s ease-out .25s both;
+  }
+  .km-chip::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: #FF6B00;
+    animation: km-pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes km-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(.7); opacity: .6; }
+  }
+  .km-h1 {
+    font-size: 34px; font-weight: 800;
+    letter-spacing: -0.8px; line-height: 1.1;
+    color: #0E0E0E;
+    margin-bottom: 14px;
+    opacity: 0;
+    animation: km-fade-up .7s ease-out .35s both;
+  }
+  .km-h1 span {
+    color: #FF6B00;
+    position: relative;
+    display: inline-block;
+  }
+  .km-h1 span::after {
+    content: ''; position: absolute; left: 0; right: 0;
+    bottom: 2px; height: 8px;
+    background: rgba(255, 107, 0, .18);
+    z-index: -1;
+    border-radius: 4px;
+  }
+  .km-sub {
+    font-size: 14px; color: #555;
+    line-height: 1.6;
+    max-width: 340px; margin: 0 auto;
+    opacity: 0;
+    animation: km-fade-up .7s ease-out .45s both;
+  }
+
+  /* ===== Primary CTA ===== */
+  .km-primary {
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px;
+    background: #FF6B00;
+    color: #fff;
+    font-size: 16px; font-weight: 800;
+    padding: 18px 24px;
+    border-radius: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 12px 30px rgba(255, 107, 0, .35);
+    transition: transform .15s ease, box-shadow .15s ease;
+    opacity: 0;
+    animation: km-fade-up .7s ease-out .55s both;
+  }
+  .km-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(255, 107, 0, .42); }
+  .km-primary:active { transform: translateY(0); box-shadow: 0 6px 18px rgba(255, 107, 0, .35); }
+  .km-primary svg { width: 18px; height: 18px; }
+
+  /* ===== Section divider ===== */
+  .km-divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 24px 0 14px;
+    opacity: 0;
+    animation: km-fade-up .6s ease-out .65s both;
+  }
+  .km-divider::before, .km-divider::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,0,0,.12), transparent);
+  }
+  .km-divider-text {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(0,0,0,.4);
+  }
+
+  /* ===== App store row ===== */
+  .km-stores {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .km-store {
+    display: flex; align-items: center; gap: 10px;
+    background: #0E0E0E;
+    color: #fff;
+    padding: 13px 14px;
+    border-radius: 14px;
+    transition: transform .15s ease, background .15s ease;
+    opacity: 0;
+    animation: km-fade-up .55s ease-out var(--km-d) both;
+  }
+  .km-store:nth-of-type(1) { --km-d: .7s; }
+  .km-store:nth-of-type(2) { --km-d: .78s; }
+  .km-store:hover { transform: translateY(-2px); background: #1a1a1a; }
+  .km-store:active { transform: translateY(0); }
+  .km-store-ic { flex-shrink: 0; }
+  .km-store-text { flex: 1; min-width: 0; }
+  .km-store-eyebrow {
+    font-size: 9.5px; font-weight: 600;
+    color: rgba(255,255,255,.65);
+    letter-spacing: 0.04em;
+    margin-bottom: 1px;
+  }
+  .km-store-name {
+    font-size: 14px; font-weight: 700;
+    letter-spacing: -0.2px;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .km-store.km-soon { opacity: .5; cursor: default; }
+  .km-store.km-soon:hover { transform: none; background: #0E0E0E; }
+  .km-store.km-soon .km-store-name::after {
+    content: ' • soon';
+    font-size: 10px;
+    color: rgba(255,255,255,.55);
+    font-weight: 500;
+  }
+
+  /* ===== Social row ===== */
+  .km-socials {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .km-social {
+    display: flex; align-items: center; gap: 10px;
+    padding: 13px 14px;
+    border-radius: 14px;
+    color: #fff;
+    transition: transform .15s ease, filter .15s ease;
+    opacity: 0;
+    animation: km-fade-up .55s ease-out var(--km-d) both;
+  }
+  .km-social:nth-of-type(1) { --km-d: .85s; }
+  .km-social:nth-of-type(2) { --km-d: .93s; }
+  .km-social:hover { transform: translateY(-2px); filter: brightness(1.08); }
+  .km-social:active { transform: translateY(0); }
+  .km-social-fb { background: #1877F2; }
+  .km-social-ig {
+    background: linear-gradient(45deg, #F58529 0%, #DD2A7B 50%, #8134AF 75%, #515BD4 100%);
+  }
+  .km-social-ic { flex-shrink: 0; }
+  .km-social-text { flex: 1; min-width: 0; }
+  .km-social-eyebrow {
+    font-size: 9.5px; font-weight: 600;
+    color: rgba(255,255,255,.85);
+    letter-spacing: 0.04em;
+    margin-bottom: 1px;
+  }
+  .km-social-name {
+    font-size: 14px; font-weight: 700; letter-spacing: -0.2px;
+  }
+
+  /* ===== Marquee strip ===== */
+  .km-marquee {
+    margin: 28px -20px 18px;
+    padding: 16px 0;
+    border-top: 1px solid rgba(0,0,0,.07);
+    border-bottom: 1px solid rgba(0,0,0,.07);
+    overflow: hidden;
+    -webkit-mask: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+            mask: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+    opacity: 0;
+    animation: km-fade-up .8s ease-out 1s both;
+  }
+  .km-marquee-track {
+    display: flex;
+    white-space: nowrap;
+    animation: km-marquee 30s linear infinite;
+    width: fit-content;
+  }
+  .km-marquee-item {
+    font-size: 15px; font-weight: 800;
+    color: rgba(0,0,0,.35);
+    padding: 0 26px;
+    letter-spacing: -0.3px;
+    display: inline-flex; align-items: center;
+  }
+  .km-marquee-item span { color: #FF6B00; font-size: 10px; margin-left: 26px; }
+  @keyframes km-marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ===== Footer ===== */
+  .km-footer {
+    text-align: center;
+    margin-top: auto;
+    padding-top: 14px;
+    font-size: 11px;
+    color: rgba(0,0,0,.45);
+    line-height: 1.7;
+  }
+  .km-footer a { color: #FF6B00; font-weight: 600; }
+  .km-footer-copy { font-size: 10.5px; color: rgba(0,0,0,.35); margin-top: 8px; }
+
+  /* ===== Animations ===== */
+  @keyframes km-fade-up {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes km-fade-down {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== Reduced motion ===== */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  @media (min-width: 540px) {
+    .km-wrap { padding: 44px 24px 28px; }
+    .km-h1 { font-size: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="km-bg">
+  <div class="km-blob km-blob-1"></div>
+  <div class="km-blob km-blob-2"></div>
+  <div class="km-blob km-blob-3"></div>
+</div>
+
+<div class="km-wrap">
+
+  <div class="km-brand">
+    <div class="km-brand-logo">
+      <img src="/logo.png" alt="" onerror="this.style.display='none'">
+    </div>
+    <div class="km-brand-text">Tap<span>My</span>Car</div>
+  </div>
+
+  <div class="km-hero">
+    <span class="km-chip">Privacy + Safety — No app needed to contact</span>
+    <h1 class="km-h1">Privacy for you.<br><span>Safety</span> for your car.</h1>
+    <p class="km-sub">Your car is always protected. Your identity is never exposed. Anyone can reach you — without ever seeing your real number.</p>
+  </div>
+
+  <a class="km-primary" href="https://tapmycar.io" target="_blank" rel="noopener">
+    Visit tapmycar.io
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </a>
+
+  <div class="km-divider">
+    <span class="km-divider-text">Get the app</span>
+  </div>
+
+  <div class="km-stores">
+    <a class="km-store km-soon" href="javascript:void(0)" aria-label="App Store (coming soon)">
+      <div class="km-store-ic">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+      </div>
+      <div class="km-store-text">
+        <div class="km-store-eyebrow">Download on the</div>
+        <div class="km-store-name">App Store</div>
+      </div>
+    </a>
+
+    <a class="km-store km-soon" href="javascript:void(0)" aria-label="Google Play (coming soon)">
+      <div class="km-store-ic">
+        <svg width="26" height="26" viewBox="0 0 24 24"><path fill="#34A853" d="M5.864 1.69l10.937 6.333-2.302 2.302L5.864 1.69z"/><path fill="#FBBC04" d="M16.801 8.023l2.807 1.626a1 1 0 0 1 0 1.73l-2.808 1.626L13.495 12l3.306-3.977z"/><path fill="#EA4335" d="M14.499 13.005l2.302 2.302-10.937 6.333 8.635-8.635z"/><path fill="#4285F4" d="M3.609 1.814 13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92z"/></svg>
+      </div>
+      <div class="km-store-text">
+        <div class="km-store-eyebrow">Get it on</div>
+        <div class="km-store-name">Google Play</div>
+      </div>
+    </a>
+  </div>
+
+  <div class="km-divider">
+    <span class="km-divider-text">Follow us</span>
+  </div>
+
+  <div class="km-socials">
+    <a class="km-social km-social-fb" href="https://facebook.com/tapmycar" target="_blank" rel="noopener">
+      <div class="km-social-ic">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg>
+      </div>
+      <div class="km-social-text">
+        <div class="km-social-eyebrow">Like us on</div>
+        <div class="km-social-name">Facebook</div>
+      </div>
+    </a>
+
+    <a class="km-social km-social-ig" href="https://instagram.com/tapmycar" target="_blank" rel="noopener">
+      <div class="km-social-ic">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+      </div>
+      <div class="km-social-text">
+        <div class="km-social-eyebrow">Follow us on</div>
+        <div class="km-social-name">Instagram</div>
+      </div>
+    </a>
+  </div>
+
+  <div class="km-marquee">
+    <div class="km-marquee-track">
+      <div class="km-marquee-item">Privacy<span>•</span></div>
+      <div class="km-marquee-item">Safety<span>•</span></div>
+      <div class="km-marquee-item">Instant<span>•</span></div>
+      <div class="km-marquee-item">Simple<span>•</span></div>
+      <div class="km-marquee-item">Yours<span>•</span></div>
+      <div class="km-marquee-item">Private<span>•</span></div>
+      <div class="km-marquee-item">Privacy<span>•</span></div>
+      <div class="km-marquee-item">Safety<span>•</span></div>
+      <div class="km-marquee-item">Instant<span>•</span></div>
+      <div class="km-marquee-item">Simple<span>•</span></div>
+      <div class="km-marquee-item">Yours<span>•</span></div>
+      <div class="km-marquee-item">Private<span>•</span></div>
+    </div>
+  </div>
+
+  <div class="km-footer">
+    <a href="/privacy.html">Privacy Policy</a> &nbsp;·&nbsp; <a href="/terms.html">Terms of Service</a>
+    <div class="km-footer-copy">© 2026 Praman Tech LLC — Connecticut, USA</div>
+  </div>
+
+</div>
+
+</body>
+</html>
