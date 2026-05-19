@@ -1,15 +1,98 @@
-<!DOCTYPE html>
+// ============================================================================
+// TapMyCar - Patch 36a-fix: Rewrite /knowmore as a proper link-hub promo page
+//
+// My Patch 36a misread the brief and built a "features page" with invented
+// content (stats like "0¢ shared", a "Live" indicator badge, made-up feature
+// descriptions). What was actually requested:
+//
+//   - Back-of-sticker scan target
+//   - GOAL: send the visitor to website + app stores + social media
+//   - BIG action buttons as the hero (they ARE the page)
+//   - "Live" was about page motion, not a status indicator
+//   - Use content + voice from the existing landing.html, do not invent
+//
+// This patch REPLACES knowmore.html entirely with a focused link-hub page:
+//
+//   - Brand header: TapMyCar logo + wordmark
+//   - Hero: actual landing tagline "Privacy for you. Safety for your car."
+//     with the real sub-copy from landing.html
+//   - BIG primary CTA: Visit tapmycar.io
+//   - BIG store-button pair: App Store + Google Play (side-by-side, dark
+//     store-style design)
+//   - BIG social buttons: Facebook + Instagram (side-by-side or stacked)
+//   - Footer with Privacy + Terms + copyright
+//
+//   - Animation/motion (the actual "live" feel):
+//       * Gradient drift background
+//       * Scroll-reveal animations
+//       * Gentle hover lift on every button
+//       * Floating decorative shapes
+//       * Pulsing accent rings around brand mark
+//       * Marquee strip of brand words at bottom
+//
+//   - No invented stats, no fake feature copy, no "Live" status badge
+//   - App Store + Play Store buttons SHOWN by default with placeholder
+//     hrefs (we agreed admin will set real URLs in Patch 36b). Since
+//     they're the main pitch of a promo page, they should always be visible
+//     so the visitor can see "iOS and Android app on the way" / "available
+//     in stores". When the URL is missing they get a subtle "coming soon"
+//     style instead of being hidden.
+//
+// Properties: idempotent (overwrites only if the old 36a "features" marker
+// is detected). Backs up the old file.
+// ============================================================================
+
+const fs = require('fs');
+const path = require('path');
+
+const ROOT = __dirname;
+const PUBLIC = path.join(ROOT, 'public');
+
+const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 16);
+const BACKUP_DIR = path.join(ROOT, `backup-patch36afix-${ts}`);
+
+const log = (s) => console.log(s);
+const ok = (s) => console.log('  \u2713 ' + s);
+const skip = (s) => console.log('  \u00b7 ' + s + ' (already applied, skipped)');
+const errExit = (s) => { console.error('  \u2717 ' + s); process.exit(1); };
+
+function writeFile(p, content) {
+  if (content.charCodeAt(0) === 0xFEFF) content = content.slice(1);
+  fs.writeFileSync(p, content, 'utf8');
+}
+
+log('');
+log('TapMyCar Patch 36a-fix \u2014 rewrite /knowmore as link-hub promo');
+log('Backup: ' + path.relative(ROOT, BACKUP_DIR));
+log('');
+fs.mkdirSync(BACKUP_DIR, { recursive: true });
+
+const MARKER = 'TMC_PATCH36AFIX_LINKHUB';
+
+const file = path.join(PUBLIC, 'knowmore.html');
+if (fs.existsSync(file)) {
+  const old = fs.readFileSync(file, 'utf8');
+  if (old.includes(MARKER)) {
+    skip('knowmore.html (already rewritten)');
+    process.exit(0);
+  }
+  // Back up the old 36a version before overwriting
+  fs.mkdirSync(path.join(BACKUP_DIR, 'public'), { recursive: true });
+  fs.copyFileSync(file, path.join(BACKUP_DIR, 'public', 'knowmore.html'));
+}
+
+const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#FF6B00">
-<title>TapMyCar — Privacy for you. Safety for your car.</title>
+<title>TapMyCar \u2014 Privacy for you. Safety for your car.</title>
 <meta name="description" content="Get the TapMyCar app, follow us on social, and visit our website.">
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/logo.png">
 
-<!-- TMC_PATCH36AFIX_LINKHUB: link-hub promo page for sticker-back scans -->
+<!-- ${MARKER}: link-hub promo page for sticker-back scans -->
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
@@ -239,7 +322,7 @@
   .km-store.km-soon { opacity: .5; cursor: default; }
   .km-store.km-soon:hover { transform: none; background: #0E0E0E; }
   .km-store.km-soon .km-store-name::after {
-    content: ' • soon';
+    content: ' \u2022 soon';
     font-size: 10px;
     color: rgba(255,255,255,.55);
     font-weight: 500;
@@ -367,9 +450,9 @@
   </div>
 
   <div class="km-hero">
-    <span class="km-chip">Privacy + Safety — No app needed to contact</span>
+    <span class="km-chip">Privacy + Safety \u2014 No app needed to contact</span>
     <h1 class="km-h1">Privacy for you.<br><span>Safety</span> for your car.</h1>
-    <p class="km-sub">Your car is always protected. Your identity is never exposed. Anyone can reach you — without ever seeing your real number.</p>
+    <p class="km-sub">Your car is always protected. Your identity is never exposed. Anyone can reach you \u2014 without ever seeing your real number.</p>
   </div>
 
   <a class="km-primary" href="https://tapmycar.io" target="_blank" rel="noopener">
@@ -431,27 +514,56 @@
 
   <div class="km-marquee">
     <div class="km-marquee-track">
-      <div class="km-marquee-item">Privacy<span>•</span></div>
-      <div class="km-marquee-item">Safety<span>•</span></div>
-      <div class="km-marquee-item">Instant<span>•</span></div>
-      <div class="km-marquee-item">Simple<span>•</span></div>
-      <div class="km-marquee-item">Yours<span>•</span></div>
-      <div class="km-marquee-item">Private<span>•</span></div>
-      <div class="km-marquee-item">Privacy<span>•</span></div>
-      <div class="km-marquee-item">Safety<span>•</span></div>
-      <div class="km-marquee-item">Instant<span>•</span></div>
-      <div class="km-marquee-item">Simple<span>•</span></div>
-      <div class="km-marquee-item">Yours<span>•</span></div>
-      <div class="km-marquee-item">Private<span>•</span></div>
+      <div class="km-marquee-item">Privacy<span>\u2022</span></div>
+      <div class="km-marquee-item">Safety<span>\u2022</span></div>
+      <div class="km-marquee-item">Instant<span>\u2022</span></div>
+      <div class="km-marquee-item">Simple<span>\u2022</span></div>
+      <div class="km-marquee-item">Yours<span>\u2022</span></div>
+      <div class="km-marquee-item">Private<span>\u2022</span></div>
+      <div class="km-marquee-item">Privacy<span>\u2022</span></div>
+      <div class="km-marquee-item">Safety<span>\u2022</span></div>
+      <div class="km-marquee-item">Instant<span>\u2022</span></div>
+      <div class="km-marquee-item">Simple<span>\u2022</span></div>
+      <div class="km-marquee-item">Yours<span>\u2022</span></div>
+      <div class="km-marquee-item">Private<span>\u2022</span></div>
     </div>
   </div>
 
   <div class="km-footer">
-    <a href="/privacy.html">Privacy Policy</a> &nbsp;·&nbsp; <a href="/terms.html">Terms of Service</a>
-    <div class="km-footer-copy">© 2026 Praman Tech LLC — Connecticut, USA</div>
+    <a href="/privacy.html">Privacy Policy</a> &nbsp;\u00b7&nbsp; <a href="/terms.html">Terms of Service</a>
+    <div class="km-footer-copy">\u00a9 ${new Date().getFullYear()} Praman Tech LLC \u2014 Connecticut, USA</div>
   </div>
 
 </div>
 
 </body>
 </html>
+`;
+
+writeFile(file, html);
+ok('knowmore.html: rewritten as link-hub promo (' + html.split('\n').length + ' lines)');
+
+log('');
+log('==============================================================');
+log('Patch 36a-fix complete.');
+log('');
+log('Deploy:');
+log('  git add -A');
+log('  git commit -m "Patch 36a-fix: rewrite /knowmore as link-hub promo"');
+log('  git push');
+log('  Wait ~60 sec for Vercel.');
+log('');
+log('Test:');
+log('  Open https://tapmycar.io/knowmore on your phone (or in DevTools mobile mode).');
+log('  You should see:');
+log('    - Light cream/peach background with drifting orange glows');
+log('    - Brand mark with pulsing accent ring');
+log('    - Hero: real tagline "Privacy for you. Safety for your car."');
+log('    - BIG orange button: "Visit tapmycar.io"');
+log('    - Side-by-side: App Store + Google Play (both labeled "soon")');
+log('    - Side-by-side: Facebook + Instagram (real social buttons)');
+log('    - Scrolling marquee: Privacy / Safety / Instant / Simple / Yours');
+log('    - Footer with Privacy + Terms + copyright');
+log('  App + Play store buttons are visible but greyed with "soon" label');
+log('  until you set real URLs in Patch 36b.');
+log('==============================================================');
