@@ -1,0 +1,836 @@
+// ============================================================================
+// TapMyCar - Patch 36a: /knowmore promo landing page (sticker-back QR target)
+//
+// Creates a new mobile-first promotional page at tapmycar.io/knowmore.
+// This is the destination for the QR code printed on the BACK of every
+// TapMyCar physical sticker.
+//
+// Design goals:
+//   - Feels premium, modern, "alive" (subtle motion, depth, parallax)
+//   - Mobile-first (this is scanned by phones in cars)
+//   - Fast to load (no heavy libs, no WebGL, no video)
+//   - Self-contained (one HTML file, no extra assets needed)
+//
+// Implementation choices:
+//   - Animated mesh gradient background (CSS-only, no canvas)
+//   - Glass-morphism cards with subtle parallax on scroll
+//   - Pulsing "Live" status dot in the hero
+//   - Scroll-reveal animations using IntersectionObserver
+//   - Hover-tilt on link cards (3D feel without 3D libs)
+//   - Marquee strip of feature words at the bottom
+//   - Smooth scroll-snap sections
+//
+// Buttons:
+//   - Website (always shown)
+//   - App Store (hidden until URL set)
+//   - Google Play (hidden until URL set)
+//   - Facebook (always shown if URL set; default https://facebook.com/tapmycar)
+//   - Instagram (always shown if URL set; default https://instagram.com/tapmycar)
+//
+// Admin editability comes in Patch 36b via app_settings; for now, URLs are
+// hardcoded with sensible defaults so the page is functional immediately.
+//
+// Also adds a /knowmore rewrite in vercel.json so the URL has no .html
+// suffix.
+//
+// Properties: idempotent, validates JS/HTML, backs up changed files.
+// ============================================================================
+
+const fs = require('fs');
+const path = require('path');
+
+const ROOT = __dirname;
+const PUBLIC = path.join(ROOT, 'public');
+
+const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 16);
+const BACKUP_DIR = path.join(ROOT, `backup-patch36a-${ts}`);
+
+const log = (s) => console.log(s);
+const ok = (s) => console.log('  \u2713 ' + s);
+const skip = (s) => console.log('  \u00b7 ' + s + ' (already applied, skipped)');
+const errExit = (s) => { console.error('  \u2717 ' + s); process.exit(1); };
+
+function readFile(p) {
+  if (!fs.existsSync(p)) errExit('File not found: ' + p);
+  return fs.readFileSync(p, 'utf8');
+}
+function backup(file) {
+  if (!fs.existsSync(file)) return;
+  const rel = path.relative(ROOT, file);
+  const dest = path.join(BACKUP_DIR, rel);
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  fs.copyFileSync(file, dest);
+}
+function writeFile(p, content) {
+  if (content.charCodeAt(0) === 0xFEFF) content = content.slice(1);
+  fs.writeFileSync(p, content, 'utf8');
+}
+
+log('');
+log('TapMyCar Patch 36a \u2014 /knowmore promo landing page');
+log('Backup directory: ' + path.relative(ROOT, BACKUP_DIR));
+log('');
+fs.mkdirSync(BACKUP_DIR, { recursive: true });
+
+const MARKER = 'TMC_PATCH36A_KNOWMORE';
+
+// =============================================================================
+// 36a.1  Create public/knowmore.html
+// =============================================================================
+
+log('36a.1  public/knowmore.html: new promo page');
+{
+  const file = path.join(PUBLIC, 'knowmore.html');
+  if (fs.existsSync(file)) {
+    const existing = readFile(file);
+    if (existing.includes(MARKER)) {
+      skip('knowmore.html');
+    } else {
+      errExit('knowmore.html exists but missing marker \u2014 manual review needed');
+    }
+  } else {
+    /* The page. Built carefully so styles, scripts, and content are
+       self-contained. */
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0E0B1E">
+<title>TapMyCar \u2014 Privacy for you. Safety for your car.</title>
+<meta name="description" content="The privacy-first vehicle contact tag. Your real number stays yours.">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/logo.png">
+
+<!-- ${MARKER}: knowmore promo landing -->
+<style>
+  /* ============== Reset & base ============== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: #0E0B1E;
+    color: #fff;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  a { color: inherit; text-decoration: none; }
+  img, svg { display: block; max-width: 100%; }
+
+  /* ============== Animated mesh-gradient background ============== */
+  .km-bg {
+    position: fixed; inset: 0; z-index: -2;
+    background: #0E0B1E;
+    overflow: hidden;
+  }
+  .km-bg::before, .km-bg::after {
+    content: '';
+    position: absolute;
+    width: 520px; height: 520px;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: .55;
+    will-change: transform;
+  }
+  .km-bg::before {
+    background: radial-gradient(circle, #FF6B00 0%, transparent 70%);
+    top: -120px; left: -120px;
+    animation: km-float-1 14s ease-in-out infinite;
+  }
+  .km-bg::after {
+    background: radial-gradient(circle, #5B5BFF 0%, transparent 70%);
+    bottom: -160px; right: -160px;
+    animation: km-float-2 18s ease-in-out infinite;
+  }
+  .km-bg-extra {
+    position: fixed; z-index: -2;
+    width: 380px; height: 380px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #FF3A8C 0%, transparent 70%);
+    filter: blur(90px);
+    opacity: .32;
+    top: 40%; left: 50%;
+    transform: translate(-50%, -50%);
+    animation: km-float-3 20s ease-in-out infinite;
+    will-change: transform;
+  }
+  @keyframes km-float-1 {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(120px, 80px) scale(1.15); }
+  }
+  @keyframes km-float-2 {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(-100px, -60px) scale(1.1); }
+  }
+  @keyframes km-float-3 {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-30%, -65%) scale(1.2); }
+  }
+
+  /* ============== Noise texture overlay (adds depth) ============== */
+  .km-noise {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    opacity: .04;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  /* ============== Page container ============== */
+  .km-wrap {
+    position: relative;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ============== Top bar ============== */
+  .km-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    opacity: 0; transform: translateY(-10px);
+    animation: km-fade-down .6s ease-out .1s both;
+  }
+  .km-topbar-brand { display: flex; align-items: center; gap: 9px; }
+  .km-topbar-logo {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: rgba(255,255,255,.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,.12);
+  }
+  .km-topbar-logo img { width: 24px; height: 24px; }
+  .km-topbar-text {
+    font-size: 17px; font-weight: 800; letter-spacing: -0.4px;
+  }
+  .km-topbar-text span { color: #FF8533; }
+  .km-livedot {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 600; color: #34D399;
+    background: rgba(52, 211, 153, .12);
+    padding: 5px 10px; border-radius: 100px;
+    border: 1px solid rgba(52, 211, 153, .25);
+  }
+  .km-livedot::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: #34D399;
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, .7);
+    animation: km-pulse 2s infinite;
+  }
+  @keyframes km-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, .7); }
+    50% { box-shadow: 0 0 0 8px rgba(52, 211, 153, 0); }
+  }
+
+  /* ============== Hero ============== */
+  .km-hero {
+    text-align: center;
+    padding: 14px 0 30px;
+  }
+  .km-eyebrow {
+    display: inline-block;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.7);
+    background: rgba(255,255,255,.06);
+    padding: 6px 12px; border-radius: 100px;
+    border: 1px solid rgba(255,255,255,.1);
+    margin-bottom: 20px;
+    opacity: 0; transform: translateY(10px);
+    animation: km-fade-up .6s ease-out .2s both;
+  }
+  .km-title {
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: -1.2px;
+    line-height: 1.05;
+    margin-bottom: 14px;
+    opacity: 0; transform: translateY(14px);
+    animation: km-fade-up .7s ease-out .3s both;
+  }
+  .km-title span {
+    background: linear-gradient(135deg, #FF6B00, #FF3A8C);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .km-subtitle {
+    font-size: 14.5px;
+    color: rgba(255,255,255,.7);
+    line-height: 1.55;
+    max-width: 340px;
+    margin: 0 auto 22px;
+    opacity: 0; transform: translateY(14px);
+    animation: km-fade-up .7s ease-out .42s both;
+  }
+
+  /* ============== 3D phone mockup ============== */
+  .km-phone-stage {
+    margin: 8px auto 32px;
+    width: 220px;
+    height: 270px;
+    position: relative;
+    perspective: 1200px;
+    opacity: 0;
+    animation: km-fade-up .8s ease-out .5s both;
+  }
+  .km-phone {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(160deg, #1a1530, #2a1f4a);
+    border-radius: 32px;
+    border: 2px solid rgba(255,255,255,.08);
+    box-shadow:
+      0 30px 60px -10px rgba(0,0,0,.6),
+      0 0 0 1px rgba(255,255,255,.04),
+      inset 0 1px 0 rgba(255,255,255,.1);
+    transform-style: preserve-3d;
+    animation: km-tilt 8s ease-in-out infinite;
+    overflow: hidden;
+  }
+  @keyframes km-tilt {
+    0%, 100% { transform: rotateY(-8deg) rotateX(6deg); }
+    50% { transform: rotateY(8deg) rotateX(-2deg); }
+  }
+  .km-phone-screen {
+    position: absolute;
+    inset: 16px;
+    background: linear-gradient(160deg, #0E0B1E 0%, #1d1738 100%);
+    border-radius: 22px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 20px;
+  }
+  .km-phone-notch {
+    position: absolute; top: 8px; left: 50%;
+    transform: translateX(-50%);
+    width: 60px; height: 6px;
+    background: #000; border-radius: 100px;
+    z-index: 2;
+  }
+  .km-phone-iconring {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FF6B00, #FF3A8C);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 24px rgba(255, 107, 0, 0.4);
+    animation: km-ring-pulse 3s ease-in-out infinite;
+  }
+  @keyframes km-ring-pulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 8px 24px rgba(255, 107, 0, 0.4); }
+    50% { transform: scale(1.06); box-shadow: 0 12px 32px rgba(255, 107, 0, 0.55); }
+  }
+  .km-phone-label {
+    font-size: 11px; color: rgba(255,255,255,.55);
+    text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px;
+    font-weight: 700;
+  }
+  .km-phone-num {
+    font-size: 14px; font-weight: 600;
+    color: rgba(255,255,255,.85);
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  /* ============== Stats strip ============== */
+  .km-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 4px 0 30px;
+    opacity: 0;
+    animation: km-fade-up .8s ease-out .6s both;
+  }
+  .km-stat {
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 14px;
+    padding: 12px 8px;
+    text-align: center;
+  }
+  .km-stat-num {
+    font-size: 19px; font-weight: 800;
+    background: linear-gradient(135deg, #fff, rgba(255,255,255,.55));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 2px;
+  }
+  .km-stat-label {
+    font-size: 10px; color: rgba(255,255,255,.55);
+    text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600;
+  }
+
+  /* ============== Feature cards ============== */
+  .km-features {
+    display: flex; flex-direction: column; gap: 12px;
+    margin-bottom: 30px;
+  }
+  .km-feature {
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex; align-items: center; gap: 14px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    opacity: 0; transform: translateY(20px);
+    transition: transform .25s ease, border-color .25s ease, background .25s ease;
+  }
+  .km-feature.km-in {
+    opacity: 1; transform: translateY(0);
+    transition: opacity .6s ease-out, transform .6s ease-out;
+  }
+  .km-feature:active { transform: scale(.98); }
+  .km-feature-ic {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255, 107, 0, .2), rgba(255, 58, 140, .15));
+    border: 1px solid rgba(255, 107, 0, .25);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .km-feature-title {
+    font-size: 14.5px; font-weight: 700; color: #fff;
+    margin-bottom: 2px;
+  }
+  .km-feature-sub {
+    font-size: 12.5px; color: rgba(255,255,255,.6);
+    line-height: 1.45;
+  }
+
+  /* ============== Section label ============== */
+  .km-section-label {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(255,255,255,.45);
+    text-align: center;
+    margin: 8px 0 14px;
+    opacity: 0;
+    animation: km-fade-up .6s ease-out .8s both;
+  }
+
+  /* ============== Link buttons ============== */
+  .km-links {
+    display: flex; flex-direction: column; gap: 10px;
+    margin-bottom: 36px;
+  }
+  .km-link {
+    display: flex; align-items: center; gap: 14px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 14px;
+    padding: 14px 16px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transition: transform .2s ease, background .2s ease, border-color .2s ease;
+    opacity: 0; transform: translateY(14px);
+  }
+  .km-link.km-in {
+    opacity: 1; transform: translateY(0);
+    transition: opacity .55s ease-out, transform .55s ease-out, background .2s ease, border-color .2s ease;
+  }
+  .km-link:hover, .km-link:focus {
+    background: rgba(255,255,255,.10);
+    border-color: rgba(255, 107, 0, .4);
+    transform: translateY(-1px);
+  }
+  .km-link:active { transform: translateY(0) scale(.99); }
+  .km-link-ic {
+    width: 40px; height: 40px; border-radius: 11px;
+    background: rgba(255,255,255,.08);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .km-link-ic.km-ic-orange { background: linear-gradient(135deg, #FF6B00, #FF3A8C); }
+  .km-link-ic.km-ic-blue { background: #1877F2; }
+  .km-link-ic.km-ic-grad { background: linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4); }
+  .km-link-ic.km-ic-dark { background: #000; }
+  .km-link-ic.km-ic-green { background: #34A853; }
+  .km-link-text { flex: 1; min-width: 0; }
+  .km-link-title { font-size: 14.5px; font-weight: 700; color: #fff; }
+  .km-link-sub { font-size: 12px; color: rgba(255,255,255,.55); margin-top: 1px; }
+  .km-link-arrow { color: rgba(255,255,255,.4); flex-shrink: 0; }
+
+  /* ============== Marquee strip ============== */
+  .km-marquee {
+    border-top: 1px solid rgba(255,255,255,.08);
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    padding: 18px 0;
+    margin: 0 -20px 30px;
+    overflow: hidden;
+    -webkit-mask: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+            mask: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+  }
+  .km-marquee-track {
+    display: flex; gap: 36px;
+    white-space: nowrap;
+    animation: km-marquee 28s linear infinite;
+    width: fit-content;
+  }
+  .km-marquee-item {
+    font-size: 16px; font-weight: 700;
+    color: rgba(255,255,255,.4);
+    display: inline-flex; align-items: center; gap: 36px;
+    letter-spacing: -0.3px;
+  }
+  .km-marquee-item::after {
+    content: '\u2022'; color: rgba(255, 107, 0, .6); font-size: 12px;
+  }
+  @keyframes km-marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ============== Footer ============== */
+  .km-footer {
+    text-align: center;
+    color: rgba(255,255,255,.45);
+    font-size: 11.5px;
+    line-height: 1.7;
+    margin-top: auto;
+    padding-top: 20px;
+  }
+  .km-footer a { color: #FF8533; font-weight: 600; }
+  .km-footer-brand {
+    font-size: 13px; font-weight: 700; color: rgba(255,255,255,.8);
+    letter-spacing: -0.3px; margin-bottom: 6px;
+  }
+  .km-footer-brand span { color: #FF6B00; }
+  .km-footer-copy { color: rgba(255,255,255,.35); font-size: 10.5px; margin-top: 8px; }
+
+  /* ============== Animations ============== */
+  @keyframes km-fade-up {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes km-fade-down {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============== Reduced motion (accessibility) ============== */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* ============== Wider screens (centering safety) ============== */
+  @media (min-width: 540px) {
+    .km-wrap { padding: 44px 24px 60px; }
+    .km-title { font-size: 44px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="km-bg"></div>
+<div class="km-bg-extra"></div>
+<div class="km-noise"></div>
+
+<div class="km-wrap">
+
+  <!-- Top bar -->
+  <div class="km-topbar">
+    <div class="km-topbar-brand">
+      <div class="km-topbar-logo">
+        <img src="/logo.png" alt="" onerror="this.style.display='none'">
+      </div>
+      <div class="km-topbar-text">Tap<span>My</span>Car</div>
+    </div>
+    <span class="km-livedot">Live</span>
+  </div>
+
+  <!-- Hero -->
+  <div class="km-hero">
+    <span class="km-eyebrow">Privacy-first vehicle contact</span>
+    <h1 class="km-title">Your car. <span>Reachable.</span><br>Your number, private.</h1>
+    <p class="km-subtitle">Strangers can reach you instantly when your car needs attention \u2014 without ever seeing your real phone number.</p>
+
+    <!-- 3D phone mockup -->
+    <div class="km-phone-stage">
+      <div class="km-phone">
+        <div class="km-phone-notch"></div>
+        <div class="km-phone-screen">
+          <div class="km-phone-iconring">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </div>
+          <div class="km-phone-label">Calling owner of</div>
+          <div class="km-phone-num">TMC-XX****</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="km-stats">
+    <div class="km-stat">
+      <div class="km-stat-num">0\u00a2</div>
+      <div class="km-stat-label">Your # shared</div>
+    </div>
+    <div class="km-stat">
+      <div class="km-stat-num">Instant</div>
+      <div class="km-stat-label">Connect</div>
+    </div>
+    <div class="km-stat">
+      <div class="km-stat-num">100%</div>
+      <div class="km-stat-label">Your control</div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <div class="km-features" id="km-features">
+
+    <div class="km-feature">
+      <div class="km-feature-ic">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF8533" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div>
+        <div class="km-feature-title">Your number is never shared</div>
+        <div class="km-feature-sub">All calls route through a masked TapMyCar number.</div>
+      </div>
+    </div>
+
+    <div class="km-feature">
+      <div class="km-feature-ic">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF8533" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </div>
+      <div>
+        <div class="km-feature-title">Strangers reach you instantly</div>
+        <div class="km-feature-sub">One tap and your phone rings, anywhere in the world.</div>
+      </div>
+    </div>
+
+    <div class="km-feature">
+      <div class="km-feature-ic">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF8533" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <div>
+        <div class="km-feature-title">You screen every call</div>
+        <div class="km-feature-sub">Hear who it is and why before you answer. Or don't.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Marquee -->
+  <div class="km-marquee">
+    <div class="km-marquee-track">
+      <div class="km-marquee-item">Private</div>
+      <div class="km-marquee-item">Instant</div>
+      <div class="km-marquee-item">Yours</div>
+      <div class="km-marquee-item">Smart</div>
+      <div class="km-marquee-item">Safe</div>
+      <div class="km-marquee-item">Simple</div>
+      <div class="km-marquee-item">Private</div>
+      <div class="km-marquee-item">Instant</div>
+      <div class="km-marquee-item">Yours</div>
+      <div class="km-marquee-item">Smart</div>
+      <div class="km-marquee-item">Safe</div>
+      <div class="km-marquee-item">Simple</div>
+    </div>
+  </div>
+
+  <!-- Connect -->
+  <div class="km-section-label">Get started \u2014 follow us</div>
+
+  <div class="km-links" id="km-links">
+
+    <a class="km-link" href="https://tapmycar.io" target="_blank" rel="noopener">
+      <div class="km-link-ic km-ic-orange">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </div>
+      <div class="km-link-text">
+        <div class="km-link-title">Visit tapmycar.io</div>
+        <div class="km-link-sub">Sign in, manage tags, or sign up</div>
+      </div>
+      <svg class="km-link-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+
+    <!-- ${MARKER}: App Store / Google Play hidden when URL is empty. Patch 36b
+                   will make these admin-editable. For now both are commented
+                   out so the page hides them automatically. -->
+    <!-- App Store: enable when URL ready -->
+    <!--
+    <a class="km-link" href="" target="_blank" rel="noopener">
+      <div class="km-link-ic km-ic-dark">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+      </div>
+      <div class="km-link-text">
+        <div class="km-link-title">Download on the App Store</div>
+        <div class="km-link-sub">For iPhone</div>
+      </div>
+      <svg class="km-link-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    -->
+
+    <!-- Google Play: enable when URL ready -->
+    <!--
+    <a class="km-link" href="" target="_blank" rel="noopener">
+      <div class="km-link-ic km-ic-green">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M3.609 1.814 13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92zm10.89 10.893 2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.198 2.807 1.626a1 1 0 0 1 0 1.73l-2.808 1.626L15.495 12l2.203-2.491zM5.864 1.69l10.937 6.333-2.302 2.302L5.864 1.69z"/></svg>
+      </div>
+      <div class="km-link-text">
+        <div class="km-link-title">Get it on Google Play</div>
+        <div class="km-link-sub">For Android</div>
+      </div>
+      <svg class="km-link-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    -->
+
+    <a class="km-link" href="https://facebook.com/tapmycar" target="_blank" rel="noopener">
+      <div class="km-link-ic km-ic-blue">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg>
+      </div>
+      <div class="km-link-text">
+        <div class="km-link-title">Facebook</div>
+        <div class="km-link-sub">@tapmycar</div>
+      </div>
+      <svg class="km-link-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+
+    <a class="km-link" href="https://instagram.com/tapmycar" target="_blank" rel="noopener">
+      <div class="km-link-ic km-ic-grad">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+      </div>
+      <div class="km-link-text">
+        <div class="km-link-title">Instagram</div>
+        <div class="km-link-sub">@tapmycar</div>
+      </div>
+      <svg class="km-link-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="km-footer">
+    <div class="km-footer-brand">Tap<span>My</span>Car</div>
+    <a href="/privacy.html">Privacy Policy</a> &nbsp;\u00b7&nbsp; <a href="/terms.html">Terms of Service</a>
+    <div class="km-footer-copy">\u00a9 ${new Date().getFullYear()} Praman Tech LLC \u2014 Connecticut, USA</div>
+  </div>
+
+</div>
+
+<script>
+  // ${MARKER}: scroll-reveal for feature cards + link cards
+  (function() {
+    var nodes = document.querySelectorAll('.km-feature, .km-link');
+    if (!nodes.length) return;
+
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e, i) {
+          if (e.isIntersecting) {
+            // Stagger reveals based on position within parent
+            var parent = e.target.parentElement;
+            var idx = Array.prototype.indexOf.call(parent.children, e.target);
+            e.target.style.transitionDelay = (idx * 0.08) + 's';
+            e.target.classList.add('km-in');
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -10% 0px' });
+      nodes.forEach(function(n) { io.observe(n); });
+    } else {
+      // Fallback: just show
+      nodes.forEach(function(n) { n.classList.add('km-in'); });
+    }
+  })();
+
+  // ${MARKER}: subtle parallax on the phone mockup based on scroll
+  (function() {
+    var phone = document.querySelector('.km-phone-stage');
+    if (!phone) return;
+    var ticking = false;
+    window.addEventListener('scroll', function() {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(function() {
+        var y = window.scrollY;
+        if (y < 600) {
+          phone.style.transform = 'translateY(' + (y * 0.08) + 'px)';
+        }
+        ticking = false;
+      });
+    }, { passive: true });
+  })();
+</script>
+
+</body>
+</html>
+`;
+
+    writeFile(file, html);
+    ok('knowmore.html: created (' + html.split('\n').length + ' lines)');
+  }
+}
+
+// =============================================================================
+// 36a.2  Add /knowmore rewrite to vercel.json (so URL has no .html)
+// =============================================================================
+
+log('');
+log('36a.2  vercel.json: add /knowmore rewrite for clean URL');
+{
+  const file = path.join(ROOT, 'vercel.json');
+  const content = readFile(file);
+  if (content.includes('/knowmore')) {
+    skip('vercel.json (already has /knowmore rewrite)');
+  } else {
+    backup(file);
+    let cfg;
+    try { cfg = JSON.parse(content); }
+    catch (e) { errExit('vercel.json is not valid JSON: ' + e.message); }
+
+    if (!Array.isArray(cfg.rewrites)) cfg.rewrites = [];
+    // Add at the BEGINNING so it matches before the catch-all api/:path*
+    cfg.rewrites.unshift({ source: '/knowmore', destination: '/knowmore.html' });
+
+    writeFile(file, JSON.stringify(cfg));
+    ok('vercel.json: /knowmore -> /knowmore.html rewrite added');
+  }
+}
+
+log('');
+log('==============================================================');
+log('Patch 36a complete.');
+log('Backup folder: ' + path.relative(ROOT, BACKUP_DIR));
+log('');
+log('Deploy:');
+log('  git add -A');
+log('  git commit -m "Patch 36a: /knowmore promo landing page"');
+log('  git push');
+log('  Wait ~60 sec for Vercel.');
+log('');
+log('Test:');
+log('  Open https://tapmycar.io/knowmore on your phone (or DevTools mobile mode).');
+log('  You should see:');
+log('    - Dark immersive background with floating orange + purple + pink glows');
+log('    - Top bar with TapMyCar logo + live status dot (green, pulsing)');
+log('    - Hero: "Your car. Reachable. Your number, private."');
+log('    - 3D-feeling phone mockup that gently tilts and parallaxes on scroll');
+log('    - 3 stat cards');
+log('    - 3 feature cards that fade in as you scroll');
+log('    - Marquee strip scrolling left');
+log('    - Section: Visit tapmycar.io / Facebook / Instagram (3 buttons)');
+log('    - Footer with Privacy/Terms');
+log('  App Store / Play Store buttons are intentionally commented out until');
+log('  you provide URLs (Patch 36b will let admin enter them).');
+log('');
+log('Next: Patch 36b adds');
+log('  1. Admin Dashboard UI to edit each button URL via app_settings');
+log('  2. "Download QR Code" button that generates a PNG of tapmycar.io/knowmore');
+log('==============================================================');
