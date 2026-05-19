@@ -1162,95 +1162,10 @@ function goToStep3(){
   registrationData.car_year=document.getElementById('s2-year').value.trim();
   registrationData.car_color=document.getElementById('s2-color').value.trim();
   if(localStorage.getItem('tmc_token')){
-    /* TMC_PATCH34CFIX2_REAL_CLAIM: this is the REAL activation path for signed-in users.
-       The original code called saveVehicleDetails() (which 403s without
-       activation_session_id) then showed success regardless. We now make
-       a proper claim call that updates owner_id + status + plan, then
-       only show success on actual success. */
-    p34cFinishClaim();
+    saveVehicleDetails(registrationData.userId||localStorage.getItem('tmc_token'));
+    showState('success');
   }else{
     sendPhoneOTP();
-  }
-}
-
-/* TMC_PATCH34CFIX2_REAL_CLAIM: Real claim flow for signed-in users. Called from goToStep2
-   when user has tmc_token in localStorage. */
-async function p34cFinishClaim() {
-  /* Disable the Continue button to prevent double-submits */
-  var contBtn = document.querySelector('#state-step2 .btn');
-  if (contBtn) { contBtn.disabled = true; contBtn.style.opacity = '.6'; contBtn.textContent = 'Activating...'; }
-
-  var uid = registrationData.userId || localStorage.getItem('tmc_token');
-  var sessId = window.p34cActivationSessionId || null;
-
-  if (!sessId) {
-    showToast('Please verify your phone again, then continue.');
-    if (contBtn) { contBtn.disabled = false; contBtn.style.opacity = '1'; contBtn.textContent = 'Continue'; }
-    /* Send the user back to verify-existing so they can re-verify phone. */
-    setTimeout(function() { showState('verify-existing'); }, 800);
-    return;
-  }
-
-  var body = {
-    token: currentToken,
-    user_id: uid,
-    license_plate: registrationData.license_plate || null,
-    car_make: registrationData.car_make || null,
-    car_model: registrationData.car_model || null,
-    car_year: registrationData.car_year || null,
-    car_color: registrationData.car_color || null,
-    activation_session_id: sessId
-  };
-  console.log('[Patch34cfix2] claim payload:', body);
-
-  try {
-    var r = await fetch('/api/get-tag', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(body)
-    });
-    var data = null;
-    try { data = await r.json(); } catch(e) { data = null; }
-    console.log('[Patch34cfix2] claim response status:', r.status, 'body:', data);
-
-    if (!r.ok) {
-      var msg = (data && data.error) || ('Activation failed (HTTP ' + r.status + ')');
-      showToast(msg);
-      if (contBtn) { contBtn.disabled = false; contBtn.style.opacity = '1'; contBtn.textContent = 'Continue'; }
-      if (data && data.needs_phone_verification) {
-        window.p34cActivationSessionId = null;
-        phoneVerified = false;
-        setTimeout(function() { showState('verify-existing'); }, 800);
-      }
-      return;
-    }
-
-    /* TMC_PATCH34CFIX2_REAL_CLAIM: also set the tag's plan to match the user's plan,
-       so dashboard shows it correctly. Backend doesn't auto-bump plan,
-       so we POST a follow-up update. */
-    try {
-      var userPlan = (p34cUserPlan || 'standard').toLowerCase();
-      if (userPlan && userPlan !== 'etag') {
-        await fetch('/api/get-tag', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            token: currentToken,
-            user_id: uid,
-            plan: userPlan,
-            status_override: 'active'  /* this is an UPDATE, not a fresh claim */
-          })
-        });
-      }
-    } catch (e) { console.warn('[Patch34cfix2] plan update failed:', e); }
-
-    /* All good — show success and redirect. */
-    showState('success');
-    setTimeout(function() { window.location.href = '/dashboard.html'; }, 1500);
-  } catch (e) {
-    console.error('[Patch34cfix2] network exception:', e);
-    showToast('Network error');
-    if (contBtn) { contBtn.disabled = false; contBtn.style.opacity = '1'; contBtn.textContent = 'Continue'; }
   }
 }
 
