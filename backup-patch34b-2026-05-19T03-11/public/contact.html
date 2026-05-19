@@ -412,7 +412,7 @@
     </div>
 
     <div class="p34a-identity-cards p34a-anim-stagger-2" style="display:flex;flex-direction:column;gap:12px;margin-top:32px">
-      <a href="javascript:void(0)" onclick="_p34bGoToSignin()" class="p34a-identity-card">
+      <a href="/signin.html" class="p34a-identity-card">
         <div class="p34a-identity-ic">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
@@ -957,20 +957,6 @@ let phoneVerified=false,emailVerified=false;
 // If user is signed in we go straight to verify-existing (existing logic).
 // If not signed in we show the identity-check screen where they pick
 // "already a user" vs "new here".
-/* TMC_PATCH34B_CONTINUE: build /signin.html?continue=/tag/{token} so user is returned
-   here after signin. window.location.pathname already includes /tag/{token}
-   for this page (per vercel.json rewrite). */
-function _p34bGoToSignin() {
-  try {
-    var cont = window.location.pathname; /* e.g. "/tag/TMC-XXXXXX" */
-    if (cont && cont.indexOf('/') === 0 && cont.indexOf('//') !== 0 && cont.indexOf('://') === -1) {
-      window.location.href = '/signin.html?continue=' + encodeURIComponent(cont);
-      return;
-    }
-  } catch (e) {}
-  window.location.href = '/signin.html';
-}
-
 function proceedFromWelcome() {
   try {
     var sToken = localStorage.getItem('tmc_token');

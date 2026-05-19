@@ -131,16 +131,7 @@ async function signIn() {
     if (data.token) {
       saveSession(data.token, data.phone || '', data.name || '');
       localStorage.setItem('tmc_email', email);
-      /* TMC_PATCH34B_CONTINUE: honor ?continue= if present and safe (relative path) */
-      var _p34bDest = '/dashboard.html';
-      try {
-        var _p34bUrl = new URL(window.location.href);
-        var _p34bCont = _p34bUrl.searchParams.get('continue');
-        if (_p34bCont && _p34bCont.indexOf('/') === 0 && _p34bCont.indexOf('//') !== 0 && _p34bCont.indexOf('://') === -1) {
-          _p34bDest = _p34bCont;
-        }
-      } catch (e) {}
-      window.location.href = _p34bDest;
+      window.location.href = '/dashboard.html';
     } else {
       showToast(data.error || 'Wrong code  try again');
     }
