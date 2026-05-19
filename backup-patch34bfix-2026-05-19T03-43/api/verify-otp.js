@@ -279,14 +279,10 @@ module.exports = async function handler(req, res) {
       await supabase.from('users').update(updates).eq('id', user.id);
     }
 
-    /* TMC_PATCH34BFIX_PHONE: include phone so signin.html can saveSession() with a
-       real phone value. Without this, tmc_phone is saved as "" and the
-       welcome-page "is signed in" check (which requires phone) fails. */
     return res.json({
       token: user.id,
       name: user.name,
       email: user.email,
-      phone: user.phone || '',
       isNewUser
     });
   }

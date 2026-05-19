@@ -972,14 +972,13 @@ function _p34bGoToSignin() {
 }
 
 function proceedFromWelcome() {
-  /* TMC_PATCH34BFIX_PHONE: tmc_token alone is sufficient to know the user is signed in.
-     Phone/name/email are convenience fields used to prefill verify-existing.
-     Old check required all 4, which broke when the signin response was
-     missing phone (verify-otp.js didn't return it). */
   try {
     var sToken = localStorage.getItem('tmc_token');
-    if (sToken) {
-      // Already signed in — skip identity check
+    var sPhone = localStorage.getItem('tmc_phone');
+    var sName = localStorage.getItem('tmc_name');
+    var sEmail = localStorage.getItem('tmc_email');
+    if (sToken && sPhone && sName && sEmail) {
+      // Already signed in — skip identity check, run existing activation
       startActivation();
       return;
     }
@@ -988,25 +987,10 @@ function proceedFromWelcome() {
 }
 
 async function startActivation(){
-  let token=localStorage.getItem('tmc_token');
-  let phone=localStorage.getItem('tmc_phone');
-  let name=localStorage.getItem('tmc_name');
-  let email=localStorage.getItem('tmc_email');
-  /* TMC_PATCH34BFIX_PHONE: if signed in (token present) but missing phone/name/email,
-     hydrate from /api/get-dashboard so we can still show verify-existing. */
-  if (token && (!phone || !name || !email)) {
-    try {
-      const r = await fetch('/api/get-dashboard?user_id=' + encodeURIComponent(token));
-      if (r.ok) {
-        const d = await r.json();
-        if (d && d.user) {
-          if (!phone && d.user.phone) { phone = d.user.phone; localStorage.setItem('tmc_phone', phone); }
-          if (!name && d.user.name)   { name  = d.user.name;  localStorage.setItem('tmc_name', name); }
-          if (!email && d.user.email) { email = d.user.email; localStorage.setItem('tmc_email', email); }
-        }
-      }
-    } catch (e) {}
-  }
+  const token=localStorage.getItem('tmc_token');
+  const phone=localStorage.getItem('tmc_phone');
+  const name=localStorage.getItem('tmc_name');
+  const email=localStorage.getItem('tmc_email');
   if(token&&phone&&name&&email){
     registrationData={name,email,phone,userId:token};
     showState('verify-existing');
