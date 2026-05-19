@@ -39,28 +39,23 @@ module.exports = async function handler(req, res) {
   if (userErr || !user) return res.status(404).json({ error: 'User not found' });
   if (!user.phone) return res.status(400).json({ error: 'No phone number on this account.' });
 
-  // TMC_PATCH34CFIX3_ALWAYS_SESSION: even if already verified, we still need to mint
-  // an activation_session for the tag-claim flow. Branch into two paths
-  // that both end at the session-insert block.
-  let _alreadyVerifiedShortcut = false;
+  // Already verified — short-circuit
   if (user.phone_verified) {
-    _alreadyVerifiedShortcut = true;
-    /* Skip Twilio Verify check. Fall through to session insert. */
-  } else {
-    // Check via Twilio Verify (only if not already verified)
-    try {
-      const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-      const check = await client.verify.v2.services(process.env.TWILIO_VERIFY_SID)
-        .verificationChecks.create({ to: user.phone, code: String(code).trim() });
-      if (check.status !== 'approved') {
-        return res.status(400).json({ error: 'Wrong or expired code. Please try again.' });
-      }
-    } catch (e) {
-      console.error('Twilio Verify check error:', e && e.message);
+    return res.json({ success: true, already_verified: true });
+  }
+
+  // Check via Twilio Verify
+  try {
+    const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+    const check = await client.verify.v2.services(process.env.TWILIO_VERIFY_SID)
+      .verificationChecks.create({ to: user.phone, code: String(code).trim() });
+    if (check.status !== 'approved') {
       return res.status(400).json({ error: 'Wrong or expired code. Please try again.' });
     }
+  } catch (e) {
+    console.error('Twilio Verify check error:', e && e.message);
+    return res.status(400).json({ error: 'Wrong or expired code. Please try again.' });
   }
-  /* TMC_PATCH34CFIX3_ALWAYS_SESSION: end of conditional Twilio check */
 
   // Mark verified (account-level flag, informational)
   const { error: updErr } = await supabase

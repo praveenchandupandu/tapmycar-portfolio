@@ -1183,35 +1183,10 @@ async function p34cFinishClaim() {
   var uid = registrationData.userId || localStorage.getItem('tmc_token');
   var sessId = window.p34cActivationSessionId || null;
 
-  /* TMC_PATCH34CFIX3_ALWAYS_SESSION: if session is missing (because user is already phone_verified
-     and the OTP path skipped session creation), re-mint by calling
-     /api/confirm-phone-verification. Backend with 34c-fix-3 always mints
-     a session for already-verified users with a tmc_token. */
   if (!sessId) {
-    try {
-      console.log('[Patch34cfix3] no session, attempting to re-mint');
-      var mintRes = await fetch('/api/confirm-phone-verification', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          user_id: uid,
-          code: '000000', /* ignored when phone_verified=true on backend */
-          already_verified_session: true
-        })
-      });
-      var mintData = await mintRes.json();
-      console.log('[Patch34cfix3] re-mint response:', mintRes.status, mintData);
-      if (mintRes.ok && mintData && mintData.activation_session_id) {
-        sessId = mintData.activation_session_id;
-        window.p34cActivationSessionId = sessId;
-      }
-    } catch (e) {
-      console.warn('[Patch34cfix3] re-mint failed:', e);
-    }
-  }
-  if (!sessId) {
-    showToast('Could not mint activation session. Please verify your phone.');
+    showToast('Please verify your phone again, then continue.');
     if (contBtn) { contBtn.disabled = false; contBtn.style.opacity = '1'; contBtn.textContent = 'Continue'; }
+    /* Send the user back to verify-existing so they can re-verify phone. */
     setTimeout(function() { showState('verify-existing'); }, 800);
     return;
   }
