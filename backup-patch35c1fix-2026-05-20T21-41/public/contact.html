@@ -991,21 +991,11 @@ async function startActivation(){
   /* TMC_PATCH34C_PAID_FLOW: dispatcher — if signed-in paid/gifted user, route to
      the streamlined paid-flow. Otherwise fall through to the existing
      new-user registration path. */
-  /* TMC_PATCH35C1FIX_GIFT_TAP: if the scanned tag is a GIFT, route into the no-payment
-     paid flow regardless of the user's own plan. The gift covers the
-     activation; the backend (get-tag.js, Patch 35c-1) applies the trial. */
-  var _isGiftTag = !!(window._tag && window._tag.is_gift === true);
-
   var _ptok = localStorage.getItem('tmc_token');
   if (_ptok) {
     var _puser = await p34cHydrateUser();
     if (_puser) {
       var _pp = String(_puser.plan || 'etag').toLowerCase().trim();
-      if (_isGiftTag) {
-        /* Gift tag + signed-in user: no-payment flow no matter their plan. */
-        await p34cEnterPaidFlow(_puser);
-        return;
-      }
       if (_pp === 'standard' || _pp === 'premium' || _pp === 'business') {
         await p34cEnterPaidFlow(_puser);
         return;
@@ -1519,25 +1509,13 @@ function p34cInstallPayButtonHook() {
   /* Remove any existing onclick attribute and set our router. */
   try { btn.removeAttribute('onclick'); } catch (e) {}
   btn.onclick = function() {
-    /* TMC_PATCH35C1FIX_GIFT_TAP: a gift tag is always no-payment, even for brand-new users. */
-    var giftTag = !!(window._tag && window._tag.is_gift === true);
-    if (p34cIsPaidUser || giftTag) {
+    if (p34cIsPaidUser) {
       p34cActivateWithoutPayment_v2();
       return;
     }
     /* Fall through to the original paid checkout flow. */
     try { activateAndPay(); } catch (e) { console.error(e); }
   };
-}
-
-/* TMC_PATCH35C1FIX_GIFT_TAP: relabel the pay button when the tag is a gift. */
-function p35c1fixRelabelPayButton() {
-  var btn = document.getElementById('pay-btn');
-  if (!btn) return;
-  var giftTag = !!(window._tag && window._tag.is_gift === true);
-  if (giftTag) {
-    btn.textContent = 'Claim my free tag';
-  }
 }
 
 /* TMC_PATCH34CFIX_SESSION: monkey-patch verifyPhoneOTP so paid users go through
