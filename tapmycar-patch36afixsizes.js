@@ -1,15 +1,74 @@
-<!DOCTYPE html>
+// ============================================================================
+// TapMyCar - Patch 36a-fix-sizes: Resize knowmore elements to fill phone screen
+//
+// User screenshot showed:
+//   1. Large empty space between social buttons and footer (lots of dead light area)
+//   2. Buttons too small - looked cramped on a real phone
+//   3. Footer barely visible, cut off near bottom edge
+//   4. Typing animation invisible (white text on orange gradient = no contrast)
+//   5. Phone mockup smaller than necessary
+//
+// Fix strategy:
+//   - Switch from `min-height: 100vh` + min-content layout to a proper flex
+//     layout that distributes vertical space across sections
+//   - Beef up all button paddings and font sizes
+//   - Enlarge phone mockup ~30%
+//   - Move the dark/light transition lower (was 50vh, now ~55%)
+//   - Footer gets a clear visible band at the bottom with proper padding
+//   - Typing bar gets dark contrast background so the text is readable
+//   - Use `min-height: 100dvh` (dynamic viewport height) for accurate iOS sizing
+// ============================================================================
+
+const fs = require('fs');
+const path = require('path');
+
+const ROOT = __dirname;
+const PUBLIC = path.join(ROOT, 'public');
+
+const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 16);
+const BACKUP_DIR = path.join(ROOT, `backup-patch36afixsizes-${ts}`);
+
+const log = (s) => console.log(s);
+const ok = (s) => console.log('  \u2713 ' + s);
+const skip = (s) => console.log('  \u00b7 ' + s + ' (already applied, skipped)');
+const errExit = (s) => { console.error('  \u2717 ' + s); process.exit(1); };
+
+function writeFile(p, content) {
+  if (content.charCodeAt(0) === 0xFEFF) content = content.slice(1);
+  fs.writeFileSync(p, content, 'utf8');
+}
+
+log('');
+log('TapMyCar Patch 36a-fix-sizes \u2014 fill phone screen properly');
+log('Backup: ' + path.relative(ROOT, BACKUP_DIR));
+log('');
+fs.mkdirSync(BACKUP_DIR, { recursive: true });
+
+const MARKER = 'TMC_PATCH36AFIXSIZES_FILL';
+
+const file = path.join(PUBLIC, 'knowmore.html');
+if (fs.existsSync(file)) {
+  const old = fs.readFileSync(file, 'utf8');
+  if (old.includes(MARKER)) {
+    skip('knowmore.html (already resized)');
+    process.exit(0);
+  }
+  fs.mkdirSync(path.join(BACKUP_DIR, 'public'), { recursive: true });
+  fs.copyFileSync(file, path.join(BACKUP_DIR, 'public', 'knowmore.html'));
+}
+
+const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0A0612">
-<title>TapMyCar — Privacy for you. Safety for your car.</title>
+<title>TapMyCar \u2014 Privacy for you. Safety for your car.</title>
 <meta name="description" content="Visit our website, get the app, and follow us on social media.">
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/logo.png">
 
-<!-- TMC_PATCH36AFIXSIZES_FILL: production knowmore page, sized to fill phone screen -->
+<!-- ${MARKER}: production knowmore page, sized to fill phone screen -->
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -328,9 +387,9 @@ img, svg { display: block; max-width: 100%; }
   40% { left: 100%; }
 }
 
-/* ===== LIGHT SECTION BUTTONS — sized for thumbs ===== */
+/* ===== LIGHT SECTION BUTTONS \u2014 sized for thumbs ===== */
 
-/* Primary CTA — bigger, better contrast on typing bar */
+/* Primary CTA \u2014 bigger, better contrast on typing bar */
 .e-primary {
   background: linear-gradient(135deg, #FF6B00, #FF8A3D);
   color: #fff;
@@ -420,7 +479,7 @@ img, svg { display: block; max-width: 100%; }
 .e-divider::before, .e-divider::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(0,0,0,.14), transparent); }
 .e-divider-text { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(0,0,0,.5); }
 
-/* Stores — BIGGER */
+/* Stores \u2014 BIGGER */
 .e-stores { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .e-store {
   display: flex; align-items: center; gap: 10px;
@@ -450,9 +509,9 @@ img, svg { display: block; max-width: 100%; }
 .e-store-name { font-size: 13px; font-weight: 700; line-height: 1.1; }
 .e-store.e-soon { opacity: .55; }
 .e-store.e-soon:hover { transform: none; background: #0E0E0E; }
-.e-store.e-soon .e-store-name::after { content: ' • soon'; font-size: 9px; color: rgba(255,255,255,.5); font-weight: 500; }
+.e-store.e-soon .e-store-name::after { content: ' \u2022 soon'; font-size: 9px; color: rgba(255,255,255,.5); font-weight: 500; }
 
-/* Socials — BIGGER */
+/* Socials \u2014 BIGGER */
 .e-socials { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .e-social {
   display: flex; align-items: center; gap: 10px;
@@ -528,7 +587,7 @@ img, svg { display: block; max-width: 100%; }
     </div>
 
     <div class="e-hero">
-      <span class="e-chip">Privacy + Safety — No app needed</span>
+      <span class="e-chip">Privacy + Safety \u2014 No app needed</span>
       <h1 class="e-h1">
         <span class="e-h1-word">Privacy</span>
         <span class="e-h1-word">for</span>
@@ -536,7 +595,7 @@ img, svg { display: block; max-width: 100%; }
         <span class="e-h1-word e-h1-orange">Safety</span>
         <span class="e-h1-word">for your car.</span>
       </h1>
-      <p class="e-sub">Strangers reach you — your real number stays yours.</p>
+      <p class="e-sub">Strangers reach you \u2014 your real number stays yours.</p>
     </div>
 
     <div class="e-phone-stage">
@@ -593,8 +652,8 @@ img, svg { display: block; max-width: 100%; }
     </div>
 
     <div class="e-footer">
-      <a href="/privacy.html">Privacy</a> &nbsp;·&nbsp; <a href="/terms.html">Terms</a>
-      <div class="e-footer-copy">© 2026 Praman Tech LLC</div>
+      <a href="/privacy.html">Privacy</a> &nbsp;\u00b7&nbsp; <a href="/terms.html">Terms</a>
+      <div class="e-footer-copy">\u00a9 ${new Date().getFullYear()} Praman Tech LLC</div>
     </div>
 
   </div>
@@ -603,3 +662,35 @@ img, svg { display: block; max-width: 100%; }
 
 </body>
 </html>
+`;
+
+writeFile(file, html);
+ok('knowmore.html: resized to fill screen (' + html.split('\n').length + ' lines)');
+
+log('');
+log('==============================================================');
+log('Patch 36a-fix-sizes complete.');
+log('');
+log('Changes from previous version:');
+log('  \u2022 Big buttons \u2014 stores + socials now 12-14px padding (was 8-10px)');
+log('  \u2022 Larger phone mockup (140px, was 110px); 156px on tall phones');
+log('  \u2022 Hero text 28px (was 22px)');
+log('  \u2022 Typing bar now has dark backdrop \u2014 the URL text is readable');
+log('  \u2022 Dark/light split moved to 55% (was 50%) \u2014 more dark drama');
+log('  \u2022 Light section uses gap-based layout \u2014 no more empty void');
+log('  \u2022 Footer has visible padding-bottom and clearer color');
+log('  \u2022 100dvh for proper iOS viewport sizing (Safari URL bar quirk)');
+log('  \u2022 Bottom decorative blobs moved into the light section so it');
+log('     does not look so empty');
+log('');
+log('Deploy:');
+log('  git add -A');
+log('  git commit -m "Patch 36a-fix-sizes: fill phone screen + larger buttons"');
+log('  git push');
+log('  Wait 60 sec for Vercel.');
+log('');
+log('Test:');
+log('  Open https://tapmycar.io/knowmore on your phone.');
+log('  Footer should be visible. Buttons should look thumb-friendly.');
+log('  Typing animation should be visible (dark backdrop now).');
+log('==============================================================');

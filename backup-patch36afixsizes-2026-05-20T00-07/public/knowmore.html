@@ -9,7 +9,7 @@
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/logo.png">
 
-<!-- TMC_PATCH36AFIXSIZES_FILL: production knowmore page, sized to fill phone screen -->
+<!-- TMC_PATCH36AFINAL_KNOWMORE: production knowmore page -->
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -19,27 +19,22 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   line-height: 1.4;
-  /* Split: dark top (55%), light bottom (45%). Light section is short
-     to push content to fill the visible viewport (no big empty area below). */
   background:
     linear-gradient(
       to bottom,
       #0A0612 0%,
-      #0A0612 52%,
-      #1a0e1c 57%,
-      #FFFAF5 63%,
+      #0A0612 48%,
+      #1a0e1c 53%,
+      #FFFAF5 60%,
       #FFFAF5 100%
     );
-  min-height: 100vh;
-  min-height: 100dvh;
 }
 a { color: inherit; text-decoration: none; }
 img, svg { display: block; max-width: 100%; }
 
-/* ===== BACKGROUND DECOR ===== */
+/* ===== TOP HALF (DARK CINEMATIC) BACKGROUND ELEMENTS ===== */
 .e-grid {
-  position: absolute; top: 0; left: 0; right: 0; height: 55vh;
-  height: 55dvh;
+  position: absolute; top: 0; left: 0; right: 0; height: 50vh;
   z-index: 0; pointer-events: none;
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
@@ -71,9 +66,9 @@ img, svg { display: block; max-width: 100%; }
   50% { opacity: 1; }
 }
 .e-stars {
-  position: absolute; top: 0; left: 0; right: 0; height: 55vh;
-  height: 55dvh;
-  z-index: 0; pointer-events: none; overflow: hidden;
+  position: absolute; top: 0; left: 0; right: 0; height: 50vh;
+  z-index: 0; pointer-events: none;
+  overflow: hidden;
 }
 .e-star {
   position: absolute;
@@ -95,8 +90,10 @@ img, svg { display: block; max-width: 100%; }
   0%, 100% { opacity: 0; }
   50% { opacity: 0.8; box-shadow: 0 0 6px #fff; }
 }
+
+/* ===== BOTTOM HALF (LIGHT KINETIC) BACKGROUND ELEMENTS ===== */
 .e-bg-dots {
-  position: absolute; top: 55vh; top: 55dvh; left: 0; right: 0; bottom: 0;
+  position: absolute; top: 50vh; left: 0; right: 0; bottom: 0;
   z-index: 0; pointer-events: none;
   background-image: radial-gradient(circle, rgba(255, 107, 0, 0.18) 1.5px, transparent 1.5px);
   background-size: 22px 22px;
@@ -115,72 +112,56 @@ img, svg { display: block; max-width: 100%; }
   z-index: 0;
 }
 .e-shape-1 {
-  width: 220px; height: 220px;
-  background: radial-gradient(circle, rgba(255, 107, 0, 0.3), transparent);
-  bottom: 20%; left: -70px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(255, 107, 0, 0.25), transparent);
+  top: 60%; left: -60px;
   animation: e-drift-1 14s ease-in-out infinite;
 }
 .e-shape-2 {
-  width: 180px; height: 180px;
-  background: radial-gradient(circle, rgba(255, 58, 140, 0.22), transparent);
-  bottom: 6%; right: -50px;
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, rgba(255, 58, 140, 0.18), transparent);
+  top: 75%; right: -40px;
   animation: e-drift-2 18s ease-in-out infinite;
 }
 @keyframes e-drift-1 {
   0%, 100% { transform: translate(0,0); }
-  50% { transform: translate(40px, -30px); }
+  50% { transform: translate(40px, 30px); }
 }
 @keyframes e-drift-2 {
   0%, 100% { transform: translate(0,0); }
   50% { transform: translate(-30px, -40px); }
 }
 
-/* ===== PAGE LAYOUT - flex distributes vertical space across sections ===== */
+/* ===== PAGE LAYOUT — fits in one phone screen ===== */
 .e-wrap {
-  max-width: 440px;
+  max-width: 420px;
   margin: 0 auto;
-  padding: 22px 22px 18px;
+  padding: 18px 18px 14px;
   min-height: 100vh;
-  min-height: 100dvh;
   display: flex; flex-direction: column;
   position: relative;
   z-index: 1;
 }
 
-/* The dark section grows to fill ~55% of viewport */
-.e-dark {
-  color: #fff;
-  display: flex; flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex: 1 1 auto;
-}
+/* ====== DARK SECTION (top) ====== */
+.e-dark { color: #fff; }
 
-/* The light section sits below the dark; its content is the action buttons.
-   It grows to fill the rest of the viewport so buttons spread out properly. */
-.e-light {
-  display: flex; flex-direction: column;
-  gap: 14px;
-  padding-top: 8px;
-}
-
-/* Brand */
 .e-brand {
-  display: flex; align-items: center; gap: 11px;
+  display: flex; align-items: center; gap: 9px;
   justify-content: center;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   opacity: 0;
   animation: e-fade-down .6s ease-out .1s both;
 }
 .e-brand-logo {
-  width: 44px; height: 44px;
+  width: 36px; height: 36px;
   background: linear-gradient(135deg, #FF6B00, #FF3A8C);
-  border-radius: 12px;
+  border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 8px 22px rgba(255, 107, 0, 0.55);
+  box-shadow: 0 6px 18px rgba(255, 107, 0, 0.5);
 }
 .e-brand-logo svg {
-  width: 26px; height: 26px;
+  width: 22px; height: 22px;
   stroke-dasharray: 60;
   stroke-dashoffset: 60;
   animation: e-draw 1.4s ease-out .3s forwards;
@@ -190,21 +171,20 @@ img, svg { display: block; max-width: 100%; }
   to { stroke-dashoffset: 0; }
 }
 .e-brand-text {
-  font-size: 23px; font-weight: 800; letter-spacing: -0.5px; color: #fff;
+  font-size: 19px; font-weight: 800; letter-spacing: -0.5px; color: #fff;
 }
 .e-brand-text span { color: #FF8533; }
 
-/* Hero */
-.e-hero { text-align: center; margin-bottom: 18px; }
+.e-hero { text-align: center; margin-bottom: 14px; }
 .e-chip {
-  display: inline-flex; align-items: center; gap: 7px;
+  display: inline-flex; align-items: center; gap: 6px;
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 107, 0, 0.3);
   color: #FFAB6D;
-  font-size: 11px; font-weight: 700;
-  padding: 6px 13px; border-radius: 100px;
-  margin-bottom: 14px;
+  font-size: 10px; font-weight: 700;
+  padding: 5px 11px; border-radius: 100px;
+  margin-bottom: 10px;
   opacity: 0;
   animation: e-fade-up .6s ease-out .25s both;
 }
@@ -219,10 +199,10 @@ img, svg { display: block; max-width: 100%; }
   50% { transform: scale(.6); opacity: .5; }
 }
 .e-h1 {
-  font-size: 28px; font-weight: 800;
-  letter-spacing: -0.6px; line-height: 1.12;
+  font-size: 22px; font-weight: 800;
+  letter-spacing: -0.5px; line-height: 1.15;
   color: #fff;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 .e-h1-word {
   display: inline-block;
@@ -246,20 +226,19 @@ img, svg { display: block; max-width: 100%; }
   to { opacity: 1; filter: blur(0); transform: translateY(0); }
 }
 .e-sub {
-  font-size: 13px; color: rgba(255,255,255,0.72);
+  font-size: 11.5px; color: rgba(255,255,255,0.7);
   line-height: 1.5;
-  max-width: 320px; margin: 0 auto;
+  max-width: 300px; margin: 0 auto;
   opacity: 0;
   animation: e-fade-up .6s ease-out 1.2s both;
 }
 
-/* Bigger phone mockup */
 .e-phone-stage {
-  margin: 8px auto 0;
-  width: 140px;
-  height: 200px;
+  margin: 12px auto 10px;
+  width: 110px;
+  height: 160px;
   position: relative;
-  perspective: 900px;
+  perspective: 800px;
   opacity: 0;
   animation: e-fade-up .8s ease-out 1.35s both;
 }
@@ -267,10 +246,10 @@ img, svg { display: block; max-width: 100%; }
   position: absolute;
   inset: 0;
   background: linear-gradient(160deg, #2a2a2a, #0E0E0E);
-  border-radius: 24px;
-  border: 2.5px solid #333;
+  border-radius: 20px;
+  border: 2px solid #333;
   box-shadow:
-    0 24px 50px -10px rgba(0,0,0,.55),
+    0 20px 40px -10px rgba(0,0,0,.5),
     0 0 0 1px rgba(255,255,255,.05),
     inset 0 1px 0 rgba(255,255,255,.1);
   transform-style: preserve-3d;
@@ -282,28 +261,28 @@ img, svg { display: block; max-width: 100%; }
   50% { transform: rotateY(10deg) rotateX(-3deg); }
 }
 .e-phone-notch {
-  position: absolute; top: 5px; left: 50%;
+  position: absolute; top: 4px; left: 50%;
   transform: translateX(-50%);
-  width: 44px; height: 5px;
+  width: 36px; height: 4px;
   background: #000; border-radius: 100px; z-index: 3;
 }
 .e-phone-screen {
   position: absolute;
-  inset: 7px;
+  inset: 6px;
   background: linear-gradient(160deg, #FF6B00, #FF3A8C);
-  border-radius: 18px;
+  border-radius: 14px;
   overflow: hidden;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   text-align: center;
-  padding: 10px;
+  padding: 8px;
 }
 .e-phone-shield {
-  width: 40px; height: 40px;
+  width: 32px; height: 32px;
   background: rgba(255,255,255,0.22);
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   animation: e-shield-pulse 2s ease-in-out infinite;
 }
 @keyframes e-shield-pulse {
@@ -311,8 +290,8 @@ img, svg { display: block; max-width: 100%; }
   50% { transform: scale(1.1); }
 }
 .e-phone-title {
-  font-size: 11px; font-weight: 800; color: #fff;
-  letter-spacing: -0.2px; line-height: 1.25;
+  font-size: 9px; font-weight: 800; color: #fff;
+  letter-spacing: -0.2px; line-height: 1.2;
 }
 .e-phone-reflection {
   position: absolute;
@@ -328,22 +307,21 @@ img, svg { display: block; max-width: 100%; }
   40% { left: 100%; }
 }
 
-/* ===== LIGHT SECTION BUTTONS — sized for thumbs ===== */
-
-/* Primary CTA — bigger, better contrast on typing bar */
+/* ====== LIGHT SECTION (bottom) ====== */
 .e-primary {
   background: linear-gradient(135deg, #FF6B00, #FF8A3D);
   color: #fff;
-  padding: 14px 16px;
-  border-radius: 16px;
+  padding: 11px 14px;
+  border-radius: 14px;
+  margin: 4px 0 10px;
   transition: transform .2s ease, box-shadow .2s ease;
   box-shadow:
-    0 16px 36px rgba(255, 107, 0, .42),
+    0 14px 32px rgba(255, 107, 0, .42),
     0 0 0 1px rgba(255, 107, 0, 0.3),
     inset 0 1px 0 rgba(255,255,255,.25);
   opacity: 0;
   animation: e-fade-up .7s ease-out 1.55s both;
-  display: flex; flex-direction: column; gap: 8px;
+  display: flex; flex-direction: column; gap: 6px;
   position: relative;
   overflow: hidden;
 }
@@ -361,16 +339,16 @@ img, svg { display: block; max-width: 100%; }
 .e-primary:hover { transform: translateY(-2px); }
 .e-primary:active { transform: translateY(0); }
 .e-primary-bar {
-  background: rgba(20, 10, 30, 0.55);
-  border-radius: 9px;
-  padding: 7px 11px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 8px;
+  padding: 5px 9px;
   font-family: 'JetBrains Mono', 'SF Mono', monospace;
-  font-size: 13px;
+  font-size: 11px;
   color: #fff;
-  display: flex; align-items: center; gap: 7px;
+  display: flex; align-items: center; gap: 6px;
 }
 .e-primary-dot {
-  width: 7px; height: 7px;
+  width: 6px; height: 6px;
   background: #34D399;
   border-radius: 50%;
   box-shadow: 0 0 6px #34D399;
@@ -379,7 +357,7 @@ img, svg { display: block; max-width: 100%; }
 }
 @keyframes e-livedot {
   0%, 100% { box-shadow: 0 0 6px #34D399; }
-  50% { box-shadow: 0 0 14px #34D399; }
+  50% { box-shadow: 0 0 12px #34D399; }
 }
 .e-typing {
   display: inline-block;
@@ -402,7 +380,7 @@ img, svg { display: block; max-width: 100%; }
 }
 .e-primary-cta {
   display: flex; align-items: center; justify-content: space-between;
-  font-size: 15px; font-weight: 800;
+  font-size: 13px; font-weight: 800;
 }
 .e-primary-arrow { animation: e-arrow-bounce 2s ease-in-out infinite; }
 @keyframes e-arrow-bounce {
@@ -410,30 +388,27 @@ img, svg { display: block; max-width: 100%; }
   50% { transform: translateX(3px); }
 }
 
-/* Divider */
 .e-divider {
   display: flex; align-items: center; gap: 10px;
-  margin: 2px 0;
+  margin: 8px 0 6px;
   opacity: 0;
   animation: e-fade-up .6s ease-out 1.7s both;
 }
 .e-divider::before, .e-divider::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(0,0,0,.14), transparent); }
-.e-divider-text { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(0,0,0,.5); }
+.e-divider-text { font-size: 9.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(0,0,0,.5); }
 
-/* Stores — BIGGER */
-.e-stores { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.e-stores { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }
 .e-store {
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; gap: 8px;
   background: #0E0E0E;
   color: #fff;
-  padding: 12px 13px;
-  border-radius: 13px;
+  padding: 8px 10px;
+  border-radius: 11px;
   transition: transform .15s ease, background .15s ease;
   opacity: 0;
   animation: e-fade-up .55s ease-out var(--e-d) both;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 6px 16px rgba(0,0,0,.18);
 }
 .e-store:nth-of-type(1) { --e-d: 1.85s; }
 .e-store:nth-of-type(2) { --e-d: 1.92s; }
@@ -446,18 +421,17 @@ img, svg { display: block; max-width: 100%; }
   pointer-events: none;
 }
 .e-store:hover { transform: translateY(-2px); background: #1a1a1a; }
-.e-store-eyebrow { font-size: 9px; font-weight: 600; color: rgba(255,255,255,.65); }
-.e-store-name { font-size: 13px; font-weight: 700; line-height: 1.1; }
-.e-store.e-soon { opacity: .55; }
+.e-store-eyebrow { font-size: 8px; font-weight: 600; color: rgba(255,255,255,.65); }
+.e-store-name { font-size: 11px; font-weight: 700; }
+.e-store.e-soon { opacity: .5; }
 .e-store.e-soon:hover { transform: none; background: #0E0E0E; }
-.e-store.e-soon .e-store-name::after { content: ' • soon'; font-size: 9px; color: rgba(255,255,255,.5); font-weight: 500; }
+.e-store.e-soon .e-store-name::after { content: ' • soon'; font-size: 8px; color: rgba(255,255,255,.5); font-weight: 500; }
 
-/* Socials — BIGGER */
-.e-socials { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.e-socials { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }
 .e-social {
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 13px;
-  border-radius: 13px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px;
+  border-radius: 11px;
   color: #fff;
   transition: transform .15s ease, box-shadow .2s ease;
   opacity: 0;
@@ -465,42 +439,30 @@ img, svg { display: block; max-width: 100%; }
 }
 .e-social:nth-of-type(1) { --e-d: 2s; }
 .e-social:nth-of-type(2) { --e-d: 2.07s; }
-.e-social-fb { background: #1877F2; box-shadow: 0 8px 18px rgba(24, 119, 242, .4); }
-.e-social-fb:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(24, 119, 242, .6); }
-.e-social-ig { background: linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4); box-shadow: 0 8px 18px rgba(221, 42, 123, .4); }
-.e-social-ig:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(221, 42, 123, .6); }
+.e-social-fb { background: #1877F2; box-shadow: 0 6px 16px rgba(24, 119, 242, .35); }
+.e-social-fb:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(24, 119, 242, .6); }
+.e-social-ig { background: linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4); box-shadow: 0 6px 16px rgba(221, 42, 123, .35); }
+.e-social-ig:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(221, 42, 123, .6); }
 .e-social-text { flex: 1; min-width: 0; }
-.e-social-eyebrow { font-size: 9px; font-weight: 600; color: rgba(255,255,255,.85); }
-.e-social-name { font-size: 13px; font-weight: 700; line-height: 1.1; }
+.e-social-eyebrow { font-size: 8px; font-weight: 600; color: rgba(255,255,255,.85); }
+.e-social-name { font-size: 11px; font-weight: 700; }
 
-/* Footer - clearly visible, no longer cut off */
 .e-footer {
   text-align: center;
   margin-top: auto;
-  padding-top: 14px;
-  padding-bottom: 6px;
-  font-size: 11px;
-  color: rgba(0,0,0,.55);
-  line-height: 1.7;
+  padding-top: 8px;
+  font-size: 9.5px;
+  color: rgba(0,0,0,.45);
+  line-height: 1.6;
 }
 .e-footer a { color: #FF6B00; font-weight: 600; }
-.e-footer a:not(:last-child) { margin-right: 6px; }
-.e-footer-copy { font-size: 10px; color: rgba(0,0,0,.4); margin-top: 4px; }
+.e-footer-copy { font-size: 8.5px; color: rgba(0,0,0,.35); margin-top: 3px; }
 
 @keyframes e-fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes e-fade-down { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
-}
-
-/* Slightly taller phones get a bit more breathing room */
-@media (min-height: 800px) {
-  .e-phone-stage { width: 156px; height: 220px; }
-  .e-h1 { font-size: 30px; }
-  .e-primary { padding: 16px 18px; }
-  .e-store, .e-social { padding: 14px 14px; }
-  .e-store-name, .e-social-name { font-size: 14px; }
 }
 </style>
 </head>
@@ -544,7 +506,7 @@ img, svg { display: block; max-width: 100%; }
         <div class="e-phone-notch"></div>
         <div class="e-phone-screen">
           <div class="e-phone-shield">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
           <div class="e-phone-title">Your car.<br>Protected.</div>
         </div>
@@ -553,50 +515,46 @@ img, svg { display: block; max-width: 100%; }
     </div>
   </div>
 
-  <div class="e-light">
+  <a class="e-primary" href="https://tapmycar.io" target="_blank" rel="noopener">
+    <div class="e-primary-bar">
+      <div class="e-primary-dot"></div>
+      <span class="e-typing">tapmycar.io</span>
+    </div>
+    <div class="e-primary-cta">
+      <div>Visit our website</div>
+      <svg class="e-primary-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+  </a>
 
-    <a class="e-primary" href="https://tapmycar.io" target="_blank" rel="noopener">
-      <div class="e-primary-bar">
-        <div class="e-primary-dot"></div>
-        <span class="e-typing">tapmycar.io</span>
-      </div>
-      <div class="e-primary-cta">
-        <div>Visit our website</div>
-        <svg class="e-primary-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>
+  <div class="e-divider"><span class="e-divider-text">Get the app</span></div>
+
+  <div class="e-stores">
+    <a class="e-store e-soon" href="javascript:void(0)">
+      <div><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg></div>
+      <div><div class="e-store-eyebrow">Download on</div><div class="e-store-name">App Store</div></div>
     </a>
+    <a class="e-store e-soon" href="javascript:void(0)">
+      <div><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#34A853" d="M5.864 1.69l10.937 6.333-2.302 2.302L5.864 1.69z"/><path fill="#FBBC04" d="M16.801 8.023l2.807 1.626a1 1 0 0 1 0 1.73l-2.808 1.626L13.495 12l3.306-3.977z"/><path fill="#EA4335" d="M14.499 13.005l2.302 2.302-10.937 6.333 8.635-8.635z"/><path fill="#4285F4" d="M3.609 1.814 13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92z"/></svg></div>
+      <div><div class="e-store-eyebrow">Get it on</div><div class="e-store-name">Google Play</div></div>
+    </a>
+  </div>
 
-    <div class="e-divider"><span class="e-divider-text">Get the app</span></div>
+  <div class="e-divider"><span class="e-divider-text">Follow us</span></div>
 
-    <div class="e-stores">
-      <a class="e-store e-soon" href="javascript:void(0)">
-        <div><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg></div>
-        <div><div class="e-store-eyebrow">Download on</div><div class="e-store-name">App Store</div></div>
-      </a>
-      <a class="e-store e-soon" href="javascript:void(0)">
-        <div><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#34A853" d="M5.864 1.69l10.937 6.333-2.302 2.302L5.864 1.69z"/><path fill="#FBBC04" d="M16.801 8.023l2.807 1.626a1 1 0 0 1 0 1.73l-2.808 1.626L13.495 12l3.306-3.977z"/><path fill="#EA4335" d="M14.499 13.005l2.302 2.302-10.937 6.333 8.635-8.635z"/><path fill="#4285F4" d="M3.609 1.814 13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92z"/></svg></div>
-        <div><div class="e-store-eyebrow">Get it on</div><div class="e-store-name">Google Play</div></div>
-      </a>
-    </div>
+  <div class="e-socials">
+    <a class="e-social e-social-fb" href="https://facebook.com/tapmycar" target="_blank" rel="noopener">
+      <div><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg></div>
+      <div class="e-social-text"><div class="e-social-eyebrow">Like us on</div><div class="e-social-name">Facebook</div></div>
+    </a>
+    <a class="e-social e-social-ig" href="https://instagram.com/tapmycar" target="_blank" rel="noopener">
+      <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></div>
+      <div class="e-social-text"><div class="e-social-eyebrow">Follow us on</div><div class="e-social-name">Instagram</div></div>
+    </a>
+  </div>
 
-    <div class="e-divider"><span class="e-divider-text">Follow us</span></div>
-
-    <div class="e-socials">
-      <a class="e-social e-social-fb" href="https://facebook.com/tapmycar" target="_blank" rel="noopener">
-        <div><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg></div>
-        <div class="e-social-text"><div class="e-social-eyebrow">Like us on</div><div class="e-social-name">Facebook</div></div>
-      </a>
-      <a class="e-social e-social-ig" href="https://instagram.com/tapmycar" target="_blank" rel="noopener">
-        <div><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></div>
-        <div class="e-social-text"><div class="e-social-eyebrow">Follow us on</div><div class="e-social-name">Instagram</div></div>
-      </a>
-    </div>
-
-    <div class="e-footer">
-      <a href="/privacy.html">Privacy</a> &nbsp;·&nbsp; <a href="/terms.html">Terms</a>
-      <div class="e-footer-copy">© 2026 Praman Tech LLC</div>
-    </div>
-
+  <div class="e-footer">
+    <a href="/privacy.html">Privacy</a> &nbsp;·&nbsp; <a href="/terms.html">Terms</a>
+    <div class="e-footer-copy">© 2026 Praman Tech LLC</div>
   </div>
 
 </div>
