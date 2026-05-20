@@ -228,47 +228,7 @@ module.exports = async function handler(req, res) {
       return res.status(500).json({ error: error.message });
     }
 
-    /* TMC_PATCH35C1_GIFT_CLAIM: if the claimed tag is a gift, apply the trial plan to the
-       tag and to the owner. The tag row we just updated (data) carries the
-       gift_* columns, so we read them straight off it. */
-    let giftApplied = null;
-    try {
-      if (data && data.is_gift === true) {
-        const giftPlan = data.gift_plan || 'standard';
-        const giftMonths = Number(data.gift_months) > 0 ? Number(data.gift_months) : 1;
-
-        const nowMs = Date.now();
-        const startsAt = new Date(nowMs).toISOString();
-        /* add giftMonths calendar months */
-        const expiryDate = new Date(nowMs);
-        expiryDate.setMonth(expiryDate.getMonth() + giftMonths);
-        const expiresAt = expiryDate.toISOString();
-
-        /* 1) set the tag's plan to the gift plan */
-        await supabase
-          .from('tags')
-          .update({ plan: giftPlan })
-          .eq('token', cleanToken);
-
-        /* 2) set the owner's plan + trial window */
-        await supabase
-          .from('users')
-          .update({
-            plan: giftPlan,
-            gift_plan_starts_at: startsAt,
-            gift_plan_expires_at: expiresAt
-          })
-          .eq('id', user_id);
-
-        giftApplied = { plan: giftPlan, months: giftMonths, expires_at: expiresAt };
-      }
-    } catch (giftErr) {
-      /* Non-fatal: the tag is claimed; trial application failed. Log it so
-         it can be fixed manually. The claim itself still succeeded. */
-      console.error('TMC_PATCH35C1_GIFT_CLAIM: gift trial application failed:', giftErr && giftErr.message);
-    }
-
-    return res.json({ success: true, tag: data ? data[0] : null, gift: giftApplied });
+    return res.json({ success: true, tag: data ? data[0] : null });
   }
 
   // â”€â”€ GET â€” fetch tag(s) â”€â”€

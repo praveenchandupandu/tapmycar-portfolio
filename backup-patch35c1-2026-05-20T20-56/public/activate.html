@@ -467,26 +467,10 @@ async function processToken(token) {
     }
 
     // Completely unclaimed, no existing tag — new activation
-    isPhysicalUpgrade = false;
-    /* TMC_PATCH35C1_GIFT_CLAIM: gift tag detection */
-    if (scannedTag && scannedTag.is_gift === true) {
-      const gMonths = Number(scannedTag.gift_months) > 0 ? Number(scannedTag.gift_months) : 1;
-      const gPlanRaw = scannedTag.gift_plan || 'standard';
-      const gPlan = gPlanRaw.charAt(0).toUpperCase() + gPlanRaw.slice(1);
-      document.getElementById('r-status').textContent = 'Gift tag';
-      document.getElementById('r-status').className = 'result-status result-new';
-      document.getElementById('r-message').innerHTML =
-        '<div style="background:linear-gradient(135deg,#FFF3EC,#FFE4D4);border:1px solid #FFB98A;border-radius:14px;padding:16px;margin:6px 0">' +
-        '<div style="font-size:26px;margin-bottom:6px">\uD83C\uDF81</div>' +
-        '<div style="font-weight:800;font-size:15px;color:#C2410C;margin-bottom:4px">You received a free TapMyCar sticker!</div>' +
-        '<div style="font-size:13px;color:#9A3412;line-height:1.5">Free ' + gMonths + '-month trial of the <strong>' + gPlan + '</strong> plan included. No payment needed \u2014 just verify your phone and you are set.</div>' +
-        '</div>';
-      document.getElementById('r-action').innerHTML = '<button class="btn" style="margin-top:14px" onclick="proceedFromResult()">Claim my free sticker \u2192</button>';
-      return;
-    }
     document.getElementById('r-status').textContent = 'Ready to activate';
     document.getElementById('r-status').className = 'result-status result-new';
     document.getElementById('r-message').textContent = 'This tag is available. Activate it now!';
+    isPhysicalUpgrade = false;
     document.getElementById('r-action').innerHTML = '<button class="btn" style="margin-top:14px" onclick="proceedFromResult()">Activate this tag →</button>';
 
   } catch(e) {
@@ -971,12 +955,6 @@ function flowAfterVehicle() {
     return;
   }
 
-  /* TMC_PATCH35C1_GIFT_CLAIM: gift tag — SMS verify, then claim with NO payment */
-  if (scannedTag && scannedTag.is_gift === true) {
-    pvShow((sessionId) => activateGiftTag(sessionId));
-    return;
-  }
-
   // Paid new physical: SMS verify first, then go to payment step.
   // The session_id is stored in pvActivationSessionId and consumed by
   // create-checkout (via Stripe metadata) and the webhook.
@@ -985,48 +963,6 @@ function flowAfterVehicle() {
     try { localStorage.setItem('tmc_pending_activation_session', sessionId); } catch(e) {}
     showStep('payment');
   });
-}
-
-// TMC_PATCH35C1_GIFT_CLAIM: gift tag activation. Claims the tag with no payment. The
-// backend (get-tag.js) detects is_gift and applies the trial plan + expiry
-// to the user automatically.
-async function activateGiftTag(activationSessionId) {
-  try {
-    const res = await fetch('/api/get-tag', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        token: scannedToken,
-        user_id: s.token,
-        activation_session_id: activationSessionId,
-        license_plate: vehicleData.license_plate,
-        car_make: vehicleData.car_make,
-        car_model: vehicleData.car_model,
-        car_year: vehicleData.car_year,
-        car_color: vehicleData.car_color
-      })
-    });
-    const data = await res.json();
-    if (!res.ok || !data.success) {
-      showToast(data.error || 'Activation failed. Please try again.');
-      showStep('vehicle');
-      return;
-    }
-    let planName = 'your plan';
-    let monthsTxt = '';
-    if (data.gift) {
-      planName = (data.gift.plan || 'standard');
-      planName = planName.charAt(0).toUpperCase() + planName.slice(1);
-      monthsTxt = (data.gift.months || 1) + '-month';
-    }
-    document.getElementById('success-title').textContent = 'Gift Activated! \uD83C\uDF81';
-    document.getElementById('success-message').textContent =
-      'Your free ' + monthsTxt + ' ' + planName + ' trial is active and your sticker is ready. Place it on your vehicle and you are all set.';
-    showStep('success');
-  } catch(e) {
-    showToast('Network error. Please try again.');
-    showStep('vehicle');
-  }
 }
 
 // ===== TMC_PATCH7_ACTIVATE_SMS activateEtag =========================================
