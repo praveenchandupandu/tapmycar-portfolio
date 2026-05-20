@@ -1,3 +1,4 @@
+/* TMC_PATCH35AHOTFIX2_FK_HINT: tags->users joins pinned to tags_owner_id_fkey */
 // TapMyCar — proxy-call.js
 // Orchestrates the masked-call flow.
 //
@@ -68,7 +69,7 @@ module.exports = async function handler(req, res) {
   {
     const { data: _tagCheck } = await supabase
       .from('tags')
-      .select('status, users(phone_verified)')
+      .select('status, users!tags_owner_id_fkey(phone_verified)')
       .eq('token', String(token).toUpperCase().trim())
       .single();
     if (!_tagCheck) {
@@ -97,7 +98,7 @@ module.exports = async function handler(req, res) {
   // Get tag and owner from database
   const { data: tag, error } = await supabase
     .from('tags')
-    .select('*, users(phone, name, phone_verified)')
+    .select('*, users!tags_owner_id_fkey(phone, name, phone_verified)')
     .eq('token', token)
     .single();
 

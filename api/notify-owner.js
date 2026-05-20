@@ -1,3 +1,4 @@
+/* TMC_PATCH35AHOTFIX2_FK_HINT: tags->users joins pinned to tags_owner_id_fkey */
 const { Resend } = require('resend');
 const { createClient } = require('@supabase/supabase-js');
 
@@ -32,7 +33,7 @@ module.exports = async function handler(req, res) {
   // Get tag and owner
   const { data: tag } = await supabase
     .from('tags')
-    .select('*, users(phone, name, email, phone_verified)')
+    .select('*, users!tags_owner_id_fkey(phone, name, email, phone_verified)')
     .eq('id', tag_id)
     .single();
 

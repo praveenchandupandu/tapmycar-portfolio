@@ -1,3 +1,4 @@
+/* TMC_PATCH35AHOTFIX2_FK_HINT: tags->users joins pinned to tags_owner_id_fkey */
 // TMC_PATCH9_CALL_FLOW
 // TapMyCar - register-pending-call
 // Stranger on contact.html taps Call. Browser POSTs the tag token here
@@ -29,7 +30,7 @@ module.exports = async function handler(req, res) {
   // Look up tag and verify it is callable (active + owner phone verified)
   const { data: tag } = await supabase
     .from('tags')
-    .select('id, status, users(id, phone, phone_verified)')
+    .select('id, status, users!tags_owner_id_fkey(id, phone, phone_verified)')
     .eq('token', cleanToken)
     .single();
 

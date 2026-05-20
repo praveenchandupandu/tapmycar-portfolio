@@ -1,3 +1,4 @@
+/* TMC_PATCH35AHOTFIX2_FK_HINT: tags->users joins pinned to tags_owner_id_fkey */
 // TapMyCar — owner-callback.js
 // Lookup-helper endpoint. proxy-call.js's stranger flow points the
 // stranger leg here, which then redirects to the actual stranger-wait
@@ -38,7 +39,7 @@ module.exports = async function handler(req, res) {
   // Look up owner phone
   const { data: tag } = await supabase
     .from('tags')
-    .select('*, users(phone)')
+    .select('*, users!tags_owner_id_fkey(phone)')
     .eq('token', token)
     .single();
 
