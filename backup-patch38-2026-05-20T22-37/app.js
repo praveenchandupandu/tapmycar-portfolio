@@ -1,4 +1,4 @@
-// TapMyCar  app.js
+﻿// TapMyCar  app.js
 
 const API = {
   sendOTP: (phone) => fetch('/api/send-otp', {
@@ -115,158 +115,6 @@ function requireAuth() {
   if (!token) window.location.href = '/signin.html';
   return token;
 }
-
-// TMC_PATCH17_IDLE_LOGOUT: Idle auto-logout helper.
-//
-// Call installIdleLogout({minutes, warningSeconds, onLogout}) on any page
-// that requires auth. The helper:
-//   - Tracks the timestamp of the last user activity in localStorage
-//     (key 'tmc_last_activity'). This makes it multi-tab-safe: activity
-//     in any tab resets the timer in all open tabs.
-//   - Checks every 5 seconds: if (now - lastActivity) > (minutes * 60s),
-//     calls onLogout.
-//   - At (minutes - warningSeconds/60) minutes, shows a warning modal.
-//   - Listens for mousemove, keydown, scroll, touchstart, click, and
-//     resets the timestamp on any of these.
-//   - On visibilitychange: when tab becomes visible again, immediately
-//     re-checks; if elapsed time is past the limit, logs out at once.
-//   - On storage event for 'tmc_last_activity' from another tab,
-//     refreshes its in-memory copy.
-/* TMC_PATCH27_IDLE_FIX: rewrite installIdleLogout to fix Stay-button race */
-window.installIdleLogout = function(opts) {
-  opts = opts || {};
-  var minutes = opts.minutes || 10;
-  var warningSeconds = opts.warningSeconds || 60;
-  var onLogout = opts.onLogout || function() { window.location.href = '/signin.html'; };
-
-  var IDLE_INTERVAL_MS = 5000;
-  var WARN_INTERVAL_MS = 250;
-  var LIMIT_MS = minutes * 60 * 1000;
-  var WARN_MS = LIMIT_MS - warningSeconds * 1000;
-
-  var warningEl = null;
-  var loggedOut = false;
-  var pollHandle = null;
-  var currentInterval = IDLE_INTERVAL_MS;
-  var justClickedUntil = 0;
-
-  // Global handle for the Stay button (called via onclick attribute).
-  // Re-assigning each install is safe; only one idle helper ever runs.
-  window.__tmcStaySignedIn = function() {
-    var now = Date.now();
-    try { localStorage.setItem('tmc_last_activity', String(now)); } catch (e) {}
-    justClickedUntil = now + 1500; // suppress logout for 1.5s after click
-    hideWarning();
-    rescheduleTick(IDLE_INTERVAL_MS);
-  };
-
-  function recordActivity() {
-    if (loggedOut) return;
-    try { localStorage.setItem('tmc_last_activity', String(Date.now())); } catch (e) {}
-    hideWarning();
-  }
-
-  function showWarning() {
-    if (warningEl) { warningEl.style.display = 'flex'; return; }
-    var div = document.createElement('div');
-    div.id = 'tmc-idle-warning';
-    div.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;font-family:inherit';
-    div.innerHTML = '<div style="background:#fff;border-radius:18px;padding:24px 22px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.3)">' +
-      '<div style="width:48px;height:48px;border-radius:50%;background:#FFF3EC;display:flex;align-items:center;justify-content:center;margin:0 auto 14px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B00" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>' +
-      '<div style="font-size:16px;font-weight:800;color:#111;margin-bottom:6px">Still there?</div>' +
-      '<div style="font-size:13px;color:#6B7280;margin-bottom:18px;line-height:1.5">You&#39;ll be signed out in <span id="tmc-idle-count">60</span> <span id="tmc-idle-unit">seconds</span> for inactivity.</div>' +
-      '<button id="tmc-idle-stay" type="button" onclick="window.__tmcStaySignedIn()" style="width:100%;height:44px;border:none;border-radius:12px;background:#FF6B00;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Stay signed in</button>' +
-    '</div>';
-    document.body.appendChild(div);
-    warningEl = div;
-  }
-
-  function hideWarning() {
-    if (warningEl) warningEl.style.display = 'none';
-  }
-
-  function getLastActivity() {
-    try {
-      var v = parseInt(localStorage.getItem('tmc_last_activity') || '0', 10);
-      return v > 0 ? v : Date.now();
-    } catch (e) { return Date.now(); }
-  }
-
-  function doLogout() {
-    if (loggedOut) return;
-    loggedOut = true;
-    if (pollHandle) { clearInterval(pollHandle); pollHandle = null; }
-    try { localStorage.removeItem('tmc_last_activity'); } catch (e) {}
-    try { onLogout(); } catch (e) { console.error('logout callback error:', e); }
-  }
-
-  function rescheduleTick(intervalMs) {
-    if (currentInterval === intervalMs && pollHandle) return;
-    if (pollHandle) clearInterval(pollHandle);
-    currentInterval = intervalMs;
-    pollHandle = setInterval(tick, intervalMs);
-  }
-
-  function tick() {
-    if (loggedOut) return;
-    var now = Date.now();
-    // Suppress logout briefly after a "Stay signed in" click, to ride out
-    // any race conditions.
-    if (now < justClickedUntil) {
-      rescheduleTick(IDLE_INTERVAL_MS);
-      return;
-    }
-    var elapsed = now - getLastActivity();
-    if (elapsed >= LIMIT_MS) {
-      doLogout();
-      return;
-    }
-    if (elapsed >= WARN_MS) {
-      showWarning();
-      rescheduleTick(WARN_INTERVAL_MS); // smooth countdown when warning shown
-      var remaining = Math.max(0, Math.ceil((LIMIT_MS - elapsed) / 1000));
-      var c = document.getElementById('tmc-idle-count');
-      if (c) c.textContent = remaining;
-      var u = document.getElementById('tmc-idle-unit');
-      if (u) u.textContent = (remaining === 1 ? 'second' : 'seconds');
-    } else {
-      hideWarning();
-      rescheduleTick(IDLE_INTERVAL_MS);
-    }
-  }
-
-  // Initialize last-activity to "now" on install.
-  recordActivity();
-
-  // Activity listeners (throttled writes).
-  var events = ['mousemove', 'keydown', 'scroll', 'touchstart', 'click'];
-  var lastWrite = 0;
-  events.forEach(function(ev) {
-    window.addEventListener(ev, function() {
-      var now = Date.now();
-      if (now - lastWrite < 5000) return;
-      lastWrite = now;
-      recordActivity();
-    }, { passive: true });
-  });
-
-  // Tab visibility — re-check when tab becomes visible
-  document.addEventListener('visibilitychange', function() {
-    if (!document.hidden) tick();
-  });
-
-  // Multi-tab: respond to last-activity updates from other tabs
-  window.addEventListener('storage', function(e) {
-    if (e.key === 'tmc_last_activity') {
-      hideWarning();
-      rescheduleTick(IDLE_INTERVAL_MS);
-    }
-  });
-
-  // Start polling
-  rescheduleTick(IDLE_INTERVAL_MS);
-};
-
 
 function startCountdown(btnId, seconds = 60) {
   const btn = document.getElementById(btnId);
@@ -834,7 +682,6 @@ function removeTypingIndicator() {
   if (el) el.remove();
 }
 
-// TMC_PATCH37 - chatbot now talks to the /api/chat backend
 async function sendChatMessage() {
   const input = document.getElementById('tmc-chat-input');
   const text = input.value.trim();
@@ -845,25 +692,34 @@ async function sendChatMessage() {
   chatHistory.push({ role: 'user', content: text });
   addTypingIndicator();
 
+  // Try Anthropic API first
   let replied = false;
   try {
-    const response = await fetch('/api/chat', {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: chatHistory.slice(-12) })
+      headers: {
+        'Content-Type': 'application/json',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 300,
+        system: TMC_SYSTEM_PROMPT,
+        messages: chatHistory.slice(-10)
+      })
     });
 
-    if (response.ok) {
-      const data = await response.json();
-      if (data && data.reply) {
-        removeTypingIndicator();
-        chatHistory.push({ role: 'assistant', content: data.reply });
-        addChatMessage(data.reply, false);
-        replied = true;
-      }
+    const data = await response.json();
+    removeTypingIndicator();
+
+    if (data.content && data.content[0] && data.content[0].text) {
+      const reply = data.content[0].text;
+      chatHistory.push({ role: 'assistant', content: reply });
+      addChatMessage(reply, false);
+      replied = true;
     }
   } catch (e) {
-    // network failed - fall through to the offline keyword helper
+    // API failed  use smart offline
   }
 
   if (!replied) {

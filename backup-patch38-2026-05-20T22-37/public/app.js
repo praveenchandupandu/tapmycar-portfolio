@@ -834,7 +834,6 @@ function removeTypingIndicator() {
   if (el) el.remove();
 }
 
-// TMC_PATCH37 - chatbot now talks to the /api/chat backend
 async function sendChatMessage() {
   const input = document.getElementById('tmc-chat-input');
   const text = input.value.trim();
@@ -845,25 +844,34 @@ async function sendChatMessage() {
   chatHistory.push({ role: 'user', content: text });
   addTypingIndicator();
 
+  // Try Anthropic API first
   let replied = false;
   try {
-    const response = await fetch('/api/chat', {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: chatHistory.slice(-12) })
+      headers: {
+        'Content-Type': 'application/json',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 300,
+        system: TMC_SYSTEM_PROMPT,
+        messages: chatHistory.slice(-10)
+      })
     });
 
-    if (response.ok) {
-      const data = await response.json();
-      if (data && data.reply) {
-        removeTypingIndicator();
-        chatHistory.push({ role: 'assistant', content: data.reply });
-        addChatMessage(data.reply, false);
-        replied = true;
-      }
+    const data = await response.json();
+    removeTypingIndicator();
+
+    if (data.content && data.content[0] && data.content[0].text) {
+      const reply = data.content[0].text;
+      chatHistory.push({ role: 'assistant', content: reply });
+      addChatMessage(reply, false);
+      replied = true;
     }
   } catch (e) {
-    // network failed - fall through to the offline keyword helper
+    // API failed  use smart offline
   }
 
   if (!replied) {
