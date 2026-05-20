@@ -602,32 +602,29 @@ img, svg { display: block; max-width: 100%; }
 </div>
 
 <script>
-/* TMC_PATCH36BFIX_REUSE_KEYS: load URLs from EXISTING app_settings keys (reuse, no duplicates).
-   Keys used:
-     app_store_url        -> App Store button
-     play_store_url       -> Google Play button
-     social_facebook      -> Facebook button
-     social_instagram     -> Instagram button
-   The primary "Visit our website" button stays hardcoded to tapmycar.io
-   since this page IS the sticker-back of tapmycar.io — no setting needed. */
+/* TMC_PATCH36B_KNOWMORE_ADMIN: load URLs from app_settings and apply to buttons */
 (function() {
-  function v(settings, key) {
-    return (settings && settings[key] && settings[key].value) || '';
-  }
-
   function applyUrls(settings) {
-    /* App Store */
-    var appStore = v(settings, 'app_store_url');
+    /* Website */
+    var web = settings.knowmore_website_url && settings.knowmore_website_url.value;
+    if (web) {
+      var a = document.getElementById('km-website-link');
+      if (a) a.href = web;
+    }
+
+    /* App Store — if URL present, activate the button */
+    var appStore = settings.knowmore_app_store_url && settings.knowmore_app_store_url.value;
     var appEl = document.getElementById('km-appstore-link');
     if (appEl && appStore) {
       appEl.href = appStore;
       appEl.classList.remove('e-soon');
+      appEl.removeAttribute('target');
       appEl.setAttribute('target', '_blank');
       appEl.setAttribute('rel', 'noopener');
     }
 
     /* Google Play */
-    var play = v(settings, 'play_store_url');
+    var play = settings.knowmore_play_store_url && settings.knowmore_play_store_url.value;
     var playEl = document.getElementById('km-play-link');
     if (playEl && play) {
       playEl.href = play;
@@ -637,19 +634,25 @@ img, svg { display: block; max-width: 100%; }
     }
 
     /* Facebook — hide entirely if URL is blank */
-    var fb = v(settings, 'social_facebook');
+    var fb = settings.knowmore_facebook_url && settings.knowmore_facebook_url.value;
     var fbEl = document.getElementById('km-fb-link');
     if (fbEl) {
-      if (fb) fbEl.href = fb;
-      else fbEl.style.display = 'none';
+      if (fb) {
+        fbEl.href = fb;
+      } else {
+        fbEl.style.display = 'none';
+      }
     }
 
     /* Instagram — hide if blank */
-    var ig = v(settings, 'social_instagram');
+    var ig = settings.knowmore_instagram_url && settings.knowmore_instagram_url.value;
     var igEl = document.getElementById('km-ig-link');
     if (igEl) {
-      if (ig) igEl.href = ig;
-      else igEl.style.display = 'none';
+      if (ig) {
+        igEl.href = ig;
+      } else {
+        igEl.style.display = 'none';
+      }
     }
   }
 

@@ -40,14 +40,15 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Max 50 updates per request' });
   }
 
-  /* TMC_PATCH36BFIX_REUSE_KEYS: 36b reused existing app_settings keys, so no new slot needed */
+  /* TMC_PATCH36B_KNOWMORE_ADMIN: knowmore.actions slot for sticker-back page URLs */
   const allowedSlots = [
     'landing.hero',
     'landing.demo',
     'landing.footer',
     'dashboard.banner',
     'dashboard.help',
-    'signin.footer'
+    'signin.footer',
+    'knowmore.actions'
   ];
 
   const results = [];
