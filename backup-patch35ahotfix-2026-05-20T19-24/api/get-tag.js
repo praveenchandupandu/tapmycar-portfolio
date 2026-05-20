@@ -252,8 +252,7 @@ module.exports = async function handler(req, res) {
     try {
       const r = await supabase
         .from('tags')
-        /* TMC_PATCH35AHOTFIX_FK_HINT: disambiguate users join (owner_id FK only) */
-        .select('*, users!tags_owner_id_fkey(name, phone, emergency_contact, emergency_name, welcome_message)')
+        .select('*, users(name, phone, emergency_contact, emergency_name, welcome_message)')
         .eq('token', cleanToken)
         .single();
       if (r.error) queryError = r.error;
@@ -267,8 +266,7 @@ module.exports = async function handler(req, res) {
       try {
         const r2 = await supabase
           .from('tags')
-          /* TMC_PATCH35AHOTFIX_FK_HINT: fallback query also pinned to owner_id FK */
-          .select('*, users!tags_owner_id_fkey(name, phone, emergency_contact, emergency_name)')
+          .select('*, users(name, phone, emergency_contact, emergency_name)')
           .eq('token', cleanToken)
           .single();
         if (!r2.error && r2.data) {
