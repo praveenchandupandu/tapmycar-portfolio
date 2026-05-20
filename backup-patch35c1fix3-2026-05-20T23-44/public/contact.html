@@ -834,7 +834,7 @@ async function loadTag(){
     if(!data.tag){showState('invalid');return;}
     const tag=data.tag;
     if(tag.status==='disabled'||tag.status==='inactive'){showState('disabled');}
-    else if(tag.status==='unclaimed'){/*TMC_PATCH35C1FIX3_UNCLAIMED_TAG: set window._tag so gift detection works*/window._tag=tag;window._tagId=tag.id||'';document.getElementById('unclaimed-token').textContent=tag.token;showState('unclaimed');}
+    else if(tag.status==='unclaimed'){document.getElementById('unclaimed-token').textContent=tag.token;showState('unclaimed');}
     else if(tag.status==='paused'){showState('disabled');return;}
     else if(tag.status==='active')
   {/*TMC_SYNC_TAG_FIXED*/window._tag=data.tag;showState("active");currentScanId=data.scan_id||"";window._tagId=data.tag.id||"";window._emergencyPhone=data.tag.users&&data.tag.users.emergency_contact?data.tag.users.emergency_contact:"";window._ownerName=data.tag.users&&data.tag.users.name?data.tag.users.name:"your friend";if(window._emergencyPhone){document.getElementById("emergency-contact-btn").style.display="block";}requestLocation();}    else{showState('invalid');}
