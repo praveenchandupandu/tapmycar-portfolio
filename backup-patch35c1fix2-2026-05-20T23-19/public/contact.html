@@ -595,8 +595,8 @@
   </div>
   <div style="flex:1;padding:20px 24px;display:flex;flex-direction:column;gap:14px">
     <div style="font-size:13px;color:#6B7280">Step 4 of 4  Activate your tag</div>
-    <div class="card" id="s4-order-summary"><div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">Order summary</div><div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:.5px solid #E5E7EB"><div style="font-size:14px;color:#111;font-weight:500">eTag activation</div><div style="font-size:14px;font-weight:700;color:#111">$1.00</div></div><div style="display:flex;justify-content:space-between;padding:8px 0"><div style="font-size:12px;color:#6B7280">Auto-upgrade to Standard on day 30</div><div style="font-size:12px;color:#6B7280">$9.99</div></div></div>
-    <div id="s4-autoupgrade-box" style="background:#FFF3EC;border:1.5px solid #FF6B00;border-radius:14px;padding:16px">
+    <div class="card"><div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">Order summary</div><div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:.5px solid #E5E7EB"><div style="font-size:14px;color:#111;font-weight:500">eTag activation</div><div style="font-size:14px;font-weight:700;color:#111">$1.00</div></div><div style="display:flex;justify-content:space-between;padding:8px 0"><div style="font-size:12px;color:#6B7280">Auto-upgrade to Standard on day 30</div><div style="font-size:12px;color:#6B7280">$9.99</div></div></div>
+    <div style="background:#FFF3EC;border:1.5px solid #FF6B00;border-radius:14px;padding:16px">
       <div style="font-size:13px;font-weight:700;color:#9A3800;margin-bottom:8px">Auto-upgrade terms</div>
       <div style="font-size:12px;color:#78350F;line-height:1.6;margin-bottom:10px">After 30 days we charge $9.99 and ship your physical NFC + QR sticker to your address.</div>
       <div style="background:#DCFCE7;border-radius:9px;padding:8px 12px;margin-bottom:12px"><div style="font-size:11px;color:#15803D;font-weight:600">Cancel anytime before day 30  no charge</div></div>
@@ -1688,59 +1688,11 @@ function p34cUpdatePayButtonLabel() {
           var btn = document.getElementById('pay-btn');
           if (btn) { btn.style.opacity = '1'; btn.disabled = false; }
         }
-        /* TMC_PATCH35C1FIX2_GIFT_STEP4: gift tag — replace the paid Step 4 with a gift screen. */
-        setTimeout(p35c1fix2RenderGiftStep4, 35);
       }
       return r;
     };
   }
 })();
-
-/* TMC_PATCH35C1FIX2_GIFT_STEP4: render the gift variant of Step 4. */
-function p35c1fix2RenderGiftStep4() {
-  var isGift = !!(window._tag && window._tag.is_gift === true);
-  if (!isGift) return;
-
-  var gMonthsRaw = window._tag.gift_months;
-  var gMonths = (Number(gMonthsRaw) > 0) ? Number(gMonthsRaw) : 1;
-  var gPlanRaw = window._tag.gift_plan || 'standard';
-  var gPlan = gPlanRaw.charAt(0).toUpperCase() + gPlanRaw.slice(1);
-
-  /* Replace the order summary with a gift summary */
-  var summary = document.getElementById('s4-order-summary');
-  if (summary) {
-    summary.innerHTML =
-      '<div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">Your gift</div>' +
-      '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:.5px solid #E5E7EB">' +
-        '<div style="font-size:14px;color:#111;font-weight:500">' + gPlan + ' plan \u2014 ' + gMonths + '-month trial</div>' +
-        '<div style="font-size:14px;font-weight:800;color:#16A34A">FREE</div>' +
-      '</div>' +
-      '<div style="display:flex;justify-content:space-between;padding:8px 0">' +
-        '<div style="font-size:12px;color:#6B7280">Physical TapMyCar sticker</div>' +
-        '<div style="font-size:12px;color:#6B7280">Included</div>' +
-      '</div>';
-  }
-
-  /* Hide the auto-upgrade terms box entirely */
-  var box = document.getElementById('s4-autoupgrade-box');
-  if (box) box.style.display = 'none';
-
-  /* Relabel + enable the button (no consent gate for gifts) */
-  var btn = document.getElementById('pay-btn');
-  if (btn) {
-    btn.textContent = 'Claim my free tag';
-    btn.style.opacity = '1';
-    btn.disabled = false;
-  }
-
-  /* Update the step subtitle */
-  try {
-    var stepViews = document.querySelectorAll('#state-step4 div[style*="font-size:13px"][style*="color:#6B7280"]');
-    if (stepViews && stepViews[0]) {
-      stepViews[0].textContent = 'Step 4 of 4  Claim your free gift';
-    }
-  } catch (e) {}
-}
 
 loadTag();
 
