@@ -4563,14 +4563,15 @@ function p15StopCamera() {
 
   <video id="p35bs-qr-video" autoplay playsinline muted style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000"></video>
 
-  <!-- TMC_PATCH35BSCANFIX_BUNDLED: Viewfinder — fixed clean layout -->
-  <div style="position:absolute;inset:0;z-index:2;pointer-events:none">
-    <div style="position:absolute;top:50%;left:50%;width:260px;height:260px;margin:-130px 0 0 -130px;box-sizing:border-box">
-      <span style="position:absolute;top:0;left:0;display:block;width:36px;height:36px;border-top:4px solid #FF6B00;border-left:4px solid #FF6B00;border-radius:6px 0 0 0;box-sizing:border-box"></span>
-      <span style="position:absolute;top:0;right:0;display:block;width:36px;height:36px;border-top:4px solid #FF6B00;border-right:4px solid #FF6B00;border-radius:0 6px 0 0;box-sizing:border-box"></span>
-      <span style="position:absolute;bottom:0;left:0;display:block;width:36px;height:36px;border-bottom:4px solid #FF6B00;border-left:4px solid #FF6B00;border-radius:0 0 0 6px;box-sizing:border-box"></span>
-      <span style="position:absolute;bottom:0;right:0;display:block;width:36px;height:36px;border-bottom:4px solid #FF6B00;border-right:4px solid #FF6B00;border-radius:0 0 6px 0;box-sizing:border-box"></span>
-      <span id="p35bs-scanline" style="position:absolute;top:0;left:8px;right:8px;height:2px;background:linear-gradient(90deg,transparent,#FF6B00,transparent);box-shadow:0 0 12px #FF6B00;animation:p35bs-scan 2s ease-in-out infinite;display:block"></span>
+  <!-- Viewfinder overlay -->
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:2">
+    <div style="position:relative;width:240px;height:240px">
+      <div style="position:absolute;top:0;left:0;width:34px;height:34px;border-top:4px solid #FF6B00;border-left:4px solid #FF6B00;border-radius:6px 0 0 0"></div>
+      <div style="position:absolute;top:0;right:0;width:34px;height:34px;border-top:4px solid #FF6B00;border-right:4px solid #FF6B00;border-radius:0 6px 0 0"></div>
+      <div style="position:absolute;bottom:0;left:0;width:34px;height:34px;border-bottom:4px solid #FF6B00;border-left:4px solid #FF6B00;border-radius:0 0 0 6px"></div>
+      <div style="position:absolute;bottom:0;right:0;width:34px;height:34px;border-bottom:4px solid #FF6B00;border-right:4px solid #FF6B00;border-radius:0 0 6px 0"></div>
+      <!-- scanning line -->
+      <div id="p35bs-scanline" style="position:absolute;top:0;left:8px;right:8px;height:2px;background:linear-gradient(90deg,transparent,#FF6B00,transparent);box-shadow:0 0 12px #FF6B00;animation:p35bs-scan 2s ease-in-out infinite"></div>
     </div>
   </div>
 
@@ -4584,7 +4585,7 @@ function p15StopCamera() {
 <style>
 @keyframes p35bs-scan {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(252px); }
+  50% { transform: translateY(232px); }
 }
 </style>
 
@@ -4713,17 +4714,14 @@ let p35bsQrLoopActive = false;
 let p35bsQrLib = null;
 
 async function p35bsLoadJsQr() {
-  /* TMC_PATCH35BSCANFIX_BUNDLED: load from same-origin /vendor/jsQR.js */
-  if (typeof window.jsQR === 'function') return Promise.resolve();
+  if (p35bsQrLib || (typeof jsQR === 'function')) {
+    return Promise.resolve();
+  }
   return new Promise(function(resolve, reject) {
     var s = document.createElement('script');
-    s.src = '/vendor/jsQR.js';
-    s.async = true;
-    s.onload = function() {
-      if (typeof window.jsQR === 'function') resolve();
-      else reject(new Error('jsQR loaded but global not exposed'));
-    };
-    s.onerror = function() { reject(new Error('Failed to load /vendor/jsQR.js')); };
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js';
+    s.onload = function() { resolve(); };
+    s.onerror = function() { reject(new Error('Failed to load QR library')); };
     document.head.appendChild(s);
   });
 }
