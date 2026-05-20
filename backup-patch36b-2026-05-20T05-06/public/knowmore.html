@@ -555,7 +555,7 @@ img, svg { display: block; max-width: 100%; }
 
   <div class="e-light">
 
-    <a class="e-primary" id="km-website-link" href="https://tapmycar.io" target="_blank" rel="noopener">
+    <a class="e-primary" href="https://tapmycar.io" target="_blank" rel="noopener">
       <div class="e-primary-bar">
         <div class="e-primary-dot"></div>
         <span class="e-typing">tapmycar.io</span>
@@ -569,11 +569,11 @@ img, svg { display: block; max-width: 100%; }
     <div class="e-divider"><span class="e-divider-text">Get the app</span></div>
 
     <div class="e-stores">
-      <a class="e-store e-soon" id="km-appstore-link" href="javascript:void(0)">
+      <a class="e-store e-soon" href="javascript:void(0)">
         <div><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg></div>
         <div><div class="e-store-eyebrow">Download on</div><div class="e-store-name">App Store</div></div>
       </a>
-      <a class="e-store e-soon" id="km-play-link" href="javascript:void(0)">
+      <a class="e-store e-soon" href="javascript:void(0)">
         <div><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#34A853" d="M5.864 1.69l10.937 6.333-2.302 2.302L5.864 1.69z"/><path fill="#FBBC04" d="M16.801 8.023l2.807 1.626a1 1 0 0 1 0 1.73l-2.808 1.626L13.495 12l3.306-3.977z"/><path fill="#EA4335" d="M14.499 13.005l2.302 2.302-10.937 6.333 8.635-8.635z"/><path fill="#4285F4" d="M3.609 1.814 13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92z"/></svg></div>
         <div><div class="e-store-eyebrow">Get it on</div><div class="e-store-name">Google Play</div></div>
       </a>
@@ -582,11 +582,11 @@ img, svg { display: block; max-width: 100%; }
     <div class="e-divider"><span class="e-divider-text">Follow us</span></div>
 
     <div class="e-socials">
-      <a class="e-social e-social-fb" id="km-fb-link" href="https://facebook.com/tapmycar" target="_blank" rel="noopener">
+      <a class="e-social e-social-fb" href="https://facebook.com/tapmycar" target="_blank" rel="noopener">
         <div><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg></div>
         <div class="e-social-text"><div class="e-social-eyebrow">Like us on</div><div class="e-social-name">Facebook</div></div>
       </a>
-      <a class="e-social e-social-ig" id="km-ig-link" href="https://instagram.com/tapmycar" target="_blank" rel="noopener">
+      <a class="e-social e-social-ig" href="https://instagram.com/tapmycar" target="_blank" rel="noopener">
         <div><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></div>
         <div class="e-social-text"><div class="e-social-eyebrow">Follow us on</div><div class="e-social-name">Instagram</div></div>
       </a>
@@ -600,70 +600,6 @@ img, svg { display: block; max-width: 100%; }
   </div>
 
 </div>
-
-<script>
-/* TMC_PATCH36B_KNOWMORE_ADMIN: load URLs from app_settings and apply to buttons */
-(function() {
-  function applyUrls(settings) {
-    /* Website */
-    var web = settings.knowmore_website_url && settings.knowmore_website_url.value;
-    if (web) {
-      var a = document.getElementById('km-website-link');
-      if (a) a.href = web;
-    }
-
-    /* App Store — if URL present, activate the button */
-    var appStore = settings.knowmore_app_store_url && settings.knowmore_app_store_url.value;
-    var appEl = document.getElementById('km-appstore-link');
-    if (appEl && appStore) {
-      appEl.href = appStore;
-      appEl.classList.remove('e-soon');
-      appEl.removeAttribute('target');
-      appEl.setAttribute('target', '_blank');
-      appEl.setAttribute('rel', 'noopener');
-    }
-
-    /* Google Play */
-    var play = settings.knowmore_play_store_url && settings.knowmore_play_store_url.value;
-    var playEl = document.getElementById('km-play-link');
-    if (playEl && play) {
-      playEl.href = play;
-      playEl.classList.remove('e-soon');
-      playEl.setAttribute('target', '_blank');
-      playEl.setAttribute('rel', 'noopener');
-    }
-
-    /* Facebook — hide entirely if URL is blank */
-    var fb = settings.knowmore_facebook_url && settings.knowmore_facebook_url.value;
-    var fbEl = document.getElementById('km-fb-link');
-    if (fbEl) {
-      if (fb) {
-        fbEl.href = fb;
-      } else {
-        fbEl.style.display = 'none';
-      }
-    }
-
-    /* Instagram — hide if blank */
-    var ig = settings.knowmore_instagram_url && settings.knowmore_instagram_url.value;
-    var igEl = document.getElementById('km-ig-link');
-    if (igEl) {
-      if (ig) {
-        igEl.href = ig;
-      } else {
-        igEl.style.display = 'none';
-      }
-    }
-  }
-
-  fetch('/api/get-settings')
-    .then(function(r) { return r.ok ? r.json() : null; })
-    .then(function(data) {
-      if (data && data.settings) applyUrls(data.settings);
-    })
-    .catch(function() { /* silently keep defaults */ });
-})();
-</script>
 
 </body>
 </html>

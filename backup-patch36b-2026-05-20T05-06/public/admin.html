@@ -1203,20 +1203,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 <!-- TMC_PATCH26_APP_SETTINGS: Settings panel -->
 <div class="panel" id="panel-settings">
   <div class="asl">Site Settings</div>
-  <div class="kpi-sub" style="margin-bottom:14px;padding:0 4px">Configure URLs and toggles that appear on landing, dashboard, sign-in, and sticker-back pages.</div>
-
-  <!-- TMC_PATCH36B_KNOWMORE_ADMIN: Sticker-back QR download card -->
-  <div style="background:linear-gradient(135deg,#0E0E0E,#1a0e1c);color:#fff;border-radius:14px;padding:18px;margin-bottom:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-    <div style="flex:1;min-width:200px">
-      <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#FFAB6D;margin-bottom:6px">Sticker Back Page</div>
-      <div style="font-size:15px;font-weight:700;line-height:1.35;margin-bottom:4px">QR Code for tapmycar.io/knowmore</div>
-      <div style="font-size:12px;color:rgba(255,255,255,0.65);line-height:1.5">High-resolution PNG (1230×1230 px), ready to print on the back of physical stickers.</div>
-    </div>
-    <button class="gen-btn success" onclick="p36bDownloadQr()" style="white-space:nowrap">
-      <svg viewBox="0 0 24 24" width="14" height="14" style="vertical-align:-2px;margin-right:6px" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download QR Code
-    </button>
-  </div>
-
+  <div class="kpi-sub" style="margin-bottom:14px;padding:0 4px">Configure URLs and toggles that appear on landing, dashboard, and sign-in pages.</div>
   <div id="p26-settings-list" class="p26-settings-list"><div class="empty">Loading settings…</div></div>
   <div class="p26-save-bar">
     <span class="p26-save-status" id="p26-save-status"></span>
@@ -3873,23 +3860,6 @@ function p26ToggleSlot(checkbox) {
 function p26MarkDirty() {
   const st = document.getElementById('p26-save-status');
   if (st) st.textContent = 'Unsaved changes';
-}
-
-// TMC_PATCH36B_KNOWMORE_ADMIN: Download QR Code for knowmore page.
-function p36bDownloadQr() {
-  /* adminKey is the global var populated from localStorage.tmc_admin_key */
-  var k = (typeof adminKey === 'string' && adminKey) ? adminKey : '';
-  if (!k) {
-    alert('Admin key not loaded. Refresh the page and try again.');
-    return;
-  }
-  /* Direct browser download via anchor element. */
-  var a = document.createElement('a');
-  a.href = '/api/qr-knowmore?key=' + encodeURIComponent(k);
-  a.download = 'tapmycar-knowmore-qr.png';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
 }
 
 async function p26Save() {
