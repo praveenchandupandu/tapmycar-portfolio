@@ -1,4 +1,3 @@
-/* TMC_PATCH35D_GRACEFUL_HANGUP: <Pause> added before <Hangup/> for graceful endings */
 /* TMC_PATCH35AHOTFIX2_FK_HINT: tags->users joins pinned to tags_owner_id_fkey */
 // TapMyCar — owner-callback.js
 // Lookup-helper endpoint. proxy-call.js's stranger flow points the
@@ -33,7 +32,6 @@ module.exports = async function handler(req, res) {
     return res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Say voice="${VOICE}">Sorry, we couldn't process your request. Please try again. Goodbye!</Say>
-  <Pause length="1"/>
   <Hangup/>
 </Response>`);
   }
@@ -52,7 +50,6 @@ module.exports = async function handler(req, res) {
     return res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Say voice="${VOICE}">We weren't able to reach the owner. We'll send them a message right away — they'll get back to you as soon as they can. Thank you so much for trying!</Say>
-  <Pause length="1"/>
   <Hangup/>
 </Response>`);
   }

@@ -1,4 +1,3 @@
-/* TMC_PATCH35D_GRACEFUL_HANGUP: <Pause> added before <Hangup/> for graceful endings */
 // TapMyCar — stranger-wait.js
 // What the STRANGER hears while we orchestrate the owner call.
 //
@@ -129,7 +128,6 @@ module.exports = async function handler(req, res) {
       twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Say voice="${VOICE}">We weren't able to connect you this time, but we'll let the owner know right away — they'll reach out as soon as they can. Thank you so much for trying to help. Take care!</Say>
-  <Pause length="1"/>
   <Hangup/>
 </Response>`;
     }
@@ -138,7 +136,6 @@ module.exports = async function handler(req, res) {
     twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Say voice="${VOICE}">Sorry, something went wrong. Please try again later. Goodbye!</Say>
-  <Pause length="1"/>
   <Hangup/>
 </Response>`;
   }

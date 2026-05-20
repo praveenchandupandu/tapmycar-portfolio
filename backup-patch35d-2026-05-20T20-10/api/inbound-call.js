@@ -1,4 +1,3 @@
-/* TMC_PATCH35D_GRACEFUL_HANGUP: <Pause> added before <Hangup/> for graceful endings */
 // TMC_PATCH9_CALL_FLOW
 // TapMyCar - inbound-call (Twilio voice webhook)
 // Twilio calls this URL when an incoming call arrives at our number.
@@ -75,7 +74,6 @@ module.exports = async function handler(req, res) {
     return res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Say voice="${VOICE}">Sorry, we don't recognize this call. Please tap the Call button on the TapMyCar page first, then try calling again. Goodbye!</Say>
-  <Pause length="1"/>
   <Hangup/>
 </Response>`);
   }
@@ -127,7 +125,6 @@ module.exports = async function handler(req, res) {
     <Number url="${escapeXml(ownerLegUrl)}" method="POST">${escapeXml(ownerPhone)}</Number>
   </Dial>
   <Say voice="${VOICE}">We weren't able to reach the owner this time, but we'll let them know right away. They'll get back to you as soon as they can. Take care!</Say>
-  <Pause length="1"/>
   <Hangup/>
 </Response>`);
 };

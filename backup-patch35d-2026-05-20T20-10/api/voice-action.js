@@ -1,4 +1,3 @@
-/* TMC_PATCH35D_GRACEFUL_HANGUP: <Pause> added before <Hangup/> for graceful endings */
 // TMC_PATCH11_PRESS1_SINGLE
 // TapMyCar - voice-action.js
 //
@@ -119,7 +118,6 @@ module.exports = async function handler(req, res) {
       return res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Say voice="${VOICE}">Great news! The owner got your message and is on their way to the car right now. Thanks so much for using TapMyCar - you really helped out today!</Say>
-  <Pause length="1"/>
   <Hangup/>
 </Response>`);
     }
@@ -169,7 +167,6 @@ module.exports = async function handler(req, res) {
     return res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Say voice="${VOICE}">Done${namePart}! They'll know you're on your way. Thanks for being part of TapMyCar.</Say>
-  <Pause length="1"/>
   <Hangup/>
 </Response>`);
   }
@@ -178,7 +175,6 @@ module.exports = async function handler(req, res) {
   return res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Say voice="${VOICE}">Sorry, I didn't catch that. Goodbye for now!</Say>
-  <Pause length="1"/>
   <Hangup/>
 </Response>`);
 };
