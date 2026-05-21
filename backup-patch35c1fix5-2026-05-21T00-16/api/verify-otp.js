@@ -125,24 +125,6 @@ module.exports = async function handler(req, res) {
       isNewUser = true;
     }
     if (isNewUser && user) await assignFreeTag(user.id);
-
-    /* TMC_PATCH35C1FIX5_PHONE_VERIFIED: the Twilio phone OTP check above passed, so this phone is
-       genuinely verified. Persist phone_verified so the activation-session
-       re-mint path (confirm-phone-verification) can take its no-Twilio
-       shortcut. Without this, new users have phone_verified stuck at false
-       and the gift-claim re-mint fails with "verify your phone first". */
-    if (user && user.id) {
-      try {
-        await supabase
-          .from('users')
-          .update({ phone_verified: true, phone_verified_at: new Date().toISOString() })
-          .eq('id', user.id);
-      } catch (pvErr) {
-        console.error('TMC_PATCH35C1FIX5_PHONE_VERIFIED: phone_verified update failed:', pvErr && pvErr.message);
-        /* non-fatal: verification still succeeded for the caller */
-      }
-    }
-
     return res.json({ token: user.id, name: user.name, phone: user.phone });
   }
 
