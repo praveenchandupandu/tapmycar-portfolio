@@ -126,12 +126,6 @@
       <div style="font-size:12px;color:rgba(255,255,255,.85);line-height:1.7;margin-bottom:14px">With Standard plan you get a real physical tag shipped to you plus privacy tools that actually work.<br><br><span style="color:#FFE4CC;font-weight:600">Know where your car was scanned. Screen every call. Stay protected.</span></div>
       <a href="/pricing.html" style="display:block;background:#fff;color:#FF6B00;font-size:13px;font-weight:800;padding:12px 24px;border-radius:12px;text-decoration:none;text-align:center">Upgrade to Standard</a>
     </div>
-    <!-- TMC_PATCH35C2_GIFT_LIFECYCLE: gift trial-ending banner -->
-    <div id="gift-expiry-banner" style="display:none;background:linear-gradient(135deg,#FF6B00,#C2410C);border-radius:18px;padding:18px 16px;margin-bottom:14px;position:relative;overflow:hidden">
-      <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:4px" id="gift-expiry-title">Your free trial is ending soon</div>
-      <div style="font-size:13px;color:rgba(255,255,255,.9);line-height:1.5;margin-bottom:12px" id="gift-expiry-text">Subscribe to keep your tag active.</div>
-      <a href="/pricing.html" style="display:inline-block;background:#fff;color:#C2410C;font-weight:700;font-size:13px;padding:9px 18px;border-radius:10px;text-decoration:none">Subscribe now</a>
-    </div>
     <div id="upgrade-banner-standard" style="display:none;background:linear-gradient(135deg,#1A1A1A,#2d1a00);border-radius:18px;padding:18px 16px;margin-bottom:14px;position:relative;overflow:hidden">
       <div style="position:absolute;width:120px;height:120px;border-radius:50%;background:rgba(255,107,0,.12);right:-20px;top:-30px"></div>
       <div style="font-size:10px;font-weight:700;color:var(--or);margin-bottom:6px;letter-spacing:.8px;text-transform:uppercase">Protect your whole family</div>
@@ -341,37 +335,6 @@ async function loadDashboard() {
       if (_bStd) _bStd.style.display = 'block';
     }
     /* premium / business / anything else: no banner shown */
-
-    /* TMC_PATCH35C2_GIFT_LIFECYCLE: gift trial-ending banner — shows within 10 days of expiry.
-       Overrides the upgrade banners (a gift user does not need an upgrade
-       nag, they need a renewal nag). */
-    try {
-      var _giftExp = data && data.user && data.user.gift_plan_expires_at;
-      var _giftBanner = document.getElementById('gift-expiry-banner');
-      if (_giftExp && _giftBanner) {
-        var _expDate = new Date(_giftExp);
-        var _msLeft = _expDate.getTime() - Date.now();
-        var _daysLeft = Math.ceil(_msLeft / 86400000);
-        if (_daysLeft <= 10) {
-          /* hide the upgrade banners; the renewal banner takes priority */
-          if (_bEtag) _bEtag.style.display = 'none';
-          if (_bStd) _bStd.style.display = 'none';
-          var _t = document.getElementById('gift-expiry-title');
-          var _x = document.getElementById('gift-expiry-text');
-          if (_daysLeft <= 0) {
-            if (_t) _t.textContent = 'Your free trial ends today';
-            if (_x) _x.textContent = 'Subscribe now to keep your tag active and your car protected.';
-          } else if (_daysLeft === 1) {
-            if (_t) _t.textContent = 'Your free trial ends tomorrow';
-            if (_x) _x.textContent = 'Subscribe now so your tag keeps working without interruption.';
-          } else {
-            if (_t) _t.textContent = 'Your free trial ends in ' + _daysLeft + ' days';
-            if (_x) _x.textContent = 'Subscribe any time to keep your tag active after the trial.';
-          }
-          _giftBanner.style.display = 'block';
-        }
-      }
-    } catch (e) { console.warn('TMC_PATCH35C2_GIFT_LIFECYCLE: banner error', e); }
 
     // TMC_FAMILY_CODES_LOADER
     renderFamilyCodes(_userPlan, data.premiumCodes || []);

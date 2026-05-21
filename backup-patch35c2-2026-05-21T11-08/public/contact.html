@@ -833,7 +833,7 @@ async function loadTag(){
     const data=await res.json();
     if(!data.tag){showState('invalid');return;}
     const tag=data.tag;
-    if(tag.status==='disabled'||tag.status==='inactive'){/*TMC_PATCH35C2_GIFT_LIFECYCLE: gift-expired tags get a reactivate message*/if(tag.gift_expired===true){try{var _dt=document.querySelector('#state-disabled .result-message, #state-disabled p');if(_dt){_dt.textContent='This tag\u2019s free trial has ended. The owner can reactivate it by subscribing at tapmycar.io.';}}catch(e){}}showState('disabled');}
+    if(tag.status==='disabled'||tag.status==='inactive'){showState('disabled');}
     else if(tag.status==='unclaimed'){/*TMC_PATCH35C1FIX3_UNCLAIMED_TAG: set window._tag so gift detection works*/window._tag=tag;window._tagId=tag.id||'';document.getElementById('unclaimed-token').textContent=tag.token;showState('unclaimed');}
     else if(tag.status==='paused'){showState('disabled');return;}
     else if(tag.status==='active')

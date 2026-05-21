@@ -1,0 +1,1 @@
+{"version":2,"outputDirectory":"public","functions":{"api/*.js":{"memory":512,"maxDuration":10}},"rewrites":[{"source":"/knowmore","destination":"/knowmore.html"},{"source":"/tag/:token","destination":"/contact.html"},{"source":"/api/:path*","destination":"/api/:path*"}]}
