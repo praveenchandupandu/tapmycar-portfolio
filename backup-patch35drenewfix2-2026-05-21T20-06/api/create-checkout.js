@@ -94,8 +94,7 @@ module.exports = async function handler(req, res) {
     return res.json({ success: true, redirect: '/etag.html', free: true });
   }
 
-  /* TMC_PATCH35DRENEWFIX2_WHITELIST: allow the renew flow past the whitelist guard */
-  if (flow !== 'activate' && flow !== 'direct' && flow !== 'renew') {
+  if (flow !== 'activate' && flow !== 'direct') {
     return res.status(400).json({ error: `Invalid flow '${flow}'` });
   }
   if (plan !== 'standard' && plan !== 'premium') {
