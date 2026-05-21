@@ -165,26 +165,6 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    /* TMC_PATCH35DRENEW_GIFT_RENEWAL: renewal flow — annual fee ONLY, no sticker, no shipping.
-       The gift recipient already has the sticker; this just pays for the
-       year of service and reactivates their tag. */
-    if (flow === 'renew') {
-      lineItems.push(_withTax({
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: plan === 'standard'
-              ? 'TapMyCar Standard — annual plan (reactivate your tag)'
-              : 'TapMyCar Premium — annual plan (reactivate your tag)',
-            description: 'Renews your TapMyCar service for one year and reactivates the tag you already have. Cancel anytime.'
-          },
-          unit_amount: ANNUAL
-        },
-        quantity: 1
-      }));
-      chargeTodayCents += ANNUAL;
-    }
-
     if (flow === 'direct') {
       // Sticker fee today
       lineItems.push(_withTax({
@@ -238,8 +218,7 @@ module.exports = async function handler(req, res) {
         // Save the card to the customer so the webhook can create a subscription later
         setup_future_usage: 'off_session'
       },
-      /* TMC_PATCH35DRENEW_GIFT_RENEWAL: renew flow ships nothing — skip shipping address */
-      ...(flow === 'renew' ? {} : { shipping_address_collection: { allowed_countries: ['US'] } }),
+      shipping_address_collection: { allowed_countries: ['US'] },
       billing_address_collection: 'required',
       /* TMC_PATCH34_AUTOMATIC_TAX: Stripe Tax — calculates tax based on shipping address */
       automatic_tax: { enabled: true },

@@ -130,8 +130,7 @@
     <div id="gift-expiry-banner" style="display:none;background:linear-gradient(135deg,#FF6B00,#C2410C);border-radius:18px;padding:18px 16px;margin-bottom:14px;position:relative;overflow:hidden">
       <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:4px" id="gift-expiry-title">Your free trial is ending soon</div>
       <div style="font-size:13px;color:rgba(255,255,255,.9);line-height:1.5;margin-bottom:12px" id="gift-expiry-text">Subscribe to keep your tag active.</div>
-      <!-- TMC_PATCH35DRENEW_GIFT_RENEWAL: renew checkout, not the full pricing page -->
-      <button onclick="p35dStartRenew()" id="gift-renew-btn" style="background:#fff;color:#C2410C;font-weight:700;font-size:13px;padding:9px 18px;border-radius:10px;border:0;cursor:pointer">Subscribe now</button>
+      <a href="/pricing.html" style="display:inline-block;background:#fff;color:#C2410C;font-weight:700;font-size:13px;padding:9px 18px;border-radius:10px;text-decoration:none">Subscribe now</a>
     </div>
     <div id="upgrade-banner-standard" style="display:none;background:linear-gradient(135deg,#1A1A1A,#2d1a00);border-radius:18px;padding:18px 16px;margin-bottom:14px;position:relative;overflow:hidden">
       <div style="position:absolute;width:120px;height:120px;border-radius:50%;background:rgba(255,107,0,.12);right:-20px;top:-30px"></div>
@@ -377,9 +376,6 @@ async function loadDashboard() {
     // TMC_FAMILY_CODES_LOADER
     renderFamilyCodes(_userPlan, data.premiumCodes || []);
 
-    /* TMC_PATCH35DRENEW_GIFT_RENEWAL: remember the user's plan for the renew button */
-    window.__tmcRenewPlan = (_userPlan === 'premium') ? 'premium' : 'standard';
-
     if (data.tags && data.tags.length > 0) {
       // TMC_PICK_BEST_TAG: prefer active physical sticker over eTag.
       // Token rule: physical = token does NOT start with "TMC-ET",
@@ -563,35 +559,7 @@ if ('serviceWorker' in navigator) {
 </nav>
 <!-- /TMC_FLOATING_NAV -->
 <!-- TMC_PATCH26_APP_SETTINGS -->
-<script src="/app-settings.js" defer>
-/* TMC_PATCH35DRENEW_GIFT_RENEWAL: start the renewal checkout (annual fee only). */
-async function p35dStartRenew() {
-  var btn = document.getElementById('gift-renew-btn');
-  var session = (typeof getSession === 'function') ? getSession() : null;
-  var token = session && session.token ? session.token : (localStorage.getItem('tmc_token') || '');
-  if (!token) { window.location.href = '/signin.html'; return; }
-  var plan = window.__tmcRenewPlan || 'standard';
-  if (btn) { btn.disabled = true; btn.textContent = 'Loading...'; }
-  try {
-    var res = await fetch('/api/create-checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: token, flow: 'renew', plan: plan })
-    });
-    var data = await res.json();
-    if (data && data.url) {
-      window.location.href = data.url;
-      return;
-    }
-    if (btn) { btn.disabled = false; btn.textContent = 'Subscribe now'; }
-    alert((data && data.error) || 'Could not start checkout. Please try again.');
-  } catch (e) {
-    if (btn) { btn.disabled = false; btn.textContent = 'Subscribe now'; }
-    alert('Network error. Please try again.');
-  }
-}
-
-</script>
+<script src="/app-settings.js" defer></script>
 </body>
 </html>
 

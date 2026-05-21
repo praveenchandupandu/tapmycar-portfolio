@@ -99,58 +99,6 @@ async function handler(req, res) {
         const nStickers = parseInt(sticker_count || '1', 10);
         const isPrepay = prepay === 'true';
 
-        /* TMC_PATCH35DRENEW_GIFT_RENEWAL: renewal flow — gift trial renewal. The customer paid the
-           annual fee today; create the recurring subscription (no trial),
-           restore their plan, and reactivate the gift tag they already have. */
-        if (flow === 'renew') {
-          let renewSub = null;
-          try {
-            renewSub = await stripe.subscriptions.create({
-              customer: session.customer,
-              items: [{ price: subscription_price_id }],
-              /* paid today -> first cycle starts a year out, no trial */
-              trial_period_days: 365,
-              metadata: { user_id, plan, flow: 'renew' }
-            });
-            console.log('✓ renew: subscription ' + renewSub.id + ' for ' + user_id);
-          } catch (subErr) {
-            console.error('renew: subscription create failed:', subErr.message);
-          }
-
-          /* restore the user's plan + clear gift-expiry state */
-          await supabase
-            .from('users')
-            .update({
-              plan: plan,
-              subscription_id: renewSub ? renewSub.id : null,
-              gift_expired_at: null,
-              gift_reminders_sent: ''
-            })
-            .eq('id', user_id);
-
-          /* reactivate the gift tag(s) the user already holds */
-          await supabase
-            .from('tags')
-            .update({ status: 'active', gift_expired: false })
-            .eq('owner_id', user_id)
-            .eq('is_gift', true);
-
-          /* record the order */
-          await supabase.from('orders').insert({
-            user_id,
-            plan,
-            amount: session.amount_total,
-            stripe_id: session.id,
-            subscription_id: renewSub ? renewSub.id : null,
-            status: 'paid',
-            sticker_count: 0,
-            order_status: 'renewal'
-          });
-
-          console.log('✓ renew complete for ' + user_id + ' plan=' + plan);
-          break;
-        }
-
         // ─── CREATE THE SUBSCRIPTION (saved card from one-time payment) ──
         // For activate flow no-prepay: trial = 30 days (sticker charge fires at trial-end)
         // For direct flow no-prepay: trial = 30 days (annual charge fires at trial-end)
