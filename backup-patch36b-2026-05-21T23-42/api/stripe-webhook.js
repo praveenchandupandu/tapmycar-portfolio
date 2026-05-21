@@ -1,4 +1,3 @@
-/* TMC_PATCH36B_CANCEL_WORDING */
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const { createClient } = require("@supabase/supabase-js");
 const crypto = require('crypto');
@@ -624,7 +623,7 @@ function buildOrderEmail({ plan, flow, prepay, amountToday, shipName, shipAddres
     <div style="background:#FFF3EC;border:1px solid #FFE4CC;border-radius:12px;padding:14px;margin-bottom:20px">
       <div style="font-size:12px;font-weight:700;color:#FF6B00;margin-bottom:4px">What happens next</div>
       <div style="font-size:12px;color:#92400E;line-height:1.6">${nextLine}</div>
-      <div style="font-size:11px;color:#92400E;margin-top:8px">Not satisfied? Request a refund within 14 days — a $1 service fee is retained. After 14 days, the plan is non-refundable. Physical stickers are non-refundable once shipped.</div>
+      <div style="font-size:11px;color:#92400E;margin-top:8px">Cancel anytime in Settings. Physical stickers are non-refundable once shipped.</div>
     </div>
     <a href="https://tapmycar.io/dashboard.html" style="display:block;background:#FF6B00;color:#fff;font-size:14px;font-weight:700;padding:14px 0;border-radius:13px;text-align:center;text-decoration:none">Open dashboard</a>
     <div style="margin-top:20px;font-size:10px;color:#9CA3AF;text-align:center">Questions? Email support@tapmycar.io · <a href="https://tapmycar.io/terms.html" style="color:#FF6B00">Terms</a> · <a href="https://tapmycar.io/privacy.html" style="color:#FF6B00">Privacy</a></div>
@@ -642,7 +641,7 @@ function buildStickerShippingEmail(plan) {
       <div style="font-size:13px;font-weight:700;color:#9A3800;margin-bottom:4px">Charged today: ${sticker}</div>
       <div style="font-size:12px;color:#78350F">Your ${plan === 'premium' ? '3 physical stickers ship' : 'physical sticker ships'} to your address in 2-3 business days.</div>
     </div>
-    <div style="background:#F9FAFB;border-radius:12px;padding:14px;margin-bottom:16px;font-size:12px;color:#6B7280;line-height:1.6">In 30 days, your first annual charge of ${yearly} begins your subscription. Not satisfied? Request a refund within 14 days — a $1 service fee is retained. After 14 days, the plan is non-refundable.</div>
+    <div style="background:#F9FAFB;border-radius:12px;padding:14px;margin-bottom:16px;font-size:12px;color:#6B7280;line-height:1.6">In 30 days, your first annual charge of ${yearly} begins your subscription. Cancel anytime.</div>
     <a href="https://tapmycar.io/dashboard.html" style="display:block;background:#FF6B00;color:#fff;font-size:14px;font-weight:700;padding:14px 0;border-radius:13px;text-align:center;text-decoration:none">View dashboard</a>
   </div>`;
 }

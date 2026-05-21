@@ -1,4 +1,3 @@
-/* TMC_PATCH36B_CANCEL_WORDING */
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { createClient } = require('@supabase/supabase-js');
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
@@ -191,7 +190,7 @@ module.exports = async function handler(req, res) {
       /* annual difference */
       let annualDiffCents = 1999; /* default: full Premium annual (gift users) */
       let annualLabel = 'Premium annual plan';
-      let annualDesc = 'Your Premium plan for one year. Not satisfied? Request a refund within 14 days — a $1 service fee is retained. After 14 days, the plan is non-refundable.';
+      let annualDesc = 'Your Premium plan for one year. Cancel anytime.';
 
       const hadSub = user.subscription_id && String(user.plan || '').toLowerCase() === 'standard';
       if (hadSub) {
@@ -237,7 +236,7 @@ module.exports = async function handler(req, res) {
             name: plan === 'standard'
               ? 'TapMyCar Standard — annual plan (reactivate your tag)'
               : 'TapMyCar Premium — annual plan (reactivate your tag)',
-            description: 'Renews your TapMyCar service for one year and reactivates the tag you already have. Not satisfied? Request a refund within 14 days — a $1 service fee is retained. After 14 days, the plan is non-refundable.'
+            description: 'Renews your TapMyCar service for one year and reactivates the tag you already have. Cancel anytime.'
           },
           unit_amount: ANNUAL
         },
@@ -256,8 +255,8 @@ module.exports = async function handler(req, res) {
               ? 'TapMyCar Standard — 1 physical NFC + QR sticker (lifetime)'
               : 'TapMyCar Premium — 3 physical NFC + QR stickers (lifetime, for family)',
             description: plan === 'standard'
-              ? `Ships in 2-3 business days. On day 30, your $9.99/year annual plan begins. Request a refund within 14 days — a $1 service fee is retained; non-refundable after that.`
-              : `Ships in 2-3 business days. Comes with 3 gift codes to share with family. On day 30, your $19.99/year annual plan begins. Request a refund within 14 days — a $1 service fee is retained; non-refundable after that.`
+              ? `Ships in 2-3 business days. On day 30, your $9.99/year annual plan begins. Cancel anytime.`
+              : `Ships in 2-3 business days. Comes with 3 gift codes to share with family. On day 30, your $19.99/year annual plan begins. Cancel anytime.`
           },
           unit_amount: STICKER
         },
