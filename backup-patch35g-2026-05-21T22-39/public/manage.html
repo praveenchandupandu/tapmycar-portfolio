@@ -186,33 +186,12 @@ async function loadManage() {
       tagURL = 'https://tapmycar.io/tag/' + tag.token;
     }
 
-    /* TMC_PATCH35G_EXPIRED_DISPLAY: detect an expired gift tag. The user's plan is 'etag'
-       after expiry, but the tag still carries gift_expired + gift_plan,
-       so we show the real gift plan with a "trial ended" note. */
-    var _giftExpiredTag = null;
-    if (data.tags && data.tags.length) {
-      for (var _gi = 0; _gi < data.tags.length; _gi++) {
-        if (data.tags[_gi] && data.tags[_gi].gift_expired === true) {
-          _giftExpiredTag = data.tags[_gi];
-          break;
-        }
-      }
-    }
-
     let planHTML = '<div class="plan-card current" style="margin-bottom:14px">';
-    if (_giftExpiredTag) {
-      var _gp = (_giftExpiredTag.gift_plan || 'standard');
-      var _gpName = planNames[_gp] || (_gp.charAt(0).toUpperCase() + _gp.slice(1));
-      planHTML += '<div class="plan-badge" style="background:#DC2626;color:#fff">Trial ended</div>';
-      planHTML += '<div class="plan-name">' + _gpName + '</div>';
-      planHTML += '<div style="font-size:11px;color:var(--gy);margin-top:4px">Your free trial has ended. Subscribe to reactivate your tag and keep ' + _gpName + ' features.</div>';
-    } else {
-      planHTML += '<div class="plan-badge" style="background:var(--or);color:#fff">Your Current Plan</div>';
-      planHTML += '<div class="plan-name">' + (planNames[userPlan] || userPlan) + '</div>';
-      if (userPlan === 'etag') planHTML += '<div style="font-size:11px;color:var(--gy);margin-top:4px">Free digital QR tag</div>';
-      else if (userPlan === 'standard') planHTML += '<div style="font-size:11px;color:var(--gy);margin-top:4px">Physical sticker + masked calling + scan location</div>';
-      else if (userPlan === 'premium') planHTML += '<div style="font-size:11px;color:var(--gy);margin-top:4px">3 vehicles + unlimited calls + full protection</div>';
-    }
+    planHTML += '<div class="plan-badge" style="background:var(--or);color:#fff">Your Current Plan</div>';
+    planHTML += '<div class="plan-name">' + (planNames[userPlan] || userPlan) + '</div>';
+    if (userPlan === 'etag') planHTML += '<div style="font-size:11px;color:var(--gy);margin-top:4px">Free digital QR tag</div>';
+    else if (userPlan === 'standard') planHTML += '<div style="font-size:11px;color:var(--gy);margin-top:4px">Physical sticker + masked calling + scan location</div>';
+    else if (userPlan === 'premium') planHTML += '<div style="font-size:11px;color:var(--gy);margin-top:4px">3 vehicles + unlimited calls + full protection</div>';
     planHTML += '</div>';
     document.getElementById('current-plan-box').innerHTML = planHTML;
 

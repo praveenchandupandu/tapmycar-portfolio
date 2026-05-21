@@ -107,7 +107,7 @@
           <div style="font-size:16px;font-weight:700;color:var(--bk)" id="vehicle-label">My Vehicle</div>
           <div style="font-size:11px;color:var(--gy);margin-top:2px" id="tag-token">Loading...</div>
         </div>
-        <span class="sp sp-on" id="tag-status-pill">Active</span>
+        <span class="sp sp-on">Active</span>
       </div>
       <div class="qr-wrap" id="qr-container"></div>
       <div style="text-align:center;font-size:10px;color:var(--gy);margin-bottom:14px;word-break:break-all" id="tag-url">Generating your tag URL...</div>
@@ -403,19 +403,6 @@ async function loadDashboard() {
         document.getElementById("pause-sub").textContent = "Tag paused  strangers see nothing";
         document.getElementById("stat-status").textContent = "OFF";
         document.getElementById("stat-status").style.color = "var(--rd,#DC2626)";
-      }
-      /* TMC_PATCH35G_EXPIRED_DISPLAY: reflect inactive / disabled tags on the card + stat */
-      if (currentTagStatus === "inactive" || currentTagStatus === "disabled") {
-        var _pill = document.getElementById("tag-status-pill");
-        if (_pill) {
-          _pill.textContent = "Inactive";
-          _pill.className = "sp sp-am";
-        }
-        var _stat = document.getElementById("stat-status");
-        if (_stat) {
-          _stat.textContent = "OFF";
-          _stat.style.color = "var(--rd,#DC2626)";
-        }
       }
             // Normalize token to TMC-XXXXXX format (in case DB has it without hyphen)
       function formatTagToken(t) {
