@@ -1639,31 +1639,6 @@ async function p34cActivateWithoutPayment_v2() {
     if (color && color.value) registrationData.car_color = color.value.trim();
   } catch (e) {}
 
-  /* TMC_PATCH35C1FIX4_REMINT_SESSION: if no session (new-user verify-otp path does not mint one),
-     re-mint via confirm-phone-verification. The user IS phone_verified by
-     now, so the backend (Patch 34c-fix-3) mints a fresh session. */
-  if (!window.p34cActivationSessionId) {
-    var _uidRM = registrationData.userId || localStorage.getItem('tmc_token');
-    if (_uidRM) {
-      try {
-        var _mintRes = await fetch('/api/confirm-phone-verification', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            user_id: _uidRM,
-            code: '000000',
-            already_verified_session: true
-          })
-        });
-        var _mintData = await _mintRes.json();
-        if (_mintRes.ok && _mintData && _mintData.activation_session_id) {
-          window.p34cActivationSessionId = _mintData.activation_session_id;
-        }
-      } catch (e) {
-        console.warn('TMC_PATCH35C1FIX4_REMINT_SESSION: re-mint failed:', e);
-      }
-    }
-  }
   if (!window.p34cActivationSessionId) {
     showToast('Please verify your phone first.');
     if (btn) { btn.textContent = 'Activate Tag'; btn.disabled = false; }
