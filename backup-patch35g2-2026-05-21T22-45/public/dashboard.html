@@ -324,30 +324,8 @@ async function loadDashboard() {
     console.log('[dashboard] userPlan=' + _userPlan + ' (raw=' + JSON.stringify(data && data.user && data.user.plan) + ')');
 
     var _planLabels = { etag: 'Free', free: 'Free', standard: 'Standard', premium: 'Premium', business: 'Business' };
-
-    /* TMC_PATCH35G2_BADGE_FIX: if the user has an expired gift tag, the badge should
-       show the real gift plan (e.g. "Standard"), not "Free". The user's
-       plan column is 'etag' after expiry, but the tag still carries
-       gift_expired + gift_plan. */
-    var _giftExpiredTag = null;
-    if (data && data.tags && data.tags.length) {
-      for (var _gx = 0; _gx < data.tags.length; _gx++) {
-        if (data.tags[_gx] && data.tags[_gx].gift_expired === true) {
-          _giftExpiredTag = data.tags[_gx];
-          break;
-        }
-      }
-    }
-
     var _badge = document.getElementById('plan-badge');
-    if (_badge) {
-      if (_giftExpiredTag) {
-        var _gxPlan = (_giftExpiredTag.gift_plan || 'standard');
-        _badge.textContent = _planLabels[_gxPlan] || (_gxPlan.charAt(0).toUpperCase() + _gxPlan.slice(1));
-      } else {
-        _badge.textContent = _planLabels[_userPlan] || (_userPlan.charAt(0).toUpperCase() + _userPlan.slice(1));
-      }
-    }
+    if (_badge) _badge.textContent = _planLabels[_userPlan] || _userPlan.charAt(0).toUpperCase() + _userPlan.slice(1);
 
     /* TMC_PATCH29_PLAN_BADGE_FIX: Reset BOTH banners to hidden, then decide. */
     var _bEtag = document.getElementById('upgrade-banner-etag');
