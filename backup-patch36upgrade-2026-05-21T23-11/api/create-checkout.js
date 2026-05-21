@@ -95,8 +95,7 @@ module.exports = async function handler(req, res) {
   }
 
   /* TMC_PATCH35DRENEWFIX2_WHITELIST: allow the renew flow past the whitelist guard */
-  /* TMC_PATCH36UPGRADE_STD_TO_PREMIUM: allow upgrade flow */
-  if (flow !== 'activate' && flow !== 'direct' && flow !== 'renew' && flow !== 'upgrade') {
+  if (flow !== 'activate' && flow !== 'direct' && flow !== 'renew') {
     return res.status(400).json({ error: `Invalid flow '${flow}'` });
   }
   if (plan !== 'standard' && plan !== 'premium') {
@@ -170,64 +169,6 @@ module.exports = async function handler(req, res) {
     /* TMC_PATCH35DRENEW_GIFT_RENEWAL: renewal flow — annual fee ONLY, no sticker, no shipping.
        The gift recipient already has the sticker; this just pays for the
        year of service and reactivates their tag. */
-    /* TMC_PATCH36UPGRADE_STD_TO_PREMIUM: Standard -> Premium upgrade. 2 extra stickers ($19.99)
-       + annual difference (prorated for paying users, full for gift users). */
-    if (flow === 'upgrade') {
-      /* 2 additional stickers — flat $19.99 */
-      lineItems.push(_withTax({
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: '2 additional TapMyCar stickers (Premium upgrade)',
-            description: 'Two extra weatherproof NFC + QR stickers for your family. Ships in 2-3 business days.'
-          },
-          unit_amount: 1999
-        },
-        quantity: 1
-      }));
-      chargeTodayCents += 1999;
-
-      /* annual difference */
-      let annualDiffCents = 1999; /* default: full Premium annual (gift users) */
-      let annualLabel = 'Premium annual plan';
-      let annualDesc = 'Your Premium plan for one year. Cancel anytime.';
-
-      const hadSub = user.subscription_id && String(user.plan || '').toLowerCase() === 'standard';
-      if (hadSub) {
-        /* PAYING Standard user — prorate the $10/yr difference. */
-        try {
-          const sub = await stripe.subscriptions.retrieve(user.subscription_id);
-          const periodEnd = sub && sub.current_period_end ? sub.current_period_end * 1000 : 0;
-          if (periodEnd > Date.now()) {
-            const daysLeft = Math.ceil((periodEnd - Date.now()) / 86400000);
-            const clampedDays = Math.max(0, Math.min(365, daysLeft));
-            let prorated = Math.round(1000 * (clampedDays / 365));
-            if (prorated < 100) prorated = 100; /* Stripe minimum */
-            annualDiffCents = prorated;
-            annualLabel = 'Premium upgrade (prorated, ' + clampedDays + ' days remaining)';
-            annualDesc = 'Prorated difference to upgrade your remaining Standard term to Premium.';
-          } else {
-            annualDiffCents = 999; /* fallback flat difference */
-            annualLabel = 'Premium upgrade (annual difference)';
-          }
-        } catch (subErr) {
-          console.error('TMC_PATCH36UPGRADE_STD_TO_PREMIUM: subscription retrieve failed, flat fallback:', subErr && subErr.message);
-          annualDiffCents = 999;
-          annualLabel = 'Premium upgrade (annual difference)';
-        }
-      }
-
-      lineItems.push(_withTax({
-        price_data: {
-          currency: 'usd',
-          product_data: { name: annualLabel, description: annualDesc },
-          unit_amount: annualDiffCents
-        },
-        quantity: 1
-      }));
-      chargeTodayCents += annualDiffCents;
-    }
-
     if (flow === 'renew') {
       lineItems.push(_withTax({
         price_data: {

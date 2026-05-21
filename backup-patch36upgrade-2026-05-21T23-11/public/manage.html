@@ -121,7 +121,7 @@
     <div class="plan-feat"><div class="plan-feat-dot"></div>Unlimited masked calls</div>
     <div class="plan-feat"><div class="plan-feat-dot"></div>Scan location map</div>
     <div class="plan-feat"><div class="plan-feat-dot"></div>Emergency contact feature</div>
-    <button class="btn" id="btn-premium" style="margin-top:12px;font-size:13px;padding:12px 0;background:#1A1A1A" onclick="p36StartUpgrade()">Upgrade to Premium</button>
+    <button class="btn" id="btn-premium" style="margin-top:12px;font-size:13px;padding:12px 0;background:#1A1A1A" onclick="window.location.href='/pricing.html'">Get Premium</button>
   </div>
 
   <div style="margin-bottom:14px;background:var(--gbl);border-radius:14px;padding:16px;border:.5px solid var(--bd)">
@@ -241,28 +241,6 @@ async function loadManage() {
 function copyTagURL() {
   if (tagURL) {
     navigator.clipboard.writeText(tagURL).then(() => showToast('Tag URL copied!')).catch(() => showToast('Copy failed'));
-  }
-}
-
-/* TMC_PATCH36UPGRADE_STD_TO_PREMIUM: start the Standard -> Premium upgrade checkout. */
-async function p36StartUpgrade() {
-  var btn = document.getElementById('btn-premium');
-  var token = (typeof s !== 'undefined' && s && s.token) ? s.token : (localStorage.getItem('tmc_token') || '');
-  if (!token) { window.location.href = '/signin.html'; return; }
-  if (btn) { btn.disabled = true; btn.textContent = 'Loading...'; }
-  try {
-    var res = await fetch('/api/create-checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: token, flow: 'upgrade', plan: 'premium' })
-    });
-    var data = await res.json();
-    if (data && data.url) { window.location.href = data.url; return; }
-    if (btn) { btn.disabled = false; btn.textContent = 'Upgrade to Premium'; }
-    alert((data && data.error) || 'Could not start the upgrade. Please try again.');
-  } catch (e) {
-    if (btn) { btn.disabled = false; btn.textContent = 'Upgrade to Premium'; }
-    alert('Network error. Please try again.');
   }
 }
 
