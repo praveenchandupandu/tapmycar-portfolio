@@ -1355,9 +1355,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
     </div>
     <div class="verify-summary" id="verify-summary" style="display:none">
       <div class="verify-stat"><span class="verify-label">Batch total</span><span class="verify-val" id="v-total">0</span></div>
-      <!-- TMC_PATCH35H_RECEIVE_POLISH: already-verified stat -->
-      <div class="verify-stat"><span class="verify-label">Already verified</span><span class="verify-val green" id="v-already">0</span></div>
-      <div class="verify-stat"><span class="verify-label">Scanned this session</span><span class="verify-val green" id="v-scanned">0</span></div>
+      <div class="verify-stat"><span class="verify-label">Scanned (received)</span><span class="verify-val green" id="v-scanned">0</span></div>
       <div class="verify-stat"><span class="verify-label">Not yet scanned</span><span class="verify-val yellow" id="v-remaining">0</span></div>
     </div>
     <div class="scanned-list" id="scanned-list"></div>
@@ -2348,11 +2346,8 @@ function loadBatchOptions(tags) {
     if (!isNaN(na) && !isNaN(nb)) return na - nb;
     return String(a).localeCompare(String(b));
   }).forEach(b => {
-    /* TMC_PATCH35H_RECEIVE_POLISH: show how many in the batch are already verified */
-    const _toks = batchTokensMap[b];
-    const count = _toks.length;
-    const verifiedCount = _toks.filter(function(t){ return t && t.verified === true; }).length;
-    sel.innerHTML += `<option value="${b}">Batch ${b} \u2014 ${count} tokens, ${verifiedCount} verified</option>`;
+    const count = batchTokensMap[b].length;
+    sel.innerHTML += `<option value="${b}">Batch ${b} (${count} tokens)</option>`;
   });
 }
 
@@ -2460,9 +2455,7 @@ function downloadReplacementCSV() {
 
 //  RECEIVE & VERIFY 
 function loadBatchForVerify() {
-  /* TMC_PATCH35H_RECEIVE_POLISH: batch names are TEXT (Patch 21). parseInt broke text-named
-     batches (parseInt -> NaN -> bailed). Use the raw string value. */
-  const batchNum = (document.getElementById('verify-batch').value || '').trim();
+  const batchNum = parseInt(document.getElementById('verify-batch').value);
   if (!batchNum) {
     document.getElementById('verify-summary').style.display = 'none';
     document.getElementById('finalize-btn').style.display = 'none';
@@ -2476,10 +2469,6 @@ function loadBatchForVerify() {
   const tokens = batchTokensMap[batchNum] || [];
   document.getElementById('verify-summary').style.display = 'block';
   document.getElementById('v-total').textContent = tokens.length;
-  /* TMC_PATCH35H_RECEIVE_POLISH: how many are already verified */
-  var _alreadyVerified = tokens.filter(function(t){ return t && t.verified === true; }).length;
-  var _alreadyEl = document.getElementById('v-already');
-  if (_alreadyEl) _alreadyEl.textContent = _alreadyVerified;
   document.getElementById('v-scanned').textContent = '0';
   document.getElementById('v-remaining').textContent = tokens.length;
   document.getElementById('scanned-list').innerHTML = '';
