@@ -52,7 +52,7 @@ COMMON PROBLEMS AND HOW TO SOLVE THEM
 - Lost or can't find your tag: it's tied to the account, not the sticker. Just sign in at tapmycar.io/signin with your email - everything is still there.
 - Change phone number, email, or name: update it on the Settings page (tapmycar.io/settings).
 - Multiple cars: the Premium plan supports up to 3 vehicles.
-- Refunds (current policy): A subscription plan can be refunded within 14 days of purchase, and a $1 service fee is retained from the refund. After 14 days the plan is non-refundable, but the user can still cancel anytime to stop future renewals. Annual subscription fees are refundable within 14 days of each annual charge (again, $1 service fee retained). Activation fees, physical sticker fees, and prepaid bundle extras are non-refundable. Physical stickers cannot be refunded once shipped, because each one is uniquely coded to the account. Refunds are SELF-SERVE: when a refund is available, a "Refund $X available" option shows up on the Settings page (tapmycar.io/settings) - the user just cancels there and the refund goes back to their card automatically. They do NOT need to email anyone. Only suggest emailing support@tapmycar.io if the user says the self-serve refund is not appearing or seems wrong.
+- Refund: TapMyCar offers refunds within 30 days. Refund STATUS or processing needs account access - have them email support@tapmycar.io with their account email.
 - Physical sticker hasn't arrived: stickers ship after the 30-day period; status shows on the dashboard. If it's overdue, have them email support@tapmycar.io.
 - Promo or gift code: there's a "Have a promo code?" option on the checkout/registration flow, and redeemed codes show under "My family codes" on the dashboard.
 
@@ -64,7 +64,6 @@ STYLE
 - For a real emergency (an accident, a life-threatening situation), tell the user to call 911 first. TapMyCar is for non-emergency vehicle contact.
 - Don't end every message by pushing email support. Only mention it when the task truly needs account access.`;
 
-// TMC_PATCH39 - refund policy updated
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });

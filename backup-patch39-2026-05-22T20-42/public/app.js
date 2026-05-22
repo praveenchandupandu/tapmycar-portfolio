@@ -527,7 +527,7 @@ HOW IT WORKS:
 COMMON ISSUES:
 - QR not scanning  Ensure good lighting, clean QR, camera focused. Try zooming in.
 - Can't download PDF  Log in first, then go to Tag page
-- Want a refund  Self-serve on the Settings page within 14 days ($1 fee retained)
+- Want a refund  Email support@tapmycar.io, refunds within 30 days
 - Sticker not arrived  Ships after day 30, check dashboard for status
 - Lost my tag  Sign in with email, tag is still active
 - Pause tag  Toggle from dashboard
@@ -905,7 +905,7 @@ function getSmartResponse(question) {
 
   // Refund
   if (q.includes('refund') || q.includes('money back') || q.includes('charge')) {
-    return 'You can request a refund within 14 days of purchase - a $1 service fee is kept. Just open the Settings page and cancel: if you\'re within the window, a "Refund available" option appears and the refund goes back to your card automatically. Note: activation fees and shipped stickers are non-refundable.';
+    return 'We offer full refunds within 30 days, no questions asked. Just email support@tapmycar.io with your account email and we\'ll process it right away.';
   }
 
   // Sticker / shipping
