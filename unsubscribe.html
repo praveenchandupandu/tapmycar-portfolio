@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<!-- TMC_PATCH42_UNSUBSCRIBE -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#FF6B00">
+  <title>Email Preferences — TapMyCar</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta name="robots" content="noindex">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Inter,-apple-system,Segoe UI,Roboto,sans-serif;
+      background:#F9FAFB;color:#111;min-height:100vh;display:flex;
+      align-items:center;justify-content:center;padding:24px}
+    .card{background:#fff;max-width:440px;width:100%;border-radius:18px;
+      border:1px solid #E5E7EB;padding:40px 32px;text-align:center;
+      box-shadow:0 4px 24px rgba(0,0,0,.05)}
+    .brand{font-size:22px;font-weight:800;margin-bottom:28px}
+    .brand span{color:#FF6B00}
+    .icon{width:54px;height:54px;border-radius:50%;margin:0 auto 18px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:26px;font-weight:800}
+    .icon.ok{background:#DCFCE7;color:#16A34A}
+    .icon.err{background:#FEE2E2;color:#DC2626}
+    h1{font-size:20px;font-weight:800;margin-bottom:10px}
+    p{font-size:14px;color:#4B5563;line-height:1.65;margin-bottom:8px}
+    a{color:#FF6B00}
+    .msg{font-size:15px;color:#6B7280;padding:20px 0}
+    .btn-ghost{margin-top:20px;background:none;border:1px solid #E5E7EB;
+      color:#374151;font-size:13px;font-weight:600;padding:10px 18px;
+      border-radius:10px;cursor:pointer;font-family:inherit}
+    .btn-ghost:hover{background:#F9FAFB}
+    .foot{margin-top:26px;font-size:11px;color:#9CA3AF}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">TapMyCar<span>.</span></div>
+    <div id="card"><div class="msg">Updating your email preferences…</div></div>
+    <div class="foot">Praman Tech LLC · Connecticut, USA</div>
+  </div>
+  <script>
+  (function(){
+    var p = new URLSearchParams(location.search);
+    var uid = p.get("u"); var tok = p.get("t");
+    var card = document.getElementById("card");
+    function render(state, optOut){
+      if(state === "loading"){
+        card.innerHTML = '<div class="msg">Updating your email preferences\u2026</div>';
+        return;
+      }
+      if(state === "error"){
+        card.innerHTML =
+          '<div class="icon err">!</div>' +
+          '<h1>Link not valid</h1>' +
+          '<p>This unsubscribe link is invalid or has expired. If you keep ' +
+          'receiving unwanted emails, contact ' +
+          '<a href="mailto:support@tapmycar.io">support@tapmycar.io</a>.</p>';
+        return;
+      }
+      if(optOut){
+        card.innerHTML =
+          '<div class="icon ok">&#10003;</div>' +
+          '<h1>You have been unsubscribed</h1>' +
+          '<p>You will no longer receive marketing or announcement emails ' +
+          'from TapMyCar.</p>' +
+          '<p>Important account, billing and security emails are still sent ' +
+          '\u2014 these are required to operate your account.</p>' +
+          '<button id="toggle" class="btn-ghost">Changed your mind? Resubscribe</button>';
+      } else {
+        card.innerHTML =
+          '<div class="icon ok">&#10003;</div>' +
+          '<h1>You are resubscribed</h1>' +
+          '<p>You will receive TapMyCar product updates and announcements again.</p>' +
+          '<button id="toggle" class="btn-ghost">Unsubscribe</button>';
+      }
+      var b = document.getElementById("toggle");
+      if(b) b.onclick = function(){ submit(optOut ? "resubscribe" : "unsubscribe"); };
+    }
+    function submit(action){
+      render("loading");
+      fetch("/api/unsubscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: uid, token: tok, action: action })
+      }).then(function(r){ return r.json(); }).then(function(d){
+        if(d && d.success){ render("done", !!d.email_opt_out); }
+        else { render("error"); }
+      }).catch(function(){ render("error"); });
+    }
+    if(!uid || !tok){ render("error"); }
+    else { submit("unsubscribe"); }
+  })();
+  </script>
+</body>
+</html>
