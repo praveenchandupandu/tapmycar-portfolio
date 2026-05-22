@@ -1222,17 +1222,6 @@ if (window.location.pathname.includes('dashboard')) {
 }
 
 
-// TMC_PATCH41_WEBPUSH: pushManager.subscribe() requires the VAPID key as a
-// Uint8Array, not a string. This converts the base64url public key.
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const raw = atob(base64);
-  const output = new Uint8Array(raw.length);
-  for (let i = 0; i < raw.length; i++) output[i] = raw.charCodeAt(i);
-  return output;
-}
-
 async function registerPush() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
   const s = getSession();
@@ -1243,7 +1232,7 @@ async function registerPush() {
     if (permission !== 'granted') return;
     const sub = await reg.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array('BDJaBVzTHDODJtF9xeEwuaVsEb2axVw1xPkRCK1Gdv57G5iZFBY-jADC1Tx9A3rxZfVQsqyA1Uk4qYHBlNYnbyU')
+      applicationServerKey: 'EKYvbjg84PwT28vsbESyR45_5mR7eiLG-NCqFPz0kAsZUCTA7see54fuytLQ6S_NCxheRYPO93OhqM3HK3HNpxg'
     });
     const key = sub.getKey('p256dh');
     const auth = sub.getKey('auth');
