@@ -553,8 +553,8 @@ function injectChatbot() {
     <div id="tmc-chat-badge" style="position:fixed;bottom:72px;right:20px;background:#111;color:#fff;font-size:11px;font-weight:600;padding:6px 12px;border-radius:10px 10px 0 10px;z-index:200;box-shadow:0 2px 10px rgba(0,0,0,.15);display:none;cursor:pointer" onclick="toggleChat()">Need help? </div>
     <div id="tmc-chat-window" style="display:none;position:fixed;bottom:90px;right:16px;width:340px;max-width:calc(100vw - 32px);height:480px;max-height:calc(100vh - 120px);background:#fff;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.2);z-index:201;flex-direction:column;overflow:hidden">
       <div style="background:#FF6B00;padding:16px;display:flex;align-items:center;gap:10px;flex-shrink:0">
-        <div style="width:36px;height:36px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0"><!-- TMC_PATCH40 -->
-          <img src="/logo.png" alt="TapMyCar" width="30" height="30" style="display:block;object-fit:contain" />
+        <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         </div>
         <div style="flex:1">
           <div style="font-size:14px;font-weight:700;color:#fff">TapMyCar Support</div>
@@ -563,7 +563,7 @@ function injectChatbot() {
         <button onclick="toggleChat()" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div id="tmc-chat-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px">
-        <div class="tmc-msg tmc-msg-bot"><div class="tmc-msg-bubble" id="tmc-greeting-bubble">Hi there! Welcome to TapMyCar. How can I help you today?</div></div>
+        <div class="tmc-msg tmc-msg-bot"><div class="tmc-msg-bubble">Hi there! Welcome to TapMyCar. How can I help you today? </div></div>
         <div style="display:flex;flex-wrap:wrap;gap:6px">
           <button class="tmc-quick-q" onclick="askQuestion('How do I activate my tag?')">Activate my tag</button>
           <button class="tmc-quick-q" onclick="askQuestion('How does masked calling work?')">Masked calling</button>
@@ -963,26 +963,8 @@ function getSmartResponse(question) {
 }
 
 // Auto-inject chatbot on every page
-
-// TMC_PATCH40 - greet a signed-in user by their first name
-function personalizeChatGreeting() {
-  try {
-    var bubble = document.getElementById('tmc-greeting-bubble');
-    if (!bubble) return;
-    var raw = (localStorage.getItem('tmc_name') || '').trim();
-    if (!raw) return; // signed-out visitor - keep the generic greeting
-    var first = raw.split(/\s+/)[0];
-    if (!first) return;
-    first = first.charAt(0).toUpperCase() + first.slice(1);
-    bubble.textContent = 'Hi ' + first + '! Welcome back to TapMyCar. How can I help you today?';
-  } catch (e) { /* keep the generic greeting on any error */ }
-}
-
 document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(function () {
-    injectChatbot();
-    personalizeChatGreeting();
-  }, 1000);
+  setTimeout(injectChatbot, 1000);
 });
 
 // 
