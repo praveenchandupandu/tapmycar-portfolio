@@ -24,26 +24,6 @@ module.exports = async function handler(req, res) {
       .order('created_at', { ascending: false })
       .limit(50);
 
-    /* TMC_PATCH36CFIX_GIFT_AWARE: detect an expired gift tag so the page can show the
-       real gift plan instead of "eTag (Free)". */
-    let giftExpired = null;
-    try {
-      const { data: bTags } = await supabase
-        .from('tags')
-        .select('gift_expired, gift_plan, is_gift')
-        .eq('owner_id', user_id);
-      if (bTags && bTags.length) {
-        for (let i = 0; i < bTags.length; i++) {
-          if (bTags[i] && bTags[i].gift_expired === true) {
-            giftExpired = { plan: bTags[i].gift_plan || 'standard' };
-            break;
-          }
-        }
-      }
-    } catch (gtErr) {
-      console.error('TMC_PATCH36CFIX_GIFT_AWARE: gift tag lookup failed:', gtErr && gtErr.message);
-    }
-
     /* premium family codes (premium users only) */
     let premiumCodes = [];
     if (user.plan === 'premium') {
@@ -84,7 +64,6 @@ module.exports = async function handler(req, res) {
       subStatus,
       renewal,
       giftExpiresAt,
-      giftExpired,
       nextAmountCents,
       orders: orders || [],
       premiumCodes

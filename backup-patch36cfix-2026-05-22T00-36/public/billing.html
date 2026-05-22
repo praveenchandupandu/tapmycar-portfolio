@@ -108,21 +108,12 @@ async function loadBilling() {
     if (!res.ok) throw new Error(data && data.error || 'load failed');
 
     /* plan */
-    /* TMC_PATCH36CFIX_GIFT_AWARE: if a gift trial expired, show the real gift plan + a
-       trial-ended note instead of "eTag (Free)". */
-    if (data.giftExpired) {
-      var gName = PLAN_NAMES[data.giftExpired.plan] || data.giftExpired.plan;
-      document.getElementById('b-plan').textContent = gName;
-      document.getElementById('b-plan-sub').textContent =
-        'Your free trial has ended. Subscribe to reactivate your tag and keep ' + gName + ' features.';
-    } else {
-      var planName = PLAN_NAMES[data.plan] || data.plan;
-      document.getElementById('b-plan').textContent = planName;
-      var planSub = '';
-      if (data.subStatus) planSub = 'Subscription status: ' + data.subStatus + '. ';
-      if (data.plan === 'etag') planSub += 'Free digital QR plan.';
-      document.getElementById('b-plan-sub').textContent = planSub;
-    }
+    var planName = PLAN_NAMES[data.plan] || data.plan;
+    document.getElementById('b-plan').textContent = planName;
+    var planSub = '';
+    if (data.subStatus) planSub = 'Subscription status: ' + data.subStatus + '. ';
+    if (data.plan === 'etag') planSub += 'Free digital QR plan.';
+    document.getElementById('b-plan-sub').textContent = planSub;
 
     /* renewal */
     if (data.giftExpiresAt) {
