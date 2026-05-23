@@ -1112,6 +1112,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
     <button class="sb-item" data-tab="inventory" onclick="navTo('inventory')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><span>Inventory</span></button>
     <button class="sb-item" data-tab="promos" onclick="navTo('promos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg><span>Promos</span></button>
     <button class="sb-item" data-tab="audit" onclick="navTo('audit')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6a2 2 0 012 2v0H7v0a2 2 0 012-2z"/><path d="M8 4H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg><span>Audit</span></button>
+    <button class="sb-item" data-tab="broadcast" onclick="navTo('broadcast')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg><span>Broadcast</span></button><!-- TMC_PATCH44_BROADCAST -->
     </nav>
     <div class="sidebar-foot">
       <button class="sb-logout" onclick="adminLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Logout</span></button>
@@ -1660,6 +1661,110 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
         </div>
 
         <div id="reviews-list"><div class="empty">Loading reviews...</div></div>
+      </div>
+
+      <!-- TMC_PATCH44_BROADCAST panel -->
+      <div class="panel" id="panel-broadcast">
+        <style>
+          .bc-wrap{max-width:680px}
+          .bc-card{background:#fff;border:1px solid #E5E7EB;border-radius:14px;
+            padding:20px;margin-bottom:18px}
+          .bc-label{font-size:12px;font-weight:700;color:#374151;
+            text-transform:uppercase;letter-spacing:.04em;margin:0 0 8px}
+          .bc-input,.bc-textarea,.bc-select{width:100%;border:1px solid #D1D5DB;
+            border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;
+            box-sizing:border-box;color:#111}
+          .bc-textarea{min-height:120px;resize:vertical}
+          .bc-row{margin-bottom:16px}
+          .bc-modes{display:flex;gap:8px;flex-wrap:wrap}
+          .bc-mode{flex:1;min-width:120px;border:1px solid #D1D5DB;background:#F9FAFB;
+            border-radius:9px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;
+            color:#374151;font-family:inherit}
+          .bc-mode.active{border-color:#FF6B00;background:#FFF4EC;color:#C2410C}
+          .bc-note{background:#EFF6FF;border:1px solid #BFDBFE;color:#1E40AF;
+            font-size:12px;border-radius:9px;padding:10px 12px;line-height:1.55}
+          .bc-count{font-size:14px;font-weight:700;color:#111;padding:8px 0}
+          .bc-count .n{color:#FF6B00}
+          .bc-btn{background:#FF6B00;color:#fff;border:none;border-radius:9px;
+            padding:11px 20px;font-size:14px;font-weight:700;cursor:pointer;
+            font-family:inherit}
+          .bc-btn:disabled{opacity:.5;cursor:not-allowed}
+          .bc-btn-ghost{background:#fff;color:#374151;border:1px solid #D1D5DB;
+            border-radius:9px;padding:11px 18px;font-size:13px;font-weight:600;
+            cursor:pointer;font-family:inherit}
+          .bc-hist-row{border:1px solid #E5E7EB;border-radius:10px;padding:12px 14px;
+            margin-bottom:8px;font-size:13px}
+          .bc-hist-row .s{font-weight:700;color:#111}
+          .bc-hist-row .m{color:#6B7280;font-size:12px;margin-top:3px}
+          .bc-result{font-size:13px;border-radius:9px;padding:10px 12px;margin-top:12px}
+          .bc-result.ok{background:#DCFCE7;color:#166534}
+          .bc-result.err{background:#FEE2E2;color:#991B1B}
+        </style>
+
+        <div class="bc-wrap">
+          <div class="bc-card">
+            <div class="bc-note" style="margin-bottom:16px">
+              <b>Email channel.</b> Push and SMS channels are coming in a later stage.
+              Announcement emails automatically skip users who have unsubscribed,
+              and every email includes a required unsubscribe link.
+            </div>
+
+            <div class="bc-row">
+              <p class="bc-label">Recipients</p>
+              <div class="bc-modes">
+                <button type="button" class="bc-mode active" data-mode="all"
+                  onclick="bcSetMode('all')">All users</button>
+                <button type="button" class="bc-mode" data-mode="plan"
+                  onclick="bcSetMode('plan')">By plan</button>
+                <button type="button" class="bc-mode" data-mode="specific"
+                  onclick="bcSetMode('specific')">Specific</button>
+              </div>
+            </div>
+
+            <div class="bc-row" id="bc-plan-row" style="display:none">
+              <p class="bc-label">Plan</p>
+              <select class="bc-select" id="bc-plan" onchange="bcResetCount()">
+                <option value="etag">eTag</option>
+                <option value="standard">Standard</option>
+                <option value="premium">Premium</option>
+              </select>
+            </div>
+
+            <div class="bc-row" id="bc-specific-row" style="display:none">
+              <p class="bc-label">User emails or IDs (comma or newline separated)</p>
+              <textarea class="bc-textarea" id="bc-ids" style="min-height:70px"
+                placeholder="someone@example.com, another@example.com"
+                oninput="bcResetCount()"></textarea>
+            </div>
+
+            <div class="bc-row">
+              <button type="button" class="bc-btn-ghost" id="bc-preview-btn"
+                onclick="bcPreview()">Preview recipient count</button>
+              <div class="bc-count" id="bc-count"></div>
+            </div>
+          </div>
+
+          <div class="bc-card">
+            <div class="bc-row">
+              <p class="bc-label">Subject</p>
+              <input class="bc-input" id="bc-subject" maxlength="150"
+                placeholder="e.g. Important update about your TapMyCar account">
+            </div>
+            <div class="bc-row">
+              <p class="bc-label">Message</p>
+              <textarea class="bc-textarea" id="bc-body"
+                placeholder="Write your message. Plain text - line breaks are kept."></textarea>
+            </div>
+            <button type="button" class="bc-btn" id="bc-send-btn"
+              onclick="bcSend()">Send broadcast</button>
+            <div id="bc-result"></div>
+          </div>
+
+          <div class="bc-card">
+            <p class="bc-label">Send history</p>
+            <div id="bc-history"><div class="empty">Loading history…</div></div>
+          </div>
+        </div>
       </div>
 
 
@@ -3476,8 +3581,8 @@ function downloadFile(content, filename, mime) {
 </script>
 <script>
 // ─── NAV HELPERS (defined AFTER preserved script so our showTab wins) ──
-const TAB_TITLES = {"home": "Home", "users": "Users", "orders": "Orders", "leads": "Leads", "tags": "Tags", "analytics": "Analytics", "scans": "Scans", "upgrade": "Upgrade tracker", "reviews": "Reviews", "generate": "Generate", "receive": "Receive", "inventory": "Inventory", "promos": "Promos", "audit": "Audit"};
-const TAB_SUBS = {"home": "At-a-glance view of the business", "users": "Search, manage, and gift plans", "orders": "Physical shipping and fulfillment", "leads": "Feedback emails captured on contact pages", "tags": "All tokens in the system", "analytics": "Revenue, scans, and growth metrics", "scans": "Raw scan history", "upgrade": "Users approaching day 30 auto-upgrade", "reviews": "Approve reviews, toggle visibility, feature on landing", "generate": "Create new NFC/QR token batches", "receive": "Verify stickers received from manufacturer", "inventory": "Stock levels by batch", "promos": "Gift plans, gift-activate tags, and promo codes", "audit": "Admin actions and system health"};
+const TAB_TITLES = {"home": "Home", "users": "Users", "orders": "Orders", "leads": "Leads", "tags": "Tags", "analytics": "Analytics", "scans": "Scans", "upgrade": "Upgrade tracker", "reviews": "Reviews", "generate": "Generate", "receive": "Receive", "inventory": "Inventory", "promos": "Promos", "audit": "Audit", "broadcast": "Broadcast"};
+const TAB_SUBS = {"home": "At-a-glance view of the business", "users": "Search, manage, and gift plans", "orders": "Physical shipping and fulfillment", "leads": "Feedback emails captured on contact pages", "tags": "All tokens in the system", "analytics": "Revenue, scans, and growth metrics", "scans": "Raw scan history", "upgrade": "Users approaching day 30 auto-upgrade", "reviews": "Approve reviews, toggle visibility, feature on landing", "generate": "Create new NFC/QR token batches", "receive": "Verify stickers received from manufacturer", "inventory": "Stock levels by batch", "promos": "Gift plans, gift-activate tags, and promo codes", "audit": "Admin actions and system health", "broadcast": "Compose and send notifications to users"};
 // TMC_PATCH35B_GIFT_ADMIN: Gift Activate Tag form handler + gifts-in-flight list
 let p35bGiftsCache = [];
 
@@ -4820,5 +4925,145 @@ function p35bsCloseQr() {
 }
 </script>
 
+
+<script>
+// TMC_PATCH44_BROADCAST - admin broadcast tab logic
+(function(){
+  var bcMode = "all";
+
+  window.bcSetMode = function(m){
+    bcMode = m;
+    document.querySelectorAll(".bc-mode").forEach(function(b){
+      b.classList.toggle("active", b.getAttribute("data-mode") === m);
+    });
+    document.getElementById("bc-plan-row").style.display = (m === "plan") ? "" : "none";
+    document.getElementById("bc-specific-row").style.display = (m === "specific") ? "" : "none";
+    bcResetCount();
+  };
+
+  window.bcResetCount = function(){
+    document.getElementById("bc-count").innerHTML = "";
+  };
+
+  function bcRecipients(){
+    if (bcMode === "plan") {
+      return { mode: "plan", plan: document.getElementById("bc-plan").value };
+    }
+    if (bcMode === "specific") {
+      var raw = document.getElementById("bc-ids").value || "";
+      var ids = raw.split(/[,\n]/).map(function(s){return s.trim();})
+        .filter(function(s){return s.length;});
+      return { mode: "specific", ids: ids };
+    }
+    return { mode: "all" };
+  }
+
+  function bcApi(payload){
+    payload.admin_key = (typeof adminKey === "string" ? adminKey : "");
+    return fetch("/api/send-broadcast", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    }).then(function(r){ return r.json(); });
+  }
+
+  window.bcPreview = function(){
+    var btn = document.getElementById("bc-preview-btn");
+    var out = document.getElementById("bc-count");
+    btn.disabled = true; out.innerHTML = "Checking…";
+    bcApi({ channel: "email", dry_run: true, recipients: bcRecipients() })
+      .then(function(d){
+        btn.disabled = false;
+        if (d && d.success) {
+          var extra = d.excluded_opted_out
+            ? " (" + d.excluded_opted_out + " unsubscribed, skipped)" : "";
+          out.innerHTML = "This will send to <span class=\"n\">" + d.count +
+            "</span> user" + (d.count === 1 ? "" : "s") + extra;
+        } else {
+          out.textContent = (d && d.error) ? d.error : "Could not get count";
+        }
+      })
+      .catch(function(){ btn.disabled = false; out.textContent = "Network error"; });
+  };
+
+  window.bcSend = function(){
+    var subject = (document.getElementById("bc-subject").value || "").trim();
+    var body = (document.getElementById("bc-body").value || "").trim();
+    var res = document.getElementById("bc-result");
+    res.innerHTML = "";
+    if (!subject) { res.className=""; res.innerHTML = bcMsg("err","Enter a subject."); return; }
+    if (!body) { res.innerHTML = bcMsg("err","Enter a message."); return; }
+
+    var rcp = bcRecipients();
+    if (rcp.mode === "specific" && (!rcp.ids || !rcp.ids.length)) {
+      res.innerHTML = bcMsg("err","Add at least one recipient email or ID."); return;
+    }
+
+    var who = rcp.mode === "all" ? "ALL users"
+      : rcp.mode === "plan" ? ("users on the " + rcp.plan + " plan")
+      : (rcp.ids.length + " specific user(s)");
+    if (!confirm("Send this email broadcast to " + who + "?\n\nThis cannot be undone.")) return;
+
+    var btn = document.getElementById("bc-send-btn");
+    btn.disabled = true; btn.textContent = "Sending…";
+    bcApi({ channel: "email", subject: subject, body: body, recipients: rcp })
+      .then(function(d){
+        btn.disabled = false; btn.textContent = "Send broadcast";
+        if (d && d.success) {
+          res.innerHTML = bcMsg("ok","Sent to " + d.sent + " user(s)." +
+            (d.failed ? (" " + d.failed + " failed.") : "") +
+            (d.excluded_opted_out ? (" " + d.excluded_opted_out + " unsubscribed user(s) skipped.") : ""));
+          document.getElementById("bc-subject").value = "";
+          document.getElementById("bc-body").value = "";
+          bcLoadHistory();
+        } else {
+          res.innerHTML = bcMsg("err",(d && d.error) ? d.error : "Send failed.");
+        }
+      })
+      .catch(function(){
+        btn.disabled = false; btn.textContent = "Send broadcast";
+        res.innerHTML = bcMsg("err","Network error - broadcast not sent.");
+      });
+  };
+
+  function bcMsg(kind, text){
+    return '<div class="bc-result ' + kind + '">' + bcEsc(text) + '</div>';
+  }
+  function bcEsc(s){
+    return String(s == null ? "" : s).replace(/[<>&"]/g, function(c){
+      return ({"<":"&lt;",">":"&gt;","&":"&amp;","\"":"&quot;"})[c];
+    });
+  }
+
+  window.bcLoadHistory = function(){
+    var box = document.getElementById("bc-history");
+    if (!box) return;
+    box.innerHTML = '<div class="empty">Loading history\u2026</div>';
+    bcApi({ action: "history" })
+      .then(function(d){
+        if (!d || !d.success) { box.innerHTML = '<div class="empty">Could not load history.</div>'; return; }
+        var list = d.broadcasts || [];
+        if (!list.length) { box.innerHTML = '<div class="empty">No broadcasts sent yet.</div>'; return; }
+        box.innerHTML = list.map(function(b){
+          var when = b.created_at ? new Date(b.created_at).toLocaleString() : "";
+          return '<div class="bc-hist-row">' +
+            '<div class="s">' + bcEsc(b.subject || "(no subject)") + '</div>' +
+            '<div class="m">' + bcEsc(b.channel || "email") + ' \u00b7 sent ' + (b.sent||0) +
+            (b.failed ? (' \u00b7 ' + b.failed + ' failed') : '') +
+            ' \u00b7 ' + when + '</div></div>';
+        }).join("");
+      })
+      .catch(function(){ box.innerHTML = '<div class="empty">Network error.</div>'; });
+  };
+
+  // Load history whenever the Broadcast tab is opened (same pattern as Promos).
+  var prevNavTo = window.navTo;
+  window.navTo = function(id){
+    var r = (typeof prevNavTo === "function") ? prevNavTo.apply(this, arguments) : undefined;
+    if (id === "broadcast") { try { bcLoadHistory(); } catch(e){} }
+    return r;
+  };
+})();
+</script>
 </body>
 </html>

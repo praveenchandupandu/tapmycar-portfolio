@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <link rel="manifest" href="/manifest.json">
@@ -22,8 +22,6 @@ html, body { max-width: none !important; width: 100% !important; margin: 0 !impo
    ============================================================= */
 
 :root {
-  /* TMC_PATCH16_ADMIN_COLORS: force dark theme on form widgets (number inputs, scrollbars, etc.) */
-  color-scheme: dark;
   --bg: #070A17;
   --bg-elev: #0C1124;
   --surface: #151B33;
@@ -565,7 +563,7 @@ a { color: inherit; text-decoration: none; }
 
 .form-stack { display: flex; flex-direction: column; gap: 14px; }
 .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.field-label { font-size: 12px; color: #E5E7EB !important; font-weight: 700; margin-bottom: 6px; display: block; } /* TMC_PATCH16_ADMIN_COLORS: explicit bright */
+.field-label { font-size: 12px; color: var(--text-3); font-weight: 600; }
 
 .gen-input {
   height: 44px;
@@ -573,160 +571,14 @@ a { color: inherit; text-decoration: none; }
   border-radius: var(--r);
   padding: 0 14px;
   font-size: 14px;
-  background-color: var(--bg-elev) !important; /* TMC_PATCH16_ADMIN_COLORS: beat Chrome UA */
-  color: var(--text) !important;
+  background: var(--bg-elev);
+  color: var(--text);
   outline: none;
   transition: all .15s;
   width: 100%;
-  color-scheme: dark; /* per-element fallback */
 }
 .gen-input:focus { border-color: var(--brand); box-shadow: 0 0 0 4px var(--brand-ring); }
-.gen-input::placeholder { color: var(--text-3) !important; opacity: 1; } /* TMC_PATCH16_ADMIN_COLORS */
-/* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: voided multi-select + scans-by-user */
-.p21-voided-controls{display:flex;align-items:center;gap:10px;background:#1A2D4A;border-radius:10px;padding:10px 14px;margin-bottom:10px}
-.p21-voided-controls label{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--text-2);cursor:pointer;font-weight:600}
-.p21-voided-controls .p21-sel-count{font-size:12px;color:var(--text-3);margin-left:auto;font-weight:600}
-.p21-voided-controls button{height:34px;padding:0 14px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
-.p21-delete-btn{background:#DC2626;color:#fff}
-.p21-delete-btn:disabled{opacity:.4;cursor:not-allowed}
-.p21-delete-btn:hover:not(:disabled){background:#B91C1C}
-.p21-row-cb{margin-right:10px;width:18px;height:18px;accent-color:var(--brand);cursor:pointer;flex-shrink:0}
-.p21-ar-wrap{display:flex;align-items:center}
-.p21-ar-wrap .ar{flex:1;min-width:0}
-
-/* Scans-by-user view */
-.p21-scans-user-row{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:all .15s}
-.p21-scans-user-row:hover{border-color:var(--brand);background:var(--bg-elev)}
-.p21-su-avatar{width:38px;height:38px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0}
-.p21-su-info{flex:1;min-width:0}
-.p21-su-name{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
-.p21-su-meta{font-size:11px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.p21-su-stat{text-align:right;flex-shrink:0}
-.p21-su-stat-num{font-size:18px;font-weight:800;color:var(--brand);line-height:1}
-.p21-su-stat-lbl{font-size:10px;color:var(--text-3);font-weight:600;margin-top:3px;text-transform:uppercase;letter-spacing:.4px}
-.p21-su-time{font-size:10.5px;color:var(--text-3);text-align:right;margin-top:4px}
-/* TMC_PATCH20_AUDIT_AND_OPS: notification badges + test-data + audit list */
-.p20-badge{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:#FF6B00;color:#fff;font-size:9px;font-weight:800;margin-left:auto;font-family:inherit}
-.sb-item .p20-badge{margin-left:auto}
-.p20-test-btn{background:#1A2D4A;border:1.5px dashed #334155;color:#94A3B8;font-size:11px;font-weight:600;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:inherit;margin:3px}
-.p20-test-btn:hover{background:#1F3559;color:#E5E7EB;border-color:#475569}
-.p20-test-section{background:rgba(20,30,50,.4);border:1.5px dashed #334155;border-radius:12px;padding:12px;margin-top:14px}
-.p20-test-section h4{font-size:11px;color:#64748B;text-transform:uppercase;letter-spacing:.5px;margin:0 0 8px;font-weight:700}
-.p20-audit-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:11.5px}
-.p20-audit-row:last-child{border-bottom:none}
-.p20-audit-row .dot{width:7px;height:7px;border-radius:50%;background:#FF6B00;flex-shrink:0}
-.p20-audit-row.warn .dot{background:#FCA5A5}
-.p20-audit-row.good .dot{background:#4ADE80}
-.p20-audit-action{color:#E5E7EB;font-weight:700;flex:1}
-.p20-audit-meta{color:#94A3B8;font-size:10.5px;margin-top:2px}
-.p20-audit-time{color:#64748B;font-size:10px;flex-shrink:0;white-space:nowrap}
-/* TMC_PATCH19_TAGS_AND_CSV: tag filters + voided + CSV export */
-.p19-filter-row{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding:2px;scrollbar-width:none}
-.p19-filter-row::-webkit-scrollbar{display:none}
-.p19-filter-pill{background:var(--bg-elev);border:1.5px solid var(--border);border-radius:99px;padding:6px 14px;font-size:11px;font-weight:600;color:var(--text-2);cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
-.p19-filter-pill:hover{border-color:var(--border-strong)}
-.p19-filter-pill.active{background:var(--brand);color:#fff;border-color:var(--brand)}
-.p19-filter-pill .p19-count{font-size:10px;opacity:.7;font-weight:700}
-.p19-filter-pill.active .p19-count{opacity:1}
-.p19-search-row{display:flex;gap:8px;align-items:center;margin-bottom:14px}
-.p19-search-row input{flex:1;height:38px;border:1.5px solid var(--border);border-radius:var(--r);padding:0 14px;font-size:13px;background-color:var(--bg-elev) !important;color:var(--text) !important;outline:none;font-family:inherit}
-.p19-search-row input:focus{border-color:var(--brand)}
-.p19-search-count{font-size:11px;color:var(--text-3);font-weight:600;white-space:nowrap}
-.p19-csv-btn{background:transparent;border:1.5px solid var(--border);border-radius:var(--r);color:var(--text-2);font-size:12px;font-weight:600;padding:0 14px;height:36px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;transition:all .15s}
-.p19-csv-btn:hover{background:var(--bg-elev);border-color:var(--brand);color:var(--brand)}
-.p19-csv-btn svg{width:12px;height:12px;stroke:currentColor;stroke-width:2.4;fill:none}
-.p19-tab-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap}
-/* TMC_PATCH18_USER_SUPPORT: user-detail support panel */
-.p18-row{display:flex;align-items:center;gap:8px;font-size:11.5px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
-.p18-row:last-child{border-bottom:none}
-.p18-row-k{color:#64748B;font-weight:500;flex-shrink:0;min-width:90px}
-.p18-row-v{color:#E5E7EB;font-weight:600;text-align:right;flex:1;word-break:break-all}
-.p18-row-v.dim{color:#94A3B8;font-style:italic;font-weight:500}
-.p18-row-v.brand{color:#FF6B00;font-weight:700}
-.p18-row-v.green{color:#4ADE80}
-.p18-row-v.yellow{color:#FDE047}
-.p18-row-v.mono{font-family:'SF Mono',Menlo,Consolas,monospace;font-size:10.5px}
-.p18-row-link{color:#60A5FA !important;font-weight:600;text-decoration:none;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-size:11px}
-.p18-row-link:hover{text-decoration:underline}
-.p18-row-link svg{width:10px;height:10px;stroke:currentColor;stroke-width:2.4;fill:none}
-.p18-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:12px 0 14px}
-.p18-stat-grid > div{background:#0F1F3D;border-radius:10px;padding:10px 4px;text-align:center}
-.p18-stat-num{font-size:18px;font-weight:800;color:#FF6B00;line-height:1}
-.p18-stat-lbl{font-size:9px;color:#94A3B8;font-weight:600;margin-top:4px;text-transform:uppercase;letter-spacing:.4px}
-.p18-pv-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px}
-.p18-pv-badge.ok{background:#14532D;color:#4ADE80}
-.p18-pv-badge.warn{background:#713F12;color:#FDE047}
-.p18-pv-badge svg{width:10px;height:10px;stroke:currentColor;stroke-width:2.5;fill:none}
-
-/* Contact tabs inside user detail */
-.p18-tabs{display:flex;gap:5px;margin:10px 0;background:#0A1730;padding:4px;border-radius:10px}
-.p18-tab{flex:1;background:transparent;border:none;padding:8px 6px;border-radius:7px;color:#94A3B8;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
-.p18-tab.active{background:#FF6B00;color:#fff}
-.p18-tab-count{display:inline-block;margin-left:4px;font-size:9px;opacity:.8}
-
-.p18-content{min-height:80px}
-.p18-empty{padding:24px 12px;text-align:center;color:#64748B;font-size:11px}
-
-.p18-item{background:#0F1F3D;border:1px solid rgba(255,255,255,.04);border-radius:10px;padding:10px 12px;margin-bottom:6px}
-.p18-item-time{font-size:10px;color:#94A3B8;font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:6px}
-.p18-item-time .p18-loc-link{margin-left:auto;color:#60A5FA;text-decoration:none;font-size:9.5px;font-weight:700}
-.p18-item-msg{background:#1A2D4A;border-left:3px solid #FF6B00;border-radius:6px;padding:8px 10px;font-size:12px;color:#E5E7EB;line-height:1.4;margin-top:4px}
-.p18-item-stat{font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;display:inline-block}
-.p18-item-stat.completed,.p18-item-stat.bridged{background:#14532D;color:#4ADE80}
-.p18-item-stat.message_only{background:#581C87;color:#D8B4FE}
-.p18-item-stat.no_answer{background:#713F12;color:#FDE047}
-.p18-item-stat.busy,.p18-item-stat.failed,.p18-item-stat.canceled{background:#7F1D1D;color:#FCA5A5}
-
-.p18-photo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
-.p18-photo-tile{position:relative;aspect-ratio:1/1;border-radius:8px;overflow:hidden;background:#0F1F3D;cursor:pointer}
-.p18-photo-tile img{width:100%;height:100%;object-fit:cover;display:block}
-.p18-photo-tile-time{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,transparent,rgba(0,0,0,.75));color:#fff;font-size:9px;font-weight:600;padding:6px 8px}
-
-.p18-voice-player audio{width:100%;height:32px;margin-top:6px;border-radius:99px}
-
-.p18-lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:500;align-items:center;justify-content:center;padding:20px}
-.p18-lightbox.show{display:flex}
-.p18-lightbox img{max-width:100%;max-height:80vh;border-radius:10px}
-.p18-lightbox-close{position:absolute;top:18px;right:18px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;border:none;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.p18-lightbox-meta{position:absolute;left:0;right:0;bottom:24px;text-align:center;color:#fff;font-size:13px;font-weight:600}
-
-/* TMC_PATCH16_ADMIN_COLORS: hide number-input spinners for cleaner dark UI */
-.gen-input[type="number"]::-webkit-outer-spin-button,
-.gen-input[type="number"]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-.gen-input[type="number"] { -moz-appearance: textfield; }
-/* TMC_PATCH16_ADMIN_COLORS: ensure label visibility inside nested boxes */
-.gen-box .field-label,
-.repl-box .field-label,
-.danger-box .field-label,
-.verify-box .field-label {
-  color: #E5E7EB !important;
-  text-shadow: 0 1px 0 rgba(0,0,0,.25);
-}
-/* TMC_PATCH15_VERIFY_GATE: keep autofill in dark theme */
-.gen-input:-webkit-autofill,
-.gen-input:-webkit-autofill:hover,
-.gen-input:-webkit-autofill:focus {
-  -webkit-text-fill-color: var(--text);
-  -webkit-box-shadow: 0 0 0px 1000px var(--bg-elev) inset;
-  caret-color: var(--text);
-  transition: background-color 5000s ease-in-out 0s;
-}
-/* TMC_PATCH15_VERIFY_GATE: camera scanner */
-.p15-scan-toggle{display:flex;gap:8px;margin-bottom:14px}
-.p15-scan-toggle button{flex:1;height:40px;border-radius:var(--r);border:1.5px solid var(--border);background:var(--bg-elev);color:var(--text-2);font-weight:600;font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s}
-.p15-scan-toggle button.active{background:var(--brand);color:#fff;border-color:var(--brand)}
-.p15-camera-box{display:none;background:#000;border-radius:var(--r);overflow:hidden;margin-bottom:14px;position:relative}
-.p15-camera-box.show{display:block}
-.p15-camera-box video{width:100%;display:block}
-.p15-camera-status{position:absolute;top:8px;left:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:6px 10px;border-radius:6px;text-align:center}
-.p15-voided-list{margin-top:12px}
-.p15-voided-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px}
-.p15-voided-item:last-child{border-bottom:none}
-.p15-voided-token{font-family:'SF Mono',Monaco,Consolas,monospace;font-size:13px;color:var(--text-2)}
-.p15-voided-meta{font-size:11px;color:var(--text-3);margin-top:2px}
+.gen-input::placeholder { color: var(--text-4); }
 select.gen-input {
   appearance: none; -webkit-appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
@@ -793,37 +645,6 @@ input[type="date"].gen-input { color-scheme: dark; }
 .gen-token-url { font-size: 10px; color: var(--text-4); margin-top: 3px; word-break: break-all; }
 
 .empty { text-align: center; padding: 56px 20px; color: var(--text-4); font-size: 14px; }
-/* TMC_PATCH26_APP_SETTINGS: Settings panel */
-.p26-settings-list{display:flex;flex-direction:column;gap:14px}
-.p26-setting-row{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:14px}
-.p26-setting-label{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
-.p26-setting-desc{font-size:11px;color:var(--text-3);margin-bottom:10px;line-height:1.4}
-.p26-setting-input{width:100%;height:40px;border:1.5px solid var(--border);border-radius:var(--r);padding:0 14px;font-size:13px;background-color:var(--bg-elev) !important;color:var(--text) !important;outline:none;font-family:inherit;margin-bottom:10px}
-.p26-setting-input:focus{border-color:var(--brand)}
-.p26-slots-label{font-size:10px;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-.p26-slots-grid{display:flex;flex-wrap:wrap;gap:6px}
-.p26-slot-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;background:var(--bg-elev);border:1.5px solid var(--border);border-radius:99px;font-size:11px;color:var(--text-3);font-weight:600;cursor:pointer;transition:all .15s}
-.p26-slot-chip.on{background:rgba(255,107,0,.12);border-color:var(--brand);color:var(--brand)}
-.p26-slot-chip input{margin:0;width:12px;height:12px;accent-color:var(--brand);cursor:pointer}
-.p26-save-bar{position:sticky;bottom:0;background:rgba(7,10,23,.95);backdrop-filter:blur(8px);padding:14px 0;margin:0 -14px -14px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center;justify-content:flex-end}
-.p26-save-bar .gen-btn{height:40px;padding:0 24px}
-.p26-save-status{font-size:11px;color:var(--text-3);font-weight:600}
-/* TMC_PATCH24_CATCHUP_ALERTS: home quick-action alerts */
-.p23-alert-stack{display:flex;flex-direction:column;gap:8px;margin:14px 0 6px}
-.p23-alert{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;cursor:pointer;border:1.5px solid;transition:all .15s;font-family:inherit;width:100%;text-align:left;background:transparent}
-.p23-alert.warn{background:rgba(253,224,71,.06);border-color:rgba(253,224,71,.3);color:#FDE047}
-.p23-alert.warn:hover{background:rgba(253,224,71,.12);border-color:rgba(253,224,71,.5)}
-.p23-alert.danger{background:rgba(252,165,165,.06);border-color:rgba(252,165,165,.3);color:#FCA5A5}
-.p23-alert.danger:hover{background:rgba(252,165,165,.12);border-color:rgba(252,165,165,.5)}
-.p23-alert-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.p23-alert.warn .p23-alert-icon{background:rgba(253,224,71,.15)}
-.p23-alert.danger .p23-alert-icon{background:rgba(252,165,165,.15)}
-.p23-alert-icon svg{width:16px;height:16px;stroke:currentColor;stroke-width:2.4;fill:none}
-.p23-alert-body{flex:1;min-width:0}
-.p23-alert-title{font-size:13px;font-weight:700;margin-bottom:2px}
-.p23-alert-sub{font-size:11px;opacity:.85;font-weight:500}
-.p23-alert-arrow{flex-shrink:0;opacity:.7}
-.p23-alert-arrow svg{width:14px;height:14px;stroke:currentColor;stroke-width:2.5;fill:none}
 
 /* List rows (.ar) used by Tags, Scans, etc. */
 .ar {
@@ -1107,12 +928,10 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
     <button class="sb-item" data-tab="upgrade" onclick="navTo('upgrade')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg><span>Upgrades</span></button>
       <div class="sb-group-label">Operations</div>
       <button class="sb-item" data-tab="generate" onclick="navTo('generate')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span>Generate</span></button>
-    <button class="sb-item" data-tab="settings" onclick="navTo('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Settings</span></button>
-<button class="sb-item" data-tab="receive" onclick="navTo('receive')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Receive</span></button>
+    <button class="sb-item" data-tab="receive" onclick="navTo('receive')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Receive</span></button>
     <button class="sb-item" data-tab="inventory" onclick="navTo('inventory')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><span>Inventory</span></button>
     <button class="sb-item" data-tab="promos" onclick="navTo('promos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg><span>Promos</span></button>
     <button class="sb-item" data-tab="audit" onclick="navTo('audit')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6a2 2 0 012 2v0H7v0a2 2 0 012-2z"/><path d="M8 4H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg><span>Audit</span></button>
-    <button class="sb-item" data-tab="broadcast" onclick="navTo('broadcast')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg><span>Broadcast</span></button><!-- TMC_PATCH44_BROADCAST -->
     </nav>
     <div class="sidebar-foot">
       <button class="sb-logout" onclick="adminLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Logout</span></button>
@@ -1154,8 +973,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
             <div class="kpi-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/></svg>Active Tags</div>
             <div class="kpi-value orange" id="s-active">-</div>
             <div class="kpi-sub"><span id="s-unclaimed">-</span> unclaimed in stock</div>
-<!-- TMC_PATCH24_CATCHUP_ALERTS: home alerts container -->
-<div class="p23-alert-stack" id="p23-alerts" style="grid-column:1/-1"></div>
           </div>
           <div class="kpi">
             <div class="kpi-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Scans</div>
@@ -1201,42 +1018,9 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
   <div id="user-list" class="users-grid"><div class="empty">Loading users…</div></div>
 </div>
 
-<!-- TMC_PATCH26_APP_SETTINGS: Settings panel -->
-<div class="panel" id="panel-settings">
-  <div class="asl">Site Settings</div>
-  <div class="kpi-sub" style="margin-bottom:14px;padding:0 4px">Configure URLs and toggles that appear on landing, dashboard, sign-in, and sticker-back pages.</div>
-
-  <!-- TMC_PATCH36B_KNOWMORE_ADMIN: Sticker-back QR download card -->
-  <div style="background:linear-gradient(135deg,#0E0E0E,#1a0e1c);color:#fff;border-radius:14px;padding:18px;margin-bottom:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-    <div style="flex:1;min-width:200px">
-      <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#FFAB6D;margin-bottom:6px">Sticker Back Page</div>
-      <div style="font-size:15px;font-weight:700;line-height:1.35;margin-bottom:4px">QR Code for tapmycar.io/knowmore</div>
-      <div style="font-size:12px;color:rgba(255,255,255,0.65);line-height:1.5"><!--TMC_PATCH36BFIX_REUSE_KEYS-->High-resolution PNG (1230×1230 px), ready to print on the back of physical stickers. To change the buttons shown on /knowmore, edit App Store URL, Play Store URL, Facebook URL, and Instagram URL in the settings below.</div>
-    </div>
-    <button class="gen-btn success" onclick="p36bDownloadQr()" style="white-space:nowrap">
-      <svg viewBox="0 0 24 24" width="14" height="14" style="vertical-align:-2px;margin-right:6px" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download QR Code
-    </button>
-  </div>
-
-  <div id="p26-settings-list" class="p26-settings-list"><div class="empty">Loading settings…</div></div>
-  <div class="p26-save-bar">
-    <span class="p26-save-status" id="p26-save-status"></span>
-    <button class="gen-btn" id="p26-save-btn" onclick="p26Save()">Save all changes</button>
-  </div>
-</div>
-
 <!-- TAGS TAB -->
 <div class="panel" id="panel-tags">
-  <!-- TMC_PATCH19_TAGS_AND_CSV: filterable tag list with CSV export -->
-  <div class="p19-tab-bar">
-    <div class="asl" style="margin:0">All Tags</div>
-    <button class="p19-csv-btn" onclick="p19ExportCsv('tags')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV</button>
-  </div>
-  <div class="p19-filter-row" id="p19-tag-filters"></div>
-  <div class="p19-search-row">
-    <input type="text" id="p19-tag-search" placeholder="Search by token, plate, or batch…" oninput="p19RenderTags()">
-    <span class="p19-search-count" id="p19-tag-count"></span>
-  </div>
+  <div class="asl">All Tags</div>
   <div id="tag-list"><div class="empty">Loading tags…</div></div>
 </div>
 
@@ -1252,7 +1036,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
       </div>
       <div class="field">
         <label class="field-label">Batch #</label>
-        <input type="text" class="gen-input" id="gen-batch" placeholder="e.g. 1 or HOLIDAY-2026" maxlength="40"> <!-- TMC_PATCH21_BATCH_TEXT_AND_FILTERS -->
+        <input type="number" class="gen-input" id="gen-batch" placeholder="e.g. 1">
       </div>
       <div class="field">
         <label class="field-label">&nbsp;</label>
@@ -1275,7 +1059,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
       </div>
       <div class="field">
         <label class="field-label">Original batch #</label>
-        <input type="text" class="gen-input" id="repl-batch" placeholder="e.g. 1" maxlength="40"> <!-- TMC_PATCH21_BATCH_TEXT_AND_FILTERS -->
+        <input type="number" class="gen-input" id="repl-batch" placeholder="e.g. 1">
       </div>
       <div class="field">
         <label class="field-label">&nbsp;</label>
@@ -1288,21 +1072,13 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
     <div class="gen-result" id="repl-result"></div>
   </div>
 
-  <!-- TMC_PATCH20_AUDIT_AND_OPS: dev/test data helpers -->
-<div class="p20-test-section" id="p20-test-section">
-  <h4>Dev / Test data</h4>
-  <div style="font-size:11px;color:#64748B;margin-bottom:10px;line-height:1.4">Quick helpers to create test data for QA. All actions are audit-logged.</div>
-  <button type="button" class="p20-test-btn" onclick="p20CreateTestUser()">+ Test user</button>
-  <button type="button" class="p20-test-btn" onclick="p20CreateTestScan()">+ Test scan (random tag)</button>
-</div>
-
-<div class="danger-box">
+  <div class="danger-box">
     <h3>Delete entire batch</h3>
     <p>Created a batch by mistake? Delete all unclaimed tokens from a specific batch. Requires admin password. Active or claimed tags are protected and will NOT be removed.</p>
     <div class="form-row">
       <div class="field">
         <label class="field-label">Batch #</label>
-        <input type="text" class="gen-input" id="del-batch" placeholder="Batch to delete" maxlength="40"> <!-- TMC_PATCH21_BATCH_TEXT_AND_FILTERS -->
+        <input type="number" class="gen-input" id="del-batch" placeholder="Batch to delete">
       </div>
       <div class="field">
         <label class="field-label">&nbsp;</label>
@@ -1341,32 +1117,19 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
         <option value="">— Select batch —</option>
       </select>
     </div>
-    <!-- TMC_PATCH15_VERIFY_GATE: scan mode toggle (manual vs camera) -->
-    <div class="p15-scan-toggle">
-      <button type="button" id="p15-mode-manual" class="active" onclick="p15SetScanMode('manual')">Type / paste</button>
-      <button type="button" id="p15-mode-camera" onclick="p15SetScanMode('camera')">Camera scan</button>
-    </div>
-    <div class="p15-camera-box" id="p15-camera-box">
-      <div class="p15-camera-status" id="p15-camera-status">Starting camera…</div>
-      <div id="p15-camera-reader" style="width:100%;min-height:240px"></div>
-    </div>
     <div class="scan-entry">
       <input type="text" class="scan-input" id="scan-token" placeholder="Scan or type token…" onkeydown="if(event.key==='Enter')scanToken()">
       <button class="gen-btn success" onclick="scanToken()">Scan</button>
     </div>
     <div class="verify-summary" id="verify-summary" style="display:none">
       <div class="verify-stat"><span class="verify-label">Batch total</span><span class="verify-val" id="v-total">0</span></div>
-      <!-- TMC_PATCH35H_RECEIVE_POLISH: already-verified stat -->
-      <div class="verify-stat"><span class="verify-label">Already verified</span><span class="verify-val green" id="v-already">0</span></div>
-      <div class="verify-stat"><span class="verify-label">Scanned this session</span><span class="verify-val green" id="v-scanned">0</span></div>
+      <div class="verify-stat"><span class="verify-label">Scanned (received)</span><span class="verify-val green" id="v-scanned">0</span></div>
       <div class="verify-stat"><span class="verify-label">Not yet scanned</span><span class="verify-val yellow" id="v-remaining">0</span></div>
     </div>
     <div class="scanned-list" id="scanned-list"></div>
-    <button class="danger-btn" id="finalize-btn" onclick="finalizeReceive()" style="display:none" disabled>Finalize — verify scanned, void unverified</button>
-    <!-- TMC_PATCH24_CATCHUP_BTN: manual void unverified for current batch -->
-    <button type="button" id="p21-manual-void-btn" onclick="p21ManualVoidUnverified()" style="display:none;background:transparent;border:1.5px dashed #FCA5A5;color:#FCA5A5;font-size:11.5px;font-weight:600;padding:9px 14px;border-radius:10px;cursor:pointer;font-family:inherit;margin-top:10px;width:100%">Void all unverified in this batch (no scan needed)</button>
+    <button class="danger-btn" id="finalize-btn" onclick="finalizeReceive()" style="display:none" disabled>Finalize — delete unscanned from this batch only</button>
     <div id="finalize-warning" style="display:none;margin-top:10px;background:var(--danger-soft);border-radius:var(--r-sm);padding:12px;font-size:12px;color:var(--danger);line-height:1.5">
-      This voids all unscanned tokens from Batch <strong id="fw-batch"></strong> (kept for audit, never activatable). Other batches are NOT affected.
+      This will permanently delete all unscanned tokens from Batch <strong id="fw-batch"></strong> only. Other batches are NOT affected. Cannot be undone.
     </div>
   </div>
 </div>
@@ -1392,53 +1155,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
         </div>
         <button class="gen-btn success full" onclick="giftPlanByEmail()">Send gift</button>
         <div id="gift-email-result"></div>
-      </div>
-    </div>
-
-    <!-- TMC_PATCH35B_GIFT_ADMIN: Gift Activate Tag card -->
-    <div class="gen-box" style="border:2px solid rgba(255,107,0,0.18)">
-      <h3 style="color:#FF6B00">🎁 Gift Activate Tag</h3>
-      <p>Mark an unclaimed verified physical sticker as a gift. When the recipient scans it, the chosen plan activates free for the trial period — no payment required. After the trial expires, the user is prompted to subscribe yearly.</p>
-      <div class="form-stack">
-        <div class="field">
-          <label class="field-label">Tag token</label>
-          <!-- TMC_PATCH35BSCAN_NFC_QR: scan buttons -->
-          <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
-            <button type="button" class="gen-btn" id="p35bs-nfc-btn" onclick="p35bsTapNfc()" style="display:none;flex:1;min-width:120px;padding:11px 14px;background:#0E0E0E;color:#fff">
-              <svg viewBox="0 0 24 24" width="16" height="16" style="vertical-align:-3px;margin-right:6px" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
-              Tap NFC
-            </button>
-            <button type="button" class="gen-btn" id="p35bs-qr-btn" onclick="p35bsScanQr()" style="flex:1;min-width:120px;padding:11px 14px;background:#FF6B00;color:#fff">
-              <svg viewBox="0 0 24 24" width="16" height="16" style="vertical-align:-3px;margin-right:6px" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3z M17 17h4v4h-4z M14 19h2v2h-2z"/></svg>
-              Scan QR
-            </button>
-          </div>
-          <input type="text" class="gen-input" id="p35b-token" placeholder="TMC-XXXXXX (or use Tap / Scan above)" oninput="this.value=this.value.toUpperCase()" maxlength="16">
-        </div>
-        <div class="form-row">
-          <div class="field">
-            <label class="field-label">Plan</label>
-            <select class="gen-input" id="p35b-plan">
-              <option value="standard">Standard</option>
-              <option value="premium">Premium</option>
-            </select>
-          </div>
-          <div class="field">
-            <label class="field-label">Trial months</label>
-            <input type="number" class="gen-input" id="p35b-months" min="1" max="12" value="1">
-          </div>
-        </div>
-        <div class="field">
-          <label class="field-label">Recipient email <span style="color:#9CA3AF;font-weight:400">(optional)</span></label>
-          <input type="email" class="gen-input" id="p35b-email" placeholder="Leave blank for open gift (anyone can claim)">
-          <div class="kpi-sub" style="margin-top:4px">If provided, only this user can claim. They must already have an account.</div>
-        </div>
-        <div class="field">
-          <label class="field-label">Note <span style="color:#9CA3AF;font-weight:400">(optional)</span></label>
-          <input type="text" class="gen-input" id="p35b-note" placeholder="e.g. NYC Auto Show 2026" maxlength="200">
-        </div>
-        <button class="gen-btn success full" onclick="p35bActivateGift()" id="p35b-activate-btn">Activate as Gift</button>
-        <div id="p35b-result" style="margin-top:8px"></div>
       </div>
     </div>
 
@@ -1480,18 +1196,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
     <h3>Active promo codes</h3>
     <div id="promo-list"><div class="empty">No promo codes yet. Promo codes will be stored in Supabase when you create the promo_codes table.</div></div>
   </div>
-
-  <!-- TMC_PATCH35B_GIFT_ADMIN: Gifts in flight list -->
-  <div style="margin-top:24px">
-    <div class="asl">Gifts in flight</div>
-    <div class="kpi-sub" style="margin-bottom:14px;padding:0 4px">All physical tags currently marked as gift-ready. Click a row to see details.</div>
-    <div class="form-row" style="margin-bottom:14px">
-      <input type="text" class="gen-input" id="p35b-search" placeholder="Search by token, email, note…" oninput="p35bRenderGifts()">
-      <button class="gen-btn" onclick="p35bLoadGifts()">Refresh</button>
-    </div>
-    <div id="p35b-gifts-list"><div class="empty">Loading gifts…</div></div>
-  </div>
-
 </div>
 
 <!-- ORDERS TAB -->
@@ -1631,14 +1335,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 
 <!-- SCANS TAB -->
 <div class="panel" id="panel-scans">
-  <!-- TMC_PATCH21_BATCH_TEXT_AND_FILTERS: scans-by-user view -->
-  <div class="p19-search-row" style="margin-bottom:14px">
-    <input type="text" id="p21-scans-search" placeholder="Search users by name, email, or phone…" oninput="p21RenderScansByUser()">
-    <span class="p21-sel-count" id="p21-scans-count"></span>
-  </div>
-  <div id="p21-scans-by-user-list"></div>
-  <!-- legacy flat scan-list kept for compatibility but hidden -->
-  <div id="scan-list-wrap" style="display:none">
   <div class="asl">Recent scans</div>
   <div id="scan-list"><div class="empty">Loading…</div></div>
 </div>
@@ -1663,110 +1359,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
         <div id="reviews-list"><div class="empty">Loading reviews...</div></div>
       </div>
 
-      <!-- TMC_PATCH44_BROADCAST panel -->
-      <div class="panel" id="panel-broadcast">
-        <style>
-          .bc-wrap{max-width:680px}
-          .bc-card{background:#fff;border:1px solid #E5E7EB;border-radius:14px;
-            padding:20px;margin-bottom:18px}
-          .bc-label{font-size:12px;font-weight:700;color:#374151;
-            text-transform:uppercase;letter-spacing:.04em;margin:0 0 8px}
-          .bc-input,.bc-textarea,.bc-select{width:100%;border:1px solid #D1D5DB;
-            border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;
-            box-sizing:border-box;color:#111}
-          .bc-textarea{min-height:120px;resize:vertical}
-          .bc-row{margin-bottom:16px}
-          .bc-modes{display:flex;gap:8px;flex-wrap:wrap}
-          .bc-mode{flex:1;min-width:120px;border:1px solid #D1D5DB;background:#F9FAFB;
-            border-radius:9px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;
-            color:#374151;font-family:inherit}
-          .bc-mode.active{border-color:#FF6B00;background:#FFF4EC;color:#C2410C}
-          .bc-note{background:#EFF6FF;border:1px solid #BFDBFE;color:#1E40AF;
-            font-size:12px;border-radius:9px;padding:10px 12px;line-height:1.55}
-          .bc-count{font-size:14px;font-weight:700;color:#111;padding:8px 0}
-          .bc-count .n{color:#FF6B00}
-          .bc-btn{background:#FF6B00;color:#fff;border:none;border-radius:9px;
-            padding:11px 20px;font-size:14px;font-weight:700;cursor:pointer;
-            font-family:inherit}
-          .bc-btn:disabled{opacity:.5;cursor:not-allowed}
-          .bc-btn-ghost{background:#fff;color:#374151;border:1px solid #D1D5DB;
-            border-radius:9px;padding:11px 18px;font-size:13px;font-weight:600;
-            cursor:pointer;font-family:inherit}
-          .bc-hist-row{border:1px solid #E5E7EB;border-radius:10px;padding:12px 14px;
-            margin-bottom:8px;font-size:13px}
-          .bc-hist-row .s{font-weight:700;color:#111}
-          .bc-hist-row .m{color:#6B7280;font-size:12px;margin-top:3px}
-          .bc-result{font-size:13px;border-radius:9px;padding:10px 12px;margin-top:12px}
-          .bc-result.ok{background:#DCFCE7;color:#166534}
-          .bc-result.err{background:#FEE2E2;color:#991B1B}
-        </style>
-
-        <div class="bc-wrap">
-          <div class="bc-card">
-            <div class="bc-note" style="margin-bottom:16px">
-              <b>Email channel.</b> Push and SMS channels are coming in a later stage.
-              Announcement emails automatically skip users who have unsubscribed,
-              and every email includes a required unsubscribe link.
-            </div>
-
-            <div class="bc-row">
-              <p class="bc-label">Recipients</p>
-              <div class="bc-modes">
-                <button type="button" class="bc-mode active" data-mode="all"
-                  onclick="bcSetMode('all')">All users</button>
-                <button type="button" class="bc-mode" data-mode="plan"
-                  onclick="bcSetMode('plan')">By plan</button>
-                <button type="button" class="bc-mode" data-mode="specific"
-                  onclick="bcSetMode('specific')">Specific</button>
-              </div>
-            </div>
-
-            <div class="bc-row" id="bc-plan-row" style="display:none">
-              <p class="bc-label">Plan</p>
-              <select class="bc-select" id="bc-plan" onchange="bcResetCount()">
-                <option value="etag">eTag</option>
-                <option value="standard">Standard</option>
-                <option value="premium">Premium</option>
-              </select>
-            </div>
-
-            <div class="bc-row" id="bc-specific-row" style="display:none">
-              <p class="bc-label">User emails or IDs (comma or newline separated)</p>
-              <textarea class="bc-textarea" id="bc-ids" style="min-height:70px"
-                placeholder="someone@example.com, another@example.com"
-                oninput="bcResetCount()"></textarea>
-            </div>
-
-            <div class="bc-row">
-              <button type="button" class="bc-btn-ghost" id="bc-preview-btn"
-                onclick="bcPreview()">Preview recipient count</button>
-              <div class="bc-count" id="bc-count"></div>
-            </div>
-          </div>
-
-          <div class="bc-card">
-            <div class="bc-row">
-              <p class="bc-label">Subject</p>
-              <input class="bc-input" id="bc-subject" maxlength="150"
-                placeholder="e.g. Important update about your TapMyCar account">
-            </div>
-            <div class="bc-row">
-              <p class="bc-label">Message</p>
-              <textarea class="bc-textarea" id="bc-body"
-                placeholder="Write your message. Plain text - line breaks are kept."></textarea>
-            </div>
-            <button type="button" class="bc-btn" id="bc-send-btn"
-              onclick="bcSend()">Send broadcast</button>
-            <div id="bc-result"></div>
-          </div>
-
-          <div class="bc-card">
-            <p class="bc-label">Send history</p>
-            <div id="bc-history"><div class="empty">Loading history…</div></div>
-          </div>
-        </div>
-      </div>
-
 
     </div>
   </main>
@@ -1782,16 +1374,9 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 
 </div>
 
-<!-- TMC_PATCH18_USER_SUPPORT: photo lightbox -->
-<div class="p18-lightbox" id="p18-lightbox" onclick="if(event.target===this)p18CloseLightbox()">
-  <button class="p18-lightbox-close" onclick="p18CloseLightbox()" aria-label="Close">×</button>
-  <img id="p18-lightbox-img" alt="Photo" />
-  <div class="p18-lightbox-meta" id="p18-lightbox-meta"></div>
-</div>
-
 <!-- User Detail Slide-up -->
   <div id="user-detail-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400" onclick="closeUserDetail()"></div>
-  <div id="user-detail-sheet" style="display:none;position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:#1E2D4A;border-radius:20px 20px 0 0;z-index:401;max-height:90vh;overflow-y:auto;padding:20px"> <!-- TMC_PATCH18_USER_SUPPORT -->
+  <div id="user-detail-sheet" style="display:none;position:fixed;bottom:0;left:0;right:0;max-width:430px;margin:0 auto;background:#1E2D4A;border-radius:20px 20px 0 0;z-index:401;max-height:85vh;overflow-y:auto;padding:20px">
     <div style="width:40px;height:4px;border-radius:2px;background:#334155;margin:0 auto 16px"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
       <div style="font-size:16px;font-weight:800;color:#fff">User Details</div>
@@ -1809,48 +1394,24 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
         <div id="ud-status-badge" style="margin-left:auto" class="ba">active</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:6px">
-        <!-- TMC_PATCH18_USER_SUPPORT: enriched info rows -->
-        <div class="p18-row"><span class="p18-row-k">Email</span><span class="p18-row-v" id="ud-email">-</span></div>
-        <div class="p18-row"><span class="p18-row-k">Phone</span><span class="p18-row-v" id="ud-phone-row">-</span></div>
-        <div class="p18-row"><span class="p18-row-k">Plan</span><span class="p18-row-v brand" id="ud-plan">-</span></div>
-        <div class="p18-row"><span class="p18-row-k">Subscription</span><span class="p18-row-v" id="ud-sub">-</span></div>
-        <div class="p18-row"><span class="p18-row-k">Last seen</span><span class="p18-row-v" id="ud-last-seen">-</span></div>
-        <div class="p18-row"><span class="p18-row-k">User ID</span><span class="p18-row-v mono" id="ud-id">-</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:#64748B">Email</span><span style="color:#fff" id="ud-email">-</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:#64748B">Phone</span><span style="color:#fff" id="ud-phone">-</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:#64748B">Plan</span><span style="color:#FF6B00;font-weight:700" id="ud-plan">-</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:#64748B">User ID</span><span style="color:#64748B;font-size:9px;font-family:monospace" id="ud-id">-</span></div>
       </div>
     </div>
 
     <!-- User's Tags -->
-    <!-- TMC_PATCH18_USER_SUPPORT: vehicle card -->
-    <div style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Vehicle</div>
-    <div id="ud-vehicle-card" style="background:#0F1F3D;border-radius:12px;padding:12px;margin-bottom:12px">
-      <div id="ud-vehicle" style="font-size:11px;color:#64748B">No vehicle info</div>
-    </div>
-
-    <!-- TMC_PATCH18_USER_SUPPORT: stat grid -->
-    <div class="p18-stat-grid">
-      <div><div class="p18-stat-num" id="ud-stat-scans">0</div><div class="p18-stat-lbl">Scans</div></div>
-      <div><div class="p18-stat-num" id="ud-stat-calls">0</div><div class="p18-stat-lbl">Calls</div></div>
-      <div><div class="p18-stat-num" id="ud-stat-msgs">0</div><div class="p18-stat-lbl">Msgs</div></div>
-      <div><div class="p18-stat-num" id="ud-stat-photos">0</div><div class="p18-stat-lbl">Photos</div></div>
-    </div>
-
     <div style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Tags</div>
     <div id="ud-tags" style="background:#0F1F3D;border-radius:12px;padding:12px;margin-bottom:12px">
       <div style="font-size:11px;color:#64748B">Loading tags...</div>
     </div>
 
-    <!-- TMC_PATCH18_USER_SUPPORT: stranger-contact tabs -->
-    <div style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Stranger contacts</div>
-    <div class="p18-tabs">
-      <button type="button" class="p18-tab active" data-p18cat="calls" onclick="p18SwitchCat('calls')">Calls<span class="p18-tab-count" id="p18-c-calls"></span></button>
-      <button type="button" class="p18-tab" data-p18cat="messages" onclick="p18SwitchCat('messages')">Msgs<span class="p18-tab-count" id="p18-c-messages"></span></button>
-      <button type="button" class="p18-tab" data-p18cat="photos" onclick="p18SwitchCat('photos')">Photos<span class="p18-tab-count" id="p18-c-photos"></span></button>
-      <button type="button" class="p18-tab" data-p18cat="voice" onclick="p18SwitchCat('voice')">Voice<span class="p18-tab-count" id="p18-c-voice"></span></button>
+    <!-- User's Recent Scans -->
+    <div style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Recent Scans</div>
+    <div id="ud-scans" style="background:#0F1F3D;border-radius:12px;padding:12px;margin-bottom:16px">
+      <div style="font-size:11px;color:#64748B">Loading scans...</div>
     </div>
-    <div class="p18-content" id="p18-content" style="margin-bottom:16px"></div>
-
-    <!-- Legacy ud-scans kept hidden for safety -->
-    <div id="ud-scans" style="display:none"></div>
 
     <!-- Edit User -->
     <div style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Edit User</div>
@@ -1905,179 +1466,6 @@ let scannedTokens = new Set();
 let batchTokensMap = {};
 let currentVerifyBatch = null;
 let allUsersData = [];
-/* TMC_PATCH19_TAGS_AND_CSV */
-window.allOrdersData = window.allOrdersData || [];
-window.allLeadsData = window.allLeadsData || [];
-
-// TMC_PATCH20_AUDIT_AND_OPS: helpers
-function p20Esc(s) {
-  return String(s == null ? '' : s).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-// TMC_PATCH20_AUDIT_AND_OPS: detect carrier from tracking number format and link to carrier site
-function p20TrackingUrl(tn) {
-  if (!tn) return '#';
-  const s = String(tn).replace(/\s+/g, '').toUpperCase();
-  // UPS: starts with 1Z
-  if (/^1Z[A-Z0-9]{16}$/.test(s)) return 'https://www.ups.com/track?tracknum=' + encodeURIComponent(s);
-  // USPS: 20-22 digit numeric
-  if (/^9[0-9]{19,21}$/.test(s) || /^[0-9]{20,22}$/.test(s)) return 'https://tools.usps.com/go/TrackConfirmAction?qtc_tLabels1=' + encodeURIComponent(s);
-  // FedEx: 12 or 15 digits, all numeric
-  if (/^[0-9]{12}$/.test(s) || /^[0-9]{15}$/.test(s)) return 'https://www.fedex.com/fedextrack/?trknbr=' + encodeURIComponent(s);
-  // DHL: 10 digits
-  if (/^[0-9]{10}$/.test(s)) return 'https://www.dhl.com/us-en/home/tracking/tracking-express.html?submit=1&tracking-id=' + encodeURIComponent(s);
-  // Fallback: Google search
-  return 'https://www.google.com/search?q=' + encodeURIComponent('track ' + s);
-}
-window.p20TrackingUrl = p20TrackingUrl;
-window.p20Esc = p20Esc;
-
-// TMC_PATCH20_AUDIT_AND_OPS: notification badges
-function p20UpdateBadges() {
-  try {
-    // Orders: count pending (order_status not in ['shipped','delivered','canceled'])
-    const orders = window.allOrdersData || [];
-    const pending = orders.filter(o => o.order_status && !['shipped', 'delivered', 'canceled'].includes(o.order_status)).length;
-    p20SetBadge('orders', pending);
-    // Reviews: from API (uses cached count we update via review polling) — for now skip if not loaded.
-    /* TMC_PATCH24_CATCHUP_GUARD: skip fetch when admin not signed in yet */
-    if (typeof adminKey === 'string' && adminKey) {
-      fetch('/api/get-reviews?status=pending&admin_key=' + encodeURIComponent(adminKey))
-        .then(r => r.ok ? r.json() : null)
-        .then(d => p20SetBadge('reviews', d && d.reviews ? d.reviews.length : 0))
-        .catch(() => {});
-    }
-  } catch (e) {}
-}
-
-function p20SetBadge(tab, count) {
-  document.querySelectorAll('[data-tab="' + tab + '"]').forEach(el => {
-    let b = el.querySelector('.p20-badge');
-    if (count > 0) {
-      if (!b) {
-        b = document.createElement('span');
-        b.className = 'p20-badge';
-        el.appendChild(b);
-      }
-      b.textContent = count;
-    } else {
-      if (b) b.remove();
-    }
-  });
-}
-
-// Refresh badges every 30s while signed in
-setInterval(() => { if (typeof adminKey === 'string' && adminKey) p20UpdateBadges(); }, 30000);
-// Also right after dashboard loads
-(function() {
-  const orig = window.renderDashboard;
-  if (typeof orig === 'function') {
-    window.renderDashboard = function(d) {
-      const ret = orig.apply(this, arguments);
-      try { p20UpdateBadges(); } catch (e) {}
-      return ret;
-    };
-  }
-})();
-
-// TMC_PATCH20_AUDIT_AND_OPS: audit panel — overrides renderAuditLog to load from DB
-async function p20LoadAuditFromDb() {
-  if (typeof adminKey !== 'string' || !adminKey) return;
-  try {
-    const r = await fetch('/api/get-audit-log?admin=' + encodeURIComponent(adminKey) + '&limit=100');
-    const d = await r.json();
-    if (!d || !d.success) return;
-    const list = document.getElementById('audit-list');
-    if (!list) return;
-    if (!d.entries || d.entries.length === 0) {
-      list.innerHTML = '<div class="empty">No admin actions yet</div>';
-      return;
-    }
-    list.innerHTML = d.entries.map(e => {
-      const time = new Date(e.created_at).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
-      const isDestructive = /delete|suspend|void|disable/i.test(e.action);
-      const isPositive = /verify|gift|activate|create|generate/i.test(e.action);
-      const cls = isDestructive ? 'warn' : (isPositive ? 'good' : '');
-      let meta = '';
-      if (e.meta) {
-        try {
-          const m = typeof e.meta === 'string' ? JSON.parse(e.meta) : e.meta;
-          meta = Object.entries(m).map(([k, v]) => k + '=' + (v == null ? '' : v)).join(' · ');
-        } catch (_) { meta = String(e.meta).slice(0, 80); }
-      }
-      const target = e.target_type ? (' on ' + p20Esc(e.target_type) + (e.target_id ? ' ' + p20Esc(e.target_id) : '')) : '';
-      return '<div class="p20-audit-row ' + cls + '"><div class="dot"></div>' +
-        '<div style="flex:1;min-width:0">' +
-          '<div class="p20-audit-action">' + p20Esc(e.action) + p20Esc(target) + '</div>' +
-          (meta ? '<div class="p20-audit-meta">' + p20Esc(meta) + '</div>' : '') +
-        '</div>' +
-        '<div class="p20-audit-time">' + p20Esc(time) + '</div>' +
-      '</div>';
-    }).join('');
-  } catch (e) { console.error('audit load err:', e); }
-}
-
-// Wrap navTo so opening the Audit panel loads the DB log
-(function() {
-  const orig = window.navTo;
-  if (typeof orig === 'function') {
-    window.navTo = function(id) {
-      const ret = orig.apply(this, arguments);
-      if (id === 'audit') p20LoadAuditFromDb();
-      return ret;
-    };
-  }
-})();
-
-// TMC_PATCH20_AUDIT_AND_OPS: test data buttons
-async function p20CreateTestUser() {
-  if (!adminKey) { showToast('Sign in first'); return; }
-  const ts = Date.now().toString(36);
-  const name = 'Test User ' + ts.slice(-4).toUpperCase();
-  const email = 'test+' + ts + '@tapmycar.io';
-  const phone = '+1555' + Math.floor(1000000 + Math.random() * 9000000);
-  if (!confirm('Create a test user?\n\nName: ' + name + '\nEmail: ' + email + '\nPhone: ' + phone)) return;
-  try {
-    const r = await fetch('/api/get-dashboard', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'create_test_user', admin_key: adminKey, name: name, email: email, phone: phone })
-    });
-    const d = await r.json();
-    if (d.success) {
-      showToast('Test user created: ' + email);
-      if (typeof refreshAdmin === 'function') refreshAdmin();
-    } else {
-      showToast((typeof p18ErrText === 'function' ? p18ErrText(d && d.error) : (d && d.error)) || 'Failed');
-    }
-  } catch (e) { showToast('Network error: ' + (e && e.message)); }
-}
-
-async function p20CreateTestScan() {
-  if (!adminKey) { showToast('Sign in first'); return; }
-  // Pick a random active tag
-  const tags = (window.allTagsData || []).filter(t => t.status === 'active' || t.status === 'unclaimed');
-  if (tags.length === 0) { showToast('No tags available'); return; }
-  const tag = tags[Math.floor(Math.random() * tags.length)];
-  if (!confirm('Create a test scan on tag ' + tag.token + '?')) return;
-  try {
-    const r = await fetch('/api/get-dashboard', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'create_test_scan', admin_key: adminKey, tag_id: tag.id })
-    });
-    const d = await r.json();
-    if (d.success) {
-      showToast('Test scan added to ' + tag.token);
-      if (typeof refreshAdmin === 'function') refreshAdmin();
-    } else {
-      showToast((typeof p18ErrText === 'function' ? p18ErrText(d && d.error) : (d && d.error)) || 'Failed');
-    }
-  } catch (e) { showToast('Network error: ' + (e && e.message)); }
-}
-window.p20CreateTestUser = p20CreateTestUser;
-window.p20CreateTestScan = p20CreateTestScan;
-window.p20LoadAuditFromDb = p20LoadAuditFromDb;
 let allTagsData = [];
 let allScansData = [];
 let currentDetailUser = null;
@@ -2106,18 +1494,6 @@ function adminLogin() {
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('admin-content').classList.remove('is-hidden');
         localStorage.setItem('tmc_admin_key', adminKey);
-        /* TMC_PATCH17_IDLE_LOGOUT: arm idle logout once admin is signed in */
-        if (typeof installIdleLogout === 'function') {
-          installIdleLogout({
-            minutes: 10,
-            warningSeconds: 60,
-            onLogout: function() {
-              try { localStorage.removeItem('tmc_admin_key'); } catch (e) {}
-              if (typeof adminLogout === 'function') adminLogout();
-              else window.location.reload();
-            }
-          });
-        }
         renderDashboard(data);
         loadBatchOptions(data.tags || []);
       } else {
@@ -2129,17 +1505,13 @@ function adminLogin() {
 
 const savedKey = localStorage.getItem('tmc_admin_key');
 if (savedKey) { adminKey = savedKey; document.getElementById('admin-key').value = savedKey; adminLogin(); }
-/* TMC_PATCH17_IDLE_LOGOUT: also arm idle logout when auto-signed-in via saved key
-   (covered by adminLogin's success path, but harmless if adminLogin fails
-   because installIdleLogout just tracks activity and never logs out anyone
-   who isn't actually signed in — adminLogout is a no-op in that case). */
 
 let allOrders = [];
 let allLeads = [];
 
 async function loadLeads() {
   try {
-    const res = await fetch('/api/get-leads', { headers: { 'x-admin-key': getAdminKey() } });
+    const res = await fetch('/api/get-leads');
     const data = await res.json();
     if (!data.success) return;
     allLeads = data.leads || [];
@@ -2188,7 +1560,7 @@ function exportLeads() {
 
 async function loadOrders() {
   try {
-    const res = await fetch('/api/get-orders', { headers: { 'x-admin-key': getAdminKey() } });
+    const res = await fetch('/api/get-orders');
     const data = await res.json();
     if (!data.success) return;
     allOrders = data.orders || [];
@@ -2230,7 +1602,7 @@ function renderOrders(orders) {
     if (o.order_status === 'packed') actions += '<button onclick="promptShip(\'' + o.id + '\')" style="flex:1;background:#16A34A;color:#fff;font-size:10px;font-weight:700;padding:7px 0;border-radius:8px;border:none;cursor:pointer;font-family:inherit">Mark Shipped</button>';
     if (o.order_status === 'shipped') actions += '<button onclick="updateOrder(\'' + o.id + '\',\'delivered\')" style="flex:1;background:#1E3A5F;color:#4ADE80;font-size:10px;font-weight:700;padding:7px 0;border-radius:8px;border:none;cursor:pointer;font-family:inherit">Mark Delivered</button>';
     actions += '<button onclick="copyToClipboard(this.dataset.addr)" data-addr="' + shipAddr.replace(/"/g,'') + '" style="background:#1E2D4A;color:#94A3B8;font-size:10px;font-weight:700;padding:7px 10px;border-radius:8px;border:none;cursor:pointer;font-family:inherit">Copy Addr</button>';
-    return '<div class="order-card"><div class="order-header"><div class="order-name">' + (user.name || 'Unknown') + '</div><span style="background:rgba(255,255,255,.08);color:' + statusColor + ';padding:3px 8px;border-radius:99px;font-size:9px;font-weight:700">' + (o.order_status || 'pending').toUpperCase() + '</span></div><div class="order-detail"><div>' + (user.email || 'No email') + ' - ' + (user.phone || 'No phone') + '</div><div>Plan: <b style="color:#FF6B00">' + (o.plan || 'unknown').toUpperCase() + '</b> - $' + ((o.amount || 0)/100).toFixed(2) + ' - ' + date + '</div><div style="color:#94A3B8;margin-top:4px">Ship to: ' + shipAddr + '</div>' + (o.tracking_number ? '<div style="color:#4ADE80;margin-top:2px">Tracking: <a href="' + p20TrackingUrl(o.tracking_number) + '" target="_blank" rel="noopener" style="color:#4ADE80;text-decoration:underline">' + p20Esc(o.tracking_number) + '</a></div>' : '') /* TMC_PATCH20_AUDIT_AND_OPS */ + '</div><div class="order-actions">' + actions + '</div></div>';
+    return '<div class="order-card"><div class="order-header"><div class="order-name">' + (user.name || 'Unknown') + '</div><span style="background:rgba(255,255,255,.08);color:' + statusColor + ';padding:3px 8px;border-radius:99px;font-size:9px;font-weight:700">' + (o.order_status || 'pending').toUpperCase() + '</span></div><div class="order-detail"><div>' + (user.email || 'No email') + ' - ' + (user.phone || 'No phone') + '</div><div>Plan: <b style="color:#FF6B00">' + (o.plan || 'unknown').toUpperCase() + '</b> - $' + ((o.amount || 0)/100).toFixed(2) + ' - ' + date + '</div><div style="color:#94A3B8;margin-top:4px">Ship to: ' + shipAddr + '</div>' + (o.tracking_number ? '<div style="color:#4ADE80;margin-top:2px">Tracking: ' + o.tracking_number + '</div>' : '') + '</div><div class="order-actions">' + actions + '</div></div>';
   }).join('');
 }
 
@@ -2238,7 +1610,7 @@ async function updateOrder(orderId, status, tracking) {
   try {
     const res = await fetch('/api/update-order-status', {
       method: 'POST',
-      headers: {'Content-Type':'application/json', 'x-admin-key': getAdminKey()},
+      headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ order_id: orderId, status, tracking_number: tracking || null })
     });
     const data = await res.json();
@@ -2447,17 +1819,9 @@ function loadBatchOptions(tags) {
 
   const sel = document.getElementById('verify-batch');
   sel.innerHTML = '<option value=""> Select batch </option>';
-  Object.keys(batchTokensMap).sort((a,b) => {
-    /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: numeric-aware alphanumeric sort */
-    const na = parseFloat(a), nb = parseFloat(b);
-    if (!isNaN(na) && !isNaN(nb)) return na - nb;
-    return String(a).localeCompare(String(b));
-  }).forEach(b => {
-    /* TMC_PATCH35H_RECEIVE_POLISH: show how many in the batch are already verified */
-    const _toks = batchTokensMap[b];
-    const count = _toks.length;
-    const verifiedCount = _toks.filter(function(t){ return t && t.verified === true; }).length;
-    sel.innerHTML += `<option value="${b}">Batch ${b} \u2014 ${count} tokens, ${verifiedCount} verified</option>`;
+  Object.keys(batchTokensMap).sort((a,b) => a-b).forEach(b => {
+    const count = batchTokensMap[b].length;
+    sel.innerHTML += `<option value="${b}">Batch ${b} (${count} tokens)</option>`;
   });
 }
 
@@ -2466,8 +1830,7 @@ function loadBatchOptions(tags) {
 //  GENERATE NEW BATCH 
 async function generateTokens() {
   const count = parseInt(document.getElementById('gen-count').value) || 1;
-  /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: batch is text now */
-  const batch = (document.getElementById('gen-batch').value || '').trim() || null;
+  const batch = document.getElementById('gen-batch').value || null;
   const btn = document.getElementById('gen-btn');
   if (count > 500) { showToast('Max 500 per batch'); return; }
   if (!batch) { showToast('Enter a batch number'); return; }
@@ -2476,7 +1839,7 @@ async function generateTokens() {
     const res = await fetch('/api/generate-tokens', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
-      body: JSON.stringify({ count, batch_number: batch }) /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS */
+      body: JSON.stringify({ count, batch_number: parseInt(batch) })
     });
     const data = await res.json();
     if (data.success) {
@@ -2489,7 +1852,7 @@ async function generateTokens() {
       const rr = await fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey));
       const rd = await rr.json();
       if (rd.admin) { renderDashboard(rd); loadBatchOptions(rd.tags || []); }
-    } else { showToast(p18ErrText(data && data.error) || 'Failed'); } /* TMC_PATCH18_USER_SUPPORT 1 */
+    } else { showToast(data.error || 'Failed'); }
   } catch(e) { showToast('Network error'); }
   btn.textContent = 'Generate'; btn.disabled = false;
 }
@@ -2514,7 +1877,7 @@ async function generateReplacements() {
   if (!count || count < 1) { showToast('Enter how many replacements'); return; }
   if (count > 500) { showToast('Max 500'); return; }
   if (!batch) { showToast('Enter the original batch number'); return; }
-  const batchNum = String(batch).trim(); /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: text batch */
+  const batchNum = parseInt(batch);
   btn.textContent = 'Generating...'; btn.disabled = true;
   try {
     // Get current batch size to determine starting unit number
@@ -2522,7 +1885,7 @@ async function generateReplacements() {
     const checkData = await checkRes.json();
     let existingCount = 0;
     if (checkData.tags) {
-      existingCount = checkData.tags.filter(t => String(t.batch_number) === batchNum).length;
+      existingCount = checkData.tags.filter(t => t.batch_number === batchNum).length;
     }
     // Generate with same batch number
     const res = await fetch('/api/generate-tokens', {
@@ -2546,7 +1909,7 @@ async function generateReplacements() {
       const rr = await fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey));
       const rd = await rr.json();
       if (rd.admin) { renderDashboard(rd); loadBatchOptions(rd.tags || []); }
-    } else { showToast(p18ErrText(data && data.error) || 'Failed'); } /* TMC_PATCH18_USER_SUPPORT 2 */
+    } else { showToast(data.error || 'Failed'); }
   } catch(e) { showToast('Network error'); }
   btn.textContent = 'Replace'; btn.disabled = false;
 }
@@ -2565,9 +1928,7 @@ function downloadReplacementCSV() {
 
 //  RECEIVE & VERIFY 
 function loadBatchForVerify() {
-  /* TMC_PATCH35H_RECEIVE_POLISH: batch names are TEXT (Patch 21). parseInt broke text-named
-     batches (parseInt -> NaN -> bailed). Use the raw string value. */
-  const batchNum = (document.getElementById('verify-batch').value || '').trim();
+  const batchNum = parseInt(document.getElementById('verify-batch').value);
   if (!batchNum) {
     document.getElementById('verify-summary').style.display = 'none';
     document.getElementById('finalize-btn').style.display = 'none';
@@ -2581,18 +1942,11 @@ function loadBatchForVerify() {
   const tokens = batchTokensMap[batchNum] || [];
   document.getElementById('verify-summary').style.display = 'block';
   document.getElementById('v-total').textContent = tokens.length;
-  /* TMC_PATCH35H_RECEIVE_POLISH: how many are already verified */
-  var _alreadyVerified = tokens.filter(function(t){ return t && t.verified === true; }).length;
-  var _alreadyEl = document.getElementById('v-already');
-  if (_alreadyEl) _alreadyEl.textContent = _alreadyVerified;
   document.getElementById('v-scanned').textContent = '0';
   document.getElementById('v-remaining').textContent = tokens.length;
   document.getElementById('scanned-list').innerHTML = '';
   document.getElementById('finalize-btn').style.display = 'block';
   document.getElementById('finalize-btn').disabled = true;
-  /* TMC_PATCH24_CATCHUP_LOAD: show manual void button when batch is loaded */
-  const _mvBtn = document.getElementById('p21-manual-void-btn');
-  if (_mvBtn) _mvBtn.style.display = 'block';
   document.getElementById('finalize-warning').style.display = 'none';
   document.getElementById('scan-token').focus();
 }
@@ -2648,55 +2002,38 @@ function scanToken() {
 
 async function finalizeReceive() {
   if (!currentVerifyBatch) return;
-  // TMC_PATCH15_VERIFY_GATE: use new verify-tags endpoint to verify scanned + void unverified
   const batchTokens = batchTokensMap[currentVerifyBatch] || [];
-  const scannedArr = Array.from(scannedTokens);
   const unscanned = batchTokens.filter(t => !scannedTokens.has(t.token));
 
-  if (scannedArr.length === 0 && unscanned.length === 0) {
-    showToast('Nothing to do.');
+  if (unscanned.length === 0) {
+    showToast('All tokens received  nothing to delete!');
     return;
   }
 
-  const msg = 'Finalize Batch ' + currentVerifyBatch + '?\n\n' +
-    'Verify ' + scannedArr.length + ' scanned token(s) (will become activatable).\n' +
-    'Void ' + unscanned.length + ' unscanned token(s) (kept for audit, but cannot be activated).\n\n' +
-    'Other batches are NOT touched.';
-  if (!confirm(msg)) return;
+  const confirmed = confirm(
+    `Delete ${unscanned.length} unscanned token(s) from Batch ${currentVerifyBatch} ONLY?\n\n` +
+    `Tokens to delete:\n${unscanned.map(t => '#' + t.token).join('\n')}\n\n` +
+    `Other batches are NOT touched. This cannot be undone.`
+  );
+  if (!confirmed) return;
 
   const btn = document.getElementById('finalize-btn');
-  btn.textContent = 'Finalizing...'; btn.disabled = true;
-  let verifiedCount = 0, voidedCount = 0, errs = 0;
+  btn.textContent = 'Deleting...'; btn.disabled = true;
 
-  // Step 1: verify scanned tokens
-  if (scannedArr.length > 0) {
+  let deleted = 0, errors = 0;
+  for (const t of unscanned) {
     try {
-      const res = await fetch('/api/verify-tags', {
+      const res = await fetch('/api/get-tag', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
-        body: JSON.stringify({ mode: 'verify', tokens: scannedArr })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: t.token, user_id: 'admin-delete', status_override: 'deleted' })
       });
       const data = await res.json();
-      if (data.success) verifiedCount = data.verified_count || 0;
-      else errs++;
-    } catch (e) { errs++; }
+      if (data.success) deleted++; else errors++;
+    } catch(e) { errors++; }
   }
 
-  // Step 2: void unverified in this batch
-  if (unscanned.length > 0) {
-    try {
-      const res = await fetch('/api/verify-tags', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
-        body: JSON.stringify({ mode: 'void_unverified_in_batch', batch_number: currentVerifyBatch, void_reason: 'not received from manufacturer' })
-      });
-      const data = await res.json();
-      if (data.success) voidedCount = data.voided_count || 0;
-      else errs++;
-    } catch (e) { errs++; }
-  }
-
-  showToast('Verified ' + verifiedCount + ', voided ' + voidedCount + (errs ? ' (' + errs + ' errors)' : ''));
+  showToast(`Deleted ${deleted} unscanned tokens from Batch ${currentVerifyBatch}` + (errors ? ` (${errors} errors)` : ''));
 
   const rr = await fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey));
   const rd = await rr.json();
@@ -2814,7 +2151,7 @@ async function quickGift(userId, plan) {
       const rr = await fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey));
       const rd = await rr.json();
       if (rd.admin) { renderDashboard(rd); loadBatchOptions(rd.tags || []); }
-    } else { showToast(p18ErrText(data && data.error) || 'Failed'); } /* TMC_PATCH18_USER_SUPPORT 3 */
+    } else { showToast(data.error || 'Failed'); }
   } catch(e) { showToast('Network error'); }
 }
 function quickCopyId(userId) {
@@ -2832,151 +2169,19 @@ function filterUsers() {
   renderUserList(filtered);
 }
 
-// TMC_PATCH18_USER_SUPPORT: state for category tabs
-let p18CurrentCat = 'calls';
-let p18UserScans = [];
-
-function p18Esc(s) {
-  return String(s == null ? '' : s).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
-}
-function p18Time(s) {
-  if (!s) return '';
-  return new Date(s).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
-}
-function p18Match(scan, cat) {
-  if (cat === 'calls') return scan.action === 'call' || scan.contact_action === 'call';
-  if (cat === 'messages') return (scan.action === 'quick_message' || scan.contact_action === 'quick_message') && scan.message_text;
-  if (cat === 'photos') return scan.photo_url && scan.photo_url.length > 10;
-  if (cat === 'voice') return scan.audio_url && scan.audio_url.length > 10;
-  return false;
-}
-function p18LocLink(scan) {
-  if (scan.latitude && scan.longitude) {
-    const url = 'https://www.google.com/maps?q=' + encodeURIComponent(scan.latitude + ',' + scan.longitude);
-    return '<a class="p18-loc-link" href="' + p18Esc(url) + '" target="_blank" rel="noopener">View on map ↗</a>';
-  }
-  return '';
-}
-function p18RenderCallItem(scan) {
-  const dur = scan.duration_seconds || 0;
-  const durTxt = dur > 0 ? ' · ' + Math.floor(dur/60) + 'm ' + (dur % 60) + 's' : '';
-  const status = scan.call_status || (scan.contact_action === 'call' ? 'completed' : 'completed');
-  const statusLabel = { completed:'Connected', bridged:'Connected', message_only:'Message sent', no_answer:'No answer', busy:'Busy', failed:'Failed', canceled:'Canceled', ringing:'Ringing' }[status] || 'Call';
-  return '<div class="p18-item">' +
-    '<div class="p18-item-time">' + p18Esc(p18Time(scan.scanned_at)) + p18Esc(durTxt) + p18LocLink(scan) + '</div>' +
-    '<span class="p18-item-stat ' + p18Esc(status) + '">' + p18Esc(statusLabel) + '</span>' +
-  '</div>';
-}
-function p18RenderMsgItem(scan) {
-  return '<div class="p18-item">' +
-    '<div class="p18-item-time">' + p18Esc(p18Time(scan.scanned_at)) + p18LocLink(scan) + '</div>' +
-    '<div class="p18-item-msg">' + p18Esc(scan.message_text || '') + '</div>' +
-  '</div>';
-}
-function p18RenderPhotoTile(scan, idx) {
-  return '<div class="p18-photo-tile" onclick="p18OpenLightbox(' + idx + ')">' +
-    '<img src="' + p18Esc(scan.photo_url) + '" alt="" loading="lazy">' +
-    '<div class="p18-photo-tile-time">' + p18Esc(p18Time(scan.scanned_at)) + '</div>' +
-  '</div>';
-}
-function p18RenderVoiceItem(scan) {
-  return '<div class="p18-item">' +
-    '<div class="p18-item-time">' + p18Esc(p18Time(scan.scanned_at)) + p18LocLink(scan) + '</div>' +
-    '<div class="p18-voice-player"><audio controls preload="metadata"><source src="' + p18Esc(scan.audio_url) + '"></audio></div>' +
-  '</div>';
-}
-function p18SwitchCat(cat) {
-  p18CurrentCat = cat;
-  document.querySelectorAll('.p18-tab').forEach(el => {
-    el.classList.toggle('active', el.dataset.p18cat === cat);
-  });
-  p18Render();
-}
-function p18UpdateCounts() {
-  ['calls','messages','photos','voice'].forEach(c => {
-    const el = document.getElementById('p18-c-' + c);
-    if (el) {
-      const n = p18UserScans.filter(s => p18Match(s, c)).length;
-      el.textContent = n > 0 ? '(' + n + ')' : '';
-    }
-  });
-}
-function p18Render() {
-  const root = document.getElementById('p18-content');
-  if (!root) return;
-  const items = p18UserScans.filter(s => p18Match(s, p18CurrentCat));
-  if (items.length === 0) {
-    const labels = { calls:'No calls received', messages:'No messages received', photos:'No photos received', voice:'No voice memos received' };
-    root.innerHTML = '<div class="p18-empty">' + labels[p18CurrentCat] + '</div>';
-    return;
-  }
-  if (p18CurrentCat === 'calls') root.innerHTML = items.map(p18RenderCallItem).join('');
-  else if (p18CurrentCat === 'messages') root.innerHTML = items.map(p18RenderMsgItem).join('');
-  else if (p18CurrentCat === 'photos') root.innerHTML = '<div class="p18-photo-grid">' + items.map((s) => p18RenderPhotoTile(s, p18UserScans.indexOf(s))).join('') + '</div>';
-  else if (p18CurrentCat === 'voice') root.innerHTML = items.map(p18RenderVoiceItem).join('');
-}
-function p18OpenLightbox(idx) {
-  const scan = p18UserScans[idx];
-  if (!scan || !scan.photo_url) return;
-  document.getElementById('p18-lightbox-img').src = scan.photo_url;
-  document.getElementById('p18-lightbox-meta').textContent = p18Time(scan.scanned_at);
-  document.getElementById('p18-lightbox').classList.add('show');
-}
-function p18CloseLightbox() {
-  document.getElementById('p18-lightbox').classList.remove('show');
-}
-window.p18SwitchCat = p18SwitchCat;
-window.p18OpenLightbox = p18OpenLightbox;
-window.p18CloseLightbox = p18CloseLightbox;
-
-// TMC_PATCH18_USER_SUPPORT: error text helper — formats API errors clearly
-function p18ErrText(err) {
-  if (!err) return '';
-  const s = String(err);
-  if (s.length > 80) return s.slice(0, 77) + '…';
-  return s;
-}
 function openUserDetail(userId) {
   const user = allUsersData.find(u => u.id === userId);
   if (!user) { showToast('User not found'); return; }
   currentDetailUser = user;
 
-  // Basic header
+  // Fill basic info
   document.getElementById('ud-avatar').textContent = (user.name || 'U')[0].toUpperCase();
   document.getElementById('ud-name').textContent = user.name || 'Unknown';
   document.getElementById('ud-joined').textContent = 'Joined ' + new Date(user.created_at).toLocaleDateString('en-US', {month:'long',day:'numeric',year:'numeric'});
-  document.getElementById('ud-email').textContent = user.email || '—';
-
-  // TMC_PATCH18_USER_SUPPORT: phone with verified badge
-  const phoneEl = document.getElementById('ud-phone-row');
-  if (phoneEl) {
-    const phone = user.phone ? p18Esc(user.phone) : '<span class="dim">Not set</span>';
-    const verified = !!user.phone_verified;
-    const badge = user.phone
-      ? (verified
-          ? '<span class="p18-pv-badge ok"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Verified</span>'
-          : '<span class="p18-pv-badge warn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Unverified</span>')
-      : '';
-    phoneEl.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end">' + phone + ' ' + badge + '</span>';
-  }
-
+  document.getElementById('ud-email').textContent = user.email || '';
+  document.getElementById('ud-phone').textContent = user.phone || '';
   document.getElementById('ud-plan').textContent = (user.plan || 'etag').toUpperCase();
-
-  // TMC_PATCH18_USER_SUPPORT: subscription_id with Stripe link
-  const subEl = document.getElementById('ud-sub');
-  if (subEl) {
-    if (user.subscription_id) {
-      const sid = p18Esc(user.subscription_id);
-      const stripeUrl = 'https://dashboard.stripe.com/subscriptions/' + encodeURIComponent(user.subscription_id);
-      subEl.innerHTML = '<a class="p18-row-link" href="' + p18Esc(stripeUrl) + '" target="_blank" rel="noopener">' + sid.slice(0, 20) + (sid.length > 20 ? '…' : '') + ' <svg viewBox="0 0 24 24"><path d="M7 17L17 7"/><polyline points="7 7 17 7 17 17"/></svg></a>';
-    } else {
-      subEl.innerHTML = '<span class="dim">None</span>';
-    }
-  }
-
   document.getElementById('ud-id').textContent = user.id;
-
-  // TMC_PATCH18_USER_SUPPORT: status badge
 
   const suspended = user.plan === 'suspended';
   const badge = document.getElementById('ud-status-badge');
@@ -2998,90 +2203,42 @@ function openUserDetail(userId) {
   if (userTags.length > 0) {
     document.getElementById('ud-tags').innerHTML = userTags.map(t => {
       const sc = t.status === 'active' ? 'ba' : t.status === 'unclaimed' ? 'bw' : 'br';
-      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:.5px solid rgba(255,255,255,.05)"><div><div style="font-size:12px;font-weight:700;color:#FF6B00;font-family:monospace">${formatToken(t.token)}</div><div style="font-size:9px;color:#64748B">${t.license_plate || 'No plate'} · ${t.vehicle_label || ''}</div></div><span class="${sc}" style="font-size:8px">${t.status}</span></div>`;
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:.5px solid rgba(255,255,255,.05)"><div><div style="font-size:12px;font-weight:700;color:#FF6B00;font-family:monospace">${formatToken(t.token)}</div><div style="font-size:9px;color:#64748B">${t.license_plate || 'No plate'}  ${t.vehicle_label || ''}</div></div><span class="${sc}" style="font-size:8px">${t.status}</span></div>`;
     }).join('');
   } else {
     document.getElementById('ud-tags').innerHTML = '<div style="font-size:11px;color:#64748B">No tags assigned</div>';
   }
 
-  // TMC_PATCH18_USER_SUPPORT: vehicle card — first tag's car details
-  const vehEl = document.getElementById('ud-vehicle');
-  if (vehEl) {
-    const firstTag = userTags[0];
-    if (firstTag && (firstTag.car_make || firstTag.car_model || firstTag.car_year || firstTag.car_color || firstTag.license_plate)) {
-      const car = [firstTag.car_year, firstTag.car_color, firstTag.car_make, firstTag.car_model].filter(Boolean).join(' ');
-      const plate = firstTag.license_plate ? '<span style="background:#1A2D4A;color:#FF6B00;padding:3px 10px;border-radius:6px;font-family:monospace;font-size:11px;font-weight:700;letter-spacing:.5px">' + p18Esc(firstTag.license_plate) + '</span>' : '';
-      const carHtml = car ? '<span style="color:#E5E7EB;font-size:12px;font-weight:600">' + p18Esc(car) + '</span>' : '<span style="color:#64748B;font-size:11px;font-style:italic">Unnamed vehicle</span>';
-      vehEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">' + carHtml + ' ' + plate + '</div>';
-    } else {
-      vehEl.innerHTML = '<div style="font-size:11px;color:#64748B;font-style:italic">No vehicle info</div>';
-    }
-  }
-
-  // TMC_PATCH18_USER_SUPPORT: load scans + populate stats + render category tabs
-  p18UserScans = [];
-  document.getElementById('ud-stat-scans').textContent = '…';
-  document.getElementById('ud-stat-calls').textContent = '…';
-  document.getElementById('ud-stat-msgs').textContent = '…';
-  document.getElementById('ud-stat-photos').textContent = '…';
-  document.getElementById('p18-content').innerHTML = '<div class="p18-empty">Loading…</div>';
-  loadUserScansP18(userId, userTags);
+  // Load user's scan activity
+  document.getElementById('ud-scans').innerHTML = '<div style="font-size:11px;color:#64748B">Loading...</div>';
+  loadUserScans(userId, userTags);
 
   // Show overlay
   document.getElementById('user-detail-overlay').style.display = 'block';
   document.getElementById('user-detail-sheet').style.display = 'block';
 }
 
-// TMC_PATCH18_USER_SUPPORT: loads user scans, populates stat grid and category tabs.
-//   Also updates the "Last seen" row in the header.
-async function loadUserScansP18(userId, userTags) {
+async function loadUserScans(userId, userTags) {
   if (!userTags || userTags.length === 0) {
-    p18UserScans = [];
-    document.getElementById('ud-stat-scans').textContent = '0';
-    document.getElementById('ud-stat-calls').textContent = '0';
-    document.getElementById('ud-stat-msgs').textContent = '0';
-    document.getElementById('ud-stat-photos').textContent = '0';
-    document.getElementById('p18-content').innerHTML = '<div class="p18-empty">User has no tags yet</div>';
-    document.getElementById('ud-last-seen').innerHTML = '<span class="dim">Never</span>';
-    p18UpdateCounts();
+    document.getElementById('ud-scans').innerHTML = '<div style="font-size:11px;color:#64748B">No scans  user has no tags</div>';
     return;
   }
   try {
     const res = await fetch('/api/get-dashboard?user_id=' + userId);
     const data = await res.json();
-    p18UserScans = data.recentScans || [];
-
-    // Total scans count from data.scanCount (full count, not capped to 50)
-    const scanTotal = (data.scanCount != null) ? data.scanCount : p18UserScans.length;
-    document.getElementById('ud-stat-scans').textContent = scanTotal;
-    document.getElementById('ud-stat-calls').textContent = p18UserScans.filter(s => p18Match(s, 'calls')).length;
-    document.getElementById('ud-stat-msgs').textContent = p18UserScans.filter(s => p18Match(s, 'messages')).length;
-    document.getElementById('ud-stat-photos').textContent = p18UserScans.filter(s => p18Match(s, 'photos')).length;
-
-    // Last seen = most recent scanned_at across recentScans
-    const lastSeenEl = document.getElementById('ud-last-seen');
-    if (lastSeenEl) {
-      if (p18UserScans.length > 0) {
-        const newest = p18UserScans.reduce((a, b) => new Date(a.scanned_at) > new Date(b.scanned_at) ? a : b);
-        lastSeenEl.textContent = p18Time(newest.scanned_at);
-      } else {
-        lastSeenEl.innerHTML = '<span class="dim">No scans yet</span>';
-      }
+    if (data.recentScans && data.recentScans.length > 0) {
+      document.getElementById('ud-scans').innerHTML = data.recentScans.map(s => {
+        const date = new Date(s.scanned_at).toLocaleString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+        const action = s.contact_action || s.action || 'view';
+        return `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:.5px solid rgba(255,255,255,.05)"><div style="font-size:11px;color:#fff">${date}</div><span class="bw" style="font-size:8px">${action}</span></div>`;
+      }).join('');
+    } else {
+      document.getElementById('ud-scans').innerHTML = '<div style="font-size:11px;color:#64748B">No scans yet</div>';
     }
-
-    p18UpdateCounts();
-    p18CurrentCat = 'calls';
-    document.querySelectorAll('.p18-tab').forEach(el => {
-      el.classList.toggle('active', el.dataset.p18cat === 'calls');
-    });
-    p18Render();
   } catch(e) {
-    document.getElementById('p18-content').innerHTML = '<div class="p18-empty" style="color:#FCA5A5">Failed to load user data: ' + p18Esc(e && e.message ? e.message : 'network error') + '</div>';
+    document.getElementById('ud-scans').innerHTML = '<div style="font-size:11px;color:#FCA5A5">Failed to load</div>';
   }
 }
-
-// Old function kept as no-op alias for any inline onclicks still referencing it
-function loadUserScans() {}
 
 function closeUserDetail() {
   document.getElementById('user-detail-overlay').style.display = 'none';
@@ -3188,7 +2345,7 @@ async function giftPlan(plan) {
         const rd = await rr.json();
         if (rd.admin) { renderDashboard(rd); loadBatchOptions(rd.tags || []); }
       }, 1000);
-    } else { showToast(p18ErrText(data && data.error) || 'Failed'); } /* TMC_PATCH18_USER_SUPPORT 4 */
+    } else { showToast(data.error || 'Failed'); }
   } catch(e) { showToast('Network error'); }
 }
 
@@ -3224,7 +2381,7 @@ async function giftActivation() {
         const rd = await rr.json();
         if (rd.admin) { renderDashboard(rd); loadBatchOptions(rd.tags || []); }
       }, 1000);
-    } else { showToast(p18ErrText(data && data.error) || 'Failed'); } /* TMC_PATCH18_USER_SUPPORT 5 */
+    } else { showToast(data.error || 'Failed'); }
   } catch(e) { showToast('Network error'); }
 }
 
@@ -3267,7 +2424,7 @@ async function giftPlanByEmail() {
       const rr = await fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey));
       const rd = await rr.json();
       if (rd.admin) { renderDashboard(rd); loadBatchOptions(rd.tags || []); }
-    } else { showToast(p18ErrText(data && data.error) || 'Failed'); } /* TMC_PATCH18_USER_SUPPORT 6 */
+    } else { showToast(data.error || 'Failed'); }
   } catch(e) { showToast('Network error'); }
 }
 
@@ -3308,10 +2465,9 @@ function generatePromoCode() {
 
 //  DELETE ENTIRE BATCH 
 function showDeleteConfirm() {
-  /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: text batch */
-  const batch = (document.getElementById('del-batch').value || '').trim();
+  const batch = document.getElementById('del-batch').value;
   if (!batch) { showToast('Enter a batch number'); return; }
-  const batchNum = batch;
+  const batchNum = parseInt(batch);
   const batchTokens = batchTokensMap[batchNum];
   if (!batchTokens || batchTokens.length === 0) {
     showToast('No tokens found in Batch ' + batchNum);
@@ -3335,7 +2491,7 @@ function cancelDelete() {
 }
 
 async function executeDeleteBatch() {
-  const batch = (document.getElementById('del-batch').value || '').trim(); /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS */
+  const batch = parseInt(document.getElementById('del-batch').value);
   const password = document.getElementById('del-password').value.trim();
   if (!password) { showToast('Enter admin password'); return; }
 
@@ -3373,7 +2529,7 @@ async function executeDeleteBatch() {
     try {
       const res = await fetch('/api/get-tag', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey } /* TMC_PATCH15_VERIFY_GATE */,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: t.token, user_id: 'admin-delete', status_override: 'deleted' })
       });
       const data = await res.json();
@@ -3581,196 +2737,8 @@ function downloadFile(content, filename, mime) {
 </script>
 <script>
 // ─── NAV HELPERS (defined AFTER preserved script so our showTab wins) ──
-const TAB_TITLES = {"home": "Home", "users": "Users", "orders": "Orders", "leads": "Leads", "tags": "Tags", "analytics": "Analytics", "scans": "Scans", "upgrade": "Upgrade tracker", "reviews": "Reviews", "generate": "Generate", "receive": "Receive", "inventory": "Inventory", "promos": "Promos", "audit": "Audit", "broadcast": "Broadcast"};
-const TAB_SUBS = {"home": "At-a-glance view of the business", "users": "Search, manage, and gift plans", "orders": "Physical shipping and fulfillment", "leads": "Feedback emails captured on contact pages", "tags": "All tokens in the system", "analytics": "Revenue, scans, and growth metrics", "scans": "Raw scan history", "upgrade": "Users approaching day 30 auto-upgrade", "reviews": "Approve reviews, toggle visibility, feature on landing", "generate": "Create new NFC/QR token batches", "receive": "Verify stickers received from manufacturer", "inventory": "Stock levels by batch", "promos": "Gift plans, gift-activate tags, and promo codes", "audit": "Admin actions and system health", "broadcast": "Compose and send notifications to users"};
-// TMC_PATCH35B_GIFT_ADMIN: Gift Activate Tag form handler + gifts-in-flight list
-let p35bGiftsCache = [];
-
-async function p35bActivateGift() {
-  const tokenEl = document.getElementById('p35b-token');
-  const planEl = document.getElementById('p35b-plan');
-  const monthsEl = document.getElementById('p35b-months');
-  const emailEl = document.getElementById('p35b-email');
-  const noteEl = document.getElementById('p35b-note');
-  const resultEl = document.getElementById('p35b-result');
-  const btnEl = document.getElementById('p35b-activate-btn');
-
-  const token = (tokenEl.value || '').trim().toUpperCase();
-  const plan = planEl.value;
-  const months = parseInt(monthsEl.value, 10);
-  const email = (emailEl.value || '').trim().toLowerCase();
-  const note = (noteEl.value || '').trim();
-
-  if (!token) { resultEl.innerHTML = '<div class="p26-error">Token required</div>'; return; }
-  if (!/^TMC-[A-Z0-9]{6,12}$/.test(token)) {
-    resultEl.innerHTML = '<div class="p26-error">Token format must be TMC-XXXXXX</div>';
-    return;
-  }
-  if (!Number.isInteger(months) || months < 1 || months > 12) {
-    resultEl.innerHTML = '<div class="p26-error">Months must be 1–12</div>';
-    return;
-  }
-
-  btnEl.textContent = 'Activating…';
-  btnEl.disabled = true;
-  resultEl.innerHTML = '';
-
-  try {
-    const body = { token: token, plan: plan, months: months };
-    if (email) body.assigned_user_email = email;
-    if (note) body.note = note;
-
-    const res = await fetch('/api/admin-gift-activate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-key': getAdminKey()
-      },
-      body: JSON.stringify(body)
-    });
-    const data = await res.json();
-    if (res.ok && data && data.success) {
-      const g = data.gift;
-      const recipient = g.assigned_user_name
-        ? (g.assigned_user_name + ' (' + g.assigned_user_email + ')')
-        : 'Open gift — anyone who scans first claims it';
-      resultEl.innerHTML =
-        '<div class="p26-ok">' +
-        '<strong>✅ ' + g.token + ' is now gift-ready.</strong><br>' +
-        'Plan: ' + g.plan + ' · Trial: ' + g.months + ' month' + (g.months > 1 ? 's' : '') + '<br>' +
-        'Recipient: ' + recipient +
-        '</div>';
-      tokenEl.value = '';
-      monthsEl.value = '1';
-      emailEl.value = '';
-      noteEl.value = '';
-      /* Refresh the gifts list below */
-      p35bLoadGifts();
-    } else {
-      resultEl.innerHTML = '<div class="p26-error">❌ ' + p26Esc((data && data.error) || 'Failed to activate gift') + '</div>';
-    }
-  } catch (e) {
-    resultEl.innerHTML = '<div class="p26-error">❌ Network error: ' + p26Esc(e.message || '') + '</div>';
-  } finally {
-    btnEl.textContent = 'Activate as Gift';
-    btnEl.disabled = false;
-  }
-}
-
-async function p35bLoadGifts() {
-  const listEl = document.getElementById('p35b-gifts-list');
-  if (!listEl) return;
-  listEl.innerHTML = '<div class="empty">Loading gifts…</div>';
-  try {
-    /* Reuse the existing get-tags admin endpoint and filter client-side */
-    const res = await fetch('/api/get-tags', {
-      headers: { 'x-admin-key': getAdminKey() }
-    });
-    const data = await res.json();
-    if (!data || !Array.isArray(data.tags)) {
-      listEl.innerHTML = '<div class="empty">Failed to load tags</div>';
-      return;
-    }
-    p35bGiftsCache = data.tags.filter(function(t) { return t.is_gift === true; });
-    p35bRenderGifts();
-  } catch (e) {
-    listEl.innerHTML = '<div class="empty">Network error: ' + p26Esc(e.message || '') + '</div>';
-  }
-}
-
-function p35bRenderGifts() {
-  const listEl = document.getElementById('p35b-gifts-list');
-  if (!listEl) return;
-  const search = (document.getElementById('p35b-search').value || '').toLowerCase().trim();
-
-  let rows = p35bGiftsCache;
-  if (search) {
-    rows = rows.filter(function(t) {
-      return (t.token && t.token.toLowerCase().indexOf(search) >= 0) ||
-             (t.gift_note && String(t.gift_note).toLowerCase().indexOf(search) >= 0);
-    });
-  }
-
-  if (rows.length === 0) {
-    listEl.innerHTML = '<div class="empty">No gifts in flight yet. Activate a tag above to get started.</div>';
-    return;
-  }
-
-  /* Sort newest first by claimed_at (claimed) then by created_at */
-  rows.sort(function(a, b) {
-    const aT = a.claimed_at || a.created_at || '';
-    const bT = b.claimed_at || b.created_at || '';
-    return bT.localeCompare(aT);
-  });
-
-  listEl.innerHTML = rows.map(function(t) {
-    const isClaimed = t.status === 'active';
-    const isUnclaimed = t.status === 'unclaimed';
-    const statusLabel = isClaimed
-      ? '<span class="badge green">Claimed</span>'
-      : (isUnclaimed
-          ? '<span class="badge orange">Waiting for scan</span>'
-          : '<span class="badge">' + p26Esc(t.status || '') + '</span>');
-    const recipient = t.gift_assigned_to_user_id
-      ? 'Pre-linked'
-      : 'Open';
-    const planLabel = t.gift_plan
-      ? (t.gift_plan.charAt(0).toUpperCase() + t.gift_plan.slice(1))
-      : '—';
-    const note = t.gift_note ? p26Esc(t.gift_note) : '';
-    return '<div class="p26-setting-row" style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center">' +
-      '<div>' +
-        '<div style="font-weight:700;font-size:14px;margin-bottom:4px">' + p26Esc(t.token) + ' ' + statusLabel + '</div>' +
-        '<div class="kpi-sub" style="margin:0">' +
-          'Plan: <strong>' + planLabel + '</strong> · ' +
-          'Trial: <strong>' + (t.gift_months || '?') + ' mo</strong> · ' +
-          'Recipient: <strong>' + recipient + '</strong>' +
-          (note ? '<br><span style="color:#9CA3AF">Note: ' + note + '</span>' : '') +
-        '</div>' +
-      '</div>' +
-      '<button class="gen-btn" onclick="p35bRevokeGift(\''+ p26Esc(t.token) +'\')" ' +
-              'style="font-size:11px;padding:8px 12px;background:#fff;color:#DC2626;border:1px solid #FCA5A5"' +
-              (isClaimed ? ' disabled title="Already claimed"' : '') + '>Revoke</button>' +
-    '</div>';
-  }).join('');
-}
-
-async function p35bRevokeGift(token) {
-  if (!confirm('Revoke gift on ' + token + '?\n\nThis will clear the gift flags. The tag will be available for regular claim or a fresh gift.')) return;
-  try {
-    const res = await fetch('/api/admin-gift-revoke', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-key': getAdminKey()
-      },
-      body: JSON.stringify({ token: token })
-    });
-    const data = await res.json();
-    if (res.ok && data && data.success) {
-      p35bLoadGifts();
-    } else {
-      alert('Revoke failed: ' + ((data && data.error) || 'unknown'));
-    }
-  } catch (e) {
-    alert('Network error');
-  }
-}
-
-/* Load gifts when Promos tab is opened */
-(function() {
-  const origNavTo = window.navTo;
-  if (typeof origNavTo === 'function') {
-    window.navTo = function(id) {
-      const r = origNavTo.apply(this, arguments);
-      if (id === 'promos' && typeof p35bLoadGifts === 'function') {
-        p35bLoadGifts();
-      }
-      return r;
-    };
-  }
-})();
-
+const TAB_TITLES = {"home": "Home", "users": "Users", "orders": "Orders", "leads": "Leads", "tags": "Tags", "analytics": "Analytics", "scans": "Scans", "upgrade": "Upgrade tracker", "reviews": "Reviews", "generate": "Generate", "receive": "Receive", "inventory": "Inventory", "promos": "Promos", "audit": "Audit"};
+const TAB_SUBS = {"home": "At-a-glance view of the business", "users": "Search, manage, and gift plans", "orders": "Physical shipping and fulfillment", "leads": "Feedback emails captured on contact pages", "tags": "All tokens in the system", "analytics": "Revenue, scans, and growth metrics", "scans": "Raw scan history", "upgrade": "Users approaching day 30 auto-upgrade", "reviews": "Approve reviews, toggle visibility, feature on landing", "generate": "Create new NFC/QR token batches", "receive": "Verify stickers received from manufacturer", "inventory": "Stock levels by batch", "promos": "Gift plans and promo codes", "audit": "Admin actions and system health"};
 function navTo(id){
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   const panel = document.getElementById('panel-' + id);
@@ -3786,642 +2754,9 @@ function navTo(id){
   closeSidebar();
   try { document.querySelector('.main').scrollTo({top:0,behavior:'smooth'}); window.scrollTo({top:0,behavior:'smooth'}); } catch(e){}
 }
-// TMC_PATCH19_TAGS_AND_CSV: Tag filters, search, CSV export, refresh helper
-
-// State
-let p19TagFilter = 'all';
-/* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: split "unclaimed" into "verified" + "unverified" */
-const p19TagStatusList = ['all', 'active', 'verified', 'unverified', 'claimed', 'voided', 'disabled', 'inactive'];
-
-function p19Esc(s) {
-  return String(s == null ? '' : s).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-function p19CsvEsc(v) {
-  if (v == null) return '';
-  const s = String(v);
-  if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
-  return s;
-}
-
-function p19Download(filename, content, mime) {
-  const blob = new Blob([content], { type: (mime || 'text/csv;charset=utf-8') });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
-}
-
-function p19ExportCsv(kind) {
-  const dateStr = new Date().toISOString().slice(0, 10);
-  let rows = [];
-  let headers = [];
-  if (kind === 'users') {
-    headers = ['id','name','email','phone','phone_verified','plan','subscription_id','created_at'];
-    rows = (allUsersData || []).map(u => headers.map(h => u[h]));
-  } else if (kind === 'tags') {
-    headers = ['token','status','verified','tag_type','batch_number','owner_id','car_year','car_make','car_model','car_color','license_plate','vehicle_label','created_at','claimed_at','activated_at','voided_at','void_reason'];
-    rows = (allTagsData || []).map(t => headers.map(h => t[h]));
-  } else if (kind === 'scans') {
-    headers = ['id','tag_id','action','contact_action','scanned_at','device_type','latitude','longitude','message_text','photo_url','audio_url'];
-    rows = (allScansData || []).map(s => headers.map(h => s[h]));
-  } else if (kind === 'orders') {
-    headers = ['id','user_email','plan','amount','status','order_status','tracking_number','created_at'];
-    rows = (allOrdersData || []).map(o => headers.map(h => o[h]));
-  } else if (kind === 'leads') {
-    headers = ['email','name','message','tag_token','created_at'];
-    rows = (allLeadsData || []).map(l => headers.map(h => l[h]));
-  } else {
-    showToast('Unknown export type');
-    return;
-  }
-  if (rows.length === 0) {
-    showToast('Nothing to export');
-    return;
-  }
-  const csv = [headers.join(','), ...rows.map(r => r.map(p19CsvEsc).join(','))].join('\n');
-  p19Download('tapmycar_' + kind + '_' + dateStr + '.csv', csv, 'text/csv;charset=utf-8');
-  showToast('Exported ' + rows.length + ' ' + kind);
-}
-
-function p19SetTagFilter(f) {
-  p19TagFilter = f;
-  document.querySelectorAll('#p19-tag-filters .p19-filter-pill').forEach(el => {
-    el.classList.toggle('active', el.dataset.filter === f);
-  });
-  p19RenderTags();
-}
-
-function p19RenderTagFilters() {
-  const wrap = document.getElementById('p19-tag-filters');
-  if (!wrap) return;
-  const counts = {};
-  p19TagStatusList.forEach(s => counts[s] = 0);
-  (allTagsData || []).forEach(t => {
-    counts.all++;
-    /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: split unclaimed into verified vs unverified */
-    if (t.status === 'unclaimed') {
-      if (t.verified) counts.verified++;
-      else counts.unverified++;
-    } else if (counts.hasOwnProperty(t.status)) {
-      counts[t.status]++;
-    }
-  });
-  const labels = { all:'All', active:'Active', verified:'Verified', unverified:'Unverified', claimed:'Claimed', voided:'Voided', disabled:'Disabled', inactive:'Inactive' };
-  wrap.innerHTML = p19TagStatusList.map(s => {
-    const c = counts[s];
-    const isActive = s === p19TagFilter;
-    return '<button type="button" class="p19-filter-pill' + (isActive ? ' active' : '') + '" data-filter="' + s + '" onclick="p19SetTagFilter(\'' + s + '\')">' + labels[s] + '<span class="p19-count">' + c + '</span></button>';
-  }).join('');
-}
-
-function p19RenderTags() {
-  const list = document.getElementById('tag-list');
-  if (!list) return;
-  const q = (document.getElementById('p19-tag-search')?.value || '').toLowerCase().trim();
-  let tags = allTagsData || [];
-  // Apply status filter
-  /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: handle derived verified/unverified */
-  if (p19TagFilter === 'verified') {
-    tags = tags.filter(t => t.status === 'unclaimed' && t.verified === true);
-  } else if (p19TagFilter === 'unverified') {
-    tags = tags.filter(t => t.status === 'unclaimed' && t.verified === false);
-  } else if (p19TagFilter !== 'all') {
-    tags = tags.filter(t => t.status === p19TagFilter);
-  }
-  // Apply search
-  if (q) {
-    tags = tags.filter(t => {
-      const hay = (
-        (t.token || '') + ' ' +
-        (t.license_plate || '') + ' ' +
-        (t.vehicle_label || '') + ' ' +
-        (t.car_make || '') + ' ' +
-        (t.car_model || '') + ' ' +
-        (t.batch_number || '')
-      ).toLowerCase();
-      return hay.includes(q);
-    });
-  }
-  const countEl = document.getElementById('p19-tag-count');
-  if (countEl) countEl.textContent = tags.length + (q ? ' match' + (tags.length === 1 ? '' : 'es') : ' total');
-
-  if (tags.length === 0) {
-    list.innerHTML = '<div class="empty">No tags match the current filter</div>';
-    return;
-  }
-  /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: voided multi-select controls */
-  const showVoidedControls = (p19TagFilter === 'voided' && tags.length > 0);
-  let controlsHtml = '';
-  if (showVoidedControls) {
-    controlsHtml =
-      '<div class="p21-voided-controls">' +
-        '<label><input type="checkbox" id="p21-select-all" onchange="p21ToggleAll(this.checked)"> Select all</label>' +
-        '<span class="p21-sel-count" id="p21-sel-count">0 selected</span>' +
-        '<button class="p21-delete-btn" id="p21-delete-selected" onclick="p21DeleteSelected()" disabled>Delete selected</button>' +
-      '</div>';
-  }
-
-  list.innerHTML = controlsHtml + tags.map(t => {
-    const statusClass = t.status === 'active' ? 'ba' : t.status === 'unclaimed' ? 'bw' : t.status === 'voided' ? 'br' : 'br';
-    const label = t.vehicle_label || '';
-    const batch = t.batch_number ? 'Batch ' + t.batch_number : 'No batch';
-    const verifiedTag = (t.verified === false && t.status === 'unclaimed') ? ' <span style="background:#713F12;color:#FDE047;font-size:8px;font-weight:700;padding:2px 6px;border-radius:99px;margin-left:4px">UNVERIFIED</span>' : '';
-    const verifiedBadge = (t.verified === true && t.status === 'unclaimed') ? ' <span style="background:#14532D;color:#4ADE80;font-size:8px;font-weight:700;padding:2px 6px;border-radius:99px;margin-left:4px">VERIFIED</span>' : '';
-    const voidReason = t.status === 'voided' && t.void_reason ? '<div style="font-size:9px;color:#FCA5A5;margin-top:2px;font-style:italic">' + p19Esc(t.void_reason) + '</div>' : '';
-    /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: checkbox for voided */
-    const cb = showVoidedControls
-      ? '<input type="checkbox" class="p21-row-cb" data-token="' + p19Esc(t.token) + '" onchange="p21UpdateSelCount()">'
-      : '';
-    return '<div class="p21-ar-wrap">' + cb +
-      '<div class="ar"><div><div class="un" style="font-family:monospace">' + p19Esc(typeof formatToken === 'function' ? formatToken(t.token) : t.token) + verifiedTag + verifiedBadge + '</div><div class="us">' + p19Esc(label) + ' · ' + p19Esc(t.license_plate || 'No plate') + ' · ' + p19Esc(batch) + '</div>' + voidReason + '</div><span class="' + statusClass + '">' + p19Esc(t.status) + '</span></div>' +
-    '</div>';
-  }).join('');
-  /* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: refresh select-all state */
-  if (showVoidedControls) p21UpdateSelCount();
-}
-
-/* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: voided multi-select helpers */
-function p21ToggleAll(checked) {
-  document.querySelectorAll('.p21-row-cb').forEach(cb => cb.checked = checked);
-  p21UpdateSelCount();
-}
-function p21UpdateSelCount() {
-  const cbs = document.querySelectorAll('.p21-row-cb');
-  const sel = Array.from(cbs).filter(c => c.checked);
-  const ct = document.getElementById('p21-sel-count');
-  const btn = document.getElementById('p21-delete-selected');
-  const all = document.getElementById('p21-select-all');
-  if (ct) ct.textContent = sel.length + ' selected';
-  if (btn) btn.disabled = sel.length === 0;
-  if (all) {
-    if (sel.length === 0) { all.checked = false; all.indeterminate = false; }
-    else if (sel.length === cbs.length) { all.checked = true; all.indeterminate = false; }
-    else { all.checked = false; all.indeterminate = true; }
-  }
-}
-async function p21DeleteSelected() {
-  const sel = Array.from(document.querySelectorAll('.p21-row-cb')).filter(c => c.checked);
-  if (sel.length === 0) return;
-  const tokens = sel.map(c => c.dataset.token);
-  if (!confirm('Permanently delete ' + tokens.length + ' voided token(s)?\n\nThis cannot be undone. Audit log entries remain.')) return;
-  const btn = document.getElementById('p21-delete-selected');
-  if (btn) { btn.disabled = true; btn.textContent = 'Deleting…'; }
-  let okCount = 0, errCount = 0, lastErr = '';
-  for (const tok of tokens) {
-    try {
-      const r = await fetch('/api/get-tag', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
-        body: JSON.stringify({ token: tok, user_id: 'admin-delete', status_override: 'deleted' })
-      });
-      const d = await r.json();
-      if (d.success) okCount++; else { errCount++; lastErr = d.error || lastErr; }
-    } catch (e) { errCount++; lastErr = e && e.message; }
-  }
-  showToast('Deleted ' + okCount + (errCount ? ' (' + errCount + ' err: ' + (lastErr || 'unknown') + ')' : ''));
-  if (typeof refreshAdmin === 'function') refreshAdmin();
-}
-window.p21ToggleAll = p21ToggleAll;
-window.p21UpdateSelCount = p21UpdateSelCount;
-window.p21DeleteSelected = p21DeleteSelected;
-
-/* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: render Scans tab as users sorted by recent activity */
-function p21RenderScansByUser() {
-  const list = document.getElementById('p21-scans-by-user-list');
-  if (!list) return;
-  const q = (document.getElementById('p21-scans-search')?.value || '').toLowerCase().trim();
-  const scans = allScansData || [];
-  const users = allUsersData || [];
-  const tags = allTagsData || [];
-
-  // Map tag_id → tag → owner_id
-  const tagOwner = {};
-  tags.forEach(t => { tagOwner[t.id] = t.owner_id; });
-
-  // Group scans by owner_id
-  const byOwner = {};
-  scans.forEach(s => {
-    const owner = tagOwner[s.tag_id];
-    if (!owner) return;
-    if (!byOwner[owner]) byOwner[owner] = { count: 0, last: null };
-    byOwner[owner].count++;
-    const t = new Date(s.scanned_at);
-    if (!byOwner[owner].last || t > byOwner[owner].last) byOwner[owner].last = t;
-  });
-
-  // Build user rows with scan info
-  let rows = users
-    .filter(u => byOwner[u.id])
-    .map(u => {
-      const tag = tags.find(t => t.owner_id === u.id);
-      return {
-        user: u,
-        scanCount: byOwner[u.id].count,
-        lastScan: byOwner[u.id].last,
-        vehicle: tag ? [tag.car_year, tag.car_make, tag.car_model].filter(Boolean).join(' ') : ''
-      };
-    });
-
-  // Apply search filter
-  if (q) {
-    rows = rows.filter(r => {
-      const hay = (
-        (r.user.name || '') + ' ' +
-        (r.user.email || '') + ' ' +
-        (r.user.phone || '') + ' ' +
-        (r.vehicle || '')
-      ).toLowerCase();
-      return hay.includes(q);
-    });
-  }
-
-  // Sort by last scan, most recent first
-  rows.sort((a, b) => (b.lastScan || 0) - (a.lastScan || 0));
-
-  const ct = document.getElementById('p21-scans-count');
-  if (ct) ct.textContent = rows.length + ' user' + (rows.length === 1 ? '' : 's') + ' with activity';
-
-  if (rows.length === 0) {
-    list.innerHTML = '<div class="empty">No scan activity yet</div>';
-    return;
-  }
-
-  list.innerHTML = rows.map(r => {
-    const ts = r.lastScan ? r.lastScan.toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : '—';
-    const initial = (r.user.name || 'U')[0].toUpperCase();
-    const meta = (r.user.email || r.user.phone || 'No contact') + (r.vehicle ? ' · ' + r.vehicle : '');
-    return '<div class="p21-scans-user-row" onclick="openUserDetail(\'' + p19Esc(r.user.id) + '\')">' +
-      '<div class="p21-su-avatar">' + p19Esc(initial) + '</div>' +
-      '<div class="p21-su-info">' +
-        '<div class="p21-su-name">' + p19Esc(r.user.name || 'Unknown user') + '</div>' +
-        '<div class="p21-su-meta">' + p19Esc(meta) + '</div>' +
-      '</div>' +
-      '<div class="p21-su-stat">' +
-        '<div class="p21-su-stat-num">' + r.scanCount + '</div>' +
-        '<div class="p21-su-stat-lbl">scans</div>' +
-        '<div class="p21-su-time">' + p19Esc(ts) + '</div>' +
-      '</div>' +
-    '</div>';
-  }).join('');
-}
-window.p21RenderScansByUser = p21RenderScansByUser;
-
-/* TMC_PATCH24_CATCHUP_FN: manual force-void for current batch */
-async function p21ManualVoidUnverified() {
-  if (!currentVerifyBatch) { showToast('Select a batch first'); return; }
-  if (!confirm('Void all UNVERIFIED tokens in Batch ' + currentVerifyBatch + '?\n\nThis affects ONLY tokens with verified=false in that batch. Verified tokens are not touched.')) return;
-  try {
-    const res = await fetch('/api/verify-tags', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
-      body: JSON.stringify({ mode: 'void_unverified_in_batch', batch_number: String(currentVerifyBatch), void_reason: 'manual void (admin)' })
-    });
-    const d = await res.json();
-    if (d.success) {
-      showToast('Voided ' + (d.voided_count || 0) + ' unverified token(s) in Batch ' + currentVerifyBatch);
-      if (typeof refreshAdmin === 'function') refreshAdmin();
-    } else {
-      showToast('Failed: ' + (d.error || 'unknown'));
-    }
-  } catch (e) {
-    showToast('Network error: ' + (e && e.message));
-  }
-}
-window.p21ManualVoidUnverified = p21ManualVoidUnverified;
-
-// TMC_PATCH24_CATCHUP_ALERTS: home-tab quick action alerts
-function p23RenderAlerts(data) {
-  const root = document.getElementById('p23-alerts');
-  if (!root) return;
-  const tags = (data && data.tags) || (window.allTagsData) || [];
-  const unverifiedByBatch = {};
-  let totalUnverified = 0;
-  let totalVoided = 0;
-  tags.forEach(t => {
-    if (t.status === 'unclaimed' && t.verified === false) {
-      const b = t.batch_number || '(no batch)';
-      unverifiedByBatch[b] = (unverifiedByBatch[b] || 0) + 1;
-      totalUnverified++;
-    } else if (t.status === 'voided') {
-      totalVoided++;
-    }
-  });
-
-  const alerts = [];
-  if (totalUnverified > 0) {
-    const batchList = Object.entries(unverifiedByBatch)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3)
-      .map(function(pair) { return 'Batch ' + pair[0] + ' (' + pair[1] + ')'; })
-      .join(', ');
-    const extra = Object.keys(unverifiedByBatch).length > 3 ? ' …' : '';
-    alerts.push(
-      '<button type="button" class="p23-alert warn" onclick="navTo(&#39;receive&#39;)">' +
-        '<div class="p23-alert-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>' +
-        '<div class="p23-alert-body">' +
-          '<div class="p23-alert-title">' + totalUnverified + ' unverified token' + (totalUnverified === 1 ? '' : 's') + ' awaiting review</div>' +
-          '<div class="p23-alert-sub">' + batchList + extra + ' — tap to verify or void</div>' +
-        '</div>' +
-        '<div class="p23-alert-arrow"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></div>' +
-      '</button>'
-    );
-  }
-  if (totalVoided > 0) {
-    alerts.push(
-      '<button type="button" class="p23-alert danger" onclick="p23OpenVoided()">' +
-        '<div class="p23-alert-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>' +
-        '<div class="p23-alert-body">' +
-          '<div class="p23-alert-title">' + totalVoided + ' voided token' + (totalVoided === 1 ? '' : 's') + '</div>' +
-          '<div class="p23-alert-sub">Review or permanently delete them</div>' +
-        '</div>' +
-        '<div class="p23-alert-arrow"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></div>' +
-      '</button>'
-    );
-  }
-  root.innerHTML = alerts.join('');
-}
-
-function p23OpenVoided() {
-  if (typeof navTo === 'function') navTo('tags');
-  setTimeout(function() {
-    if (typeof p19SetTagFilter === 'function') p19SetTagFilter('voided');
-  }, 150);
-}
-window.p23RenderAlerts = p23RenderAlerts;
-window.p23OpenVoided = p23OpenVoided;
-
-// TMC_PATCH26_APP_SETTINGS: Settings panel
-let p26Settings = {};
-const P26_SLOTS = [
-  { id: 'landing.hero',     label: 'Landing hero' },
-  { id: 'landing.demo',     label: 'Landing demo video' },
-  { id: 'landing.footer',   label: 'Landing footer' },
-  { id: 'dashboard.banner', label: 'Dashboard banner' },
-  { id: 'dashboard.help',   label: 'Dashboard help' },
-  { id: 'signin.footer',    label: 'Sign-in footer' }
-];
-
-function p26Esc(s) {
-  return String(s == null ? '' : s).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-async function p26Load() {
-  const list = document.getElementById('p26-settings-list');
-  if (!list) return;
-  list.innerHTML = '<div class="empty">Loading settings…</div>';
-  try {
-    const res = await fetch('/api/get-settings');
-    const data = await res.json();
-    if (!data || !data.settings) { list.innerHTML = '<div class="empty">No settings found</div>'; return; }
-    p26Settings = data.settings;
-    p26Render();
-  } catch (e) {
-    list.innerHTML = '<div class="empty">Failed to load: ' + p26Esc(e && e.message) + '</div>';
-  }
-}
-
-function p26Render() {
-  const list = document.getElementById('p26-settings-list');
-  if (!list) return;
-  const keys = Object.keys(p26Settings).sort(function(a, b) {
-    return (p26Settings[a] && (p26Settings[a].sort_order || 0)) - (p26Settings[b] && (p26Settings[b].sort_order || 0));
-  });
-  if (keys.length === 0) {
-    list.innerHTML = '<div class="empty">No settings configured. Seed the table first.</div>';
-    return;
-  }
-  list.innerHTML = keys.map(function(key) {
-    const s = p26Settings[key];
-    const v = s.value || '';
-    const slots = s.slots || [];
-    const inputType = s.type === 'email' ? 'email' : (s.type === 'phone' ? 'tel' : 'url');
-    const slotsHtml = P26_SLOTS.map(function(slot) {
-      const on = slots.indexOf(slot.id) >= 0;
-      return '<label class="p26-slot-chip ' + (on ? 'on' : '') + '">' +
-        '<input type="checkbox" data-key="' + p26Esc(key) + '" data-slot="' + p26Esc(slot.id) + '"' + (on ? ' checked' : '') + ' onchange="p26ToggleSlot(this)">' +
-        p26Esc(slot.label) +
-      '</label>';
-    }).join('');
-    return '<div class="p26-setting-row">' +
-      '<div class="p26-setting-label">' + p26Esc(s.label || key) + '</div>' +
-      (s.description ? '<div class="p26-setting-desc">' + p26Esc(s.description) + '</div>' : '') +
-      '<input type="' + inputType + '" class="p26-setting-input" data-key="' + p26Esc(key) + '" value="' + p26Esc(v) + '" oninput="p26TouchValue(this)" placeholder="Leave blank to hide everywhere">' +
-      '<div class="p26-slots-label">Show on these pages:</div>' +
-      '<div class="p26-slots-grid">' + slotsHtml + '</div>' +
-    '</div>';
-  }).join('');
-}
-
-function p26TouchValue(input) {
-  const key = input.dataset.key;
-  if (p26Settings[key]) p26Settings[key].value = input.value;
-  p26MarkDirty();
-}
-function p26ToggleSlot(checkbox) {
-  const key = checkbox.dataset.key;
-  const slot = checkbox.dataset.slot;
-  if (!p26Settings[key]) return;
-  const slots = (p26Settings[key].slots || []).slice();
-  const idx = slots.indexOf(slot);
-  if (checkbox.checked && idx < 0) slots.push(slot);
-  if (!checkbox.checked && idx >= 0) slots.splice(idx, 1);
-  p26Settings[key].slots = slots;
-  // Update parent chip styling
-  checkbox.parentElement.classList.toggle('on', checkbox.checked);
-  p26MarkDirty();
-}
-function p26MarkDirty() {
-  const st = document.getElementById('p26-save-status');
-  if (st) st.textContent = 'Unsaved changes';
-}
-
-// TMC_PATCH36B_KNOWMORE_ADMIN: Download QR Code for knowmore page.
-function p36bDownloadQr() {
-  /* adminKey is the global var populated from localStorage.tmc_admin_key */
-  var k = (typeof adminKey === 'string' && adminKey) ? adminKey : '';
-  if (!k) {
-    alert('Admin key not loaded. Refresh the page and try again.');
-    return;
-  }
-  /* Direct browser download via anchor element. */
-  var a = document.createElement('a');
-  a.href = '/api/qr-knowmore?key=' + encodeURIComponent(k);
-  a.download = 'tapmycar-knowmore-qr.png';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
-
-async function p26Save() {
-  const btn = document.getElementById('p26-save-btn');
-  const st = document.getElementById('p26-save-status');
-  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
-  const updates = Object.keys(p26Settings).map(function(key) {
-    return { key, value: p26Settings[key].value || '', slots: p26Settings[key].slots || [] };
-  });
-  try {
-    const res = await fetch('/api/update-settings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
-      body: JSON.stringify({ updates })
-    });
-    const data = await res.json();
-    if (data.success) {
-      if (st) st.textContent = 'Saved ✓';
-      setTimeout(function() { if (st && st.textContent === 'Saved ✓') st.textContent = ''; }, 3000);
-    } else {
-      if (st) st.textContent = 'Save failed: ' + (data.error || 'unknown');
-    }
-  } catch (e) {
-    if (st) st.textContent = 'Network error';
-  }
-  if (btn) { btn.disabled = false; btn.textContent = 'Save all changes'; }
-}
-
-// Auto-load Settings panel on navigation
-(function() {
-  const orig = window.navTo;
-  if (typeof orig === 'function' && !orig.__p26wrapped) {
-    const wrapped = function(id) {
-      const ret = orig.apply(this, arguments);
-      if (id === 'settings') p26Load();
-      return ret;
-    };
-    wrapped.__p26wrapped = true;
-    window.navTo = wrapped;
-  }
-})();
-
-window.p26Load = p26Load;
-window.p26Save = p26Save;
-window.p26ToggleSlot = p26ToggleSlot;
-window.p26TouchValue = p26TouchValue;
-
-// TMC_PATCH24_CATCHUP_ALERTS: wrap renderDashboard so alerts auto-render after each refresh
-(function() {
-  const orig = window.renderDashboard;
-  if (typeof orig === 'function' && !orig.__p24wrapped) {
-    const wrapped = function(d) {
-      const ret = orig.apply(this, arguments);
-      try { p23RenderAlerts(d); } catch (e) {}
-      return ret;
-    };
-    wrapped.__p24wrapped = true;
-    window.renderDashboard = wrapped;
-  }
-})();
-
-/* TMC_PATCH21_BATCH_TEXT_AND_FILTERS: wrap renderDashboard to also render scans-by-user */
-(function() {
-  const orig = window.renderDashboard;
-  if (typeof orig === 'function') {
-    window.renderDashboard = function(d) {
-      const ret = orig.apply(this, arguments);
-      try { p21RenderScansByUser(); } catch (e) { console.error('p21 scans render:', e); }
-      return ret;
-    };
-  }
-})();
-
-// Wrap renderDashboard to also update Voided KPI + tag filters
-(function() {
-  const orig = window.renderDashboard;
-  if (typeof orig === 'function') {
-    window.renderDashboard = function(data) {
-      const ret = orig.apply(this, arguments);
-      try {
-        const voidedCount = (data && data.tags ? data.tags : []).filter(t => t.status === 'voided').length;
-        const vEl = document.getElementById('s-voided');
-        if (vEl) vEl.textContent = voidedCount;
-        p19RenderTagFilters();
-        p19RenderTags();
-      } catch (e) { console.error('p19 post-render error:', e); }
-      return ret;
-    };
-  }
-})();
-
-// Refresh helper - call after any admin action
-async function refreshAdmin() {
-  if (typeof adminKey !== 'string' || !adminKey) return;
-  try {
-    const r = await fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey));
-    const d = await r.json();
-    if (d && d.admin && typeof renderDashboard === 'function') {
-      renderDashboard(d);
-      if (typeof loadBatchOptions === 'function') loadBatchOptions(d.tags || []);
-    }
-  } catch (e) { console.error('refreshAdmin error:', e); }
-}
-window.refreshAdmin = refreshAdmin;
-window.p19ExportCsv = p19ExportCsv;
-window.p19SetTagFilter = p19SetTagFilter;
-window.p19RenderTags = p19RenderTags;
-
-// Inject CSV "Export" buttons into panels via JS (anchors vary by panel)
-function p19InjectCsvButtons() {
-  // Users panel: add to top
-  const usersPanel = document.getElementById('panel-users');
-  if (usersPanel && !usersPanel.querySelector('.p19-csv-btn')) {
-    const btnUsers = document.createElement('div');
-    btnUsers.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:10px';
-    btnUsers.innerHTML = '<button class="p19-csv-btn" onclick="p19ExportCsv(\'users\')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV</button>';
-    usersPanel.insertBefore(btnUsers, usersPanel.firstChild);
-  }
-  // Orders panel: insert near the pill-group
-  const ordersPanel = document.getElementById('panel-orders');
-  if (ordersPanel && !ordersPanel.querySelector('.p19-csv-btn')) {
-    const pillGroup = ordersPanel.querySelector('.pill-group');
-    if (pillGroup) {
-      const btn = document.createElement('button');
-      btn.className = 'p19-csv-btn';
-      btn.style.marginLeft = 'auto';
-      btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV';
-      btn.onclick = () => p19ExportCsv('orders');
-      pillGroup.style.display = 'flex';
-      pillGroup.style.alignItems = 'center';
-      pillGroup.appendChild(btn);
-    }
-  }
-  // Scans panel: at top
-  const scansPanel = document.getElementById('panel-scans');
-  if (scansPanel && !scansPanel.querySelector('.p19-csv-btn')) {
-    const btnScans = document.createElement('div');
-    btnScans.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:10px';
-    btnScans.innerHTML = '<button class="p19-csv-btn" onclick="p19ExportCsv(\'scans\')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV</button>';
-    scansPanel.insertBefore(btnScans, scansPanel.firstChild);
-  }
-  // Leads panel: already has exportLeads button.
-}
-window.p19InjectCsvButtons = p19InjectCsvButtons;
-if (document.readyState !== 'loading') p19InjectCsvButtons();
-else document.addEventListener('DOMContentLoaded', p19InjectCsvButtons);
-
 // Keep the old showTab name working for any inline onclicks that still use it
 function showTab(id, ev){ navTo(id); }
 window.showTab = showTab; window.navTo = navTo;
-
-/* TMC_PATCH17_IDLE_LOGOUT: force-refresh batch dropdown when navigating to Receive */
-(function() {
-  var origNavTo = window.navTo;
-  window.navTo = function(id) {
-    var ret = origNavTo.apply(this, arguments);
-    if (id === 'receive' && typeof adminKey === 'string' && adminKey) {
-      // Re-fetch dashboard so loadBatchOptions sees the freshest tags.
-      fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey))
-        .then(function(r) { return r.json(); })
-        .then(function(d) {
-          if (d && d.admin && typeof loadBatchOptions === 'function') {
-            loadBatchOptions(d.tags || []);
-          }
-        }).catch(function() {});
-    }
-    return ret;
-  };
-})();
 
 function openSidebar(){
   document.getElementById('sidebar').classList.add('open');
@@ -4573,14 +2908,11 @@ async function moderateReview(reviewId, action) {
 }
 
 async function updateReviewCounts() {
-  /* TMC_PATCH25_REVIEW_GUARD: skip when admin not signed in yet */
-  const _k = getAdminKey();
-  if (!_k) return;
   try {
-    const key = encodeURIComponent(_k);
+    const key = encodeURIComponent(getAdminKey());
     const [pendingRes, approvedRes] = await Promise.all([
-      fetch('/api/get-reviews?status=pending&limit=200&admin_key=' + key).then(r => r.ok ? r.json() : { reviews: [] }),
-      fetch('/api/get-reviews?status=approved&limit=200&admin_key=' + key).then(r => r.ok ? r.json() : { reviews: [] })
+      fetch('/api/get-reviews?status=pending&limit=200&admin_key=' + key).then(r => r.json()),
+      fetch('/api/get-reviews?status=approved&limit=200&admin_key=' + key).then(r => r.json())
     ]);
     const pendingCount = (pendingRes.reviews || []).length;
     const approvedCount = (approvedRes.reviews || []).length;
@@ -4603,467 +2935,5 @@ window.addEventListener('load', function() {
 });
 </script>
 
-
-<!-- TMC_PATCH15_VERIFY_GATE: camera QR scanner library (loaded only if user opens camera mode) -->
-<script>
-let p15Html5QrLoaded = false;
-let p15Html5QrInstance = null;
-function p15LoadQrLib(cb) {
-  if (p15Html5QrLoaded) return cb();
-  const s = document.createElement('script');
-  s.src = 'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';
-  s.onload = () => { p15Html5QrLoaded = true; cb(); };
-  s.onerror = () => { showToast('Could not load camera scanner library'); };
-  document.head.appendChild(s);
-}
-function p15SetScanMode(mode) {
-  const btnM = document.getElementById('p15-mode-manual');
-  const btnC = document.getElementById('p15-mode-camera');
-  const camBox = document.getElementById('p15-camera-box');
-  btnM.classList.toggle('active', mode === 'manual');
-  btnC.classList.toggle('active', mode === 'camera');
-  if (mode === 'camera') {
-    camBox.classList.add('show');
-    p15LoadQrLib(p15StartCamera);
-  } else {
-    camBox.classList.remove('show');
-    p15StopCamera();
-  }
-}
-function p15StartCamera() {
-  if (typeof Html5Qrcode === 'undefined') { showToast('Scanner not loaded'); return; }
-  const status = document.getElementById('p15-camera-status');
-  status.textContent = 'Point camera at a QR code…';
-  if (p15Html5QrInstance) {
-    try { p15Html5QrInstance.stop().catch(()=>{}); } catch(e){}
-  }
-  p15Html5QrInstance = new Html5Qrcode('p15-camera-reader');
-  Html5Qrcode.getCameras().then(devices => {
-    if (!devices || devices.length === 0) { status.textContent = 'No cameras found'; return; }
-    // Prefer back camera
-    const cam = devices.find(d => /back|rear|environment/i.test(d.label)) || devices[0];
-    p15Html5QrInstance.start(
-      cam.id,
-      { fps: 10, qrbox: { width: 240, height: 240 } },
-      decodedText => {
-        // Each successful scan: drop into the manual input and submit.
-        document.getElementById('scan-token').value = decodedText;
-        scanToken();
-        status.textContent = 'Scanned. Point at next sticker…';
-      },
-      _err => {} // ignore per-frame decode failures
-    ).catch(err => {
-      status.textContent = 'Camera error: ' + (err && err.message ? err.message : 'unknown');
-    });
-  }).catch(err => {
-    status.textContent = 'Camera permission denied or unavailable';
-  });
-}
-function p15StopCamera() {
-  if (p15Html5QrInstance) {
-    try { p15Html5QrInstance.stop().catch(()=>{}); } catch(e){}
-    p15Html5QrInstance = null;
-  }
-}
-</script>
-
-<!-- TMC_PATCH35BSCAN_NFC_QR: Full-screen QR scan overlay -->
-<div id="p35bs-qr-overlay" style="display:none;position:fixed;inset:0;background:#000;z-index:9999;flex-direction:column">
-  <div style="position:absolute;top:0;left:0;right:0;padding:16px 18px;background:linear-gradient(180deg,rgba(0,0,0,0.7),transparent);color:#fff;display:flex;align-items:center;justify-content:space-between;z-index:2">
-    <div>
-      <div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#FFAB6D">Gift Activate</div>
-      <div style="font-size:15px;font-weight:700;margin-top:2px">Scan a TapMyCar tag</div>
-    </div>
-    <button onclick="p35bsCloseQr()" style="background:rgba(255,255,255,0.15);color:#fff;border:0;border-radius:50%;width:40px;height:40px;font-size:24px;font-weight:300;line-height:1;cursor:pointer">×</button>
-  </div>
-
-  <video id="p35bs-qr-video" autoplay playsinline muted style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000"></video>
-
-  <!-- TMC_PATCH35BSCANFIX_BUNDLED: Viewfinder — fixed clean layout -->
-  <div style="position:absolute;inset:0;z-index:2;pointer-events:none">
-    <div style="position:absolute;top:50%;left:50%;width:260px;height:260px;margin:-130px 0 0 -130px;box-sizing:border-box">
-      <span style="position:absolute;top:0;left:0;display:block;width:36px;height:36px;border-top:4px solid #FF6B00;border-left:4px solid #FF6B00;border-radius:6px 0 0 0;box-sizing:border-box"></span>
-      <span style="position:absolute;top:0;right:0;display:block;width:36px;height:36px;border-top:4px solid #FF6B00;border-right:4px solid #FF6B00;border-radius:0 6px 0 0;box-sizing:border-box"></span>
-      <span style="position:absolute;bottom:0;left:0;display:block;width:36px;height:36px;border-bottom:4px solid #FF6B00;border-left:4px solid #FF6B00;border-radius:0 0 0 6px;box-sizing:border-box"></span>
-      <span style="position:absolute;bottom:0;right:0;display:block;width:36px;height:36px;border-bottom:4px solid #FF6B00;border-right:4px solid #FF6B00;border-radius:0 0 6px 0;box-sizing:border-box"></span>
-      <span id="p35bs-scanline" style="position:absolute;top:0;left:8px;right:8px;height:2px;background:linear-gradient(90deg,transparent,#FF6B00,transparent);box-shadow:0 0 12px #FF6B00;animation:p35bs-scan 2s ease-in-out infinite;display:block"></span>
-    </div>
-  </div>
-
-  <div id="p35bs-qr-status" style="position:absolute;bottom:0;left:0;right:0;padding:20px 24px 28px;background:linear-gradient(0deg,rgba(0,0,0,0.85),transparent);color:#fff;text-align:center;z-index:2">
-    <div id="p35bs-qr-msg" style="font-size:14px;font-weight:600;letter-spacing:-0.2px">Point the camera at the QR code on the back of the sticker.</div>
-  </div>
-
-  <canvas id="p35bs-qr-canvas" style="display:none"></canvas>
-</div>
-
-<style>
-@keyframes p35bs-scan {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(252px); }
-}
-</style>
-
-<script>
-// TMC_PATCH35BSCAN_NFC_QR: NFC + QR scan logic
-
-(function() {
-  /* Show NFC button only if the browser supports NDEFReader (Android Chrome) */
-  function checkNfcSupport() {
-    var btn = document.getElementById('p35bs-nfc-btn');
-    if (!btn) return;
-    if ('NDEFReader' in window) {
-      btn.style.display = '';
-    }
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', checkNfcSupport);
-  } else {
-    checkNfcSupport();
-  }
-})();
-
-/* Extract a TMC-XXXXXX token from a URL or raw string. Returns null if
-   the value does not look like a TapMyCar tag. */
-function p35bsExtractToken(raw) {
-  if (!raw) return null;
-  var s = String(raw).trim();
-  /* Pattern 1: a full URL like https://tapmycar.io/tag/TMC-44HSQ5 */
-  var m = s.match(/\/tag\/(TMC-[A-Z0-9]{6,12})/i);
-  if (m) return m[1].toUpperCase();
-  /* Pattern 2: a bare token TMC-XXXXXX */
-  m = s.match(/^(TMC-[A-Z0-9]{6,12})$/i);
-  if (m) return m[1].toUpperCase();
-  /* Pattern 3: token embedded anywhere in a string */
-  m = s.match(/(TMC-[A-Z0-9]{6,12})/i);
-  if (m) return m[1].toUpperCase();
-  return null;
-}
-
-function p35bsFillToken(token) {
-  var input = document.getElementById('p35b-token');
-  if (!input) return;
-  input.value = token;
-  /* visual feedback - flash the input */
-  var orig = input.style.background;
-  input.style.background = '#FFF3EC';
-  input.style.transition = 'background 0.4s ease';
-  setTimeout(function() { input.style.background = orig; }, 1200);
-  /* also flash the result area with success */
-  var result = document.getElementById('p35b-result');
-  if (result) {
-    result.innerHTML = '<div class="p26-ok">✅ Token captured: <strong>' + token + '</strong>. Set plan + months below, then activate.</div>';
-  }
-}
-
-/* ---------- NFC tap (Android Chrome) ---------- */
-async function p35bsTapNfc() {
-  if (!('NDEFReader' in window)) {
-    alert('NFC reading is only supported on Android Chrome. Use Scan QR instead.');
-    return;
-  }
-  var btn = document.getElementById('p35bs-nfc-btn');
-  var origText = btn.innerHTML;
-  btn.innerHTML = 'Hold sticker to phone…';
-  btn.disabled = true;
-  try {
-    var reader = new NDEFReader();
-    await reader.scan();
-    /* Listen ONCE - we want one tap to fill, not continuous reading */
-    var done = false;
-    reader.onreading = function(event) {
-      if (done) return;
-      var msg = event.message;
-      var url = null;
-      for (var i = 0; i < msg.records.length; i++) {
-        var rec = msg.records[i];
-        if (rec.recordType === 'url' || rec.recordType === 'absolute-url') {
-          var dec = new TextDecoder();
-          url = dec.decode(rec.data);
-          break;
-        }
-        if (rec.recordType === 'text') {
-          var dec2 = new TextDecoder();
-          url = dec2.decode(rec.data);
-          break;
-        }
-      }
-      var token = p35bsExtractToken(url);
-      if (token) {
-        done = true;
-        p35bsFillToken(token);
-      } else {
-        var result = document.getElementById('p35b-result');
-        if (result) result.innerHTML = '<div class="p26-error">❌ Tag detected but not a TapMyCar tag. Try another sticker.</div>';
-      }
-      btn.innerHTML = origText;
-      btn.disabled = false;
-    };
-    reader.onreadingerror = function() {
-      var result = document.getElementById('p35b-result');
-      if (result) result.innerHTML = '<div class="p26-error">❌ NFC read failed. Try again.</div>';
-      btn.innerHTML = origText;
-      btn.disabled = false;
-    };
-    /* Auto-reset button after 20 sec if no scan */
-    setTimeout(function() {
-      if (!done) {
-        btn.innerHTML = origText;
-        btn.disabled = false;
-      }
-    }, 20000);
-  } catch (e) {
-    var msg = (e && e.message) || 'NFC error';
-    var result = document.getElementById('p35b-result');
-    if (result) result.innerHTML = '<div class="p26-error">❌ ' + msg + '</div>';
-    btn.innerHTML = origText;
-    btn.disabled = false;
-  }
-}
-
-/* ---------- QR scan (camera + jsQR) ---------- */
-
-let p35bsQrStream = null;
-let p35bsQrLoopActive = false;
-let p35bsQrLib = null;
-
-async function p35bsLoadJsQr() {
-  /* TMC_PATCH35BSCANFIX_BUNDLED: load from same-origin /vendor/jsQR.js */
-  if (typeof window.jsQR === 'function') return Promise.resolve();
-  return new Promise(function(resolve, reject) {
-    var s = document.createElement('script');
-    s.src = '/vendor/jsQR.js';
-    s.async = true;
-    s.onload = function() {
-      if (typeof window.jsQR === 'function') resolve();
-      else reject(new Error('jsQR loaded but global not exposed'));
-    };
-    s.onerror = function() { reject(new Error('Failed to load /vendor/jsQR.js')); };
-    document.head.appendChild(s);
-  });
-}
-
-async function p35bsScanQr() {
-  var overlay = document.getElementById('p35bs-qr-overlay');
-  var video = document.getElementById('p35bs-qr-video');
-  var canvas = document.getElementById('p35bs-qr-canvas');
-  var statusMsg = document.getElementById('p35bs-qr-msg');
-  if (!overlay || !video || !canvas) return;
-
-  overlay.style.display = 'flex';
-  statusMsg.textContent = 'Loading scanner…';
-
-  try {
-    await p35bsLoadJsQr();
-  } catch (e) {
-    statusMsg.innerHTML = '<span style="color:#FCA5A5">Could not load QR scanner. Check your internet connection.</span>';
-    return;
-  }
-
-  try {
-    p35bsQrStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment' }
-    });
-    video.srcObject = p35bsQrStream;
-    await video.play();
-    statusMsg.textContent = 'Point the camera at the QR code on the back of the sticker.';
-  } catch (e) {
-    statusMsg.innerHTML = '<span style="color:#FCA5A5">Camera access denied. Enable it in browser settings and try again.</span>';
-    return;
-  }
-
-  p35bsQrLoopActive = true;
-  var ctx = canvas.getContext('2d', { willReadFrequently: true });
-
-  function loop() {
-    if (!p35bsQrLoopActive) return;
-    if (video.readyState === video.HAVE_ENOUGH_DATA) {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      var code = window.jsQR(imageData.data, canvas.width, canvas.height, {
-        inversionAttempts: 'dontInvert'
-      });
-      if (code && code.data) {
-        var token = p35bsExtractToken(code.data);
-        if (token) {
-          p35bsQrLoopActive = false;
-          statusMsg.innerHTML = '<span style="color:#34D399">✅ ' + token + ' captured!</span>';
-          /* Brief success flash, then close */
-          setTimeout(function() {
-            p35bsFillToken(token);
-            p35bsCloseQr();
-          }, 600);
-          return;
-        } else {
-          /* Detected a QR but not a TapMyCar one. Keep looking. */
-          statusMsg.innerHTML = '<span style="color:#FCA5A5">Not a TapMyCar tag. Try a different sticker.</span>';
-        }
-      }
-    }
-    requestAnimationFrame(loop);
-  }
-  requestAnimationFrame(loop);
-}
-
-function p35bsCloseQr() {
-  p35bsQrLoopActive = false;
-  var overlay = document.getElementById('p35bs-qr-overlay');
-  var video = document.getElementById('p35bs-qr-video');
-  if (p35bsQrStream) {
-    try {
-      p35bsQrStream.getTracks().forEach(function(t) { t.stop(); });
-    } catch (e) {}
-    p35bsQrStream = null;
-  }
-  if (video) {
-    try { video.pause(); video.srcObject = null; } catch (e) {}
-  }
-  if (overlay) overlay.style.display = 'none';
-}
-</script>
-
-
-<script>
-// TMC_PATCH44_BROADCAST - admin broadcast tab logic
-(function(){
-  var bcMode = "all";
-
-  window.bcSetMode = function(m){
-    bcMode = m;
-    document.querySelectorAll(".bc-mode").forEach(function(b){
-      b.classList.toggle("active", b.getAttribute("data-mode") === m);
-    });
-    document.getElementById("bc-plan-row").style.display = (m === "plan") ? "" : "none";
-    document.getElementById("bc-specific-row").style.display = (m === "specific") ? "" : "none";
-    bcResetCount();
-  };
-
-  window.bcResetCount = function(){
-    document.getElementById("bc-count").innerHTML = "";
-  };
-
-  function bcRecipients(){
-    if (bcMode === "plan") {
-      return { mode: "plan", plan: document.getElementById("bc-plan").value };
-    }
-    if (bcMode === "specific") {
-      var raw = document.getElementById("bc-ids").value || "";
-      var ids = raw.split(/[,\n]/).map(function(s){return s.trim();})
-        .filter(function(s){return s.length;});
-      return { mode: "specific", ids: ids };
-    }
-    return { mode: "all" };
-  }
-
-  function bcApi(payload){
-    payload.admin_key = (typeof adminKey === "string" ? adminKey : "");
-    return fetch("/api/send-broadcast", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    }).then(function(r){ return r.json(); });
-  }
-
-  window.bcPreview = function(){
-    var btn = document.getElementById("bc-preview-btn");
-    var out = document.getElementById("bc-count");
-    btn.disabled = true; out.innerHTML = "Checking…";
-    bcApi({ channel: "email", dry_run: true, recipients: bcRecipients() })
-      .then(function(d){
-        btn.disabled = false;
-        if (d && d.success) {
-          var extra = d.excluded_opted_out
-            ? " (" + d.excluded_opted_out + " unsubscribed, skipped)" : "";
-          out.innerHTML = "This will send to <span class=\"n\">" + d.count +
-            "</span> user" + (d.count === 1 ? "" : "s") + extra;
-        } else {
-          out.textContent = (d && d.error) ? d.error : "Could not get count";
-        }
-      })
-      .catch(function(){ btn.disabled = false; out.textContent = "Network error"; });
-  };
-
-  window.bcSend = function(){
-    var subject = (document.getElementById("bc-subject").value || "").trim();
-    var body = (document.getElementById("bc-body").value || "").trim();
-    var res = document.getElementById("bc-result");
-    res.innerHTML = "";
-    if (!subject) { res.className=""; res.innerHTML = bcMsg("err","Enter a subject."); return; }
-    if (!body) { res.innerHTML = bcMsg("err","Enter a message."); return; }
-
-    var rcp = bcRecipients();
-    if (rcp.mode === "specific" && (!rcp.ids || !rcp.ids.length)) {
-      res.innerHTML = bcMsg("err","Add at least one recipient email or ID."); return;
-    }
-
-    var who = rcp.mode === "all" ? "ALL users"
-      : rcp.mode === "plan" ? ("users on the " + rcp.plan + " plan")
-      : (rcp.ids.length + " specific user(s)");
-    if (!confirm("Send this email broadcast to " + who + "?\n\nThis cannot be undone.")) return;
-
-    var btn = document.getElementById("bc-send-btn");
-    btn.disabled = true; btn.textContent = "Sending…";
-    bcApi({ channel: "email", subject: subject, body: body, recipients: rcp })
-      .then(function(d){
-        btn.disabled = false; btn.textContent = "Send broadcast";
-        if (d && d.success) {
-          res.innerHTML = bcMsg("ok","Sent to " + d.sent + " user(s)." +
-            (d.failed ? (" " + d.failed + " failed.") : "") +
-            (d.excluded_opted_out ? (" " + d.excluded_opted_out + " unsubscribed user(s) skipped.") : ""));
-          document.getElementById("bc-subject").value = "";
-          document.getElementById("bc-body").value = "";
-          bcLoadHistory();
-        } else {
-          res.innerHTML = bcMsg("err",(d && d.error) ? d.error : "Send failed.");
-        }
-      })
-      .catch(function(){
-        btn.disabled = false; btn.textContent = "Send broadcast";
-        res.innerHTML = bcMsg("err","Network error - broadcast not sent.");
-      });
-  };
-
-  function bcMsg(kind, text){
-    return '<div class="bc-result ' + kind + '">' + bcEsc(text) + '</div>';
-  }
-  function bcEsc(s){
-    return String(s == null ? "" : s).replace(/[<>&"]/g, function(c){
-      return ({"<":"&lt;",">":"&gt;","&":"&amp;","\"":"&quot;"})[c];
-    });
-  }
-
-  window.bcLoadHistory = function(){
-    var box = document.getElementById("bc-history");
-    if (!box) return;
-    box.innerHTML = '<div class="empty">Loading history\u2026</div>';
-    bcApi({ action: "history" })
-      .then(function(d){
-        if (!d || !d.success) { box.innerHTML = '<div class="empty">Could not load history.</div>'; return; }
-        var list = d.broadcasts || [];
-        if (!list.length) { box.innerHTML = '<div class="empty">No broadcasts sent yet.</div>'; return; }
-        box.innerHTML = list.map(function(b){
-          var when = b.created_at ? new Date(b.created_at).toLocaleString() : "";
-          return '<div class="bc-hist-row">' +
-            '<div class="s">' + bcEsc(b.subject || "(no subject)") + '</div>' +
-            '<div class="m">' + bcEsc(b.channel || "email") + ' \u00b7 sent ' + (b.sent||0) +
-            (b.failed ? (' \u00b7 ' + b.failed + ' failed') : '') +
-            ' \u00b7 ' + when + '</div></div>';
-        }).join("");
-      })
-      .catch(function(){ box.innerHTML = '<div class="empty">Network error.</div>'; });
-  };
-
-  // Load history whenever the Broadcast tab is opened (same pattern as Promos).
-  var prevNavTo = window.navTo;
-  window.navTo = function(id){
-    var r = (typeof prevNavTo === "function") ? prevNavTo.apply(this, arguments) : undefined;
-    if (id === "broadcast") { try { bcLoadHistory(); } catch(e){} }
-    return r;
-  };
-})();
-</script>
 </body>
 </html>
