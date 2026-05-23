@@ -16,7 +16,7 @@ try {
 
 const FROM = 'TapMyCar <noreply@tapmycar.io>';
 const SITE = 'https://tapmycar.io';
-const COOLDOWN_MS = 0;  // TMC_PATCH51_NOTHROTTLE: 0 = notify on every scan
+const COOLDOWN_MS = 3 * 60 * 60 * 1000;  // 3 hours between alerts for one tag
 
 function esc(s) {
   return String(s == null ? '' : s)
