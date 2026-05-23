@@ -1699,6 +1699,16 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
           .bc-result{font-size:13px;border-radius:9px;padding:10px 12px;margin-top:12px}
           .bc-result.ok{background:#DCFCE7;color:#166534}
           .bc-result.err{background:#FEE2E2;color:#991B1B}
+          .bc-hist-row{cursor:pointer}
+          .bc-hist-row:hover{background:#FAFAFA}
+          .bc-hist-detail{margin-top:10px;border-top:1px solid #E5E7EB;padding-top:8px}
+          .bc-rcp{display:flex;justify-content:space-between;gap:10px;
+            font-size:12px;padding:4px 0;border-bottom:1px solid #F3F4F6}
+          .bc-rcp .who{color:#374151}
+          .bc-rcp .st{font-weight:700}
+          .bc-rcp .st.sent{color:#16A34A}
+          .bc-rcp .st.failed{color:#DC2626}
+          .bc-caret{color:#9CA3AF;font-size:11px}
         </style>
 
         <div class="bc-wrap">
@@ -1728,6 +1738,8 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
                   onclick="bcSetMode('plan')">By plan</button>
                 <button type="button" class="bc-mode" data-mode="specific"
                   onclick="bcSetMode('specific')">Specific</button>
+                <button type="button" class="bc-mode" data-mode="tag"
+                  onclick="bcSetMode('tag')">By tag</button><!-- TMC_PATCH48_TAGUI -->
               </div>
             </div>
 
@@ -1745,6 +1757,36 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
               <textarea class="bc-textarea" id="bc-ids" style="min-height:70px"
                 placeholder="someone@example.com, another@example.com"
                 oninput="bcResetCount()"></textarea>
+            </div>
+
+            <div class="bc-row" id="bc-tag-row" style="display:none">
+              <p class="bc-label">Tag filters (all optional, combined)</p>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+                <select class="bc-select" id="bc-tag-type" style="flex:1;min-width:140px"
+                  onchange="bcResetCount()">
+                  <option value="">Any tag type</option>
+                  <option value="physical">Physical</option>
+                  <option value="etag">eTag</option>
+                </select>
+                <select class="bc-select" id="bc-tag-status" style="flex:1;min-width:140px"
+                  onchange="bcResetCount()">
+                  <option value="">Any status</option>
+                  <option value="active">Active</option>
+                  <option value="paused">Paused</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="voided">Voided</option>
+                </select>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <input class="bc-input" id="bc-tag-batch" style="flex:1;min-width:140px"
+                  placeholder="Batch number (optional)" oninput="bcResetCount()">
+                <input class="bc-input" id="bc-tag-token" style="flex:1;min-width:140px"
+                  placeholder="Specific tag token (optional)" oninput="bcResetCount()">
+              </div>
+              <div class="bc-note" style="margin-top:8px">
+                Targets the <b>owners</b> of tags matching these filters. A user who
+                owns several matching tags is counted once.
+              </div>
             </div>
 
             <div class="bc-row">
@@ -4939,6 +4981,7 @@ function p35bsCloseQr() {
 <script>
 // TMC_PATCH44_BROADCAST - admin broadcast tab logic
 // TMC_PATCH46_CHANNELS - multi-channel (email / push / sms)
+// TMC_PATCH48_TAGUI - by-tag targeting + expandable recipient detail
 (function(){
   var bcMode = "all";
 
@@ -4949,6 +4992,8 @@ function p35bsCloseQr() {
     });
     document.getElementById("bc-plan-row").style.display = (m === "plan") ? "" : "none";
     document.getElementById("bc-specific-row").style.display = (m === "specific") ? "" : "none";
+    var tagRow = document.getElementById("bc-tag-row");
+    if (tagRow) tagRow.style.display = (m === "tag") ? "" : "none";
     bcResetCount();
   };
 
@@ -4966,10 +5011,21 @@ function p35bsCloseQr() {
         .filter(function(s){return s.length;});
       return { mode: "specific", ids: ids };
     }
+    if (bcMode === "tag") {
+      var r = { mode: "tag" };
+      var t = document.getElementById("bc-tag-type").value;
+      var s = document.getElementById("bc-tag-status").value;
+      var b = (document.getElementById("bc-tag-batch").value || "").trim();
+      var k = (document.getElementById("bc-tag-token").value || "").trim();
+      if (t) r.tag_type = t;
+      if (s) r.status = s;
+      if (b) r.batch_number = b;
+      if (k) r.token = k;
+      return r;
+    }
     return { mode: "all" };
   }
 
-  // Which channel checkboxes are ticked.
   function bcChannels(){
     var out = [];
     if (document.getElementById("bc-ch-email").checked) out.push("email");
@@ -4999,9 +5055,13 @@ function p35bsCloseQr() {
         btn.disabled = false;
         if (d && d.success) {
           var parts = channels.map(function(c){
-            return CH_LABEL[c] + ": <span class=\"n\">" + ((d.counts && d.counts[c]) || 0) + "</span>";
+            var n = (d.counts && d.counts[c]) || 0;
+            return CH_LABEL[c] + ": <span class=\"n\">" + n + "</span>";
           });
-          out.innerHTML = "Will send — " + parts.join(" &nbsp;·&nbsp; ");
+          var head = (typeof d.base === "number")
+            ? (d.base + " user" + (d.base === 1 ? "" : "s") + " matched — ")
+            : "Will send — ";
+          out.innerHTML = head + parts.join(" &nbsp;·&nbsp; ");
         } else {
           out.textContent = (d && d.error) ? d.error : "Could not get count";
         }
@@ -5026,6 +5086,7 @@ function p35bsCloseQr() {
 
     var who = rcp.mode === "all" ? "ALL users"
       : rcp.mode === "plan" ? ("users on the " + rcp.plan + " plan")
+      : rcp.mode === "tag" ? "owners of the matching tags"
       : (rcp.ids.length + " specific user(s)");
     var chNames = channels.map(function(c){ return CH_LABEL[c]; }).join(", ");
     if (!confirm("Send via " + chNames + " to " + who + "?\n\nThis cannot be undone.")) return;
@@ -5064,6 +5125,36 @@ function p35bsCloseQr() {
     });
   }
 
+  // Toggle the expandable recipient detail under a history row.
+  window.bcToggleDetail = function(bid, el){
+    var box = el.querySelector(".bc-hist-detail");
+    var caret = el.querySelector(".bc-caret");
+    if (box) {
+      box.parentNode.removeChild(box);
+      if (caret) caret.textContent = "▸ show recipients";
+      return;
+    }
+    box = document.createElement("div");
+    box.className = "bc-hist-detail";
+    box.innerHTML = "Loading recipients…";
+    el.appendChild(box);
+    if (caret) caret.textContent = "▾ hide recipients";
+    bcApi({ action: "detail", broadcast_id: bid })
+      .then(function(d){
+        if (!d || !d.success) { box.innerHTML = "Could not load recipients."; return; }
+        var list = d.recipients || [];
+        if (!list.length) { box.innerHTML = "No recipient records."; return; }
+        box.innerHTML = list.map(function(r){
+          var who = (r.name ? bcEsc(r.name) + " · " : "") + bcEsc(r.contact || "");
+          var st = r.status === "failed" ? "failed" : "sent";
+          return '<div class="bc-rcp"><span class="who">' + who +
+            ' <span style="color:#9CA3AF">(' + bcEsc(r.channel) + ')</span></span>' +
+            '<span class="st ' + st + '">' + st + '</span></div>';
+        }).join("");
+      })
+      .catch(function(){ box.innerHTML = "Network error loading recipients."; });
+  };
+
   window.bcLoadHistory = function(){
     var box = document.getElementById("bc-history");
     if (!box) return;
@@ -5073,17 +5164,23 @@ function p35bsCloseQr() {
         if (!d || !d.success) { box.innerHTML = '<div class="empty">Could not load history.</div>'; return; }
         var list = d.broadcasts || [];
         if (!list.length) { box.innerHTML = '<div class="empty">No broadcasts sent yet.</div>'; return; }
-        box.innerHTML = list.map(function(b){
+        box.innerHTML = "";
+        list.forEach(function(b){
           var when = b.created_at ? new Date(b.created_at).toLocaleString() : "";
           var chans = (b.channels && b.channels.length)
             ? b.channels.map(function(c){ return CH_LABEL[c] || c; }).join(", ")
             : "email";
-          return '<div class="bc-hist-row">' +
+          var row = document.createElement("div");
+          row.className = "bc-hist-row";
+          row.innerHTML =
             '<div class="s">' + bcEsc(b.subject || "(no subject)") + '</div>' +
             '<div class="m">' + bcEsc(chans) + ' \u00b7 sent ' + (b.sent||0) +
             (b.failed ? (' \u00b7 ' + b.failed + ' failed') : '') +
-            ' \u00b7 ' + when + '</div></div>';
-        }).join("");
+            ' \u00b7 ' + when +
+            ' &nbsp; <span class="bc-caret">\u25b8 show recipients</span></div>';
+          row.onclick = function(){ bcToggleDetail(b.broadcast_id, row); };
+          box.appendChild(row);
+        });
       })
       .catch(function(){ box.innerHTML = '<div class="empty">Network error.</div>'; });
   };
