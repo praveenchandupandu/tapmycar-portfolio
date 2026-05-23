@@ -1671,9 +1671,15 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
             padding:20px;margin-bottom:18px}
           .bc-label{font-size:12px;font-weight:700;color:#374151;
             text-transform:uppercase;letter-spacing:.04em;margin:0 0 8px}
+          /* TMC_PATCH49_FIELDFIX: force light fields - the admin theme
+             styles bare inputs dark, which made typed text invisible. */
           .bc-input,.bc-textarea,.bc-select{width:100%;border:1px solid #D1D5DB;
             border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;
-            box-sizing:border-box;color:#111}
+            box-sizing:border-box;color:#111;background:#fff;-webkit-text-fill-color:#111}
+          #panel-broadcast .bc-input::placeholder,
+          #panel-broadcast .bc-textarea::placeholder{color:#9CA3AF;opacity:1;
+            -webkit-text-fill-color:#9CA3AF}
+          #panel-broadcast select.bc-select option{color:#111;background:#fff}
           .bc-textarea{min-height:120px;resize:vertical}
           .bc-row{margin-bottom:16px}
           .bc-modes{display:flex;gap:8px;flex-wrap:wrap}
