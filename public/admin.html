@@ -1703,10 +1703,20 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 
         <div class="bc-wrap">
           <div class="bc-card">
-            <div class="bc-note" style="margin-bottom:16px">
-              <b>Email channel.</b> Push and SMS channels are coming in a later stage.
-              Announcement emails automatically skip users who have unsubscribed,
-              and every email includes a required unsubscribe link.
+            <!-- TMC_PATCH46_CHANNELS -->
+            <div class="bc-row">
+              <p class="bc-label">Channels</p>
+              <label style="display:inline-flex;align-items:center;gap:6px;margin-right:18px;font-size:14px;font-weight:600;color:#374151;cursor:pointer">
+                <input type="checkbox" id="bc-ch-email" checked onchange="bcResetCount()"> Email</label>
+              <label style="display:inline-flex;align-items:center;gap:6px;margin-right:18px;font-size:14px;font-weight:600;color:#374151;cursor:pointer">
+                <input type="checkbox" id="bc-ch-push" onchange="bcResetCount()"> Web push</label>
+              <label style="display:inline-flex;align-items:center;gap:6px;margin-right:18px;font-size:14px;font-weight:600;color:#374151;cursor:pointer">
+                <input type="checkbox" id="bc-ch-sms" onchange="bcResetCount()"> SMS</label>
+              <div class="bc-note" style="margin-top:10px">
+                <b>Email</b> skips unsubscribed users and includes an unsubscribe link.
+                <b>Web push</b> reaches only users who enabled browser notifications.
+                <b>SMS</b> goes only to users who explicitly opted in (and costs money per message).
+              </div>
             </div>
 
             <div class="bc-row">
@@ -4928,6 +4938,7 @@ function p35bsCloseQr() {
 
 <script>
 // TMC_PATCH44_BROADCAST - admin broadcast tab logic
+// TMC_PATCH46_CHANNELS - multi-channel (email / push / sms)
 (function(){
   var bcMode = "all";
 
@@ -4958,6 +4969,16 @@ function p35bsCloseQr() {
     return { mode: "all" };
   }
 
+  // Which channel checkboxes are ticked.
+  function bcChannels(){
+    var out = [];
+    if (document.getElementById("bc-ch-email").checked) out.push("email");
+    if (document.getElementById("bc-ch-push").checked)  out.push("push");
+    if (document.getElementById("bc-ch-sms").checked)   out.push("sms");
+    return out;
+  }
+  var CH_LABEL = { email: "Email", push: "Web push", sms: "SMS" };
+
   function bcApi(payload){
     payload.admin_key = (typeof adminKey === "string" ? adminKey : "");
     return fetch("/api/send-broadcast", {
@@ -4968,17 +4989,19 @@ function p35bsCloseQr() {
   }
 
   window.bcPreview = function(){
-    var btn = document.getElementById("bc-preview-btn");
+    var channels = bcChannels();
     var out = document.getElementById("bc-count");
+    if (!channels.length) { out.textContent = "Select at least one channel."; return; }
+    var btn = document.getElementById("bc-preview-btn");
     btn.disabled = true; out.innerHTML = "Checking…";
-    bcApi({ channel: "email", dry_run: true, recipients: bcRecipients() })
+    bcApi({ channels: channels, dry_run: true, recipients: bcRecipients() })
       .then(function(d){
         btn.disabled = false;
         if (d && d.success) {
-          var extra = d.excluded_opted_out
-            ? " (" + d.excluded_opted_out + " unsubscribed, skipped)" : "";
-          out.innerHTML = "This will send to <span class=\"n\">" + d.count +
-            "</span> user" + (d.count === 1 ? "" : "s") + extra;
+          var parts = channels.map(function(c){
+            return CH_LABEL[c] + ": <span class=\"n\">" + ((d.counts && d.counts[c]) || 0) + "</span>";
+          });
+          out.innerHTML = "Will send — " + parts.join(" &nbsp;·&nbsp; ");
         } else {
           out.textContent = (d && d.error) ? d.error : "Could not get count";
         }
@@ -4987,11 +5010,13 @@ function p35bsCloseQr() {
   };
 
   window.bcSend = function(){
+    var channels = bcChannels();
     var subject = (document.getElementById("bc-subject").value || "").trim();
     var body = (document.getElementById("bc-body").value || "").trim();
     var res = document.getElementById("bc-result");
     res.innerHTML = "";
-    if (!subject) { res.className=""; res.innerHTML = bcMsg("err","Enter a subject."); return; }
+    if (!channels.length) { res.innerHTML = bcMsg("err","Select at least one channel."); return; }
+    if (!subject) { res.innerHTML = bcMsg("err","Enter a subject."); return; }
     if (!body) { res.innerHTML = bcMsg("err","Enter a message."); return; }
 
     var rcp = bcRecipients();
@@ -5002,17 +5027,21 @@ function p35bsCloseQr() {
     var who = rcp.mode === "all" ? "ALL users"
       : rcp.mode === "plan" ? ("users on the " + rcp.plan + " plan")
       : (rcp.ids.length + " specific user(s)");
-    if (!confirm("Send this email broadcast to " + who + "?\n\nThis cannot be undone.")) return;
+    var chNames = channels.map(function(c){ return CH_LABEL[c]; }).join(", ");
+    if (!confirm("Send via " + chNames + " to " + who + "?\n\nThis cannot be undone.")) return;
 
     var btn = document.getElementById("bc-send-btn");
     btn.disabled = true; btn.textContent = "Sending…";
-    bcApi({ channel: "email", subject: subject, body: body, recipients: rcp })
+    bcApi({ channels: channels, subject: subject, body: body, recipients: rcp })
       .then(function(d){
         btn.disabled = false; btn.textContent = "Send broadcast";
         if (d && d.success) {
-          res.innerHTML = bcMsg("ok","Sent to " + d.sent + " user(s)." +
-            (d.failed ? (" " + d.failed + " failed.") : "") +
-            (d.excluded_opted_out ? (" " + d.excluded_opted_out + " unsubscribed user(s) skipped.") : ""));
+          var lines = Object.keys(d.results || {}).map(function(c){
+            var r = d.results[c];
+            return CH_LABEL[c] + ": " + r.sent + " sent" +
+              (r.failed ? (", " + r.failed + " failed") : "");
+          });
+          res.innerHTML = bcMsg("ok","Broadcast sent. " + lines.join(" · "));
           document.getElementById("bc-subject").value = "";
           document.getElementById("bc-body").value = "";
           bcLoadHistory();
@@ -5046,9 +5075,12 @@ function p35bsCloseQr() {
         if (!list.length) { box.innerHTML = '<div class="empty">No broadcasts sent yet.</div>'; return; }
         box.innerHTML = list.map(function(b){
           var when = b.created_at ? new Date(b.created_at).toLocaleString() : "";
+          var chans = (b.channels && b.channels.length)
+            ? b.channels.map(function(c){ return CH_LABEL[c] || c; }).join(", ")
+            : "email";
           return '<div class="bc-hist-row">' +
             '<div class="s">' + bcEsc(b.subject || "(no subject)") + '</div>' +
-            '<div class="m">' + bcEsc(b.channel || "email") + ' \u00b7 sent ' + (b.sent||0) +
+            '<div class="m">' + bcEsc(chans) + ' \u00b7 sent ' + (b.sent||0) +
             (b.failed ? (' \u00b7 ' + b.failed + ' failed') : '') +
             ' \u00b7 ' + when + '</div></div>';
         }).join("");
@@ -5056,7 +5088,6 @@ function p35bsCloseQr() {
       .catch(function(){ box.innerHTML = '<div class="empty">Network error.</div>'; });
   };
 
-  // Load history whenever the Broadcast tab is opened (same pattern as Promos).
   var prevNavTo = window.navTo;
   window.navTo = function(id){
     var r = (typeof prevNavTo === "function") ? prevNavTo.apply(this, arguments) : undefined;
