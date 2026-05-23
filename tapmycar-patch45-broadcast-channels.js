@@ -1,4 +1,90 @@
-// TMC_PATCH43_BROADCAST + TMC_PATCH45_CHANNELS
+// ============================================================================
+// TapMyCar - Patch 45 (Notification System, STAGE 4a): Push + SMS channels
+//
+// PREREQUISITE
+//   Patches 41-44 deployed. Web push works; the email broadcast tool works.
+//
+// WHAT THIS PATCH DOES
+//   REWRITES api/send-broadcast.js so a broadcast can go out over any
+//   combination of three channels: email, push, sms.
+//
+//   The request now accepts "channels": ["email","push","sms"] (an array).
+//   The old single "channel":"email" is still accepted for backward
+//   compatibility, so the current admin UI keeps working until Patch 46
+//   upgrades it.
+//
+//   Per-channel recipient rules (each enforced automatically):
+//     - email : must have an email AND not have email_opt_out = true.
+//               Every email carries an unsubscribe link.
+//     - push  : must have at least one saved browser push subscription.
+//               (Having a subscription IS the opt-in.)
+//     - sms   : must have a phone number AND sms_opt_in = true.
+//               This is the TCPA consent gate - users are NEVER texted
+//               unless they have explicitly opted in.
+//
+//   PREVIEW (dry_run) now returns a per-channel "counts" object, e.g.
+//     { counts: { email: 12, push: 4, sms: 0 }, count: 12, ... }
+//   ("count" is kept = email count for backward compatibility.)
+//
+//   SEND returns per-channel results plus overall totals, and logs one
+//   notifications_log row per recipient per channel under one broadcast_id.
+//
+//   HISTORY now reports every channel a broadcast used.
+//
+//   web-push uses the same VAPID env vars fixed in Stage 1; SMS uses the
+//   existing TWILIO_* env vars. Note: if Twilio A2P registration is not yet
+//   approved, SMS sends will fail gracefully and be reported as "failed" -
+//   the rest of the broadcast still completes.
+//
+// Properties: idempotent (safe to re-run), validates JS, backs up the file.
+// ============================================================================
+
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+
+const ROOT = __dirname;
+const API = path.join(ROOT, 'api');
+
+const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 16);
+const BACKUP_DIR = path.join(ROOT, `backup-patch45-${ts}`);
+
+const log  = (s) => console.log(s);
+const ok   = (s) => console.log('  \u2713 ' + s);
+const skip = (s) => console.log('  \u00b7 ' + s + ' (already applied, skipped)');
+const errExit = (s) => { console.error('  \u2717 ' + s); process.exit(1); };
+
+function writeFile(p, content) {
+  fs.writeFileSync(p, content, { encoding: 'utf8' });
+}
+function backup(absPath, label) {
+  if (!fs.existsSync(absPath)) return;
+  const dest = path.join(BACKUP_DIR, label);
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  fs.copyFileSync(absPath, dest);
+}
+function checkJs(absPath, label) {
+  try {
+    execSync('node --check "' + absPath + '"', { stdio: 'pipe' });
+    ok(label + ' passes node --check');
+  } catch (e) {
+    errExit(label + ' FAILED node --check:\n' + (e.stderr ? e.stderr.toString() : e.message));
+  }
+}
+
+log('');
+log('TapMyCar Patch 45 (Stage 4a) - Push + SMS broadcast channels');
+log('============================================================');
+
+const epPath = path.join(API, 'send-broadcast.js');
+if (!fs.existsSync(epPath)) errExit('api/send-broadcast.js not found - run Patch 43 first.');
+
+if (fs.readFileSync(epPath, 'utf8').indexOf('TMC_PATCH45_CHANNELS') !== -1) {
+  skip('api/send-broadcast.js');
+} else {
+  backup(epPath, 'api/send-broadcast.js');
+
+  const ENDPOINT = String.raw`// TMC_PATCH43_BROADCAST + TMC_PATCH45_CHANNELS
 // Admin broadcast endpoint. POST /api/send-broadcast.
 // Channels: email, push, sms. Modes: preview (dry_run), send, history.
 const { createClient } = require('@supabase/supabase-js');
@@ -328,3 +414,47 @@ module.exports = async function handler(req, res) {
     count: totalEligible
   });
 };
+`;
+
+  writeFile(epPath, ENDPOINT);
+  checkJs(epPath, 'api/send-broadcast.js');
+  ok('api/send-broadcast.js rewritten - email + push + sms channels');
+}
+
+log('');
+log('============================================================');
+log('Patch 45 (Stage 4a) applied.');
+if (fs.existsSync(BACKUP_DIR)) log('Backups: ' + path.basename(BACKUP_DIR));
+log('');
+log('  Commit + push, wait ~60s. The existing email broadcast UI keeps');
+log('  working unchanged. Test the new channels from the /admin.html');
+log('  console (uses the global adminKey):');
+log('');
+log('  PUSH preview (you have a push subscription from Stage 1):');
+log('    fetch("/api/send-broadcast",{method:"POST",headers:{"Content-Type":');
+log('      "application/json"},body:JSON.stringify({admin_key:adminKey,');
+log('      channels:["push"],dry_run:true,recipients:{mode:"all"}})})');
+log('      .then(r=>r.json()).then(console.log)');
+log('    -> expect counts.push >= 1');
+log('');
+log('  PUSH send to yourself:');
+log('    fetch("/api/send-broadcast",{method:"POST",headers:{"Content-Type":');
+log('      "application/json"},body:JSON.stringify({admin_key:adminKey,');
+log('      channels:["push"],subject:"Push test",body:"Broadcast push works.",');
+log('      recipients:{mode:"specific",ids:["praveenchandu2828@gmail.com"]}})})');
+log('      .then(r=>r.json()).then(console.log)');
+log('    -> expect results.push.sent = 1, and a notification pops up.');
+log('');
+log('  SMS preview (counts.sms will be 0 until users opt in - expected):');
+log('    ...channels:["sms"],dry_run:true,recipients:{mode:"all"}...');
+log('    -> counts.sms = 0 is CORRECT: no user has sms_opt_in = true yet.');
+log('       To test a real SMS send, first opt your own account in via SQL:');
+log('         update users set sms_opt_in = true');
+log('         where email = ' + "'" + 'praveenchandu2828@gmail.com' + "'" + ';');
+log('       then send channels:["sms"] to yourself. Note: if Twilio A2P is');
+log('       not approved yet, the send is reported as failed - that is a');
+log('       Twilio account state, not a code bug.');
+log('');
+log('  Confirm push works, then I build Patch 46 - channel checkboxes in');
+log('  the Broadcast tab UI.');
+log('');
