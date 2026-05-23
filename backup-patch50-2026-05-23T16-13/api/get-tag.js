@@ -393,22 +393,6 @@ module.exports = async function handler(req, res) {
         .single();
 
       scan_id = scan?.id;
-
-      // TMC_PATCH50_SCANNOTIFY: tell the tag owner their tag was scanned.
-      // Fire-and-forget - never delays or breaks the tag page response.
-      try {
-        const proto = req.headers["x-forwarded-proto"] || "https";
-        const host = req.headers["host"];
-        if (host) {
-          fetch(proto + "://" + host + "/api/scan-notify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ tag_id: tag.id })
-          }).catch(function (e) { console.error("scan-notify call failed:", e && e.message); });
-        }
-      } catch (e) {
-        console.error("scan-notify dispatch error (non-fatal):", e && e.message);
-      }
     }
 
     return res.json({ tag, scan_id });
