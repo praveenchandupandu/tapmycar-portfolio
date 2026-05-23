@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<!-- TMC_PATCH53_VOICE -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#FF6B00">
+  <title>Voice memo — TapMyCar</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta name="robots" content="noindex">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Inter,-apple-system,Segoe UI,Roboto,sans-serif;
+      background:#F9FAFB;color:#111;min-height:100vh;display:flex;
+      align-items:center;justify-content:center;padding:24px}
+    .card{background:#fff;max-width:440px;width:100%;border-radius:18px;
+      border:1px solid #E5E7EB;padding:34px 28px;text-align:center;
+      box-shadow:0 4px 24px rgba(0,0,0,.05)}
+    .brand{font-size:22px;font-weight:800;margin-bottom:6px}
+    .brand span{color:#FF6B00}
+    .tag{font-size:13px;color:#6B7280;margin-bottom:24px}
+    .icon{width:56px;height:56px;border-radius:50%;margin:0 auto 16px;
+      background:#F5F3FF;color:#6D28D9;display:flex;align-items:center;
+      justify-content:center;font-size:26px}
+    h1{font-size:19px;font-weight:800;margin-bottom:8px}
+    p{font-size:13px;color:#6B7280;line-height:1.6;margin-bottom:20px}
+    audio{width:100%;margin:8px 0 20px}
+    .btn{display:block;background:#FF6B00;color:#fff;font-size:14px;
+      font-weight:700;padding:13px 0;border-radius:12px;text-decoration:none}
+    .btn:hover{background:#E65F00}
+    .err{font-size:13px;color:#991B1B;background:#FEE2E2;border-radius:10px;
+      padding:12px;margin-bottom:16px}
+    .foot{margin-top:22px;font-size:11px;color:#9CA3AF}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">TapMyCar<span>.</span></div>
+    <div class="tag">Privacy for you. Safety for your car.</div>
+    <div class="icon">♪</div>
+    <h1>Voice memo</h1>
+    <div id="content"><p>Loading…</p></div>
+    <div class="foot">Praman Tech LLC · Connecticut, USA</div>
+  </div>
+  <script>
+  (function(){
+    var p = new URLSearchParams(location.search);
+    var audio = p.get("a");
+    var dur = p.get("d");
+    var veh = p.get("v");
+    var box = document.getElementById("content");
+    function esc(s){
+      return String(s == null ? "" : s).replace(/[<>&"]/g, function(c){
+        return ({"<":"&lt;",">":"&gt;","&":"&amp;","\"":"&quot;"})[c];
+      });
+    }
+    if(!audio){
+      box.innerHTML = '<div class="err">This voice memo link is missing or ' +
+        'invalid. Open your Activity page to find it.</div>' +
+        '<a class="btn" href="/activity.html">Go to Activity</a>';
+      return;
+    }
+    var who = veh ? ("on " + esc(veh)) : "on your vehicle";
+    var len = dur ? (" \u00b7 " + esc(dur) + "s") : "";
+    box.innerHTML =
+      '<p>Someone scanned your tag ' + who + ' and left a voice memo' + len + '.</p>' +
+      '<audio controls preload="metadata" src="' + encodeURI(audio) + '"></audio>' +
+      '<a class="btn" href="/activity.html">View all activity</a>';
+  })();
+  </script>
+</body>
+</html>

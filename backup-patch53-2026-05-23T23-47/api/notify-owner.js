@@ -127,11 +127,8 @@ module.exports = async function handler(req, res) {
     }
 
     subject = 'Someone sent you a voice memo via TapMyCar';
-    // TMC_PATCH53_VOICE: link to the branded voice.html page, not the raw file.
-    const voicePageUrl = 'https://tapmycar.io/voice.html?a=' + encodeURIComponent(audioUrl) +
-      '&d=' + encodeURIComponent(duration) + '&v=' + encodeURIComponent(vehicleLabel || '');
     const audioHtml = audioUrl
-      ? '<a href="' + voicePageUrl + '" style="display:inline-block;background:#6D28D9;color:#fff;font-size:13px;font-weight:700;padding:12px 20px;border-radius:10px;text-decoration:none;margin-bottom:12px">Listen to voice memo (' + duration + 's)</a>'
+      ? '<a href="' + audioUrl + '" style="display:inline-block;background:#6D28D9;color:#fff;font-size:13px;font-weight:700;padding:12px 20px;border-radius:10px;text-decoration:none;margin-bottom:12px">Listen to voice memo (' + duration + 's)</a>'
       : '<p style="font-size:12px;color:#6B7280">Voice memo could not be processed. Please check your dashboard.</p>';
     body =
       '<div style="font-family:Inter,sans-serif;max-width:400px;margin:0 auto;padding:40px 20px">' +
