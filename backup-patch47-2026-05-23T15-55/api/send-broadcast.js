@@ -1,6 +1,6 @@
-// TMC_PATCH43_BROADCAST + TMC_PATCH45_CHANNELS + TMC_PATCH47_TAGS
+// TMC_PATCH43_BROADCAST + TMC_PATCH45_CHANNELS
 // Admin broadcast endpoint. POST /api/send-broadcast.
-// Channels: email, push, sms. Modes: preview (dry_run), send, history, detail.
+// Channels: email, push, sms. Modes: preview (dry_run), send, history.
 const { createClient } = require('@supabase/supabase-js');
 const { Resend } = require('resend');
 const webpush = require('web-push');
@@ -8,11 +8,16 @@ const webpush = require('web-push');
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// VAPID config for web push (same env vars fixed in Stage 1).
 try {
   webpush.setVapidDetails(
-    process.env.VAPID_EMAIL, process.env.VAPID_PUBLIC_KEY, process.env.VAPID_PRIVATE_KEY
+    process.env.VAPID_EMAIL,
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
   );
-} catch (e) { console.error('VAPID setup failed:', e && e.message); }
+} catch (e) {
+  console.error('VAPID setup failed:', e && e.message);
+}
 
 const FROM = 'TapMyCar <noreply@tapmycar.io>';
 const SITE = 'https://tapmycar.io';
@@ -38,7 +43,8 @@ function buildEmailHtml(subject, bodyText, user) {
         'padding:26px 24px">' +
         '<h1 style="font-size:19px;font-weight:800;margin:0 0 14px">' +
           esc(subject) + '</h1>' +
-        '<div style="font-size:14px;line-height:1.65;color:#374151">' + bodyHtml + '</div>' +
+        '<div style="font-size:14px;line-height:1.65;color:#374151">' +
+          bodyHtml + '</div>' +
       '</div>' +
       '<div style="font-size:11px;color:#9CA3AF;padding:16px 6px;line-height:1.6">' +
         'You are receiving this because you have a TapMyCar account.<br>' +
@@ -48,43 +54,14 @@ function buildEmailHtml(subject, bodyText, user) {
     '</div>';
 }
 
-// Fetch users by a list of ids (chunked to stay within query limits).
-async function usersByIds(ids) {
-  const uniq = Array.from(new Set(ids.filter(Boolean)));
-  const out = [];
-  for (let i = 0; i < uniq.length; i += 300) {
-    const chunk = uniq.slice(i, i + 300);
-    const { data, error } = await supabase.from('users')
-      .select('id, email, name, phone, plan, email_opt_out, sms_opt_in, unsubscribe_token')
-      .in('id', chunk);
-    if (error) throw new Error(error.message);
-    (data || []).forEach(function (u) { out.push(u); });
-  }
-  return out;
-}
-
-// Resolve the base recipient set from the selector.
+// Resolve the base recipient set from the selector. Channel filtering happens
+// afterward, per channel.
 async function resolveRecipients(recipients) {
   const mode = (recipients && recipients.mode) || 'all';
-
-  // --- mode: tag -> owners of tags matching the filters ---
-  if (mode === 'tag') {
-    let tq = supabase.from('tags').select('owner_id').range(0, 99999);
-    if (recipients.tag_type)     tq = tq.eq('tag_type', recipients.tag_type);
-    if (recipients.status)       tq = tq.eq('status', recipients.status);
-    if (recipients.batch_number) tq = tq.eq('batch_number', recipients.batch_number);
-    if (recipients.token)        tq = tq.eq('token', String(recipients.token).trim());
-    const { data: tags, error: terr } = await tq;
-    if (terr) throw new Error(terr.message);
-    const ownerIds = (tags || []).map(function (t) { return t.owner_id; }).filter(Boolean);
-    if (!ownerIds.length) return [];
-    return usersByIds(ownerIds);
-  }
-
-  // --- modes: all / plan / specific ---
   let q = supabase.from('users')
     .select('id, email, name, phone, plan, email_opt_out, sms_opt_in, unsubscribe_token')
     .range(0, 9999);
+
   if (mode === 'plan') {
     const plan = recipients && recipients.plan;
     if (VALID_PLANS.indexOf(plan) === -1) {
@@ -92,6 +69,7 @@ async function resolveRecipients(recipients) {
     }
     q = q.eq('plan', plan);
   }
+
   const { data, error } = await q;
   if (error) throw new Error(error.message);
   let users = data || [];
@@ -108,6 +86,7 @@ async function resolveRecipients(recipients) {
   return users;
 }
 
+// Map of user_id -> array of push subscriptions, for the given user ids.
 async function getPushSubs(userIds) {
   const map = {};
   if (!userIds.length) return map;
@@ -121,6 +100,7 @@ async function getPushSubs(userIds) {
   return map;
 }
 
+// --- channel eligibility ---
 function emailEligible(users) {
   return users.filter(function (u) { return u.email && !u.email_opt_out; });
 }
@@ -131,6 +111,7 @@ function smsEligible(users) {
   return users.filter(function (u) { return u.phone && u.sms_opt_in === true; });
 }
 
+// --- channel senders. Each returns { sent, failed, logRows } ---
 async function sendEmail(users, subject, bodyText, broadcastId) {
   let sent = 0, failed = 0; const logRows = [];
   for (let i = 0; i < users.length; i += 100) {
@@ -195,7 +176,9 @@ async function sendSms(users, subject, bodyText, broadcastId) {
   try {
     const twilio = require('twilio');
     client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-  } catch (e) { console.error('Twilio init failed:', e && e.message); }
+  } catch (e) {
+    console.error('Twilio init failed:', e && e.message);
+  }
   const text = (String(subject).trim() + ': ' + String(bodyText).trim()).slice(0, 600);
   for (let i = 0; i < users.length; i += 10) {
     const chunk = users.slice(i, i + 10);
@@ -235,8 +218,9 @@ module.exports = async function handler(req, res) {
     const { data, error } = await supabase
       .from('notifications_log').select('*')
       .eq('event_type', 'broadcast')
-      .order('created_at', { ascending: false }).limit(2000);
+      .order('created_at', { ascending: false }).limit(1000);
     if (error) return res.status(500).json({ error: error.message });
+
     const groups = {};
     (data || []).forEach(function (r) {
       const k = r.broadcast_id || ('row-' + r.id);
@@ -257,35 +241,7 @@ module.exports = async function handler(req, res) {
     return res.json({ success: true, broadcasts: list });
   }
 
-  // --- DETAIL: per-recipient list for one broadcast ---
-  if (action === 'detail') {
-    const bid = body.broadcast_id;
-    if (!bid) return res.status(400).json({ error: 'broadcast_id required' });
-    const { data, error } = await supabase
-      .from('notifications_log').select('*')
-      .eq('broadcast_id', bid)
-      .order('created_at', { ascending: true }).limit(5000);
-    if (error) return res.status(500).json({ error: error.message });
-    const rows = data || [];
-    // Join recipient names from users.
-    const ids = Array.from(new Set(rows.map(function (r) { return r.recipient_user_id; }).filter(Boolean)));
-    const nameById = {};
-    for (let i = 0; i < ids.length; i += 300) {
-      const chunk = ids.slice(i, i + 300);
-      const { data: us } = await supabase.from('users').select('id, name').in('id', chunk);
-      (us || []).forEach(function (u) { nameById[u.id] = u.name; });
-    }
-    const recipients_list = rows.map(function (r) {
-      return {
-        name: nameById[r.recipient_user_id] || null,
-        contact: r.recipient_contact, channel: r.channel,
-        status: r.status, error: r.error || null
-      };
-    });
-    return res.json({ success: true, broadcast_id: bid, recipients: recipients_list });
-  }
-
-  // --- channels ---
+  // --- normalize channels (accept "channels" array OR legacy "channel" string) ---
   let channels = body.channels;
   if (!channels && body.channel) channels = [body.channel];
   if (!channels || !channels.length) channels = ['email'];
@@ -316,7 +272,6 @@ module.exports = async function handler(req, res) {
   if (dry_run) {
     return res.json({
       success: true, dry_run: true, channels: channels, counts: counts,
-      base: base.length,                          // users matched by the selector
       count: counts.email,
       excluded_opted_out: base.length - counts.email
     });
@@ -332,8 +287,7 @@ module.exports = async function handler(req, res) {
   const totalEligible = counts.email + counts.push + counts.sms;
   if (totalEligible === 0) {
     return res.status(400).json({
-      error: 'No eligible recipients across the selected channel(s). ' +
-             base.length + ' user(s) matched, but none can receive on those channels.'
+      error: 'No eligible recipients across the selected channel(s).'
     });
   }
 
@@ -359,7 +313,9 @@ module.exports = async function handler(req, res) {
 
   try {
     if (allLogRows.length) await supabase.from('notifications_log').insert(allLogRows);
-  } catch (e) { console.error('notifications_log insert failed:', e && e.message); }
+  } catch (e) {
+    console.error('notifications_log insert failed:', e && e.message);
+  }
 
   let totalSent = 0, totalFailed = 0;
   Object.keys(results).forEach(function (c) {
@@ -369,6 +325,6 @@ module.exports = async function handler(req, res) {
   return res.json({
     success: true, broadcast_id: broadcastId, channels: channels,
     results: results, sent: totalSent, failed: totalFailed,
-    base: base.length, count: totalEligible
+    count: totalEligible
   });
 };

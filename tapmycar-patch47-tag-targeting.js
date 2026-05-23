@@ -1,4 +1,82 @@
-// TMC_PATCH43_BROADCAST + TMC_PATCH45_CHANNELS + TMC_PATCH47_TAGS
+// ============================================================================
+// TapMyCar - Patch 47 (Notification System, STAGE 4c-a): Tag targeting + detail
+//
+// PREREQUISITE
+//   Patches 43-46 deployed (multi-channel broadcast working).
+//
+// WHAT THIS PATCH DOES
+//   REWRITES api/send-broadcast.js to add three things the current tool
+//   is missing:
+//
+//   1. RECIPIENT MODE "tag" - target the OWNERS of tags, filtered by:
+//        { mode:"tag", tag_type:"physical|etag", status:"active|paused|...",
+//          batch_number:"...", token:"..." }   (any subset; all optional)
+//      Resolution: query the tags table -> collect owner_id values ->
+//      fetch those users. De-duplicated, so a user who owns 3 matching
+//      tags is still ONE recipient.
+//
+//   2. ACTION "detail" - given a broadcast_id, returns the full per-recipient
+//      list from notifications_log (name, contact, channel, status, error).
+//      This is what the "who received it" expandable history row uses.
+//
+//   3. Preview "counts" now also returns "base" (how many users matched the
+//      selector before channel filtering) so the UI can say e.g.
+//      "12 users matched; SMS will reach 0 (none opted in)" instead of a
+//      bare "SMS: 0" that looks like a failure.
+//
+//   The notifications_log send path additionally stores the recipient's
+//   name into body_preview? NO - name is fetched live in "detail" by
+//   joining recipient_user_id back to users, so no schema change is needed.
+//
+//   No SQL change. No vercel.json change.
+//
+// Properties: idempotent (safe to re-run), validates JS, backs up the file.
+// ============================================================================
+
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+
+const ROOT = __dirname;
+const API = path.join(ROOT, 'api');
+
+const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 16);
+const BACKUP_DIR = path.join(ROOT, `backup-patch47-${ts}`);
+
+const log  = (s) => console.log(s);
+const ok   = (s) => console.log('  \u2713 ' + s);
+const skip = (s) => console.log('  \u00b7 ' + s + ' (already applied, skipped)');
+const errExit = (s) => { console.error('  \u2717 ' + s); process.exit(1); };
+
+function writeFile(p, c) { fs.writeFileSync(p, c, { encoding: 'utf8' }); }
+function backup(absPath, label) {
+  if (!fs.existsSync(absPath)) return;
+  const dest = path.join(BACKUP_DIR, label);
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  fs.copyFileSync(absPath, dest);
+}
+function checkJs(absPath, label) {
+  try {
+    execSync('node --check "' + absPath + '"', { stdio: 'pipe' });
+    ok(label + ' passes node --check');
+  } catch (e) {
+    errExit(label + ' FAILED node --check:\n' + (e.stderr ? e.stderr.toString() : e.message));
+  }
+}
+
+log('');
+log('TapMyCar Patch 47 (Stage 4c-a) - Tag targeting + recipient detail');
+log('=================================================================');
+
+const epPath = path.join(API, 'send-broadcast.js');
+if (!fs.existsSync(epPath)) errExit('api/send-broadcast.js not found - run Patches 43-46 first.');
+
+if (fs.readFileSync(epPath, 'utf8').indexOf('TMC_PATCH47_TAGS') !== -1) {
+  skip('api/send-broadcast.js');
+} else {
+  backup(epPath, 'api/send-broadcast.js');
+
+  const ENDPOINT = String.raw`// TMC_PATCH43_BROADCAST + TMC_PATCH45_CHANNELS + TMC_PATCH47_TAGS
 // Admin broadcast endpoint. POST /api/send-broadcast.
 // Channels: email, push, sms. Modes: preview (dry_run), send, history, detail.
 const { createClient } = require('@supabase/supabase-js');
@@ -372,3 +450,37 @@ module.exports = async function handler(req, res) {
     base: base.length, count: totalEligible
   });
 };
+`;
+
+  writeFile(epPath, ENDPOINT);
+  checkJs(epPath, 'api/send-broadcast.js');
+  ok('api/send-broadcast.js rewritten - tag mode + detail action + base count');
+}
+
+log('');
+log('=================================================================');
+log('Patch 47 (Stage 4c-a) applied.');
+if (fs.existsSync(BACKUP_DIR)) log('Backups: ' + path.basename(BACKUP_DIR));
+log('');
+log('  Commit + push, wait ~60s. The Broadcast UI keeps working; the new');
+log('  features are exposed by Patch 48. You can pre-test from the');
+log('  /admin.html console:');
+log('');
+log('  By-tag preview (owners of all physical tags):');
+log('    fetch("/api/send-broadcast",{method:"POST",headers:{"Content-Type":');
+log('      "application/json"},body:JSON.stringify({admin_key:adminKey,');
+log('      channels:["email"],dry_run:true,');
+log('      recipients:{mode:"tag",tag_type:"physical"}})})');
+log('      .then(r=>r.json()).then(console.log)');
+log('    -> expect { base:<N owners>, counts:{email:<N>}, ... }');
+log('');
+log('  Recipient detail for a past broadcast (use a real broadcast_id');
+log('  from your send history):');
+log('    fetch("/api/send-broadcast",{method:"POST",headers:{"Content-Type":');
+log('      "application/json"},body:JSON.stringify({admin_key:adminKey,');
+log('      action:"detail",broadcast_id:"bc_1779546836866"})})');
+log('      .then(r=>r.json()).then(console.log)');
+log('    -> expect { recipients:[{name,contact,channel,status},...] }');
+log('');
+log('  Then I build Patch 48 - the "By tag" picker + expandable history.');
+log('');
