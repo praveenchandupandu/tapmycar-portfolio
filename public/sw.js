@@ -1,4 +1,5 @@
-﻿const CACHE_NAME = 'tapmycar-v6';
+// TMC_PATCH52_SW - quiet fetch handler + correct notification icons
+const CACHE_NAME = 'tapmycar-v7';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
@@ -12,8 +13,14 @@ self.addEventListener('activate', e => {
   );
 });
 
+// Pass-through fetch. Non-GET requests are left entirely alone.
+// The .catch() stops a cancelled / blocked / failed request from
+// logging an 'Uncaught (in promise) Failed to fetch' in the console.
 self.addEventListener('fetch', e => {
-  e.respondWith(fetch(e.request));
+  if (e.request.method !== 'GET') return;
+  e.respondWith(
+    fetch(e.request).catch(() => Response.error())
+  );
 });
 
 self.addEventListener('push', function(event) {
