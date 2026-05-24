@@ -366,24 +366,9 @@ module.exports = async function handler(req, res) {
     totalSent += results[c].sent; totalFailed += results[c].failed;
   });
 
-  // TMC_PATCH56_ANNOUNCE: if the admin ticked "Also show as in-app popup",
-  // save this broadcast as an in-app announcement too.
-  let announcementCreated = false;
-  if (body.also_in_app) {
-    try {
-      const { error: annErr } = await supabase.from('announcements').insert({
-        title: String(subject), body: String(body.body),
-        active: true, created_by: 'admin', broadcast_id: broadcastId
-      });
-      if (annErr) console.error('announcement insert failed:', annErr.message);
-      else announcementCreated = true;
-    } catch (e) { console.error('announcement insert error:', e && e.message); }
-  }
-
   return res.json({
     success: true, broadcast_id: broadcastId, channels: channels,
     results: results, sent: totalSent, failed: totalFailed,
-    base: base.length, count: totalEligible,
-    announcement_created: announcementCreated
+    base: base.length, count: totalEligible
   });
 };
