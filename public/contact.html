@@ -2044,10 +2044,25 @@ async function v6ToggleRecording() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     v6AudioChunks = [];
-    v6MediaRecorder = new MediaRecorder(stream);
+    // TMC_PATCH55_VOICEFMT: record in a format iPhones can play.
+    // audio/mp4 (AAC) plays on iOS + Android + desktop; webm does NOT on iOS.
+    var v6Candidates = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm'];
+    var v6PickedType = '';
+    for (var v6i = 0; v6i < v6Candidates.length; v6i++) {
+      if (window.MediaRecorder && MediaRecorder.isTypeSupported &&
+          MediaRecorder.isTypeSupported(v6Candidates[v6i])) {
+        v6PickedType = v6Candidates[v6i]; break;
+      }
+    }
+    v6MediaRecorder = v6PickedType
+      ? new MediaRecorder(stream, { mimeType: v6PickedType })
+      : new MediaRecorder(stream);
     v6MediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) v6AudioChunks.push(e.data); };
     v6MediaRecorder.onstop = () => {
-      v6AudioBlob = new Blob(v6AudioChunks, { type: 'audio/webm' });
+      // TMC_PATCH55_VOICEFMT: use the ACTUAL recorded type, never hardcode.
+      var v6BlobType = (v6MediaRecorder && v6MediaRecorder.mimeType) ||
+        v6PickedType || 'audio/webm';
+      v6AudioBlob = new Blob(v6AudioChunks, { type: v6BlobType });
       if (v6AudioUrl) URL.revokeObjectURL(v6AudioUrl);
       v6AudioUrl = URL.createObjectURL(v6AudioBlob);
       v6Audio = new Audio(v6AudioUrl);
@@ -2123,7 +2138,9 @@ function v6SendVoice() {
         scan_id: currentScanId || '' /* TMC_PATCH12_ACTIVITY_FIX */,
         action: 'voice',
         audio_base64: base64,
-        audio_type: 'audio/webm',
+        /* TMC_PATCH55_VOICEFMT: send the real type so the backend picks
+           the correct file extension (.m4a for mp4, .webm for webm). */
+        audio_type: (v6AudioBlob && v6AudioBlob.type) || 'audio/webm',
         duration: Math.round(v6RecordingDuration)
       })
     }).catch(()=>{});
