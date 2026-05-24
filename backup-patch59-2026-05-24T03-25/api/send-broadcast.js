@@ -17,7 +17,7 @@ try {
 const FROM = 'TapMyCar <noreply@tapmycar.io>';
 const SITE = 'https://tapmycar.io';
 const VALID_PLANS = ['etag', 'standard', 'premium'];
-const VALID_CHANNELS = ['email', 'push', 'sms', 'inapp']; // TMC_PATCH59_INAPP
+const VALID_CHANNELS = ['email', 'push', 'sms'];
 
 function esc(s) {
   return String(s == null ? '' : s)
@@ -285,12 +285,10 @@ module.exports = async function handler(req, res) {
     return res.json({ success: true, broadcast_id: bid, recipients: recipients_list });
   }
 
-  // --- channels --- (TMC_PATCH59_INAPP)
+  // --- channels ---
   let channels = body.channels;
   if (!channels && body.channel) channels = [body.channel];
   if (!channels || !channels.length) channels = ['email'];
-  // Legacy support: the old also_in_app flag = add the 'inapp' channel.
-  if (body.also_in_app && channels.indexOf('inapp') === -1) channels.push('inapp');
   for (const c of channels) {
     if (VALID_CHANNELS.indexOf(c) === -1) {
       return res.status(400).json({ error: 'Invalid channel: ' + c });
@@ -324,19 +322,15 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  // --- SEND --- (TMC_PATCH59_INAPP)
-  // Subject is OPTIONAL. The message body is still required.
-  if (!body.body || !String(body.body).trim()) {
-    return res.status(400).json({ error: 'Please enter a message' });
+  // --- SEND ---
+  if (!subject || !String(subject).trim()) {
+    return res.status(400).json({ error: 'Subject is required' });
   }
-  // Email needs a non-empty subject line - fall back to a default if blank.
-  const effectiveSubject = (subject && String(subject).trim())
-    ? String(subject).trim()
-    : 'TapMyCar Update';
-  // In-app reaches every logged-in user, so it is not counted per-recipient.
-  const sendsInApp = channels.indexOf('inapp') !== -1;
+  if (!body.body || !String(body.body).trim()) {
+    return res.status(400).json({ error: 'Message body is required' });
+  }
   const totalEligible = counts.email + counts.push + counts.sms;
-  if (totalEligible === 0 && !sendsInApp) {
+  if (totalEligible === 0) {
     return res.status(400).json({
       error: 'No eligible recipients across the selected channel(s). ' +
              base.length + ' user(s) matched, but none can receive on those channels.'
@@ -348,17 +342,17 @@ module.exports = async function handler(req, res) {
   let allLogRows = [];
 
   if (channels.indexOf('email') !== -1) {
-    const r = await sendEmail(eligible.email, effectiveSubject, body.body, broadcastId);
+    const r = await sendEmail(eligible.email, subject, body.body, broadcastId);
     results.email = { sent: r.sent, failed: r.failed };
     allLogRows = allLogRows.concat(r.logRows);
   }
   if (channels.indexOf('push') !== -1) {
-    const r = await sendPush(eligible.push, subsMap, effectiveSubject, body.body, broadcastId);
+    const r = await sendPush(eligible.push, subsMap, subject, body.body, broadcastId);
     results.push = { sent: r.sent, failed: r.failed };
     allLogRows = allLogRows.concat(r.logRows);
   }
   if (channels.indexOf('sms') !== -1) {
-    const r = await sendSms(eligible.sms, effectiveSubject, body.body, broadcastId);
+    const r = await sendSms(eligible.sms, subject, body.body, broadcastId);
     results.sms = { sent: r.sent, failed: r.failed };
     allLogRows = allLogRows.concat(r.logRows);
   }
@@ -372,13 +366,13 @@ module.exports = async function handler(req, res) {
     totalSent += results[c].sent; totalFailed += results[c].failed;
   });
 
-  // TMC_PATCH59_INAPP: create the in-app announcement when the 'inapp'
-  // channel is selected (covers both the new channel and legacy also_in_app).
+  // TMC_PATCH56_ANNOUNCE: if the admin ticked "Also show as in-app popup",
+  // save this broadcast as an in-app announcement too.
   let announcementCreated = false;
-  if (channels.indexOf('inapp') !== -1) {
+  if (body.also_in_app) {
     try {
       const { error: annErr } = await supabase.from('announcements').insert({
-        title: effectiveSubject, body: String(body.body),
+        title: String(subject), body: String(body.body),
         active: true, created_by: 'admin', broadcast_id: broadcastId
       });
       if (annErr) console.error('announcement insert failed:', annErr.message);
