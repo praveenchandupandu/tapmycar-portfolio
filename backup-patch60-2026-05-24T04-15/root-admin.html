@@ -1728,14 +1728,10 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
                 <input type="checkbox" id="bc-ch-push" onchange="bcResetCount()"> Web push</label>
               <label style="display:inline-flex;align-items:center;gap:6px;margin-right:18px;font-size:14px;font-weight:600;color:#374151;cursor:pointer">
                 <input type="checkbox" id="bc-ch-sms" onchange="bcResetCount()"> SMS</label>
-              <!-- TMC_PATCH60_INAPP_UI -->
-              <label style="display:inline-flex;align-items:center;gap:6px;margin-right:18px;font-size:14px;font-weight:600;color:#374151;cursor:pointer">
-                <input type="checkbox" id="bc-ch-inapp" onchange="bcResetCount()"> In-app popup</label>
               <div class="bc-note" style="margin-top:10px">
                 <b>Email</b> skips unsubscribed users and includes an unsubscribe link.
                 <b>Web push</b> reaches only users who enabled browser notifications.
                 <b>SMS</b> goes only to users who explicitly opted in (and costs money per message).
-                <b>In-app popup</b> shows inside TapMyCar the next time each logged-in user opens the app.
               </div>
             </div>
 
@@ -1808,14 +1804,22 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 
           <div class="bc-card">
             <div class="bc-row">
-              <p class="bc-label">Subject <span style="color:#9CA3AF;font-weight:600">(optional)</span></p>
+              <p class="bc-label">Subject</p>
               <input class="bc-input" id="bc-subject" maxlength="150"
-                placeholder="Optional - leave blank to send just the message">
+                placeholder="e.g. Important update about your TapMyCar account">
             </div>
             <div class="bc-row">
               <p class="bc-label">Message</p>
               <textarea class="bc-textarea" id="bc-body"
                 placeholder="Write your message. Plain text - line breaks are kept."></textarea>
+            </div>
+            <!-- TMC_PATCH57_ANNOUNCE_POPUP -->
+            <label style="display:inline-flex;align-items:center;gap:8px;margin-bottom:14px;font-size:14px;font-weight:600;color:#374151;cursor:pointer">
+              <input type="checkbox" id="bc-also-inapp"> Also show as in-app popup
+            </label>
+            <div class="bc-note" style="margin-bottom:14px">
+              When ticked, this message also appears as a popup inside TapMyCar
+              the next time each logged-in user opens the app.
             </div>
             <button type="button" class="bc-btn" id="bc-send-btn"
               onclick="bcSend()">Send broadcast</button>
@@ -5041,11 +5045,9 @@ function p35bsCloseQr() {
     if (document.getElementById("bc-ch-email").checked) out.push("email");
     if (document.getElementById("bc-ch-push").checked)  out.push("push");
     if (document.getElementById("bc-ch-sms").checked)   out.push("sms");
-    var inappEl = document.getElementById("bc-ch-inapp");
-    if (inappEl && inappEl.checked) out.push("inapp");
     return out;
   }
-  var CH_LABEL = { email: "Email", push: "Web push", sms: "SMS", inapp: "In-app popup" };
+  var CH_LABEL = { email: "Email", push: "Web push", sms: "SMS" };
 
   function bcApi(payload){
     payload.admin_key = (typeof adminKey === "string" ? adminKey : "");
@@ -5088,6 +5090,7 @@ function p35bsCloseQr() {
     var res = document.getElementById("bc-result");
     res.innerHTML = "";
     if (!channels.length) { res.innerHTML = bcMsg("err","Select at least one channel."); return; }
+    if (!subject) { res.innerHTML = bcMsg("err","Enter a subject."); return; }
     if (!body) { res.innerHTML = bcMsg("err","Enter a message."); return; }
 
     var rcp = bcRecipients();
@@ -5104,7 +5107,10 @@ function p35bsCloseQr() {
 
     var btn = document.getElementById("bc-send-btn");
     btn.disabled = true; btn.textContent = "Sending…";
-    bcApi({ channels: channels, subject: subject, body: body, recipients: rcp })
+    var alsoInApp = false;
+    var aiEl = document.getElementById("bc-also-inapp");
+    if (aiEl) alsoInApp = aiEl.checked;
+    bcApi({ channels: channels, subject: subject, body: body, recipients: rcp, also_in_app: alsoInApp })
       .then(function(d){
         btn.disabled = false; btn.textContent = "Send broadcast";
         if (d && d.success) {
