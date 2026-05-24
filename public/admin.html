@@ -1813,6 +1813,14 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
               <textarea class="bc-textarea" id="bc-body"
                 placeholder="Write your message. Plain text - line breaks are kept."></textarea>
             </div>
+            <!-- TMC_PATCH57_ANNOUNCE_POPUP -->
+            <label style="display:inline-flex;align-items:center;gap:8px;margin-bottom:14px;font-size:14px;font-weight:600;color:#374151;cursor:pointer">
+              <input type="checkbox" id="bc-also-inapp"> Also show as in-app popup
+            </label>
+            <div class="bc-note" style="margin-bottom:14px">
+              When ticked, this message also appears as a popup inside TapMyCar
+              the next time each logged-in user opens the app.
+            </div>
             <button type="button" class="bc-btn" id="bc-send-btn"
               onclick="bcSend()">Send broadcast</button>
             <div id="bc-result"></div>
@@ -5099,7 +5107,10 @@ function p35bsCloseQr() {
 
     var btn = document.getElementById("bc-send-btn");
     btn.disabled = true; btn.textContent = "Sending…";
-    bcApi({ channels: channels, subject: subject, body: body, recipients: rcp })
+    var alsoInApp = false;
+    var aiEl = document.getElementById("bc-also-inapp");
+    if (aiEl) alsoInApp = aiEl.checked;
+    bcApi({ channels: channels, subject: subject, body: body, recipients: rcp, also_in_app: alsoInApp })
       .then(function(d){
         btn.disabled = false; btn.textContent = "Send broadcast";
         if (d && d.success) {
