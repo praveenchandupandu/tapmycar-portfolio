@@ -1271,7 +1271,6 @@ async function registerPush() {
   }
 
   function showAnnouncementPopup(ann, userId) {
-    // TMC_PATCH58_POPUP_REDESIGN - Option 2: minimal, orange title.
     if (document.getElementById("tmc-ann-overlay")) return;
 
     var overlay = document.createElement("div");
@@ -1283,24 +1282,31 @@ async function registerPush() {
 
     var bodyHtml = tmcEscAnn(ann.body).replace(/\r?\n/g, "<br>");
     overlay.innerHTML =
-      '<div style="background:#fff;max-width:340px;width:100%;' +
-        'border-radius:18px;box-shadow:0 14px 44px rgba(0,0,0,.28);' +
-        'padding:30px 28px 26px;text-align:center">' +
-          '<div style="font-size:19px;font-weight:800;color:#FF6B00;' +
-            'margin-bottom:4px">TapMyCar Alert</div>' +
-          '<div style="width:34px;height:2px;background:#E5E7EB;' +
-            'margin:13px auto 17px"></div>' +
-          '<div style="font-size:15px;font-weight:700;color:#111;' +
+      '<div style="background:#fff;max-width:380px;width:100%;border-radius:16px;' +
+        'box-shadow:0 12px 40px rgba(0,0,0,.25);overflow:hidden">' +
+        '<div style="padding:24px 22px 18px">' +
+          '<div style="font-size:13px;font-weight:700;color:#FF6B00;' +
+            'text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">' +
+            'Announcement</div>' +
+          '<div style="font-size:17px;font-weight:800;color:#111;' +
             'margin-bottom:8px">' + tmcEscAnn(ann.title) + '</div>' +
-          '<div style="font-size:14px;line-height:1.65;color:#6B7280;' +
-            'margin-bottom:24px">' + bodyHtml + '</div>' +
-          '<button id="tmc-ann-close" style="padding:12px 36px;border:none;' +
-            'border-radius:9px;background:#FF6B00;color:#fff;font-size:14px;' +
-            'font-weight:700;cursor:pointer;font-family:inherit">Close</button>' +
+          '<div style="font-size:14px;line-height:1.6;color:#374151">' +
+            bodyHtml + '</div>' +
+        '</div>' +
+        '<div style="display:flex;border-top:1px solid #E5E7EB">' +
+          '<button id="tmc-ann-close" style="flex:1;padding:14px;border:none;' +
+            'background:#fff;font-size:14px;font-weight:700;color:#6B7280;' +
+            'cursor:pointer;font-family:inherit">Close</button>' +
+          '<button id="tmc-ann-view" style="flex:1;padding:14px;border:none;' +
+            'border-left:1px solid #E5E7EB;background:#fff;font-size:14px;' +
+            'font-weight:700;color:#FF6B00;cursor:pointer;font-family:inherit">' +
+            'View Inbox</button>' +
+        '</div>' +
       '</div>';
 
     document.body.appendChild(overlay);
 
+    // Record the dismissal so this announcement never shows again.
     function markSeen() {
       try {
         fetch("/api/seen-announcement", {
@@ -1316,6 +1322,10 @@ async function registerPush() {
     }
 
     document.getElementById("tmc-ann-close").onclick = dismiss;
+    document.getElementById("tmc-ann-view").onclick = function () {
+      markSeen();
+      window.location.href = "/activity.html";
+    };
     overlay.addEventListener("click", function (e) {
       if (e.target === overlay) dismiss();
     });
