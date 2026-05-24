@@ -130,34 +130,8 @@ module.exports = async function handler(req, res) {
     // TMC_PATCH53_VOICE: link to the branded voice.html page, not the raw file.
     const voicePageUrl = 'https://tapmycar.io/voice.html?a=' + encodeURIComponent(audioUrl) +
       '&d=' + encodeURIComponent(duration) + '&v=' + encodeURIComponent(vehicleLabel || '');
-
-    // TMC_PATCH54_VOICEREADY: Supabase storage lags slightly between upload
-    // finishing and the public URL serving reliably. Probe the file with a
-    // few HEAD requests before sending, so the owner never opens a broken
-    // player. ~5s worst case - safely inside the 10s function limit.
-    async function voiceFileReady(url) {
-      if (!url) return false;
-      for (let attempt = 0; attempt < 4; attempt++) {
-        try {
-          const r = await fetch(url, { method: 'HEAD' });
-          if (r && r.ok) return true;
-        } catch (e) { /* network hiccup - retry */ }
-        await new Promise(function (res) { setTimeout(res, 1200); });
-      }
-      return false;
-    }
-    let audioReady = false;
-    if (audioUrl) {
-      audioReady = await voiceFileReady(audioUrl);
-      if (!audioReady) {
-        console.warn('Voice file not reachable after retries; emailing with Activity fallback link.');
-      }
-    }
-    // If the file is confirmed ready -> link to the branded player page.
-    // If not -> link to the Activity page so the email is never broken.
-    const listenUrl = audioReady ? voicePageUrl : 'https://tapmycar.io/activity.html';
     const audioHtml = audioUrl
-      ? '<a href="' + listenUrl + '" style="display:inline-block;background:#6D28D9;color:#fff;font-size:13px;font-weight:700;padding:12px 20px;border-radius:10px;text-decoration:none;margin-bottom:12px">Listen to voice memo (' + duration + 's)</a>'
+      ? '<a href="' + voicePageUrl + '" style="display:inline-block;background:#6D28D9;color:#fff;font-size:13px;font-weight:700;padding:12px 20px;border-radius:10px;text-decoration:none;margin-bottom:12px">Listen to voice memo (' + duration + 's)</a>'
       : '<p style="font-size:12px;color:#6B7280">Voice memo could not be processed. Please check your dashboard.</p>';
     body =
       '<div style="font-family:Inter,sans-serif;max-width:400px;margin:0 auto;padding:40px 20px">' +
