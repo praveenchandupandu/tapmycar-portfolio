@@ -1290,11 +1290,8 @@ async function registerPush() {
             'margin-bottom:4px">TapMyCar Alert</div>' +
           '<div style="width:34px;height:2px;background:#E5E7EB;' +
             'margin:13px auto 17px"></div>' +
-          /* TMC_PATCH61_NOTITLE: show the title row only when there is one */
-          ((ann.title && String(ann.title).trim())
-            ? ('<div style="font-size:15px;font-weight:700;color:#111;' +
-               'margin-bottom:8px">' + tmcEscAnn(ann.title) + '</div>')
-            : '') +
+          '<div style="font-size:15px;font-weight:700;color:#111;' +
+            'margin-bottom:8px">' + tmcEscAnn(ann.title) + '</div>' +
           '<div style="font-size:14px;line-height:1.65;color:#6B7280;' +
             'margin-bottom:24px">' + bodyHtml + '</div>' +
           '<button id="tmc-ann-close" style="padding:12px 36px;border:none;' +

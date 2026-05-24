@@ -377,12 +377,8 @@ module.exports = async function handler(req, res) {
   let announcementCreated = false;
   if (channels.indexOf('inapp') !== -1) {
     try {
-      // TMC_PATCH61_NOTITLE: store the real subject, or "" when none was
-      // given - so a no-subject popup shows no heading. Email keeps the
-      // "TapMyCar Update" fallback separately; that does not come here.
-      const annTitle = (subject && String(subject).trim()) ? String(subject).trim() : '';
       const { error: annErr } = await supabase.from('announcements').insert({
-        title: annTitle, body: String(body.body),
+        title: effectiveSubject, body: String(body.body),
         active: true, created_by: 'admin', broadcast_id: broadcastId
       });
       if (annErr) console.error('announcement insert failed:', annErr.message);
