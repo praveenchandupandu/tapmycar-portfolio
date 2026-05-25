@@ -512,7 +512,7 @@ ABOUT TAPMYCAR:
 - Quick message alerts: strangers can tap preset messages like "Your lights are on" or "Your car is being towed"
 
 PLANS (only mention pricing when specifically asked):
-- eTag: Free digital QR code, download instantly, 3 masked calls/month
+- eTag: Free digital QR code for 30 days, download instantly, 3 masked calls/month. TMC_PATCH62_ETAG30 After 30 days the user chooses to upgrade to Standard or Premium to keep the tag active - if they do not upgrade, the eTag deactivates. There is NO automatic charge; the user is never billed without choosing to.
 - Standard: Physical NFC + QR sticker shipped home, 10 masked calls/month, SMS scan alerts
 - Premium: 3 vehicles, unlimited masked calls, scan history, emergency contact
 - Business: Fleet dashboard, bulk stickers with logo
@@ -522,7 +522,7 @@ HOW IT WORKS:
 2. Get instant digital eTag (QR code PDF)
 3. Print and place on windshield
 4. Activate to enable masked calling
-5. Physical sticker ships after 30 days
+5. On a paid plan, the physical NFC + QR sticker ships to your home
 
 COMMON ISSUES:
 - QR not scanning  Ensure good lighting, clean QR, camera focused. Try zooming in.

@@ -1307,10 +1307,9 @@ async function p34cFinishClaim() {
       }
     } catch (e) { console.warn('[Patch34cfix2] plan update failed:', e); }
 
-    /* All good — show success. */
+    /* All good — show success and redirect. */
     showState('success');
-    /* TMC_PATCH62_NOAUTONAV: auto-redirect removed - user taps the
-       "Go to my dashboard" button on the success screen instead. */
+    setTimeout(function() { window.location.href = '/dashboard.html'; }, 1500);
   } catch (e) {
     console.error('[Patch34cfix2] network exception:', e);
     showToast('Network error');
@@ -1515,10 +1514,9 @@ async function p34cActivateWithoutPayment() {
         }
       }
     } catch (e) { /* non-fatal */ }
-    /* Success. */
+    /* Success: go to dashboard. */
     showState('success');
-    /* TMC_PATCH62_NOAUTONAV: auto-redirect removed - user taps the
-       "Go to my dashboard" button on the success screen instead. */
+    setTimeout(function() { window.location.href = '/dashboard.html'; }, 1500);
   } catch (e) {
     showToast('Network error');
     if (btn) { btn.textContent = 'Activate Tag'; btn.disabled = false; }
@@ -1707,8 +1705,7 @@ async function p34cActivateWithoutPayment_v2() {
        physical tag is activated (see get-tag.js lines 145-160), so the
        frontend doesn't need to do that step. */
     showState('success');
-    /* TMC_PATCH62_NOAUTONAV: auto-redirect removed - user taps the
-       "Go to my dashboard" button on the success screen instead. */
+    setTimeout(function() { window.location.href = '/dashboard.html'; }, 1500);
   } catch (e) {
     console.error('Patch34c-fix exception:', e);
     showToast('Network error');

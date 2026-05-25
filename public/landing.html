@@ -132,7 +132,7 @@ body { font-family: 'Inter', sans-serif; background: #fff; color: #111; max-widt
 <!-- NAV -->
 <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:.5px solid #E5E7EB;position:sticky;top:0;background:#fff;z-index:100">
   <a href="/landing.html" aria-label="TapMyCar" style="display:flex;align-items:center;gap:12px;text-decoration:none;font-size:30px;font-weight:900;color:#111;letter-spacing:-2.5px;line-height:1"><img src="/logo.png" alt="" style="height:52px;width:auto;display:block"><span style="white-space:nowrap;display:inline-block">Tap<span style="color:#FF6B00">My</span>Car</span></a>
-  <a href="/register.html" style="background:#FF6B00;color:#fff;font-size:12px;font-weight:700;padding:8px 16px;border-radius:10px;text-decoration:none">Get started</a>
+  <a href="/register.html" data-tmc-cta="1" style="background:#FF6B00;color:#fff;font-size:12px;font-weight:700;padding:8px 16px;border-radius:10px;text-decoration:none">Get started</a>
 </div>
 
 <!-- HERO -->
@@ -143,7 +143,7 @@ body { font-family: 'Inter', sans-serif; background: #fff; color: #111; max-widt
   <h1>Privacy for you.<br><span>Safety</span> for your car.</h1>
   <p>Your car is always protected. Your identity is never exposed. Anyone can reach you  without ever seeing your real number.</p>
   <div class="hero-btns">
-    <a href="/register.html" class="hero-btn-primary">Explore TapMyCar</a>
+    <a href="/register.html" data-tmc-cta="1" class="hero-btn-primary">Explore TapMyCar</a>
 <a href="/why.html" class="hero-btn-secondary">Why do I need this?</a>  </div>
 </div>
 
@@ -250,7 +250,7 @@ body { font-family: 'Inter', sans-serif; background: #fff; color: #111; max-widt
   </div>
   <h3>Get the TapMyCar App</h3>
   <p>Manage your tag, view scan history, control your privacy  all from your phone.</p>
-  <a href="/register.html" class="app-btn">Download Free </a>
+  <a href="/register.html" data-tmc-cta="1" class="app-btn">Download Free </a>
   <div class="app-sub">Available on iOS, Android & Web  Free to start</div>
 </div>
 
@@ -366,7 +366,7 @@ body { font-family: 'Inter', sans-serif; background: #fff; color: #111; max-widt
 <div class="cta">
   <h2>Your car deserves protection.</h2>
   <p>Privacy for you. Safety for your car. Free to start  takes 2 minutes.</p>
-  <a href="/register.html" class="cta-btn">Explore TapMyCar</a>
+  <a href="/register.html" data-tmc-cta="1" class="cta-btn">Explore TapMyCar</a>
 </div>
 
 <!-- APP DOWNLOAD STICKY -->
@@ -378,7 +378,7 @@ body { font-family: 'Inter', sans-serif; background: #fff; color: #111; max-widt
     <div style="font-size:13px;font-weight:700;color:#fff">TapMyCar App</div>
     <div style="font-size:10px;color:#9CA3AF">Free  iOS, Android & Web</div>
   </div>
-  <a href="/register.html" style="background:#FF6B00;color:#fff;font-size:12px;font-weight:700;padding:8px 16px;border-radius:10px;text-decoration:none">Get App</a>
+  <a href="/register.html" data-tmc-cta="1" style="background:#FF6B00;color:#fff;font-size:12px;font-weight:700;padding:8px 16px;border-radius:10px;text-decoration:none">Get App</a>
 </div>
 
 <!-- TMC_PATCH26_APP_SETTINGS: landing.hero slot (download badges) -->
@@ -441,5 +441,25 @@ if ('serviceWorker' in navigator) {
 </script>
 <script src="/app.js"></script>
 <script src="/tmc-redesign.js"></script>
+
+<script>
+// TMC_PATCH62_LANDING - logged-in visitors should not be pushed to register.
+(function(){
+  var token = null;
+  try { token = localStorage.getItem("tmc_token"); } catch(e){}
+  if (!token) return;  // logged-out visitor: leave the page as-is
+  var ctas = document.querySelectorAll('a[data-tmc-cta="1"]');
+  for (var i = 0; i < ctas.length; i++) {
+    ctas[i].setAttribute("href", "/dashboard.html");
+    var t = (ctas[i].textContent || "").trim().toLowerCase();
+    // Relabel the wordy CTAs; leave tiny header buttons compact.
+    if (t.indexOf("explore") !== -1 || t.indexOf("download") !== -1) {
+      ctas[i].textContent = "Go to Dashboard";
+    } else {
+      ctas[i].textContent = "Dashboard";
+    }
+  }
+})();
+</script>
 </body>
 </html>
