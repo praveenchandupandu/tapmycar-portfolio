@@ -2325,55 +2325,6 @@ function adminLogout() {
   document.getElementById('login-err').textContent = '';
 }
 
-/* TMC_PATCH38S4C: session-migration counter. Counts users by
-   last_token_type (written by the Patch 38 Stage 4 endpoints) so we can
-   see when every active session has moved off the legacy UUID onto a
-   signed token. Stage 5 (dropping the legacy fallback) is safe once
-   Legacy stays at 0. */
-function tmcStatCell(label, num, color) {
-  return '<div style="flex:1;min-width:88px;padding:10px 12px;border-radius:10px;'
-    + 'background:rgba(0,0,0,0.25)">'
-    + '<div style="font-size:22px;font-weight:800;color:' + color + '">' + num + '</div>'
-    + '<div style="font-size:10px;font-weight:600;color:#94A3B8;'
-    + 'text-transform:uppercase;letter-spacing:.04em;margin-top:2px">' + label + '</div></div>';
-}
-function tmcRenderTokenMigration(users) {
-  users = users || [];
-  var signed = 0, legacy = 0, none = 0;
-  for (var i = 0; i < users.length; i++) {
-    var t = users[i] && users[i].last_token_type;
-    if (t === 'signed') signed++;
-    else if (t === 'legacy') legacy++;
-    else none++;
-  }
-  var box = document.getElementById('tmc-token-migration');
-  if (!box) {
-    box = document.createElement('div');
-    box.id = 'tmc-token-migration';
-    box.style.cssText = 'margin:14px 0;padding:16px;border-radius:14px;'
-      + 'background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);'
-      + 'font-family:Inter,system-ui,sans-serif';
-    var anchor = document.getElementById('home-feed');
-    if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(box, anchor);
-    else document.body.appendChild(box);
-  }
-  var ok = (legacy === 0);
-  var msg = ok
-    ? 'All active sessions are on signed tokens. Dropping the legacy fallback (Patch 38 Stage 5) is safe once this has held for ~2 weeks.'
-    : legacy + ' session(s) still using the legacy UUID token. Those users need to sign out and back in to migrate.';
-  box.innerHTML =
-    '<div style="font-size:13px;font-weight:800;color:#E2E8F0">Session migration</div>'
-    + '<div style="font-size:11px;color:#64748B;margin:2px 0 12px">'
-    + 'Patch 38: legacy UUID vs signed session token, by user</div>'
-    + '<div style="display:flex;gap:9px;flex-wrap:wrap">'
-    + tmcStatCell('Signed', signed, '#22C55E')
-    + tmcStatCell('Legacy', legacy, ok ? '#64748B' : '#F59E0B')
-    + tmcStatCell('No activity yet', none, '#64748B')
-    + '</div>'
-    + '<div style="margin-top:11px;font-size:11px;line-height:1.5;color:'
-    + (ok ? '#22C55E' : '#F59E0B') + '">' + msg + '</div>';
-}
-
 function renderDashboard(data) {
   document.getElementById('s-users').textContent = data.userCount;
   document.getElementById('s-tags').textContent = data.tagCount;
@@ -2417,7 +2368,7 @@ function renderDashboard(data) {
   // Render new tabs
   loadOrders();           // real orders from /api/get-orders
   loadLeads();            // real leads from /api/get-leads
-  renderHome(data); tmcRenderTokenMigration(data.users); /* TMC_PATCH38S4C */       // home dashboard (alerts, search index, feed)
+  renderHome(data);       // home dashboard (alerts, search index, feed)
   renderAnalytics(data);
   renderUpgradeTracker(data);
   renderInventory(data);
