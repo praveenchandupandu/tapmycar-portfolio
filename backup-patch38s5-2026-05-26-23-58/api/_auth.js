@@ -75,17 +75,17 @@ function extractToken(req) {
   return null;
 }
 
-/* TMC_PATCH38S5: signed-token-only resolver. Returns { userId, viaLegacy }
-   or null. The legacy raw-UUID fallback has been REMOVED — a caller must
-   now present a valid signed session token (Authorization: Bearer ...).
-   This is what closes the original IDOR hole: a raw user_id can no longer
-   impersonate anyone. viaLegacy is always false now; it is kept only so
-   existing callers (recordTokenType) keep working unchanged. */
+/* BACKWARD-COMPATIBLE resolver. Returns { userId, viaLegacy } or null.
+   - signed token  -> { userId, viaLegacy:false }
+   - legacy UUID   -> { userId, viaLegacy:true }   (still accepted)
+   Stage 5 (much later) will drop the legacy branch once all live
+   sessions have cycled to signed tokens. */
 function resolveUser(req) {
   const raw = extractToken(req);
   if (!raw) return null;
   const verified = verifySession(raw);
   if (verified) return { userId: verified.userId, viaLegacy: false };
+  if (isUuid(raw)) return { userId: raw, viaLegacy: true };
   return null;
 }
 
