@@ -129,7 +129,7 @@ async function signIn() {
     });
     const data = await res.json();
     if (data.token) {
-      saveSession(data.token, data.phone || '', data.name || '', data.session_token); /* TMC_PATCH38S3 */
+      saveSession(data.token, data.phone || '', data.name || '');
       localStorage.setItem('tmc_email', email);
       /* TMC_PATCH34B_CONTINUE: honor ?continue= if present and safe (relative path) */
       var _p34bDest = '/dashboard.html';

@@ -232,7 +232,7 @@ async function verifyOTP() {
     });
     const data = await res.json();
     if (data.token) {
-      saveSession(data.token, data.phone || phone, data.name || name, data.session_token); /* TMC_PATCH38S3 */
+      saveSession(data.token, data.phone || phone, data.name || name);
       localStorage.setItem('tmc_email', email);
       // TMC_STORE_AND_REDIRECT
       const giftEl = document.getElementById('gift-code');

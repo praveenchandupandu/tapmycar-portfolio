@@ -96,26 +96,10 @@ function getOTPValue() {
   return Array.from(document.querySelectorAll('.otp-box')).map(b => b.value).join('');
 }
 
-/* TMC_PATCH38S3_SESSION  Patch 38 Stage 3  signed-session storage + send.
-   Backward-compatible by design:
-     - tmc_token (legacy raw UUID) is still stored exactly as before.
-     - tmc_session_token (the new HMAC-signed token from verify-otp) is
-       stored alongside it.
-   Either one alone lets the backend identify the user, so a user who was
-   logged in before this deploy (legacy token only) is never locked out.
-   saveSession() now takes an optional 4th arg: sessionToken. */
-function saveSession(token, phone, name, sessionToken) {
+function saveSession(token, phone, name) {
   localStorage.setItem('tmc_token', token);
   localStorage.setItem('tmc_phone', phone);
   localStorage.setItem('tmc_name', name);
-  if (sessionToken) {
-    /* fresh login on a server that issued a signed token */
-    localStorage.setItem('tmc_session_token', sessionToken);
-  } else if (sessionToken === null || sessionToken === '') {
-    /* server explicitly returned no signed token  clear any stale one */
-    localStorage.removeItem('tmc_session_token');
-  }
-  /* sessionToken === undefined (legacy 3-arg caller): leave token as-is */
 }
 
 function getSession() {
@@ -123,51 +107,8 @@ function getSession() {
     token: localStorage.getItem('tmc_token'),
     phone: localStorage.getItem('tmc_phone'),
     name: localStorage.getItem('tmc_name'),
-    sessionToken: localStorage.getItem('tmc_session_token'),
   };
 }
-
-/* TMC_PATCH38S3_FETCH_AUTH  attach the signed session token to same-origin
-   /api/ requests as an 'Authorization: Bearer <token>' header.
-   STRICTLY ADDITIVE: it only ADDS a header. It never removes user_id or
-   token from any request body or query string. Endpoints that do not yet
-   read the header simply ignore it; once Stage 4 endpoints adopt
-   resolveUser() they read this header first and fall back to the legacy
-   user_id UUID  so no user is ever locked out. If no signed token is
-   stored (legacy session) nothing is attached and requests are unchanged. */
-(function () {
-  if (window.__tmcFetchAuthInstalled) return;   /* idempotent at runtime */
-  var origFetch = window.fetch ? window.fetch.bind(window) : null;
-  if (!origFetch) return;
-  window.__tmcFetchAuthInstalled = true;
-  window.fetch = function (input, init) {
-    try {
-      var url = (typeof input === 'string') ? input
-              : (input && input.url) ? input.url : '';
-      if (url) {
-        var u = new URL(url, window.location.origin);
-        var isSameOriginApi = (u.origin === window.location.origin) &&
-                              (u.pathname.indexOf('/api/') === 0);
-        if (isSameOriginApi) {
-          var tok = null;
-          try { tok = localStorage.getItem('tmc_session_token'); } catch (e) {}
-          if (tok) {
-            var h = new Headers((init && init.headers) || {});
-            if (!h.has('Authorization')) {
-              h.set('Authorization', 'Bearer ' + tok);
-            }
-            var newInit = Object.assign({}, init || {});
-            newInit.headers = h;
-            return origFetch(input, newInit);
-          }
-        }
-      }
-    } catch (e) {
-      /* never let auth-wrapping break a request  fall through */
-    }
-    return origFetch(input, init);
-  };
-})();
 
 function requireAuth() {
   const { token } = getSession();

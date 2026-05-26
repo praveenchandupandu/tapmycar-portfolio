@@ -1336,7 +1336,7 @@ async function verifyAndContinue(){
     const res=await fetch('/api/verify-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:registrationData.email,phone:registrationData.phone,code,name:registrationData.name,token:currentToken,type:'phone'})});
     const data=await res.json();
     if(data.token){
-      saveSession(data.token,data.phone||registrationData.phone,data.name||registrationData.name,data.session_token); /* TMC_PATCH38S3 */
+      saveSession(data.token,data.phone||registrationData.phone,data.name||registrationData.name);
       localStorage.setItem('tmc_email',registrationData.email);
       registrationData.userId=data.token;
       await saveVehicleDetails(data.token);

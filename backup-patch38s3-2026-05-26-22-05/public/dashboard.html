@@ -241,7 +241,6 @@ if (typeof installIdleLogout === 'function') {
         localStorage.removeItem('tmc_token');
         localStorage.removeItem('tmc_phone');
         localStorage.removeItem('tmc_name');
-        localStorage.removeItem('tmc_session_token'); /* TMC_PATCH38S3 */
       } catch (e) {}
       window.location.href = '/signin.html?reason=idle';
     }
