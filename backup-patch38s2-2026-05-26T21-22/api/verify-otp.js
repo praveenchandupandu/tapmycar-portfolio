@@ -1,17 +1,4 @@
 const { createClient } = require('@supabase/supabase-js');
-/* TMC_PATCH38S2_LOGIN_TOKEN */
-const { signSession } = require('./_auth');
-
-/* TMC_PATCH38S2_LOGIN_TOKEN: sign a session token, never throw. If JWT_SECRET is missing
-   or signing fails, return null and login still succeeds with the legacy
-   token field (fail-safe — no one is locked out). */
-function _tmcSafeSign(uid) {
-  try { return signSession(uid); } catch (e) {
-    console.error('TMC_PATCH38S2_LOGIN_TOKEN: token signing failed (non-fatal):', e && e.message);
-    return null;
-  }
-}
-
 const crypto = require('crypto');
 const twilio = require('twilio');
 
@@ -156,8 +143,7 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    /* TMC_PATCH38S2_LOGIN_TOKEN: also issue a signed session token (legacy token kept) */
-    return res.json({ token: user.id, session_token: _tmcSafeSign(user.id), name: user.name, phone: user.phone });
+    return res.json({ token: user.id, name: user.name, phone: user.phone });
   }
 
   // EMAIL OTP — signin or register
@@ -314,10 +300,8 @@ module.exports = async function handler(req, res) {
     /* TMC_PATCH34BFIX_PHONE: include phone so signin.html can saveSession() with a
        real phone value. Without this, tmc_phone is saved as "" and the
        welcome-page "is signed in" check (which requires phone) fails. */
-    /* TMC_PATCH38S2_LOGIN_TOKEN: also issue a signed session token (legacy token kept) */
     return res.json({
       token: user.id,
-      session_token: _tmcSafeSign(user.id),
       name: user.name,
       email: user.email,
       phone: user.phone || '',
