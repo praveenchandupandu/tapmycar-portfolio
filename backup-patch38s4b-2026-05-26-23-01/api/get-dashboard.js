@@ -17,7 +17,6 @@ const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
 );
-const { resolveUser, recordTokenType } = require('./_auth'); /* TMC_PATCH38S4B */
 
 module.exports = async function handler(req, res) {
 
@@ -105,14 +104,7 @@ module.exports = async function handler(req, res) {
     }
 
     // Regular user profile update (non-admin)
-    /* TMC_PATCH38S4B: resolve the caller (signed token or legacy UUID)
-       and act on the caller's own id, not a body-supplied user_id
-       (IDOR fix). The inner `user_id` shadows the outer body value
-       within this block only. */
-    const _tmcAuthP = resolveUser(req);
-    if (_tmcAuthP && name) {
-      const user_id = _tmcAuthP.userId;
-      await recordTokenType(supabase, user_id, _tmcAuthP.viaLegacy);
+    if (user_id && name) {
       const updates = { name };
       if (email) updates.email = email;
       // TMC_PATCH6_PHONE_RESET
@@ -208,7 +200,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { admin } = req.query; /* TMC_PATCH38S4B: user_id resolved in user mode below */
+  const { user_id, admin } = req.query;
 
   // â”€â”€ ADMIN MODE â”€â”€
   if (admin) {
@@ -271,13 +263,7 @@ module.exports = async function handler(req, res) {
   }
 
   // â”€â”€ REGULAR USER MODE â”€â”€
-  /* TMC_PATCH38S4B: user mode — identify the caller from a signed token
-     or a legacy UUID. resolveUser() accepts both (no lockout); the
-     resolved id replaces any user_id the query claimed (IDOR fix). */
-  const _tmcAuth = resolveUser(req);
-  if (!_tmcAuth) return res.status(401).json({ error: 'Authentication required' });
-  const user_id = _tmcAuth.userId;
-  await recordTokenType(supabase, user_id, _tmcAuth.viaLegacy);
+  if (!user_id) return res.status(400).json({ error: 'user_id required' });
 
   // Get user
   const { data: user } = await supabase
