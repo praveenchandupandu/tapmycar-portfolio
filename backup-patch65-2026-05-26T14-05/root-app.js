@@ -887,7 +887,7 @@ function getSmartResponse(question) {
         q.indexOf("last") !== -1 || q.indexOf("duration") !== -1 ||
         q.indexOf("permanent") !== -1 || q.indexOf("forever") !== -1 ||
         q.indexOf("indefinit") !== -1 || q.indexOf("30") !== -1) {
-      return /* TMC_PATCH65_BILLING */ "Here's exactly how the eTag works. The eTag is free to download. To activate it, you pay a one-time $1 and choose your plan - Standard or Premium - and by activating you're agreeing to that plan. You then get 30 days to experience the full service, and you're free to cancel anytime within those 30 days if it's not for you. If you don't cancel: on day 30 your physical sticker ships and your card is charged for it ($9.99 for Standard, $24.99 for Premium), and on day 60 your annual plan begins ($9.99/year for Standard, $19.99/year for Premium) and renews yearly. You can always cancel before a charge in Settings. Full details are at tapmycar.io/pricing.";
+      return "The free eTag works for 30 days. Before the 30 days end, you upgrade to Standard or Premium to keep your tag active - if you do not upgrade, the eTag deactivates. There is no automatic charge, so you are never billed without choosing to. The physical sticker ships once you upgrade to a paid plan.";
     }
   }
 

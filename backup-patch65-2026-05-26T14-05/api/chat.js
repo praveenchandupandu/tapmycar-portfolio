@@ -56,8 +56,8 @@ COMMON PROBLEMS AND HOW TO SOLVE THEM
 - Physical sticker hasn't arrived: stickers ship after the 30-day period; status shows on the dashboard. If it's overdue, have them email support@tapmycar.io.
 - Promo or gift code: there's a "Have a promo code?" option on the checkout/registration flow, and redeemed codes show under "My family codes" on the dashboard.
 
-CRITICAL FACT - eTAG BILLING (TMC_PATCH65_BILLING)
-The eTag is free to DOWNLOAD. To ACTIVATE it the user pays a one-time $1 and chooses a plan (Standard or Premium) - by activating, they are agreeing to that plan. They then get 30 days to try the service and may CANCEL any time within those 30 days. If they do NOT cancel, the plan they agreed to proceeds AUTOMATICALLY: on day 30 the physical sticker ships and the sticker price is charged ($9.99 Standard / $24.99 Premium); on day 60 the annual plan begins ($9.99/year Standard / $19.99/year Premium) and renews yearly until cancelled. You must NEVER say "there is no automatic charge" or "payment only if you decide to upgrade" - that is FALSE. Charges DO happen automatically unless the user cancels within 30 days. You must also NEVER say the eTag is permanent, lifetime, unlimited or "never expires". Always describe billing using exactly the model above.
+CRITICAL FACT - THE eTAG IS NOT PERMANENT (TMC_PATCH63_ETAG)
+The free eTag works for 30 DAYS only. You must NEVER tell a user the eTag is permanent, lifetime, unlimited, "doesn't expire", or "works indefinitely" - that is false. Always state it clearly: the eTag is free for 30 days, after which the user must upgrade to a paid plan (Standard or Premium) to keep the tag active, or it deactivates. There is no automatic charge. The physical sticker ships after the user upgrades to a paid plan. If asked how long the eTag lasts or whether it expires, give exactly this rule.
 
 STYLE
 - Be warm, natural, and human. Sound like a real person, not a script.
@@ -91,31 +91,6 @@ module.exports = async function handler(req, res) {
   if (!messages.length || messages[messages.length - 1].role !== 'user') {
     return res.status(400).json({ error: 'conversation must end with a user message' });
   }
-
-  // TMC_PATCH65_BILLING: billing questions about the eTag are answered
-  // with a fixed, exact response - they never go through Gemini, so the
-  // answer can never drift or misstate what the customer is charged.
-  try {
-    const lastUserMsg = String(messages[messages.length - 1].content || '').toLowerCase();
-    var mentionsEtag = lastUserMsg.indexOf('etag') !== -1 ||
-      lastUserMsg.indexOf('e-tag') !== -1 ||
-      (lastUserMsg.indexOf('free') !== -1 &&
-        (lastUserMsg.indexOf('tag') !== -1 || lastUserMsg.indexOf('qr') !== -1));
-    var asksBillingOrDuration =
-      lastUserMsg.indexOf('pay') !== -1 || lastUserMsg.indexOf('charge') !== -1 ||
-      lastUserMsg.indexOf('cost') !== -1 || lastUserMsg.indexOf('price') !== -1 ||
-      lastUserMsg.indexOf('bill') !== -1 || lastUserMsg.indexOf('free') !== -1 ||
-      lastUserMsg.indexOf('money') !== -1 || lastUserMsg.indexOf('$') !== -1 ||
-      lastUserMsg.indexOf('how long') !== -1 || lastUserMsg.indexOf('days') !== -1 ||
-      lastUserMsg.indexOf('expire') !== -1 || lastUserMsg.indexOf('expir') !== -1 ||
-      lastUserMsg.indexOf('last') !== -1 || lastUserMsg.indexOf('duration') !== -1 ||
-      lastUserMsg.indexOf('permanent') !== -1 || lastUserMsg.indexOf('forever') !== -1 ||
-      lastUserMsg.indexOf('indefinit') !== -1 || lastUserMsg.indexOf('30') !== -1 ||
-      lastUserMsg.indexOf('cancel') !== -1 || lastUserMsg.indexOf('upgrade') !== -1;
-    if (mentionsEtag && asksBillingOrDuration) {
-      return res.status(200).json({ reply: "Here's exactly how the eTag works. The eTag is free to download. To activate it, you pay a one-time $1 and choose your plan - Standard or Premium - and by activating you're agreeing to that plan. You then get 30 days to experience the full service, and you're free to cancel anytime within those 30 days if it's not for you. If you don't cancel: on day 30 your physical sticker ships and your card is charged for it ($9.99 for Standard, $24.99 for Premium), and on day 60 your annual plan begins ($9.99/year for Standard, $19.99/year for Premium) and renews yearly. You can always cancel before a charge in Settings. Full details are at tapmycar.io/pricing." });
-    }
-  } catch (e) { /* if anything goes wrong, fall through to the AI */ }
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
