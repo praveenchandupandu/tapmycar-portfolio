@@ -878,19 +878,6 @@ async function sendChatMessage() {
 function getSmartResponse(question) {
   const q = question.toLowerCase();
 
-  // TMC_PATCH63_ETAG: deterministic answer for eTag-duration questions,
-  // so the bot can never say the eTag is permanent / never expires.
-  if (q.indexOf("etag") !== -1 || q.indexOf("e-tag") !== -1 ||
-      (q.indexOf("free") !== -1 && (q.indexOf("tag") !== -1 || q.indexOf("qr") !== -1))) {
-    if (q.indexOf("how long") !== -1 || q.indexOf("days") !== -1 ||
-        q.indexOf("expire") !== -1 || q.indexOf("expir") !== -1 ||
-        q.indexOf("last") !== -1 || q.indexOf("duration") !== -1 ||
-        q.indexOf("permanent") !== -1 || q.indexOf("forever") !== -1 ||
-        q.indexOf("indefinit") !== -1 || q.indexOf("30") !== -1) {
-      return "The free eTag works for 30 days. Before the 30 days end, you upgrade to Standard or Premium to keep your tag active - if you do not upgrade, the eTag deactivates. There is no automatic charge, so you are never billed without choosing to. The physical sticker ships once you upgrade to a paid plan.";
-    }
-  }
-
   // Greetings
   if (q.match(/^(hi|hey|hello|good morning|good evening|sup|yo|howdy)/)) {
     return 'Hey there! Welcome to TapMyCar support. How can I help you today?';
