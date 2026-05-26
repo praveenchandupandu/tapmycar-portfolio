@@ -3,7 +3,6 @@ const { createClient } = require("@supabase/supabase-js");
 const { Resend } = require("resend");
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-const { resolveUser, recordTokenType } = require('./_auth'); /* TMC_PATCH38S4 */
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // TMC_PATCH2_ORIGIN_GUARD
@@ -38,16 +37,9 @@ module.exports = async function handler(req, res) {
   if (!checkOrigin(req)) return res.status(403).json({ error: 'Forbidden origin' });
 
 
-  /* TMC_PATCH38S4: identify the caller from a signed session token or a
-     legacy UUID. resolveUser() accepts both, so no logged-in user is
-     locked out; the resolved id replaces any user_id the request claimed
-     (IDOR fix). viaLegacy records which token type, for the counter. */
-  const _tmcAuth = resolveUser(req);
-  if (!_tmcAuth) return res.status(401).json({ error: 'Authentication required' });
-  const user_id = _tmcAuth.userId;
-  await recordTokenType(supabase, user_id, _tmcAuth.viaLegacy);
+  const { user_id, confirm } = req.body;
 
-  const { confirm } = req.body;
+  if (!user_id) return res.status(400).json({ error: "user_id required" });
   if (confirm !== "DELETE") {
     return res.status(400).json({ error: "Confirmation required. Pass confirm: 'DELETE' to proceed." });
   }

@@ -7,7 +7,6 @@
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const { createClient } = require("@supabase/supabase-js");
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-const { resolveUser, recordTokenType } = require('./_auth'); /* TMC_PATCH38S4 */
 
 // Optional audit hook (best-effort)
 let _audit = null;
@@ -148,14 +147,8 @@ module.exports = async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
   if (!checkOrigin(req)) return res.status(403).json({ error: 'Forbidden origin' });
 
-  /* TMC_PATCH38S4: identify the caller from a signed session token or a
-     legacy UUID. resolveUser() accepts both, so no logged-in user is
-     locked out; the resolved id replaces any user_id the request claimed
-     (IDOR fix). viaLegacy records which token type, for the counter. */
-  const _tmcAuth = resolveUser(req);
-  if (!_tmcAuth) return res.status(401).json({ error: 'Authentication required' });
-  const user_id = _tmcAuth.userId;
-  await recordTokenType(supabase, user_id, _tmcAuth.viaLegacy);
+  const { user_id } = req.body;
+  if (!user_id) return res.status(400).json({ error: "user_id required" });
 
   const { data: user } = await supabase.from("users").select("*").eq("id", user_id).single();
   if (!user) return res.status(404).json({ error: "User not found" });

@@ -1,7 +1,6 @@
 ﻿const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const { createClient } = require("@supabase/supabase-js");
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-const { resolveUser, recordTokenType } = require('./_auth'); /* TMC_PATCH38S4 */
 
 const PRICE_IDS = {
   standard: "price_1TLTIBISVGiuIvF5ACnfAb4t",
@@ -17,17 +16,8 @@ const AMOUNTS = {
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  /* TMC_PATCH38S4: identify the caller from a signed session token or a
-     legacy UUID. resolveUser() accepts both, so no logged-in user is
-     locked out; the resolved id replaces any user_id the request claimed
-     (IDOR fix). viaLegacy records which token type, for the counter. */
-  const _tmcAuth = resolveUser(req);
-  if (!_tmcAuth) return res.status(401).json({ error: 'Authentication required' });
-  const user_id = _tmcAuth.userId;
-  await recordTokenType(supabase, user_id, _tmcAuth.viaLegacy);
-
-  const { plan } = req.body;
-  if (!plan) return res.status(400).json({ error: "plan required" });
+  const { user_id, plan } = req.body;
+  if (!user_id || !plan) return res.status(400).json({ error: "user_id and plan required" });
 
   const { data: user } = await supabase.from("users").select("*").eq("id", user_id).single();
   if (!user) return res.status(404).json({ error: "User not found" });

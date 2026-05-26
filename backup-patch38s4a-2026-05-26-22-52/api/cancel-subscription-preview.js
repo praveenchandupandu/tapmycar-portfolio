@@ -6,7 +6,6 @@
 
 const { createClient } = require('@supabase/supabase-js');
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-const { resolveUser, recordTokenType } = require('./_auth'); /* TMC_PATCH38S4 */
 
 const { computeEligibility } = require('./cancel-subscription');
 
@@ -16,14 +15,8 @@ module.exports = async function handler(req, res) {
   // user_id from query (GET) or body (POST). No admin auth — this is the
   // user previewing their own cancel options. We do require user_id to match
   // a real user, which is sufficient because user_id is only known to that user.
-  /* TMC_PATCH38S4: identify the caller from a signed session token or a
-     legacy UUID. resolveUser() accepts both, so no logged-in user is
-     locked out; the resolved id replaces any user_id the request claimed
-     (IDOR fix). viaLegacy records which token type, for the counter. */
-  const _tmcAuth = resolveUser(req);
-  if (!_tmcAuth) return res.status(401).json({ error: 'Authentication required' });
-  const user_id = _tmcAuth.userId;
-  await recordTokenType(supabase, user_id, _tmcAuth.viaLegacy);
+  const user_id = (req.query && req.query.user_id) || (req.body && req.body.user_id);
+  if (!user_id) return res.status(400).json({ error: 'user_id required' });
 
   const { data: user } = await supabase.from('users').select('*').eq('id', user_id).single();
   if (!user) return res.status(404).json({ error: 'User not found' });

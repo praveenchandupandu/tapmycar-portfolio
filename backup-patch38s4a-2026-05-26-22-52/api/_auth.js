@@ -60,18 +60,17 @@ function verifySession(token) {
   }
 }
 
-/* TMC_PATCH38S4: pull the caller's auth identifier from a request.
-   - signed token   -> Authorization: Bearer <token> (set by the
-     Stage 3 fetch wrapper in app.js)
-   - legacy raw UUID -> the explicit `user_id` field (body or query)
-   We deliberately do NOT read a generic `token` field: in this
-   codebase `token` is overloaded (tag tokens, etc.), so using it for
-   auth would mis-resolve the caller. */
+/* Pull the raw token from a request: Authorization: Bearer xxx,
+   or body.token / body.user_id, or query.token / query.user_id. */
 function extractToken(req) {
   const auth = req.headers && (req.headers.authorization || req.headers.Authorization);
   if (auth && /^Bearer\s+/i.test(auth)) return auth.replace(/^Bearer\s+/i, '').trim();
-  if (req.body && req.body.user_id) return String(req.body.user_id).trim();
-  if (req.query && req.query.user_id) return String(req.query.user_id).trim();
+  if (req.body && (req.body.token || req.body.user_id)) {
+    return String(req.body.token || req.body.user_id).trim();
+  }
+  if (req.query && (req.query.token || req.query.user_id)) {
+    return String(req.query.token || req.query.user_id).trim();
+  }
   return null;
 }
 
@@ -89,21 +88,4 @@ function resolveUser(req) {
   return null;
 }
 
-/* TMC_PATCH38S4: record which token type a user's request used so the
-   admin panel can show migration progress (legacy -> signed). Takes
-   the caller's own supabase client; never throws, never blocks the
-   request on a stats failure. Needs users.last_token_type /
-   last_token_at (see patch38s4-migration.sql). */
-async function recordTokenType(supabase, userId, viaLegacy) {
-  try {
-    if (!supabase || !userId) return;
-    await supabase.from('users').update({
-      last_token_type: viaLegacy ? 'legacy' : 'signed',
-      last_token_at: new Date().toISOString()
-    }).eq('id', userId);
-  } catch (e) {
-    /* non-fatal — a stats write must never break a real request */
-  }
-}
-
-module.exports = { signSession, verifySession, resolveUser, extractToken, isUuid, recordTokenType };
+module.exports = { signSession, verifySession, resolveUser, extractToken, isUuid };
