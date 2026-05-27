@@ -602,10 +602,7 @@ RULES:
 
 //  INJECT CHATBOT 
 function injectChatbot() {
-  /* TMC_PATCH39B: the admin page sets window.__tmcNoChat. We check that
-     flag instead of the URL so the admin page can have a secret name
-     without that name ever appearing in this public file. */
-  if (window.__tmcNoChat) return;
+  if (window.location.pathname.includes('admin')) return;
 
   const chatHTML = `
     <div id="tmc-chat-bubble" onclick="toggleChat()" style="position:fixed;bottom:24px;right:20px;width:56px;height:56px;border-radius:50%;background:#FF6B00;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(255,107,0,.4);z-index:200;transition:transform .2s">
@@ -1418,5 +1415,3 @@ async function registerPush() {
     setTimeout(checkAnnouncement, 1200);
   });
 })();
-
-/* TMC_PATCH39B applied */
