@@ -208,9 +208,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  /* TMC_PATCH39: accept the admin key from the x-admin-key header
-     (keeps it out of the URL and logs) or the legacy ?admin= query. */
-  const admin = (req.headers && req.headers['x-admin-key']) || req.query.admin; /* TMC_PATCH38S4B: user_id resolved in user mode below */
+  const { admin } = req.query; /* TMC_PATCH38S4B: user_id resolved in user mode below */
 
   // â”€â”€ ADMIN MODE â”€â”€
   if (admin) {

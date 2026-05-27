@@ -1966,43 +1966,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 <script>
 
 let adminKey = '';
-
-/* TMC_PATCH39: keep the admin key out of request URLs (and therefore out
-   of server logs, proxy logs and the Referer header). Moves any ?admin=
-   / ?admin_key= query value into the x-admin-key request header and
-   strips it from the URL before the request leaves the browser. On any
-   failure it falls through to a normal fetch, so an admin call can never
-   be broken — worst case the key stays in the URL as before. */
-(function () {
-  if (window.__tmcAdminKeyWrapInstalled) return;
-  var origFetch = window.fetch ? window.fetch.bind(window) : null;
-  if (!origFetch) return;
-  window.__tmcAdminKeyWrapInstalled = true;
-  window.fetch = function (input, init) {
-    try {
-      var url = (typeof input === 'string') ? input
-              : (input && input.url) ? input.url : '';
-      if (url && url.indexOf('/api/') !== -1) {
-        var u = new URL(url, window.location.origin);
-        if (u.origin === window.location.origin) {
-          var key = u.searchParams.get('admin') || u.searchParams.get('admin_key');
-          if (key) {
-            u.searchParams.delete('admin');
-            u.searchParams.delete('admin_key');
-            var h = new Headers((init && init.headers) || {});
-            if (!h.has('x-admin-key')) h.set('x-admin-key', key);
-            var newInit = Object.assign({}, init || {});
-            newInit.headers = h;
-            return origFetch(u.pathname + u.search, newInit);
-          }
-        }
-      }
-    } catch (e) {
-      /* fall through to a normal fetch */
-    }
-    return origFetch(input, init);
-  };
-})();
 let lastGeneratedTokens = [];
 let lastReplacementTokens = [];
 let scannedTokens = new Set();
@@ -2209,14 +2172,14 @@ function adminLogin() {
       if (data.admin) {
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('admin-content').classList.remove('is-hidden');
-        sessionStorage.setItem('tmc_admin_key', adminKey); /* TMC_PATCH39: */
+        localStorage.setItem('tmc_admin_key', adminKey);
         /* TMC_PATCH17_IDLE_LOGOUT: arm idle logout once admin is signed in */
         if (typeof installIdleLogout === 'function') {
           installIdleLogout({
             minutes: 10,
             warningSeconds: 60,
             onLogout: function() {
-              try { sessionStorage.removeItem('tmc_admin_key'); } catch (e) {} /* TMC_PATCH39: */
+              try { localStorage.removeItem('tmc_admin_key'); } catch (e) {}
               if (typeof adminLogout === 'function') adminLogout();
               else window.location.reload();
             }
@@ -2231,7 +2194,7 @@ function adminLogin() {
     .catch(() => { document.getElementById('login-err').textContent = 'Network error'; });
 }
 
-const savedKey = sessionStorage.getItem('tmc_admin_key'); /* TMC_PATCH39: */
+const savedKey = localStorage.getItem('tmc_admin_key');
 if (savedKey) { adminKey = savedKey; document.getElementById('admin-key').value = savedKey; adminLogin(); }
 /* TMC_PATCH17_IDLE_LOGOUT: also arm idle logout when auto-signed-in via saved key
    (covered by adminLogin's success path, but harmless if adminLogin fails
@@ -2360,7 +2323,7 @@ function copyToClipboard(text) {
 }
 
 function adminLogout() {
-  sessionStorage.removeItem('tmc_admin_key'); /* TMC_PATCH39: */
+  localStorage.removeItem('tmc_admin_key');
   document.getElementById('admin-content').classList.add('is-hidden');
   document.getElementById('login-overlay').style.display = 'flex';
   document.getElementById('admin-key').value = '';
@@ -4607,7 +4570,7 @@ let currentReviewTab = 'pending';
 
 function getAdminKey() {
   if (typeof adminKey !== 'undefined' && adminKey) return adminKey;
-  return sessionStorage.getItem('tmc_admin_key') || ''; /* TMC_PATCH39: */
+  return localStorage.getItem('tmc_admin_key') || '';
 }
 
 function escapeHtml(s) {

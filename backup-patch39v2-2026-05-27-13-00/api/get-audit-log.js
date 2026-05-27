@@ -11,11 +11,7 @@ const supabase = createClient(
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
-  /* TMC_PATCH39: accept the admin key from the x-admin-key header
-     (preferred — keeps it out of the URL and logs) or the legacy
-     ?admin= query param. */
-  const { limit } = req.query;
-  const admin = (req.headers && req.headers['x-admin-key']) || req.query.admin;
+  const { admin, limit } = req.query;
   if (admin !== process.env.ADMIN_SECRET_KEY) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
