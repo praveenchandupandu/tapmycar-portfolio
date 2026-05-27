@@ -109,13 +109,17 @@ function legacyAdminKey(req) {
 /* BACKWARD-COMPATIBLE admin check. Returns true if the request carries a
    valid httpOnly admin cookie OR a correct legacy raw key. Stage 3 points
    every admin endpoint at this; Stage 4 later drops the legacy branch. */
-/* TMC_PATCH40S4: cookie-only admin auth. The legacy raw-key branch has
-   been REMOVED — only a valid signed httpOnly cookie authenticates an
-   admin request now. This is what closes the original "raw key in the
-   browser" exposure: a leaked key string can no longer authenticate. */
 function resolveAdmin(req) {
+  /* 1) preferred: signed httpOnly cookie */
   const cookieTok = readCookie(req, COOKIE_NAME);
   if (cookieTok && verifyAdminSession(cookieTok)) return true;
+  /* 2) legacy: a correct raw admin key (constant-time compared) */
+  const raw = legacyAdminKey(req);
+  if (raw && ADMIN_KEY) {
+    const a = Buffer.from(String(raw));
+    const b = Buffer.from(String(ADMIN_KEY));
+    if (a.length === b.length && crypto.timingSafeEqual(a, b)) return true;
+  }
   return false;
 }
 

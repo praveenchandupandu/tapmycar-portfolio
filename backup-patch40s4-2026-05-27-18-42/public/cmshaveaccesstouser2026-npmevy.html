@@ -2200,84 +2200,51 @@ function rawToken(token) {
 }
 
 function adminLogin() {
-  /* TMC_PATCH40S4: cookie-only login as a single chain.
-        POST /api/admin-login  (sets the cookie if the key is correct)
-        -> GET /api/get-dashboard?admin=1  (the cookie authenticates;
-           server returns admin:true with the data)
-     The typed key lives only in _kInput for the duration of the POST,
-     then is cleared. adminKey = '' afterwards: every other fetch in the
-     page that reads adminKey sends an empty (ignored) legacy value, and
-     the cookie does the actual authentication. NO sessionStorage write. */
-  var _kInput = document.getElementById('admin-key').value.trim();
-  if (!_kInput) { document.getElementById('login-err').textContent = 'Enter admin key'; return; }
+  adminKey = document.getElementById('admin-key').value.trim();
+  if (!adminKey) { document.getElementById('login-err').textContent = 'Enter admin key'; return; }
   document.getElementById('login-err').textContent = 'Verifying...';
-  fetch('/api/admin-login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: _kInput })
-  }).then(function (loginR) {
-    _kInput = '';
-    adminKey = '';
-    document.getElementById('admin-key').value = '';
-    if (!loginR.ok) {
-      document.getElementById('login-err').textContent = 'Invalid admin key';
-      return null;
-    }
-    return fetch('/api/get-dashboard?admin=1').then(function (r) { return r.json(); });
-  }).then(function (data) {
-    if (!data) return;
-    if (data.admin) {
-      document.getElementById('login-overlay').style.display = 'none';
-      document.getElementById('admin-content').classList.remove('is-hidden');
-      /* TMC_PATCH17_IDLE_LOGOUT: arm idle logout once signed in */
-      if (typeof installIdleLogout === 'function') {
-        installIdleLogout({
-          minutes: 10,
-          warningSeconds: 60,
-          onLogout: function() {
-            if (typeof adminLogout === 'function') adminLogout();
-            else window.location.reload();
-          }
-        });
+  /* TMC_PATCH40S2: also establish the signed httpOnly admin session
+     cookie. This is additive — it runs before the existing verify-and-
+     load logic, which is unchanged. If it fails (network, old server),
+     login still proceeds the legacy way, so no admin is ever locked out.
+     Stage 3 makes endpoints read this cookie; Stage 4 drops the key. */
+  try {
+    fetch('/api/admin-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: adminKey })
+    }).catch(function () { /* non-fatal — legacy path still works */ });
+  } catch (e) { /* non-fatal */ }
+  fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey))
+    .then(r => r.json())
+    .then(data => {
+      if (data.admin) {
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('admin-content').classList.remove('is-hidden');
+        sessionStorage.setItem('tmc_admin_key', adminKey); /* TMC_PATCH39: */
+        /* TMC_PATCH17_IDLE_LOGOUT: arm idle logout once admin is signed in */
+        if (typeof installIdleLogout === 'function') {
+          installIdleLogout({
+            minutes: 10,
+            warningSeconds: 60,
+            onLogout: function() {
+              try { sessionStorage.removeItem('tmc_admin_key'); } catch (e) {} /* TMC_PATCH39: */
+              if (typeof adminLogout === 'function') adminLogout();
+              else window.location.reload();
+            }
+          });
+        }
+        renderDashboard(data);
+        loadBatchOptions(data.tags || []);
+      } else {
+        document.getElementById('login-err').textContent = 'Invalid admin key';
       }
-      if (typeof renderDashboard === 'function') renderDashboard(data);
-      if (typeof loadBatchOptions === 'function') loadBatchOptions(data.tags || []);
-    } else {
-      document.getElementById('login-err').textContent = 'Invalid admin key';
-    }
-  }).catch(function () {
-    document.getElementById('login-err').textContent = 'Network error';
-  });
+    })
+    .catch(() => { document.getElementById('login-err').textContent = 'Network error'; });
 }
 
-/* TMC_PATCH40S4: no more reading the key from storage. One-time cleanup
-   to delete any stale tmc_admin_key from older browsers. Then check for
-   an existing valid admin cookie by pinging the server; if good, show
-   the panel straight away — same UX as the old saved-key auto-login. */
-try { sessionStorage.removeItem('tmc_admin_key'); } catch (e) {}
-try { localStorage.removeItem('tmc_admin_key'); } catch (e) {}
-(function autoSignInFromCookie() {
-  fetch('/api/get-dashboard?admin=1')
-    .then(function (r) { return r.ok ? r.json() : null; })
-    .then(function (d) {
-      if (!d || !d.admin) return;
-      adminKey = '';
-      document.getElementById('login-overlay').style.display = 'none';
-      document.getElementById('admin-content').classList.remove('is-hidden');
-      if (typeof renderDashboard === 'function') renderDashboard(d);
-      if (typeof loadBatchOptions === 'function') loadBatchOptions(d.tags || []);
-      if (typeof installIdleLogout === 'function') {
-        installIdleLogout({
-          minutes: 10,
-          warningSeconds: 60,
-          onLogout: function () {
-            if (typeof adminLogout === 'function') adminLogout();
-            else window.location.reload();
-          }
-        });
-      }
-    }).catch(function () { /* no cookie or network error — show login as usual */ });
-})();
+const savedKey = sessionStorage.getItem('tmc_admin_key'); /* TMC_PATCH39: */
+if (savedKey) { adminKey = savedKey; document.getElementById('admin-key').value = savedKey; adminLogin(); }
 /* TMC_PATCH17_IDLE_LOGOUT: also arm idle logout when auto-signed-in via saved key
    (covered by adminLogin's success path, but harmless if adminLogin fails
    because installIdleLogout just tracks activity and never logs out anyone
@@ -2411,7 +2378,7 @@ function adminLogout() {
     fetch('/api/admin-logout', { method: 'POST' })
       .catch(function () { /* non-fatal */ });
   } catch (e) { /* non-fatal */ }
-  /* TMC_PATCH40S4: nothing in storage to remove; the cookie was cleared by /api/admin-logout above. */
+  sessionStorage.removeItem('tmc_admin_key'); /* TMC_PATCH39: */
   document.getElementById('admin-content').classList.add('is-hidden');
   document.getElementById('login-overlay').style.display = 'flex';
   document.getElementById('admin-key').value = '';
@@ -4444,11 +4411,15 @@ function p26MarkDirty() {
 
 // TMC_PATCH36B_KNOWMORE_ADMIN: Download QR Code for knowmore page.
 function p36bDownloadQr() {
-  /* TMC_PATCH40S4: no key in the URL. qr-knowmore accepts the httpOnly
-     admin cookie (Stage 3); the cookie rides along on the download
-     automatically because it's a same-origin GET. */
+  /* adminKey is the global var populated from localStorage.tmc_admin_key */
+  var k = (typeof adminKey === 'string' && adminKey) ? adminKey : '';
+  if (!k) {
+    alert('Admin key not loaded. Refresh the page and try again.');
+    return;
+  }
+  /* Direct browser download via anchor element. */
   var a = document.createElement('a');
-  a.href = '/api/qr-knowmore';
+  a.href = '/api/qr-knowmore?key=' + encodeURIComponent(k);
   a.download = 'tapmycar-knowmore-qr.png';
   document.body.appendChild(a);
   a.click();
@@ -4653,9 +4624,8 @@ window.showToast = showToast;
 let currentReviewTab = 'pending';
 
 function getAdminKey() {
-  /* TMC_PATCH40S4: legacy callers still invoke this; they all also send
-     the cookie, so the empty string here is harmless and ignored. */
-  return '';
+  if (typeof adminKey !== 'undefined' && adminKey) return adminKey;
+  return sessionStorage.getItem('tmc_admin_key') || ''; /* TMC_PATCH39: */
 }
 
 function escapeHtml(s) {
