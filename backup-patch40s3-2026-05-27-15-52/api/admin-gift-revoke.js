@@ -6,7 +6,6 @@
 // from here - that requires a separate refund/cancel workflow.
 
 const { createClient } = require('@supabase/supabase-js');
-const { resolveAdmin: _tmcResolveAdminCookie } = require('./_admin-auth'); /* TMC_PATCH40S3 */
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -21,8 +20,7 @@ const TOKEN_RE = /^TMC-[A-Z0-9]{6,12}$/;
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  let adminKey = req.headers['x-admin-key'];
-  if (_tmcResolveAdminCookie(req)) adminKey = process.env.ADMIN_SECRET_KEY; /* TMC_PATCH40S3: accept httpOnly admin cookie */
+  const adminKey = req.headers['x-admin-key'];
   if (!adminKey || adminKey !== process.env.ADMIN_SECRET_KEY) {
     return res.status(401).json({ error: 'Unauthorized' });
   }

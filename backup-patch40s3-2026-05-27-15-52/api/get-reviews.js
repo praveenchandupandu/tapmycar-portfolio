@@ -1,5 +1,4 @@
 const { createClient } = require('@supabase/supabase-js');
-const { resolveAdmin: _tmcResolveAdminCookie } = require('./_admin-auth'); /* TMC_PATCH40S3 */
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
 /**
@@ -14,8 +13,7 @@ module.exports = async function handler(req, res) {
   const status = req.query.status || 'approved';
   const visibleOnly = req.query.visible_only === 'true';
   const landingOnly = req.query.landing_only === 'true';
-  let adminKey = req.query.admin_key || req.headers['x-admin-key'];
-  if (_tmcResolveAdminCookie(req)) adminKey = process.env.ADMIN_SECRET_KEY; /* TMC_PATCH40S3: accept httpOnly admin cookie */
+  const adminKey = req.query.admin_key || req.headers['x-admin-key'];
   const isAdmin = adminKey === process.env.ADMIN_SECRET_KEY;
 
   if (status !== 'approved' && !isAdmin) {

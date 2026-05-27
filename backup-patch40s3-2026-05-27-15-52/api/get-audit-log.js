@@ -2,7 +2,6 @@
 // /api/get-audit-log — admin-only, returns recent audit log entries.
 
 const { createClient } = require('@supabase/supabase-js');
-const { resolveAdmin: _tmcResolveAdminCookie } = require('./_admin-auth'); /* TMC_PATCH40S3 */
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -16,8 +15,7 @@ module.exports = async function handler(req, res) {
      (preferred — keeps it out of the URL and logs) or the legacy
      ?admin= query param. */
   const { limit } = req.query;
-  let admin = (req.headers && req.headers['x-admin-key']) || req.query.admin;
-  if (_tmcResolveAdminCookie(req)) admin = process.env.ADMIN_SECRET_KEY; /* TMC_PATCH40S3: accept httpOnly admin cookie */
+  const admin = (req.headers && req.headers['x-admin-key']) || req.query.admin;
   if (admin !== process.env.ADMIN_SECRET_KEY) {
     return res.status(401).json({ error: 'Unauthorized' });
   }

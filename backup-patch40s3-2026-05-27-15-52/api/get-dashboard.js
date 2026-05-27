@@ -1,5 +1,4 @@
 const { createClient } = require('@supabase/supabase-js');
-const { resolveAdmin: _tmcResolveAdminCookie } = require('./_admin-auth'); /* TMC_PATCH40S3 */
 
 // TMC_PATCH2_ORIGIN_GUARD
 function checkOrigin(req) {
@@ -29,7 +28,7 @@ module.exports = async function handler(req, res) {
 
     // Admin actions require admin key
     if (action && admin_key) {
-      if (!_tmcResolveAdminCookie(req) && admin_key !== process.env.ADMIN_SECRET_KEY) { /* TMC_PATCH40S3 */
+      if (admin_key !== process.env.ADMIN_SECRET_KEY) {
         return res.status(401).json({ error: 'Invalid admin key' });
       }
 
@@ -154,7 +153,7 @@ module.exports = async function handler(req, res) {
 
     // TMC_PATCH20_AUDIT_AND_OPS: test-data actions (admin only)
     if (action === 'create_test_user') {
-      if (!_tmcResolveAdminCookie(req) && admin_key !== process.env.ADMIN_SECRET_KEY) { /* TMC_PATCH40S3 */
+      if (admin_key !== process.env.ADMIN_SECRET_KEY) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
       const name = String(req.body.name || '').slice(0, 60);
@@ -179,7 +178,7 @@ module.exports = async function handler(req, res) {
     }
 
     if (action === 'create_test_scan') {
-      if (!_tmcResolveAdminCookie(req) && admin_key !== process.env.ADMIN_SECRET_KEY) { /* TMC_PATCH40S3 */
+      if (admin_key !== process.env.ADMIN_SECRET_KEY) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
       const tag_id = String(req.body.tag_id || '');
@@ -214,8 +213,8 @@ module.exports = async function handler(req, res) {
   const admin = (req.headers && req.headers['x-admin-key']) || req.query.admin; /* TMC_PATCH38S4B: user_id resolved in user mode below */
 
   // â”€â”€ ADMIN MODE â”€â”€
-  if (admin || _tmcResolveAdminCookie(req)) { /* TMC_PATCH40S3 */
-    if (!_tmcResolveAdminCookie(req) && admin !== process.env.ADMIN_SECRET_KEY) {
+  if (admin) {
+    if (admin !== process.env.ADMIN_SECRET_KEY) {
       return res.json({ admin: false });
     }
 

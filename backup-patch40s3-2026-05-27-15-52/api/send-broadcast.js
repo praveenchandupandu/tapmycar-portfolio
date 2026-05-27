@@ -2,7 +2,6 @@
 // Admin broadcast endpoint. POST /api/send-broadcast.
 // Channels: email, push, sms. Modes: preview (dry_run), send, history, detail.
 const { createClient } = require('@supabase/supabase-js');
-const { resolveAdmin: _tmcResolveAdminCookie } = require('./_admin-auth'); /* TMC_PATCH40S3 */
 const { Resend } = require('resend');
 const webpush = require('web-push');
 
@@ -227,9 +226,7 @@ module.exports = async function handler(req, res) {
   const body = req.body || {};
   const { admin_key, action, subject, recipients, dry_run } = body;
 
-  let _tmcAdminKey = admin_key; /* TMC_PATCH40S3 */
-  if (_tmcResolveAdminCookie(req)) _tmcAdminKey = process.env.ADMIN_SECRET_KEY;
-  if (!_tmcAdminKey || _tmcAdminKey !== process.env.ADMIN_SECRET_KEY) {
+  if (!admin_key || admin_key !== process.env.ADMIN_SECRET_KEY) {
     return res.status(401).json({ error: 'Admin authentication required' });
   }
 

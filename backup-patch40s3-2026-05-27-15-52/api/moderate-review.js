@@ -1,5 +1,4 @@
 const { createClient } = require('@supabase/supabase-js');
-const { resolveAdmin: _tmcResolveAdminCookie } = require('./_admin-auth'); /* TMC_PATCH40S3 */
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
 /**
@@ -12,9 +11,7 @@ module.exports = async function handler(req, res) {
 
   const { review_id, action, admin_key } = req.body;
 
-  let _tmcAdminKey = admin_key; /* TMC_PATCH40S3 */
-  if (_tmcResolveAdminCookie(req)) _tmcAdminKey = process.env.ADMIN_SECRET_KEY;
-  if (!_tmcAdminKey || _tmcAdminKey !== process.env.ADMIN_SECRET_KEY) {
+  if (!admin_key || admin_key !== process.env.ADMIN_SECRET_KEY) {
     return res.status(401).json({ error: 'Admin authentication required' });
   }
   if (!review_id) return res.status(400).json({ error: 'review_id required' });

@@ -17,7 +17,6 @@
 // Auth: requires x-admin-key header matching ADMIN_SECRET_KEY.
 
 const { createClient } = require('@supabase/supabase-js');
-const { resolveAdmin: _tmcResolveAdminCookie } = require('./_admin-auth'); /* TMC_PATCH40S3 */
 const { audit } = require('./_audit'); /* TMC_PATCH20_AUDIT_AND_OPS */
 
 const supabase = createClient(
@@ -29,8 +28,7 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   // Admin auth
-  let adminKey = req.headers['x-admin-key'];
-  if (_tmcResolveAdminCookie(req)) adminKey = process.env.ADMIN_SECRET_KEY; /* TMC_PATCH40S3: accept httpOnly admin cookie */
+  const adminKey = req.headers['x-admin-key'];
   if (adminKey !== process.env.ADMIN_SECRET_KEY) {
     return res.status(401).json({ error: 'Unauthorized' });
   }

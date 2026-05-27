@@ -11,7 +11,6 @@
 // Image: 1230x1230 px, 30% error correction (highest), pure black/white.
 
 const QRCode = require('qrcode');
-const { resolveAdmin: _tmcResolveAdminCookie } = require('./_admin-auth'); /* TMC_PATCH40S3 */
 
 const TARGET_URL = 'https://tapmycar.io/knowmore';
 
@@ -19,8 +18,7 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
   // Admin auth via query param (so it works as a download link).
-  let key = req.query && req.query.key;
-  if (_tmcResolveAdminCookie(req)) key = process.env.ADMIN_SECRET_KEY; /* TMC_PATCH40S3: accept httpOnly admin cookie */
+  const key = req.query && req.query.key;
   if (!key || key !== process.env.ADMIN_SECRET_KEY) {
     return res.status(401).json({ error: 'Unauthorized' });
   }

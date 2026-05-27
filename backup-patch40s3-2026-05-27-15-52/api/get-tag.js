@@ -1,5 +1,4 @@
 const { createClient } = require('@supabase/supabase-js');
-const { resolveAdmin: _tmcResolveAdminCookie } = require('./_admin-auth'); /* TMC_PATCH40S3 */
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -23,8 +22,7 @@ module.exports = async function handler(req, res) {
       // TMC_PATCH15_VERIFY_GATE: destructive overrides require admin auth. Other status
       // changes ('paused', 'inactive', 'active') remain user-accessible.
       if (status_override === 'deleted' || status_override === 'voided') {
-        let _adminKey = req.headers['x-admin-key'] || (req.body && req.body.admin_key) || '';
-  if (_tmcResolveAdminCookie(req)) _adminKey = process.env.ADMIN_SECRET_KEY; /* TMC_PATCH40S3: accept httpOnly admin cookie */
+        const _adminKey = req.headers['x-admin-key'] || (req.body && req.body.admin_key) || '';
         if (_adminKey !== process.env.ADMIN_SECRET_KEY) {
           return res.status(401).json({ error: 'Unauthorized' });
         }
