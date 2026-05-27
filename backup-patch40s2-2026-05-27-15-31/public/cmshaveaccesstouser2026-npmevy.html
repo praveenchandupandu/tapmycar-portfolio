@@ -2203,18 +2203,6 @@ function adminLogin() {
   adminKey = document.getElementById('admin-key').value.trim();
   if (!adminKey) { document.getElementById('login-err').textContent = 'Enter admin key'; return; }
   document.getElementById('login-err').textContent = 'Verifying...';
-  /* TMC_PATCH40S2: also establish the signed httpOnly admin session
-     cookie. This is additive — it runs before the existing verify-and-
-     load logic, which is unchanged. If it fails (network, old server),
-     login still proceeds the legacy way, so no admin is ever locked out.
-     Stage 3 makes endpoints read this cookie; Stage 4 drops the key. */
-  try {
-    fetch('/api/admin-login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key: adminKey })
-    }).catch(function () { /* non-fatal — legacy path still works */ });
-  } catch (e) { /* non-fatal */ }
   fetch('/api/get-dashboard?admin=' + encodeURIComponent(adminKey))
     .then(r => r.json())
     .then(data => {
@@ -2372,12 +2360,6 @@ function copyToClipboard(text) {
 }
 
 function adminLogout() {
-  /* TMC_PATCH40S2: also clear the httpOnly admin session cookie on the
-     server. Additive and non-fatal — the rest of logout runs regardless. */
-  try {
-    fetch('/api/admin-logout', { method: 'POST' })
-      .catch(function () { /* non-fatal */ });
-  } catch (e) { /* non-fatal */ }
   sessionStorage.removeItem('tmc_admin_key'); /* TMC_PATCH39: */
   document.getElementById('admin-content').classList.add('is-hidden');
   document.getElementById('login-overlay').style.display = 'flex';
