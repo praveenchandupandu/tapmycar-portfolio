@@ -1965,7 +1965,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 <script src="/app.js"></script>
 <script>
 
-let adminKey = '_'; /* TMC_PATCH40S4_HOTFIX: placeholder so client-side `if (!adminKey)` guards pass; server still ignores it, cookie auths */
+let adminKey = '';
 
 /* TMC_PATCH39: keep the admin key out of request URLs (and therefore out
    of server logs, proxy logs and the Referer header). Moves any ?admin=
@@ -2217,7 +2217,7 @@ function adminLogin() {
     body: JSON.stringify({ key: _kInput })
   }).then(function (loginR) {
     _kInput = '';
-    adminKey = '_'; /* TMC_PATCH40S4_HOTFIX */
+    adminKey = '';
     document.getElementById('admin-key').value = '';
     if (!loginR.ok) {
       document.getElementById('login-err').textContent = 'Invalid admin key';
@@ -2261,7 +2261,7 @@ try { localStorage.removeItem('tmc_admin_key'); } catch (e) {}
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (d) {
       if (!d || !d.admin) return;
-      adminKey = '_'; /* TMC_PATCH40S4_HOTFIX */
+      adminKey = '';
       document.getElementById('login-overlay').style.display = 'none';
       document.getElementById('admin-content').classList.remove('is-hidden');
       if (typeof renderDashboard === 'function') renderDashboard(d);
