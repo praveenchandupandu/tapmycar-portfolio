@@ -1117,7 +1117,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
     <button class="sb-item" data-tab="inventory" onclick="navTo('inventory')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><span>Inventory</span></button>
     <button class="sb-item" data-tab="promos" onclick="navTo('promos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg><span>Promos</span></button>
     <button class="sb-item" data-tab="audit" onclick="navTo('audit')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6a2 2 0 012 2v0H7v0a2 2 0 012-2z"/><path d="M8 4H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg><span>Audit</span></button>
-    <button class="sb-item" data-tab="broadcast" onclick="navTo('broadcast')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg><span>Broadcast</span></button><!-- TMC_PATCH44_BROADCAST -->
+    <button class="sb-item" data-tab="broadcast" onclick="navTo('broadcast')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg><span>Broadcast</span></button><!-- TMC_PATCH44_BROADCAST -->
     <button class="sb-item" data-tab="retention" onclick="navTo('retention')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span>Retention</span></button><!-- TMC_PATCH42 -->
     </nav>
     <div class="sidebar-foot">
@@ -1669,17 +1669,21 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
         <div id="reviews-list"><div class="empty">Loading reviews...</div></div>
       </div>
 
-      <!-- TMC_PATCH42 Retention panel -->
-      <div class="panel" id="panel-retention">
-        <div id="ret-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px">
-          <div class="empty">Loading…</div>
-        </div>
-        <div style="margin-top:18px">
-          <div style="font-weight:800;font-size:14px;margin-bottom:10px">Why users are leaving (last 90 days)</div>
-          <div id="ret-reasons"><div class="empty">Loading…</div></div>
-        </div>
-      </div>
-
+      <!-- TMC_PATCH42 Retention panel -->
+      <div class="panel" id="panel-retention">
+        <div id="ret-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px">
+          <div class="empty">Loading…</div>
+        </div>
+        <div style="margin-top:18px">
+          <div style="font-weight:800;font-size:14px;margin-bottom:10px">Why users are leaving (last 90 days)</div>
+          <div id="ret-reasons"><div class="empty">Loading…</div></div>
+        </div>
+        <div style="margin-top:18px"><!-- TMC_PATCH42C -->
+          <div style="font-weight:800;font-size:14px;margin-bottom:10px">Recent exits (last 90 days)</div>
+          <div id="ret-recent"><div class="empty">Loading…</div></div>
+        </div>
+      </div>
+
       <!-- TMC_PATCH44_BROADCAST panel -->
       <div class="panel" id="panel-broadcast">
         <style>
@@ -5140,69 +5144,103 @@ function p35bsCloseQr() {
 
 
 <script>
-// TMC_PATCH42 Retention tab logic
-(function () {
-  var LABEL = {
-    too_expensive:     'Too expensive',
-    no_longer_need:    'No longer need it',
-    not_as_expected:   'Did not work as expected',
-    privacy_concerns:  'Privacy concerns',
-    found_alternative: 'Found an alternative',
-    other:             'Other',
-    unknown:           'Not specified'
-  };
-  function escHTML(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function stat(label, value) {
-    return '<div style="padding:14px;background:rgba(0,0,0,0.25);border-radius:10px">' +
-      '<div style="font-size:22px;font-weight:800;color:#FF6B00">' + (value == null ? '—' : value) + '</div>' +
-      '<div style="font-size:11px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:.04em;margin-top:2px">' + label + '</div>' +
-    '</div>';
-  }
-  function renderReasons(reasons, total) {
-    var keys = Object.keys(reasons || {});
-    if (!keys.length || !total) return '<div class="empty">No exit reasons captured yet.</div>';
-    keys.sort(function (a, b) { return reasons[b] - reasons[a]; });
-    var rows = keys.map(function (k) {
-      var n = reasons[k]; var pct = Math.round((n / total) * 100);
-      return '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(0,0,0,0.25);border-radius:8px;margin-bottom:6px">' +
-        '<div style="flex:1;font-size:13px;color:#E2E8F0">' + escHTML(LABEL[k] || k) + '</div>' +
-        '<div style="font-size:12px;color:#94A3B8">' + pct + '%</div>' +
-        '<div style="font-size:13px;font-weight:700;color:#FF6B00;min-width:30px;text-align:right">' + n + '</div>' +
-      '</div>';
-    }).join('');
-    return rows;
-  }
-  function load() {
-    var stats = document.getElementById('ret-stats');
-    var reasons = document.getElementById('ret-reasons');
-    fetch('/api/get-retention-stats').then(function (r) { return r.json(); }).then(function (d) {
-      if (!d || !d.ok) {
-        stats.innerHTML = '<div class="empty">Could not load stats.</div>';
-        reasons.innerHTML = '';
-        return;
-      }
-      stats.innerHTML =
-        stat('Exits captured (90d)', d.exit_total_90d) +
-        stat('Opted-in users',       d.marketing_consented) +
-        stat('Lapsed emails (30d)',  d.lapsed_emails_sent_30d);
-      reasons.innerHTML = renderReasons(d.exit_reasons, d.exit_total_90d);
-    }).catch(function () {
-      stats.innerHTML = '<div class="empty">Network error.</div>';
-      reasons.innerHTML = '';
-    });
-  }
-  /* hook into the existing tab-change flow by polling once after navTo. */
-  var prevNav = window.navTo;
-  if (typeof prevNav === 'function' && !window.__tmcRetentionHooked) {
-    window.__tmcRetentionHooked = true;
-    window.navTo = function (tab) {
-      var r = prevNav.apply(this, arguments);
-      if (tab === 'retention') { try { load(); } catch (e) {} }
-      return r;
-    };
-  }
-})();
-
+// TMC_PATCH42 Retention tab logic
+(function () {
+  var LABEL = {
+    too_expensive:     'Too expensive',
+    no_longer_need:    'No longer need it',
+    not_as_expected:   'Did not work as expected',
+    privacy_concerns:  'Privacy concerns',
+    found_alternative: 'Found an alternative',
+    other:             'Other',
+    unknown:           'Not specified'
+  };
+  function escHTML(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
+  function stat(label, value) {
+    return '<div style="padding:14px;background:rgba(0,0,0,0.25);border-radius:10px">' +
+      '<div style="font-size:22px;font-weight:800;color:#FF6B00">' + (value == null ? '—' : value) + '</div>' +
+      '<div style="font-size:11px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:.04em;margin-top:2px">' + label + '</div>' +
+    '</div>';
+  }
+  function renderReasons(reasons, total) {
+    var keys = Object.keys(reasons || {});
+    if (!keys.length || !total) return '<div class="empty">No exit reasons captured yet.</div>';
+    keys.sort(function (a, b) { return reasons[b] - reasons[a]; });
+    var rows = keys.map(function (k) {
+      var n = reasons[k]; var pct = Math.round((n / total) * 100);
+      return '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(0,0,0,0.25);border-radius:8px;margin-bottom:6px">' +
+        '<div style="flex:1;font-size:13px;color:#E2E8F0">' + escHTML(LABEL[k] || k) + '</div>' +
+        '<div style="font-size:12px;color:#94A3B8">' + pct + '%</div>' +
+        '<div style="font-size:13px;font-weight:700;color:#FF6B00;min-width:30px;text-align:right">' + n + '</div>' +
+      '</div>';
+    }).join('');
+    return rows;
+  }
+  /* TMC_PATCH42C: recent-exits rendering helpers */
+  function fmtDate(iso) {
+    try { return new Date(iso).toLocaleDateString('en-US', { month:'short', day:'numeric' }); }
+    catch (e) { return ''; }
+  }
+  function planLabel(p) {
+    var L = { etag: 'Free (eTag)', standard: 'Standard', premium: 'Premium' };
+    return L[p] || (p || 'unknown');
+  }
+  function renderRecent(rows) {
+    if (!rows || !rows.length) return '<div class="empty">No exits captured yet.</div>';
+    return rows.map(function (r) {
+      var dt = fmtDate(r.created_at);
+      var pl = planLabel(r.plan_at_exit);
+      var age = (r.account_age_days != null) ? (r.account_age_days + ' days old') : '';
+      var meta = [dt, pl, age].filter(Boolean).join(' · ');
+      var label = LABEL[r.reason_code] || r.reason_code || 'Unknown';
+      var comment = r.reason_text ? escHTML(r.reason_text) : '';
+      var consent = r.consent_given
+        ? '<span style="font-size:10px;color:#22C55E;background:rgba(34,197,94,0.12);padding:2px 8px;border-radius:6px;margin-left:8px">opted in</span>'
+        : '';
+      return '<div style="padding:12px 14px;background:rgba(0,0,0,0.25);border-radius:10px;margin-bottom:8px">' +
+        '<div style="font-size:11px;color:#94A3B8;margin-bottom:4px">' + escHTML(meta) + consent + '</div>' +
+        '<div style="font-size:13px;font-weight:700;color:#E2E8F0;margin-bottom:' + (comment ? '6' : '0') + 'px">' + escHTML(label) + '</div>' +
+        (comment ? ('<div style="font-size:12px;color:#CBD5E1;line-height:1.55;font-style:italic;border-left:2px solid #475569;padding-left:10px;margin-top:4px">' + comment + '</div>') : '') +
+      '</div>';
+    }).join('');
+  }
+  function load() {
+    var stats = document.getElementById('ret-stats');
+    var reasons = document.getElementById('ret-reasons');
+    fetch('/api/get-retention-stats').then(function (r) { return r.json(); }).then(function (d) {
+      if (!d || !d.ok) {
+        stats.innerHTML = '<div class="empty">Could not load stats.</div>';
+        reasons.innerHTML = '';
+        var recentEl = document.getElementById('ret-recent');
+        if (recentEl) recentEl.innerHTML = ''; /* TMC_PATCH42C */
+        return;
+      }
+      stats.innerHTML =
+        stat('Exits captured (90d)', d.exit_total_90d) +
+        stat('Opted-in users',       d.marketing_consented) +
+        stat('Lapsed emails (30d)',  d.lapsed_emails_sent_30d);
+      reasons.innerHTML = renderReasons(d.exit_reasons, d.exit_total_90d);
+      var recentEl = document.getElementById('ret-recent'); /* TMC_PATCH42C */
+      if (recentEl) recentEl.innerHTML = renderRecent(d.recent_exits || []);
+    }).catch(function () {
+      stats.innerHTML = '<div class="empty">Network error.</div>';
+      reasons.innerHTML = '';
+      var recentElErr = document.getElementById('ret-recent'); /* TMC_PATCH42C */
+      if (recentElErr) recentElErr.innerHTML = '';
+    });
+  }
+  /* hook into the existing tab-change flow by polling once after navTo. */
+  var prevNav = window.navTo;
+  if (typeof prevNav === 'function' && !window.__tmcRetentionHooked) {
+    window.__tmcRetentionHooked = true;
+    window.navTo = function (tab) {
+      var r = prevNav.apply(this, arguments);
+      if (tab === 'retention') { try { load(); } catch (e) {} }
+      return r;
+    };
+  }
+})();
+
 // TMC_PATCH44_BROADCAST - admin broadcast tab logic
 // TMC_PATCH46_CHANNELS - multi-channel (email / push / sms)
 // TMC_PATCH48_TAGUI - by-tag targeting + expandable recipient detail

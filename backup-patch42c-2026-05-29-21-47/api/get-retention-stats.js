@@ -16,23 +16,18 @@ module.exports = async function handler(req, res) {
   const thirtyDays = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
   try {
-    /* TMC_PATCH42C: also return the recent rows (anonymised) so the
-       Retention tab can show individual comments. Order newest-first,
-       cap at 500 for the aggregate count, surface the first 50 as the
-       recent list. The exit_reasons table has no PII — there is no
-       user_id, email, or phone on it. */
+    /* TMC_PATCH42B: read from the dedicated exit_reasons table (which
+       survives user deletion), grouped client-side. Volumes are small;
+       fetching rows and counting in JS is fine. */
     const { data: exits } = await supabase
       .from('exit_reasons')
-      .select('reason_code, reason_text, plan_at_exit, account_age_days, consent_given, created_at')
-      .gte('created_at', ninetyDays)
-      .order('created_at', { ascending: false })
-      .limit(500);
+      .select('reason_code')
+      .gte('created_at', ninetyDays);
     const exit_reasons = {};
     (exits || []).forEach(r => {
       const k = r.reason_code || 'unknown';
       exit_reasons[k] = (exit_reasons[k] || 0) + 1;
     });
-    const recent_exits = (exits || []).slice(0, 50);
 
     const { count: opted_in } = await supabase
       .from('users')
@@ -50,8 +45,7 @@ module.exports = async function handler(req, res) {
       exit_reasons,
       exit_total_90d: (exits || []).length,
       marketing_consented: opted_in || 0,
-      lapsed_emails_sent_30d: lapsed_30d || 0,
-      recent_exits  /* TMC_PATCH42C */
+      lapsed_emails_sent_30d: lapsed_30d || 0
     });
   } catch (e) {
     return res.status(500).json({ error: e.message });
