@@ -16,16 +16,17 @@ module.exports = async function handler(req, res) {
   const thirtyDays = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
   try {
-    /* TMC_PATCH42B: read from the dedicated exit_reasons table (which
-       survives user deletion), grouped client-side. Volumes are small;
-       fetching rows and counting in JS is fine. */
+    /* Exit reasons in last 90 days, grouped client-side (Supabase JS
+       doesn't expose group-by; the volumes are small enough that fetching
+       the rows and counting in JS is fine). */
     const { data: exits } = await supabase
-      .from('exit_reasons')
-      .select('reason_code')
-      .gte('created_at', ninetyDays);
+      .from('users')
+      .select('exit_reason_code')
+      .gte('exit_reason_at', ninetyDays)
+      .not('exit_reason_code', 'is', null);
     const exit_reasons = {};
     (exits || []).forEach(r => {
-      const k = r.reason_code || 'unknown';
+      const k = r.exit_reason_code || 'unknown';
       exit_reasons[k] = (exit_reasons[k] || 0) + 1;
     });
 

@@ -58,28 +58,25 @@ module.exports = async function handler(req, res) {
   const userEmail = user.email;
   const userName = user.name;
 
-  /* TMC_PATCH42B_EXITREASON: capture exit reason into the dedicated
-     exit_reasons table (anonymised — no user_id), which survives the
-     cascade-delete below. Patch 42 wrote to the user row which then got
-     deleted; this fix preserves the data for the Retention tab.
-     Failures here are non-fatal — never block a user's right to delete. */
+  /* TMC_PATCH42_EXITREASON: capture exit reason + marketing consent BEFORE
+     the cascade-delete runs. Failures here are non-fatal — we never want
+     a logging hiccup to block a user's right to delete their account. */
   try {
     const VALID = ['too_expensive','no_longer_need','not_as_expected','privacy_concerns','found_alternative','other'];
     const code = VALID.indexOf(exit_reason_code) !== -1 ? exit_reason_code : null;
     const text = typeof exit_reason_text === 'string' ? exit_reason_text.slice(0, 1000) : null;
     const consent = marketing_consent === true;
-    /* anonymous analytics row — no PII linking back to the deleted user */
-    if (code) {
-      const ageMs = user.created_at ? (Date.now() - new Date(user.created_at).getTime()) : null;
-      const ageDays = ageMs !== null ? Math.floor(ageMs / 86400000) : null;
-      await supabase.from('exit_reasons').insert({
-        reason_code:      code,
-        reason_text:      text,
-        plan_at_exit:     user.plan || null,
-        account_age_days: ageDays,
-        consent_given:    consent
-      });
-    }
+    /* email_opt_out is the canonical opt-out flag the broadcast system
+       reads. consent === true means we may email them; opt_out = false. */
+    await supabase.from('users').update({
+      exit_reason: text,
+      exit_reason_code: code,
+      exit_reason_at: new Date().toISOString(),
+      marketing_consent: consent,
+      marketing_consent_at: new Date().toISOString(),
+      marketing_consent_source: 'pre_delete_modal',
+      email_opt_out: !consent
+    }).eq('id', user_id);
     /* If they did NOT opt in, add a suppression row keyed by email so a
        re-registration with the same email stays suppressed forever. */
     if (!consent && userEmail) {
@@ -90,7 +87,7 @@ module.exports = async function handler(req, res) {
       });
     }
   } catch (e) {
-    console.warn('TMC_PATCH42B exit-reason capture failed (non-fatal):', e && e.message);
+    console.warn('TMC_PATCH42 exit-reason capture failed (non-fatal):', e && e.message);
   }
 
   try {
