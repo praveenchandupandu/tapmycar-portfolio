@@ -18,7 +18,6 @@ const supabase = createClient(
  */
 
 const CODE_FORMAT = /^TMC-PREM-[A-HJ-NP-Z2-9]{6}$/;
-const REFERRAL_FORMAT = /^TMC-[A-HJ-NP-Z2-9]{6}$/; /* TMC_PATCH43_REFERRALS */
 const { rateLimit, getClientIp } = require('./_rate-limit');
 
 module.exports = async function handler(req, res) {
@@ -47,64 +46,8 @@ module.exports = async function handler(req, res) {
 
   const normalized = String(code).trim().toUpperCase();
 
-  /* TMC_PATCH43_REFERRALS: handle TMC-XXXXXX referral codes. Premium
-     codes are TMC-PREM-XXXXXX (longer). The regex anchors guarantee the
-     two formats can't both match. Referral path returns directly here;
-     premium path continues unchanged below. */
-  if (REFERRAL_FORMAT.test(normalized)) {
-    const { data: referrer, error: refLookupErr } = await supabase
-      .from('users')
-      .select('id, name')
-      .eq('referral_code', normalized)
-      .maybeSingle();
-    if (refLookupErr) {
-      console.error('referral lookup error:', refLookupErr.message);
-      return res.status(500).json({ error: 'Lookup failed' });
-    }
-    if (!referrer) {
-      return res.status(404).json({ error: "We couldn't find that referral code. Double-check the spelling." });
-    }
-    if (referrer.id === user_id) {
-      return res.status(400).json({ error: "You can't use your own referral code." });
-    }
-    /* Check the user's current referred_by:
-         - same code already on file -> idempotent success
-         - different code on file    -> reject (one referrer per user) */
-    const { data: u } = await supabase
-      .from('users')
-      .select('referred_by')
-      .eq('id', user_id)
-      .single();
-    if (u && u.referred_by) {
-      if (u.referred_by === normalized) {
-        return res.status(200).json({
-          success: true,
-          type: 'referral',
-          alreadyRedeemed: true,
-          referrer_name: referrer.name || 'your friend'
-        });
-      }
-      return res.status(400).json({ error: "You've already used a referral code on this account." });
-    }
-    /* Set referred_by so stripe-webhook credits the referrer when this
-       user buys a paid plan. This is the missing link bug 2 fixes. */
-    const { error: updErr } = await supabase
-      .from('users')
-      .update({ referred_by: normalized })
-      .eq('id', user_id);
-    if (updErr) {
-      console.error('referral set failed:', updErr.message);
-      return res.status(500).json({ error: 'Could not apply the referral code right now.' });
-    }
-    return res.status(200).json({
-      success: true,
-      type: 'referral',
-      referrer_name: referrer.name || 'your friend'
-    });
-  }
-
   if (!CODE_FORMAT.test(normalized)) {
-    return res.status(400).json({ error: 'Invalid code format. Expected TMC-PREM-XXXXXX or TMC-XXXXXX.' });
+    return res.status(400).json({ error: 'Invalid code format. Expected TMC-PREM-XXXXXX.' });
   }
 
   // ─── Look up the code ────────────────────────────────────────
