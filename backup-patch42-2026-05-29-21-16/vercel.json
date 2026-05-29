@@ -25,10 +25,6 @@
     {
       "path": "/api/gift-expiry-cron",
       "schedule": "0 9 * * *"
-    },
-    {
-      "path": "/api/cron-lapsed-email",
-      "schedule": "0 10 * * *"
     }
   ],
   "headers": [

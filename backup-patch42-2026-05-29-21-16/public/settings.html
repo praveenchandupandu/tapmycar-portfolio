@@ -385,90 +385,29 @@ async function cancelSubscription() {
   }
 })();
 
-/* TMC_PATCH42_PREDELETE: replaces the two-step confirm/prompt flow with a
-   single custom modal that also captures exit reason + email consent.
-   The existing /api/delete-account contract is preserved (still passes
-   confirm:'DELETE'); the three new fields are added alongside. */
-function deleteAccount() {
-  /* lazy-build the modal so settings.html doesn't carry its DOM until needed */
-  var existing = document.getElementById('tmc-predelete-modal');
-  if (existing) { existing.style.display = 'flex'; return; }
-
-  var ov = document.createElement('div');
-  ov.id = 'tmc-predelete-modal';
-  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;font-family:Inter,system-ui,sans-serif';
-  ov.innerHTML =
-    '<div style="background:#fff;max-width:440px;width:100%;border-radius:16px;padding:22px;max-height:92vh;overflow-y:auto">' +
-      '<div style="font-size:18px;font-weight:800;color:#111;margin-bottom:6px">Before you go</div>' +
-      '<div style="font-size:13px;color:#6B7280;line-height:1.55;margin-bottom:18px">Deleting your account cancels any active subscription, disables your tags, and permanently removes your personal data. This cannot be undone.</div>' +
-      '<div style="font-size:13px;font-weight:700;color:#111;margin-bottom:8px">Why are you leaving?</div>' +
-      '<div id="tmc-pd-reasons" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">' +
-        reasonRow('too_expensive',     'It\'s too expensive') +
-        reasonRow('no_longer_need',    'I no longer need it') +
-        reasonRow('not_as_expected',   'It didn\'t work as I expected') +
-        reasonRow('privacy_concerns',  'Privacy concerns') +
-        reasonRow('found_alternative', 'I found an alternative') +
-        reasonRow('other',             'Other') +
-      '</div>' +
-      '<textarea id="tmc-pd-text" placeholder="Anything else you\'d like us to know? (optional)" style="width:100%;box-sizing:border-box;min-height:60px;padding:10px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:13px;font-family:inherit;resize:vertical;margin-bottom:14px"></textarea>' +
-      '<label style="display:flex;align-items:flex-start;gap:8px;padding:10px;border:1.5px solid #E5E7EB;border-radius:10px;margin-bottom:14px;cursor:pointer">' +
-        '<input type="checkbox" id="tmc-pd-consent" style="margin-top:2px;flex-shrink:0">' +
-        '<span style="font-size:12px;color:#374151;line-height:1.5">It\'s OK to email me about future offers and updates from TapMyCar.</span>' +
-      '</label>' +
-      '<div id="tmc-pd-err" style="font-size:12px;color:#DC2626;min-height:18px;margin-bottom:8px"></div>' +
-      '<div style="display:flex;gap:10px">' +
-        '<button type="button" onclick="closePreDelete()" style="flex:1;padding:12px;border:1.5px solid #E5E7EB;background:#fff;border-radius:10px;font-weight:700;font-size:13px;color:#111;cursor:pointer">Cancel</button>' +
-        '<button type="button" id="tmc-pd-go" onclick="submitPreDelete()" style="flex:1;padding:12px;background:#DC2626;color:#fff;border:0;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer">Permanently delete</button>' +
-      '</div>' +
-    '</div>';
-  document.body.appendChild(ov);
-  function reasonRow(code, label) {
-    return '<label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px solid #E5E7EB;border-radius:8px;cursor:pointer">' +
-      '<input type="radio" name="tmc-pd-reason" value="' + code + '" style="flex-shrink:0">' +
-      '<span style="font-size:13px;color:#111">' + label + '</span></label>';
+async function deleteAccount() {
+  const first = confirm('Delete your TapMyCar account permanently?\n\nThis will:\n• Cancel any active subscription\n• Disable all your tags (scans will show "inactive")\n• Permanently delete your personal data\n\nThis cannot be undone.');
+  if (!first) return;
+  const typed = prompt('To confirm, type DELETE (all caps) in the box below:');
+  if (typed !== 'DELETE') {
+    if (typed !== null) showToast('Delete cancelled — confirmation text did not match');
+    return;
   }
-}
-
-function closePreDelete() {
-  var m = document.getElementById('tmc-predelete-modal');
-  if (m) m.remove();
-}
-
-async function submitPreDelete() {
-  var radio = document.querySelector('input[name="tmc-pd-reason"]:checked');
-  var err = document.getElementById('tmc-pd-err');
-  if (!radio) { err.textContent = 'Please choose a reason.'; return; }
-  var reasonCode = radio.value;
-  var reasonText = (document.getElementById('tmc-pd-text').value || '').trim().slice(0, 1000);
-  var consent    = !!document.getElementById('tmc-pd-consent').checked;
-  var go = document.getElementById('tmc-pd-go');
-  go.disabled = true; go.textContent = 'Deleting…'; err.textContent = '';
   try {
-    var res = await fetch('/api/delete-account', {
+    const res = await fetch('/api/delete-account', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        user_id: s.token,
-        confirm: 'DELETE',
-        exit_reason_code: reasonCode,
-        exit_reason_text: reasonText,
-        marketing_consent: consent
-      })
+      body: JSON.stringify({ user_id: s.token, confirm: 'DELETE' })
     });
-    var data = await res.json();
+    const data = await res.json();
     if (data.success) {
-      closePreDelete();
       showToast('Account deleted. Goodbye!');
       localStorage.clear();
-      setTimeout(function () { window.location.href = '/landing.html'; }, 1500);
+      setTimeout(() => { window.location.href = '/landing.html'; }, 1500);
     } else {
-      go.disabled = false; go.textContent = 'Permanently delete';
-      err.textContent = data.error || 'Failed to delete. Please contact support@tapmycar.io.';
+      showToast(data.error || 'Failed to delete account. Please contact support@tapmycar.io.');
     }
-  } catch (e) {
-    go.disabled = false; go.textContent = 'Permanently delete';
-    err.textContent = 'Network error — please try again.';
-  }
+  } catch(e) { showToast('Network error — please try again'); }
 }
 
 async function loadReferrals() {

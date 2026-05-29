@@ -47,7 +47,7 @@ module.exports = async function handler(req, res) {
   const user_id = _tmcAuth.userId;
   await recordTokenType(supabase, user_id, _tmcAuth.viaLegacy);
 
-  const { confirm, exit_reason_code, exit_reason_text, marketing_consent } = req.body;
+  const { confirm } = req.body;
   if (confirm !== "DELETE") {
     return res.status(400).json({ error: "Confirmation required. Pass confirm: 'DELETE' to proceed." });
   }
@@ -57,38 +57,6 @@ module.exports = async function handler(req, res) {
 
   const userEmail = user.email;
   const userName = user.name;
-
-  /* TMC_PATCH42_EXITREASON: capture exit reason + marketing consent BEFORE
-     the cascade-delete runs. Failures here are non-fatal — we never want
-     a logging hiccup to block a user's right to delete their account. */
-  try {
-    const VALID = ['too_expensive','no_longer_need','not_as_expected','privacy_concerns','found_alternative','other'];
-    const code = VALID.indexOf(exit_reason_code) !== -1 ? exit_reason_code : null;
-    const text = typeof exit_reason_text === 'string' ? exit_reason_text.slice(0, 1000) : null;
-    const consent = marketing_consent === true;
-    /* email_opt_out is the canonical opt-out flag the broadcast system
-       reads. consent === true means we may email them; opt_out = false. */
-    await supabase.from('users').update({
-      exit_reason: text,
-      exit_reason_code: code,
-      exit_reason_at: new Date().toISOString(),
-      marketing_consent: consent,
-      marketing_consent_at: new Date().toISOString(),
-      marketing_consent_source: 'pre_delete_modal',
-      email_opt_out: !consent
-    }).eq('id', user_id);
-    /* If they did NOT opt in, add a suppression row keyed by email so a
-       re-registration with the same email stays suppressed forever. */
-    if (!consent && userEmail) {
-      await supabase.from('marketing_suppression').insert({
-        email: userEmail,
-        reason: 'account_deleted',
-        source: 'pre_delete_modal'
-      });
-    }
-  } catch (e) {
-    console.warn('TMC_PATCH42 exit-reason capture failed (non-fatal):', e && e.message);
-  }
 
   try {
     // 1. Cancel Stripe subscription (if any)
