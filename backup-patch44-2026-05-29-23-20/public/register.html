@@ -267,19 +267,6 @@ if ('serviceWorker' in navigator) {
 
 
 
-<script>
-/* TMC_PATCH44: prefill the gift-code input from ?ref= so the short URL
-   (e.g. /r/TMC-492TZD) lands the user with the code already filled in. */
-(function () {
-  try {
-    var ref = new URL(window.location.href).searchParams.get('ref');
-    if (ref) {
-      var input = document.getElementById('gift-code');
-      if (input && !input.value) input.value = ref.trim().toUpperCase();
-    }
-  } catch (e) { /* non-fatal */ }
-})();
-</script>
 </body>
 </html>
 

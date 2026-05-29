@@ -17,10 +17,6 @@
       "destination": "/contact.html"
     },
     {
-      "source": "/r/:code",
-      "destination": "/register.html?ref=:code"
-    },
-    {
       "source": "/api/:path*",
       "destination": "/api/:path*"
     }

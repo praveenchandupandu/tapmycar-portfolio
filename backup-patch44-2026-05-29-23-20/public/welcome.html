@@ -147,17 +147,13 @@ async function redeemCode(code) {
       // Clear pending code so we don't redeem it again on dashboard load
       localStorage.removeItem('tmc_pending_code');
       if (data.type === 'referral') {
-        /* TMC_PATCH44: simpler welcoming wording. No mention of reward. */
+        /* TMC_PATCH43_REFERRALS: referral codes don't grant the user a plan.
+           The friend earns a reward later when this user upgrades to paid. */
         var refName = data.referrer_name || 'your friend';
-        if (data.alreadyRedeemed) {
-          document.getElementById('success-title').textContent = 'Already applied';
-          document.getElementById('success-message').textContent =
-            "You've already used " + refName + "'s referral code on this account.";
-        } else {
-          document.getElementById('success-title').textContent = 'Referral applied';
-          document.getElementById('success-message').textContent =
-            "Thanks for using " + refName + "'s referral code! Welcome to TapMyCar.";
-        }
+        document.getElementById('success-title').textContent = data.alreadyRedeemed ? 'Already applied' : 'Referral applied';
+        document.getElementById('success-message').textContent =
+          (data.alreadyRedeemed ? "This referral was already applied to your account. " : "Thanks! ") +
+          refName + " will earn a reward when you upgrade to a paid plan.";
       } else if (data.alreadyRedeemed) {
         document.getElementById('success-title').textContent = 'Already activated';
         document.getElementById('success-message').textContent = "You've already redeemed this code. Scan your sticker to activate it on your account.";

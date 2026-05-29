@@ -481,7 +481,7 @@ async function loadReferrals() {
       setTimeout(loadReferrals, 1000);
       return;
     }
-    const link = 'https://tapmycar.io/r/' + data.referral_code; /* TMC_PATCH44 */
+    const link = 'https://tapmycar.io/register.html?ref=' + data.referral_code;
     document.getElementById('ref-code').textContent = data.referral_code;
     document.getElementById('ref-link').value = link;
     document.getElementById('ref-count').textContent = (data.referral_count || 0);
@@ -516,18 +516,9 @@ function copyRefLink() {
 }
 
 function shareRefLink() {
-  /* TMC_PATCH44: friendlier message + short URL. Passing the URL via
-     the canonical `url` field lets the OS share sheet render rich link
-     cards on iOS, while platforms that paste as plain text still get a
-     short URL (no query string) that they can preview reliably. */
   const link = document.getElementById('ref-link').value;
-  if (!link) return;
-  const shareText = "Hey! I'm on TapMyCar  the privacy-first contact tag for your car. Sign up with my referral:";
-  if (navigator.share) {
-    navigator.share({ title: 'TapMyCar', text: shareText, url: link }).catch(function () { copyRefLink(); });
-  } else {
-    copyRefLink();
-  }
+  if (navigator.share) { navigator.share({ title: 'TapMyCar', text: 'Protect your car with TapMyCar! Use my referral link:', url: link }); }
+  else { copyRefLink(); }
 }
 
 function signOut() { localStorage.clear(); window.location.href = '/signin.html'; }
