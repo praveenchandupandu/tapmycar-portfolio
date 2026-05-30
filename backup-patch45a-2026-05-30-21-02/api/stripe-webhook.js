@@ -405,59 +405,17 @@ async function handler(req, res) {
         }
 
         // ─── REFERRAL REWARDS ───────────────────────────────────
-        /* TMC_PATCH45A: gate on parent_user_id  Premium-gift-code
-           joiners do NOT trigger a credit (they paid nothing). Then
-           transition the referrals row applied -> pending with
-           available_at = paid_at + 14 days. */
-        const { data: buyer } = await supabase.from("users").select("referred_by, parent_user_id").eq("id", user_id).single();
-        const isGiftJoiner = !!(buyer && buyer.parent_user_id);
-        if (buyer && buyer.referred_by && !isGiftJoiner) {
+        const { data: buyer } = await supabase.from("users").select("referred_by").eq("id", user_id).single();
+        if (buyer && buyer.referred_by) {
           const { data: referrer } = await supabase.from("users")
             .select("id, referral_count, referral_credits, referral_reward_pending")
             .eq("referral_code", buyer.referred_by).single();
           if (referrer) {
-            /* Q2: only credit once per friend. The unique index on
-               referrals.referred_user_id enforces this at the DB level;
-               here we also guard the legacy users.referral_count bump
-               by checking the referrals row's current status. */
-            const { data: refRow } = await supabase
-              .from('referrals')
-              .select('id, status, paid_at, available_at')
-              .eq('referred_user_id', user_id)
-              .maybeSingle();
-            const now = new Date();
-            const availableAt = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
-            if (refRow && refRow.status === 'applied') {
-              await supabase.from('referrals').update({
-                status: 'pending',
-                paid_at: now.toISOString(),
-                available_at: availableAt.toISOString()
-              }).eq('id', refRow.id);
-              const newCount = (referrer.referral_count || 0) + 1;
-              const updates = { referral_count: newCount };
-              if (newCount === 1) updates.referral_credits = (referrer.referral_credits || 0) + 3.00;
-              else updates.referral_reward_pending = "choice";
-              await supabase.from("users").update(updates).eq("id", referrer.id);
-            } else if (!refRow) {
-              /* Edge case: legacy users.referred_by set but no referrals row
-                 (e.g. data predating Patch 45a). Create a 'pending' row so
-                 the dashboard reflects this purchase. */
-              await supabase.from('referrals').insert({
-                referrer_user_id: referrer.id,
-                referred_user_id: user_id,
-                referral_code:    buyer.referred_by,
-                status:           'pending',
-                paid_at:          now.toISOString(),
-                available_at:     availableAt.toISOString()
-              });
-              const newCount = (referrer.referral_count || 0) + 1;
-              const updates = { referral_count: newCount };
-              if (newCount === 1) updates.referral_credits = (referrer.referral_credits || 0) + 3.00;
-              else updates.referral_reward_pending = "choice";
-              await supabase.from("users").update(updates).eq("id", referrer.id);
-            }
-            /* If refRow.status is already 'pending'/'available'/'consumed'
-               we do nothing  this is a renewal or a duplicate event. */
+            const newCount = (referrer.referral_count || 0) + 1;
+            const updates = { referral_count: newCount };
+            if (newCount === 1) updates.referral_credits = (referrer.referral_credits || 0) + 3.00;
+            else updates.referral_reward_pending = "choice";
+            await supabase.from("users").update(updates).eq("id", referrer.id);
           }
         }
 

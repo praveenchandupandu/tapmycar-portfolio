@@ -86,36 +86,6 @@ module.exports = async function handler(req, res) {
       }
       return res.status(400).json({ error: "You've already used a referral code on this account." });
     }
-    /* TMC_PATCH45A: duplicate-block by email/phone hash. Looks up the
-       redeemer's email + phone and SHA-256 hashes them, then checks the
-       referrals table for any existing row from the same referrer with
-       matching hash in ANY status (including 'revoked'). If found, the
-       same person already used a referral from this referrer  reject.
-       This is the fix for: friend signs up, deletes account, re-registers
-       with same email/phone to claim again. */
-    const crypto = require('crypto');
-    const { data: redeemer } = await supabase
-      .from('users')
-      .select('email, phone')
-      .eq('id', user_id)
-      .single();
-    function sha256(s) { return crypto.createHash('sha256').update(String(s).toLowerCase().trim()).digest('hex'); }
-    const emailHash = redeemer && redeemer.email ? sha256(redeemer.email) : null;
-    const phoneHash = redeemer && redeemer.phone ? sha256(redeemer.phone) : null;
-    if (emailHash || phoneHash) {
-      const orFilters = [];
-      if (emailHash) orFilters.push('referred_email_hash.eq.' + emailHash);
-      if (phoneHash) orFilters.push('referred_phone_hash.eq.' + phoneHash);
-      const { data: dup } = await supabase
-        .from('referrals')
-        .select('id')
-        .eq('referrer_user_id', referrer.id)
-        .or(orFilters.join(','))
-        .limit(1);
-      if (dup && dup.length) {
-        return res.status(400).json({ error: "This referral has already been used." });
-      }
-    }
     /* Set referred_by so stripe-webhook credits the referrer when this
        user buys a paid plan. This is the missing link bug 2 fixes. */
     const { error: updErr } = await supabase
@@ -125,21 +95,6 @@ module.exports = async function handler(req, res) {
     if (updErr) {
       console.error('referral set failed:', updErr.message);
       return res.status(500).json({ error: 'Could not apply the referral code right now.' });
-    }
-    /* TMC_PATCH45A: insert the 'applied' row. Non-fatal  if this fails,
-       the referral still works via the legacy users.referred_by path and
-       stripe-webhook will fall back to the legacy count/credit columns. */
-    try {
-      await supabase.from('referrals').insert({
-        referrer_user_id:    referrer.id,
-        referred_user_id:    user_id,
-        referral_code:       normalized,
-        referred_email_hash: emailHash,
-        referred_phone_hash: phoneHash,
-        status:              'applied'
-      });
-    } catch (e) {
-      console.warn('referrals insert failed (non-fatal):', e && e.message);
     }
     return res.status(200).json({
       success: true,

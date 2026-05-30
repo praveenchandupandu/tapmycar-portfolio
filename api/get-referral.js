@@ -16,5 +16,45 @@ module.exports = async function handler(req, res) {
   const { data: user } = await supabase.from("users").select("referral_code, referral_count, referral_credits, referral_reward_pending").eq("id", user_id).single();
   if (!user) return res.status(404).json({ error: "User not found" });
 
-  return res.json({ success: true, ...user });
+  /* TMC_PATCH45A: derive the four numbers from the referrals table. The
+     'available' flip happens lazily here  any row in status 'pending'
+     whose available_at has passed counts as available. We don't write
+     back the status change (a cron could, but it's not needed for
+     display correctness; Patch 45b will flip on consumption). */
+  const nowIso = new Date().toISOString();
+  const { data: rows } = await supabase
+    .from('referrals')
+    .select('status, credit_amount, available_at')
+    .eq('referrer_user_id', user_id);
+  let signups = 0, confirmed = 0, credit_available = 0, credit_pending = 0;
+  (rows || []).forEach(function (r) {
+    var amt = parseFloat(r.credit_amount) || 0;
+    if (r.status === 'applied') {
+      signups += 1;
+    } else if (r.status === 'pending') {
+      confirmed += 1;
+      if (r.available_at && r.available_at <= nowIso) credit_available += amt;
+      else                                            credit_pending += amt;
+    } else if (r.status === 'available') {
+      confirmed += 1;
+      credit_available += amt;
+    } else if (r.status === 'consumed') {
+      confirmed += 1;
+      /* consumed contributes to confirmed count but not to balances */
+    }
+    /* 'revoked' rows contribute to neither signups nor confirmed nor any balance */
+  });
+
+  return res.json({
+    success: true,
+    referral_code: user.referral_code,
+    referral_count: user.referral_count,                /* legacy */
+    referral_credits: user.referral_credits,            /* legacy */
+    referral_reward_pending: user.referral_reward_pending, /* legacy */
+    /* TMC_PATCH45A: new derived numbers */
+    signups,
+    confirmed,
+    credit_available: parseFloat(credit_available.toFixed(2)),
+    credit_pending:   parseFloat(credit_pending.toFixed(2))
+  });
 };

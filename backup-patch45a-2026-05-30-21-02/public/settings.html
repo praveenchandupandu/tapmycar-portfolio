@@ -96,24 +96,9 @@
       <button onclick="shareRefLink()" style="background:var(--or);color:#fff;border:none;border-radius:11px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Share Link</button>
     </div>
     <input type="text" id="ref-link" readonly onclick="copyRefLink()" style="width:100%;height:40px;border:1.5px solid #E5E7EB;border-radius:11px;padding:0 12px;font-size:11px;color:#6B7280;background:#F9FAFB;cursor:pointer;font-family:inherit;box-sizing:border-box" placeholder="Loading...">
-    <!-- TMC_PATCH45A: four-number stats grid -->
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:14px">
-      <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:10px 12px">
-        <div style="font-size:20px;font-weight:800;color:#111" id="ref-signups">0</div>
-        <div style="font-size:10px;color:#6B7280;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em">Friends signed up</div>
-      </div>
-      <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:10px 12px">
-        <div style="font-size:20px;font-weight:800;color:#111" id="ref-confirmed">0</div>
-        <div style="font-size:10px;color:#6B7280;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em">Bought a plan</div>
-      </div>
-      <div style="background:#DCFCE7;border:1px solid #BBF7D0;border-radius:10px;padding:10px 12px">
-        <div style="font-size:20px;font-weight:800;color:#16A34A" id="ref-available">$0</div>
-        <div style="font-size:10px;color:#15803D;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em">Available</div>
-      </div>
-      <div style="background:#FFF3EC;border:1px solid #FED7AA;border-radius:10px;padding:10px 12px">
-        <div style="font-size:20px;font-weight:800;color:#FF6B00" id="ref-pending">$0</div>
-        <div style="font-size:10px;color:#C2410C;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em">Pending (14d hold)</div>
-      </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+      <div style="text-align:center"><div style="font-size:22px;font-weight:800;color:var(--or)" id="ref-count">0</div><div style="font-size:10px;color:#6B7280">Friends referred</div></div>
+      <div id="ref-credits" style="display:none;background:#DCFCE7;border-radius:10px;padding:6px 12px;font-size:12px;font-weight:700;color:#16A34A"></div>
     </div>
     <div style="background:#FFF3EC;border-radius:10px;padding:10px 12px;margin-top:12px;font-size:11px;color:#FF6B00;font-weight:600" id="ref-next">Loading...</div>
     <div id="ref-reward-box" style="display:none;background:#DCFCE7;border:1.5px solid #BBF7D0;border-radius:10px;padding:12px;margin-top:12px">
@@ -497,18 +482,13 @@ async function loadReferrals() {
       return;
     }
     const link = 'https://tapmycar.io/r/' + data.referral_code; /* TMC_PATCH44 */
-    /* TMC_PATCH45A: populate the four-number grid from the new fields,
-       falling back to legacy fields if get-referral hasn't been redeployed. */
     document.getElementById('ref-code').textContent = data.referral_code;
     document.getElementById('ref-link').value = link;
-    var signups   = (typeof data.signups   === 'number') ? data.signups   : 0;
-    var confirmed = (typeof data.confirmed === 'number') ? data.confirmed : (data.referral_count || 0);
-    var avail     = (typeof data.credit_available === 'number') ? data.credit_available : (data.referral_credits || 0);
-    var pending   = (typeof data.credit_pending   === 'number') ? data.credit_pending   : 0;
-    document.getElementById('ref-signups').textContent   = signups;
-    document.getElementById('ref-confirmed').textContent = confirmed;
-    document.getElementById('ref-available').textContent = '$' + parseFloat(avail).toFixed(2);
-    document.getElementById('ref-pending').textContent   = '$' + parseFloat(pending).toFixed(2);
+    document.getElementById('ref-count').textContent = (data.referral_count || 0);
+    if (data.referral_credits > 0) {
+      document.getElementById('ref-credits').textContent = '$' + parseFloat(data.referral_credits).toFixed(2) + ' discount earned';
+      document.getElementById('ref-credits').style.display = 'block';
+    }
     if (data.referral_reward_pending === 'choice') { document.getElementById('ref-reward-box').style.display = 'block'; }
     const count = data.referral_count || 0;
     document.getElementById('ref-next').textContent = count === 0 ? 'Refer 1 friend who buys a plan - get $3 off!' : count === 1 ? 'Refer 1 more friend - Free Standard or $4.99 coupon!' : 'Keep referring - earn more rewards!';
