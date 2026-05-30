@@ -286,154 +286,12 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    /* TMC_PATCH45B: server-side referral credit. The client may pass
-       apply_referral_credit:true/false; the *amount* is recomputed here
-       from the referrals table  the client cannot inflate it. Credits
-       are spent in FIFO order; we collect the row ids so the webhook (or
-       the free-flow branch below) can mark them consumed atomically. */
-    const applyCredit = req.body.apply_referral_credit !== false; /* default ON */
-    let _tmcCreditCents = 0;
-    let _tmcCreditRowIds = [];
-    if (applyCredit) {
-      const nowIso = new Date().toISOString();
-      const { data: avRows } = await supabase
-        .from('referrals')
-        .select('id, credit_amount, status, available_at')
-        .eq('referrer_user_id', user_id)
-        .in('status', ['pending','available'])
-        .order('paid_at', { ascending: true });
-      const usable = (avRows || []).filter(r =>
-        r.status === 'available' ||
-        (r.status === 'pending' && r.available_at && r.available_at <= nowIso)
-      );
-      for (const r of usable) {
-        _tmcCreditCents += Math.round((parseFloat(r.credit_amount) || 0) * 100);
-        _tmcCreditRowIds.push(r.id);
-      }
-    }
-
-    /* Apply the credit to the first line item (the dominant charge). The
-       $1 floor is needed for activate/direct flows so Stripe has a real
-       charge to attach the card to; renew/upgrade can go to $0 (handled
-       in the free-flow branch below). */
-    let _tmcCreditUsedCents = 0;
-    if (_tmcCreditCents > 0 && lineItems.length > 0 && lineItems[0].price_data) {
-      const firstUnit = lineItems[0].price_data.unit_amount;
-      const fullCoverFlows = (flow === 'renew' || flow === 'upgrade');
-      const maxApply = fullCoverFlows ? chargeTodayCents : Math.max(0, chargeTodayCents - 100);
-      _tmcCreditUsedCents = Math.min(_tmcCreditCents, maxApply);
-      if (_tmcCreditUsedCents > 0) {
-        /* distribute across line items so each unit_amount stays >= 0 */
-        let remaining = _tmcCreditUsedCents;
-        for (const li of lineItems) {
-          if (remaining <= 0) break;
-          if (!li.price_data) continue;
-          const take = Math.min(remaining, li.price_data.unit_amount);
-          li.price_data.unit_amount -= take;
-          remaining -= take;
-        }
-        chargeTodayCents -= _tmcCreditUsedCents;
-      }
-    }
-
-    /* FREE-FLOW BRANCH: credit covers the whole price AND the flow is one
-       where we don't need a new card on file (renew/upgrade). Skip Stripe
-       entirely, run the side-effects inline, mark credits consumed. */
-    if (chargeTodayCents === 0 && (flow === 'renew' || flow === 'upgrade')) {
-      try {
-        if (flow === 'renew') {
-          /* mirror the webhook's 'renew' side-effects: subscription create
-             (paid today => trial 365d so first cycle bills a year out),
-             user plan restore, reactivate gift tag(s), record order. */
-          let renewSub = null;
-          try {
-            renewSub = await stripe.subscriptions.create({
-              customer: customerId,
-              items: [{ price: SUB_PRICE_ID }],
-              trial_period_days: 365,
-              metadata: { user_id, plan, flow: 'renew', referral_credit_applied: String(_tmcCreditUsedCents) }
-            });
-          } catch (e) {
-            console.error('p45b free renew: sub create failed:', e.message);
-          }
-          await supabase.from('users').update({
-            plan,
-            subscription_id: renewSub ? renewSub.id : null,
-            gift_expired_at: null,
-            gift_reminders_sent: ''
-          }).eq('id', user_id);
-          await supabase.from('tags').update({
-            status: 'active',
-            gift_expired: false
-          }).eq('owner_id', user_id).eq('is_gift', true);
-          await supabase.from('orders').insert({
-            user_id, plan,
-            amount: 0,
-            stripe_id: 'credit_only_' + Date.now(),
-            subscription_id: renewSub ? renewSub.id : null,
-            status: 'paid',
-            sticker_count: 0,
-            order_status: 'renewal'
-          });
-        } else if (flow === 'upgrade') {
-          /* upgrade STD -> Premium fully covered by credit. Flip plan,
-             generate 3 Premium codes, claim the first to the buyer,
-             record an order. We don't modify the existing subscription's
-             price here  that's a follow-up the user's annual renewal
-             will pick up. */
-          await supabase.from('users').update({ plan: 'premium' }).eq('id', user_id);
-          const generatePremiumCode = function () {
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            let code = 'TMC-PREM-';
-            for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
-            return code;
-          };
-          const { data: orderRow } = await supabase.from('orders').insert({
-            user_id, plan: 'premium',
-            amount: 0,
-            stripe_id: 'credit_only_' + Date.now(),
-            subscription_id: user.subscription_id || null,
-            status: 'paid',
-            sticker_count: 2,
-            order_status: 'upgrade'
-          }).select().single();
-          const premiumCodes = [];
-          if (orderRow) {
-            for (let i = 0; i < 3; i++) {
-              let code = generatePremiumCode();
-              for (let a = 0; a < 5; a++) {
-                const { data: ex } = await supabase.from('premium_codes').select('id').eq('code', code).maybeSingle();
-                if (!ex) break;
-                code = generatePremiumCode();
-              }
-              const { data: cr } = await supabase.from('premium_codes').insert({
-                code, buyer_user_id: user_id, buyer_order_id: orderRow.id
-              }).select().single();
-              if (cr) premiumCodes.push(cr.code);
-            }
-            if (premiumCodes.length > 0) {
-              await supabase.from('premium_codes')
-                .update({ redeemed_by_user_id: user_id, redeemed_at: new Date().toISOString() })
-                .eq('code', premiumCodes[0]);
-              await supabase.from('users').update({ redeemed_code: premiumCodes[0] }).eq('id', user_id);
-            }
-          }
-        }
-        /* Mark the consumed credits in the referrals table. */
-        if (_tmcCreditRowIds.length > 0) {
-          await supabase.from('referrals').update({
-            status: 'consumed',
-            consumed_at: new Date().toISOString()
-          }).in('id', _tmcCreditRowIds);
-        }
-        return res.json({
-          free: true,
-          redirect: '/payment-success.html?free=1&plan=' + plan + '&flow=' + flow,
-          credit_used_cents: _tmcCreditUsedCents
-        });
-      } catch (e) {
-        console.error('p45b free-flow failed:', e && e.message);
-        return res.status(500).json({ error: 'Could not complete the free purchase. Please try again or contact support.' });
+    // Apply referral discount
+    if (referral_discount && referral_discount > 0 && lineItems.length > 0 && lineItems[0].price_data) {
+      const discount = Math.min(Math.round(referral_discount * 100), lineItems[0].price_data.unit_amount - 1);
+      if (discount > 0) {
+        lineItems[0].price_data.unit_amount -= discount;
+        chargeTodayCents -= discount;
       }
     }
 
@@ -466,10 +324,7 @@ module.exports = async function handler(req, res) {
         charge_today_cents: String(chargeTodayCents),
         sticker_count: plan === 'premium' ? '3' : '1',
         subscription_price_id: SUB_PRICE_ID,
-        referral_discount: String(referral_discount || 0),
-        /* TMC_PATCH45B: webhook uses these to mark credits consumed after payment. */
-        referral_credit_applied: String(_tmcCreditUsedCents || 0),
-        referral_credit_row_ids: (_tmcCreditRowIds || []).join(',')
+        referral_discount: String(referral_discount || 0)
       },
       success_url: `https://tapmycar.io/payment-success.html?session_id={CHECKOUT_SESSION_ID}&plan=${plan}&flow=${flow}${prepay ? '&prepay=1' : ''}`,
       cancel_url: `https://tapmycar.io/pricing.html`

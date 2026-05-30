@@ -212,19 +212,6 @@ module.exports = async function handler(req, res) {
       await supabase.from("tags")
         .update({ status: 'inactive' })
         .eq("owner_id", user.id);
-      /* TMC_PATCH45B: revoke this user's matching referral row if still
-         in 'pending' (i.e. inside the 14-day hold). The 14-day hold means
-         the referrer cannot have spent the credit yet, so no claw-back
-         is needed. We only act on 'pending' rows to be defensive. */
-      try {
-        await supabase.from('referrals').update({
-          status: 'revoked',
-          revoked_at: new Date().toISOString(),
-          revoke_reason: 'referred_user_refunded'
-        }).eq('referred_user_id', user.id).eq('status', 'pending');
-      } catch (e) {
-        console.warn('p45b: referral revoke failed (non-fatal):', e && e.message);
-      }
     } else {
       // Standard cancel — stop future charges, keep tag active until
       // period end (webhook will downgrade when it fires).

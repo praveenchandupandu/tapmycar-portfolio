@@ -404,22 +404,6 @@ async function handler(req, res) {
           console.log(`✓ Generated ${premiumCodes.length} Premium codes`);
         }
 
-        // ─── TMC_PATCH45B: mark consumed referral credits ───────
-        try {
-          const m = session.metadata || {};
-          const ids = (m.referral_credit_row_ids || '').split(',').filter(Boolean);
-          if (ids.length > 0) {
-            await supabase.from('referrals').update({
-              status: 'consumed',
-              consumed_at: new Date().toISOString(),
-              consumed_order_id: orderRow ? orderRow.id : null
-            }).in('id', ids).in('status', ['available','pending']);
-            console.log('p45b: marked ' + ids.length + ' referral credit(s) consumed');
-          }
-        } catch (e) {
-          console.warn('p45b: credit consume failed (non-fatal):', e && e.message);
-        }
-
         // ─── REFERRAL REWARDS ───────────────────────────────────
         /* TMC_PATCH45A: gate on parent_user_id  Premium-gift-code
            joiners do NOT trigger a credit (they paid nothing). Then
