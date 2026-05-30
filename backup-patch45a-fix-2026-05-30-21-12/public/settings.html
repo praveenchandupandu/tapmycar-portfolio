@@ -96,29 +96,26 @@
       <button onclick="shareRefLink()" style="background:var(--or);color:#fff;border:none;border-radius:11px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Share Link</button>
     </div>
     <input type="text" id="ref-link" readonly onclick="copyRefLink()" style="width:100%;height:40px;border:1.5px solid #E5E7EB;border-radius:11px;padding:0 12px;font-size:11px;color:#6B7280;background:#F9FAFB;cursor:pointer;font-family:inherit;box-sizing:border-box" placeholder="Loading...">
-    <!-- TMC_PATCH45A_FIX: integrated progress strip, no nested boxes -->
-    <div style="margin-top:18px;padding:14px 4px 0;border-top:1px solid #F3F4F6;display:flex;align-items:stretch">
-      <div style="flex:1;text-align:center">
-        <div style="font-size:22px;font-weight:800;color:#111;line-height:1" id="ref-signups">0</div>
-        <div style="font-size:10px;color:#9CA3AF;margin-top:6px;font-weight:600;letter-spacing:0.03em">SIGNED UP</div>
+    <!-- TMC_PATCH45A: four-number stats grid -->
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:14px">
+      <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:10px 12px">
+        <div style="font-size:20px;font-weight:800;color:#111" id="ref-signups">0</div>
+        <div style="font-size:10px;color:#6B7280;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em">Friends signed up</div>
       </div>
-      <div style="width:1px;background:#F3F4F6;margin:2px 0"></div>
-      <div style="flex:1;text-align:center">
-        <div style="font-size:22px;font-weight:800;color:#111;line-height:1" id="ref-confirmed">0</div>
-        <div style="font-size:10px;color:#9CA3AF;margin-top:6px;font-weight:600;letter-spacing:0.03em">PAID</div>
+      <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:10px 12px">
+        <div style="font-size:20px;font-weight:800;color:#111" id="ref-confirmed">0</div>
+        <div style="font-size:10px;color:#6B7280;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em">Bought a plan</div>
       </div>
-      <div style="width:1px;background:#F3F4F6;margin:2px 0"></div>
-      <div style="flex:1;text-align:center">
-        <div style="font-size:22px;font-weight:800;color:#16A34A;line-height:1" id="ref-available">$0</div>
-        <div style="font-size:10px;color:#9CA3AF;margin-top:6px;font-weight:600;letter-spacing:0.03em">AVAILABLE</div>
+      <div style="background:#DCFCE7;border:1px solid #BBF7D0;border-radius:10px;padding:10px 12px">
+        <div style="font-size:20px;font-weight:800;color:#16A34A" id="ref-available">$0</div>
+        <div style="font-size:10px;color:#15803D;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em">Available</div>
       </div>
-      <div style="width:1px;background:#F3F4F6;margin:2px 0"></div>
-      <div style="flex:1;text-align:center">
-        <div style="font-size:22px;font-weight:800;color:#FF6B00;line-height:1" id="ref-pending">$0</div>
-        <div style="font-size:10px;color:#9CA3AF;margin-top:6px;font-weight:600;letter-spacing:0.03em">PENDING</div>
+      <div style="background:#FFF3EC;border:1px solid #FED7AA;border-radius:10px;padding:10px 12px">
+        <div style="font-size:20px;font-weight:800;color:#FF6B00" id="ref-pending">$0</div>
+        <div style="font-size:10px;color:#C2410C;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em">Pending (14d hold)</div>
       </div>
     </div>
-    <div id="ref-next" style="margin-top:14px;font-size:12px;color:#6B7280;line-height:1.5">Loading...</div>
+    <div style="background:#FFF3EC;border-radius:10px;padding:10px 12px;margin-top:12px;font-size:11px;color:#FF6B00;font-weight:600" id="ref-next">Loading...</div>
     <div id="ref-reward-box" style="display:none;background:#DCFCE7;border:1.5px solid #BBF7D0;border-radius:10px;padding:12px;margin-top:12px">
       <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:8px">You earned a reward! Choose one:</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
@@ -513,19 +510,8 @@ async function loadReferrals() {
     document.getElementById('ref-available').textContent = '$' + parseFloat(avail).toFixed(2);
     document.getElementById('ref-pending').textContent   = '$' + parseFloat(pending).toFixed(2);
     if (data.referral_reward_pending === 'choice') { document.getElementById('ref-reward-box').style.display = 'block'; }
-    /* TMC_PATCH45A_FIX: status line adapts to actual state. */
-    var nextEl = document.getElementById('ref-next');
-    if (signups === 0 && confirmed === 0) {
-      nextEl.textContent = 'Share your code  earn $3 credit when a friend buys a plan.';
-    } else if (confirmed === 0) {
-      nextEl.textContent = signups + ' friend' + (signups === 1 ? '' : 's') + ' signed up. Credits unlock when they buy a plan.';
-    } else if (pending > 0 && avail === 0) {
-      nextEl.textContent = '$' + parseFloat(pending).toFixed(2) + ' will unlock after the 14-day refund window.';
-    } else if (pending > 0 && avail > 0) {
-      nextEl.textContent = '$' + parseFloat(avail).toFixed(2) + ' ready to use. $' + parseFloat(pending).toFixed(2) + ' unlocks soon.';
-    } else {
-      nextEl.textContent = '$' + parseFloat(avail).toFixed(2) + ' available. Use it on your next purchase.';
-    }
+    const count = data.referral_count || 0;
+    document.getElementById('ref-next').textContent = count === 0 ? 'Refer 1 friend who buys a plan - get $3 off!' : count === 1 ? 'Refer 1 more friend - Free Standard or $4.99 coupon!' : 'Keep referring - earn more rewards!';
   } catch(e) { console.error(e); }
 }
 
