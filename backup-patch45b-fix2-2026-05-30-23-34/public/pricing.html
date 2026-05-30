@@ -384,14 +384,10 @@ async function loadReferralDiscount() {
     if (data.referral_reward_pending === 'choice') {
       document.getElementById('reward-banner').style.display = 'block';
     }
-    /* TMC_PATCH45B_FIX2: this block used to unconditionally show the
-       discount-banner and set window.__refDiscount on every page load,
-       racing with Patch 45b-fix's checkbox handler. The checkbox now
-       owns both bits of state, so this block is intentionally disabled. */
-    /* if (data.referral_credits >= 3) {
-         window.__refDiscount = parseFloat(data.referral_credits);
-         document.getElementById('discount-banner').style.display = 'block';
-       } */
+    if (data.referral_credits >= 3) {
+      window.__refDiscount = parseFloat(data.referral_credits);
+      document.getElementById('discount-banner').style.display = 'block';
+    }
   } catch(e) { console.error(e); }
 }
 loadReferralDiscount();
