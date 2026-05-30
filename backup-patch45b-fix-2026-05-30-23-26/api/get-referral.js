@@ -29,12 +29,8 @@ module.exports = async function handler(req, res) {
   let signups = 0, confirmed = 0, credit_available = 0, credit_pending = 0;
   (rows || []).forEach(function (r) {
     var amt = parseFloat(r.credit_amount) || 0;
-    /* TMC_PATCH45B_FIX: signups is cumulative  every non-revoked row counts.
-       confirmed counts everyone who actually paid (any post-applied state). */
-    if (r.status === 'revoked') return;
-    signups += 1;
     if (r.status === 'applied') {
-      /* signed up, hasn't paid yet  no credit movement */
+      signups += 1;
     } else if (r.status === 'pending') {
       confirmed += 1;
       if (r.available_at && r.available_at <= nowIso) credit_available += amt;
@@ -46,6 +42,7 @@ module.exports = async function handler(req, res) {
       confirmed += 1;
       /* consumed contributes to confirmed count but not to balances */
     }
+    /* 'revoked' rows contribute to neither signups nor confirmed nor any balance */
   });
 
   return res.json({
