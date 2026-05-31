@@ -67,135 +67,15 @@
    the user ticks the box we show it; when unticked we hide it, so both
    banners reflect the same intent. */
 (function () {
-  /* TMC_PATCH45C_PRICING_V2: dynamic per-plan price/button/note updates
-     with a re-entry guard. v1 had infinite recursion between
-     updateCreditDisplay() and our wrapped updateButtonLabels(); v2 fixes
-     it with window.__tmcUpdating, and never calls updateButtonLabels()
-     from updateCreditDisplay() (restore path uses the cached originals). */
-  window.__tmcCreditDollars = 0;
-  window.__tmcUpdating = false;
-
   function setApplied(on, dollars) {
+    /* Mirror the new checkbox state into the legacy window.__refDiscount
+       and into the pre-existing 'discount-banner' visibility, so both
+       banners reflect the same user intent. */
     try {
       window.__refDiscount = on ? (dollars || 0) : 0;
-      window.__tmcApply = !!on;
-      if (typeof dollars === 'number') window.__tmcCreditDollars = dollars;
       var legacy = document.getElementById('discount-banner');
       if (legacy) legacy.style.display = on ? 'block' : 'none';
-      updateCreditDisplay();
     } catch (e) {}
-  }
-
-  function updateCreditDisplay() {
-    if (window.__tmcUpdating) return; /* guard against re-entry */
-    window.__tmcUpdating = true;
-    try {
-      var apply = !!window.__tmcApply;
-      var creditCents = Math.round((window.__tmcCreditDollars || 0) * 100);
-      ['standard','premium'].forEach(function (plan) {
-        var prefix = plan === 'standard' ? 'std' : 'prem';
-        var priceEl  = document.getElementById(prefix + '-price');
-        var btnAmtEl = document.getElementById(prefix + '-btn-amt');
-        var btnEl    = document.getElementById(prefix + '-btn');
-        if (!priceEl || !btnAmtEl || !btnEl) return;
-
-        /* Save the originals once so we can restore them on untick. */
-        if (typeof priceEl.dataset.tmcOriginal === 'undefined') {
-          priceEl.dataset.tmcOriginal = priceEl.innerHTML;
-        }
-        /* btnAmtEl is rewritten by the page's updateButtonLabels() on prepay
-           toggle. We read its CURRENT text to know the prepay-aware base
-           price, then either keep it (untick) or override it (tick). */
-        var btnText = (btnAmtEl.textContent || '').trim();
-        var todayMatch = btnText.match(/\$([0-9]+(?:\.[0-9]+)?)/);
-        if (!todayMatch) return;
-        var todayDollars = parseFloat(todayMatch[1]);
-        var todayCents = Math.round(todayDollars * 100);
-
-        var noteId = prefix + '-credit-note';
-        var noteEl = document.getElementById(noteId);
-
-        if (!apply || creditCents <= 0) {
-          /* Restore the price card to its original. Leave btnAmtEl alone
-             because the page's own updateButtonLabels() owns it. Hide the
-             credit note if present. NO cross-function call here  this is
-             what fixes the v1 recursion. */
-          priceEl.innerHTML = priceEl.dataset.tmcOriginal;
-          if (noteEl) noteEl.style.display = 'none';
-          return;
-        }
-
-        /* $1 minimum for direct flow (server-side enforced). */
-        var maxApplyCents = Math.max(0, todayCents - 100);
-        var discountCents = Math.min(creditCents, maxApplyCents);
-        if (discountCents <= 0) {
-          if (noteEl) noteEl.style.display = 'none';
-          return;
-        }
-
-        var finalCents     = todayCents - discountCents;
-        var finalDollars   = (finalCents     / 100).toFixed(2);
-        var discountDollars= (discountCents  / 100).toFixed(2);
-        var remainingCents = creditCents - discountCents;
-        var remainingDolls = (remainingCents / 100).toFixed(2);
-
-        /* Update the on-card price. Preserve the '/yr' sub-span. */
-        var orig = priceEl.dataset.tmcOriginal;
-        var subMatch = orig.match(/<span[\s\S]*?<\/span>/i);
-        var subSpan = subMatch ? subMatch[0] : '';
-        priceEl.innerHTML = '$' + finalDollars + ' ' + subSpan;
-
-        btnAmtEl.textContent = '$' + finalDollars;
-
-        if (!noteEl) {
-          noteEl = document.createElement('div');
-          noteEl.id = noteId;
-          noteEl.style.cssText = 'background:#F0FDF4;border-left:3px solid #16A34A;padding:10px 12px;margin:10px 0 0;font-size:11px;color:#166534;line-height:1.55;border-radius:8px';
-          var parent = btnEl.parentNode;
-          if (parent) parent.insertBefore(noteEl, btnEl.nextSibling);
-        }
-        noteEl.style.display = 'block';
-        if (remainingCents > 0) {
-          noteEl.textContent =
-            '$' + discountDollars + ' applied. $' + finalDollars +
-            ' minimum charge today (saves your card for annual renewal as we accept autopay). $' +
-            remainingDolls + ' remains in your account, can use for future transactions.';
-        } else {
-          noteEl.textContent = '$' + discountDollars + ' referral credit applied.';
-        }
-      });
-    } finally {
-      window.__tmcUpdating = false;
-    }
-  }
-
-  /* Wrap the page's own updateButtonLabels so OUR display refreshes any
-     time a prepay checkbox toggles. The guard prevents recursion: if
-     updateCreditDisplay() is currently running, the wrapper just calls
-     the original and returns without re-triggering our logic. */
-  function hookUpdateButtonLabels() {
-    if (window.__tmcUblHooked) return;
-    if (typeof window.updateButtonLabels !== 'function') return;
-    window.__tmcUblHooked = true;
-    var orig = window.updateButtonLabels;
-    window.updateButtonLabels = function () {
-      try { orig.apply(this, arguments); } catch (e) {}
-      if (!window.__tmcUpdating) {
-        try { updateCreditDisplay(); } catch (e) {}
-      }
-    };
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () {
-      hookUpdateButtonLabels();
-      setTimeout(hookUpdateButtonLabels, 50);
-      setTimeout(hookUpdateButtonLabels, 200);
-      setTimeout(updateCreditDisplay, 250);
-    });
-  } else {
-    hookUpdateButtonLabels();
-    setTimeout(hookUpdateButtonLabels, 50);
-    setTimeout(updateCreditDisplay, 100);
   }
   function inject(creditDollars) {
     if (creditDollars <= 0) return;
