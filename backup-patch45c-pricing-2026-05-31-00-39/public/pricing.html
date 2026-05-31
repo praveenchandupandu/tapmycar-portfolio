@@ -67,141 +67,15 @@
    the user ticks the box we show it; when unticked we hide it, so both
    banners reflect the same intent. */
 (function () {
-  /* TMC_PATCH45C_PRICING: cache the credit so updateCreditDisplay() can read it. */
-  window.__tmcCreditDollars = 0;
-
   function setApplied(on, dollars) {
+    /* Mirror the new checkbox state into the legacy window.__refDiscount
+       and into the pre-existing 'discount-banner' visibility, so both
+       banners reflect the same user intent. */
     try {
       window.__refDiscount = on ? (dollars || 0) : 0;
-      window.__tmcApply = !!on;
-      if (typeof dollars === 'number') window.__tmcCreditDollars = dollars;
       var legacy = document.getElementById('discount-banner');
       if (legacy) legacy.style.display = on ? 'block' : 'none';
-      updateCreditDisplay();
     } catch (e) {}
-  }
-
-  /* Per-plan dynamic price/button/note updates. Reads:
-       - window.__tmcApply (true if checkbox ticked)
-       - window.__tmcCreditDollars (the user's available credit)
-       - the current button label (which encodes the prepay-aware base price)
-     Writes:
-       - #std-price / #prem-price innerHTML  reflect discounted today price
-       - #std-btn-amt / #prem-btn-amt textContent  same
-       - a green note injected below each affected plan card */
-  function updateCreditDisplay() {
-    var apply = !!window.__tmcApply;
-    var creditCents = Math.round((window.__tmcCreditDollars || 0) * 100);
-    ['standard','premium'].forEach(function (plan) {
-      var prefix = plan === 'standard' ? 'std' : 'prem';
-      var priceEl  = document.getElementById(prefix + '-price');
-      var btnAmtEl = document.getElementById(prefix + '-btn-amt');
-      var btnEl    = document.getElementById(prefix + '-btn');
-      if (!priceEl || !btnAmtEl || !btnEl) return;
-
-      /* Save the originals once so we can restore them on untick. */
-      if (typeof priceEl.dataset.tmcOriginal === 'undefined') {
-        priceEl.dataset.tmcOriginal = priceEl.innerHTML;
-      }
-      /* The button amount is rewritten by updateButtonLabels() every time
-         the prepay checkbox toggles. That's our source of truth for the
-         current 'today' price for this plan, prepay-aware. */
-      var btnText = (btnAmtEl.textContent || '').trim();
-      var todayMatch = btnText.match(/\$([0-9]+(?:\.[0-9]+)?)/);
-      if (!todayMatch) return;
-      var todayDollars = parseFloat(todayMatch[1]);
-      var todayCents = Math.round(todayDollars * 100);
-
-      /* Find/remove the credit note for this plan. */
-      var noteId = prefix + '-credit-note';
-      var noteEl = document.getElementById(noteId);
-
-      if (!apply || creditCents <= 0) {
-        /* Restore the original price display. The button label is restored
-           by updateButtonLabels() on its own (next prepay-toggle or page
-           load); we proactively restore it too for the immediate untick. */
-        priceEl.innerHTML = priceEl.dataset.tmcOriginal;
-        /* Rebuild the original button amount text from the prepay state, by
-           calling the page's own updateButtonLabels if present. */
-        if (typeof window.updateButtonLabels === 'function') {
-          try { window.updateButtonLabels(); } catch (e) {}
-        }
-        if (noteEl) noteEl.style.display = 'none';
-        return;
-      }
-
-      /* For direct flow, $1 minimum charge stays (server-side enforced by
-         Patch 45b). Compute the maximum applicable discount accordingly. */
-      var maxApplyCents = Math.max(0, todayCents - 100);
-      var discountCents = Math.min(creditCents, maxApplyCents);
-      if (discountCents <= 0) {
-        /* Nothing to apply (e.g. todayCents already at $1 or below). */
-        if (noteEl) noteEl.style.display = 'none';
-        return;
-      }
-
-      var finalCents     = todayCents - discountCents;
-      var finalDollars   = (finalCents     / 100).toFixed(2);
-      var discountDollars= (discountCents  / 100).toFixed(2);
-      var remainingCents = creditCents - discountCents;
-      var remainingDolls = (remainingCents / 100).toFixed(2);
-
-      /* Update the on-card price. Preserve the '/yr' sub-span. */
-      var orig = priceEl.dataset.tmcOriginal;
-      var subMatch = orig.match(/<span[\s\S]*?<\/span>/i);
-      var subSpan = subMatch ? subMatch[0] : '';
-      priceEl.innerHTML = '$' + finalDollars + ' ' + subSpan;
-
-      /* Update the button label. */
-      btnAmtEl.textContent = '$' + finalDollars;
-
-      /* Insert/update the note below the button. */
-      if (!noteEl) {
-        noteEl = document.createElement('div');
-        noteEl.id = noteId;
-        noteEl.style.cssText = 'background:#F0FDF4;border-left:3px solid #16A34A;padding:10px 12px;margin:10px 0 0;font-size:11px;color:#166534;line-height:1.55;border-radius:8px';
-        var parent = btnEl.parentNode;
-        if (parent) parent.insertBefore(noteEl, btnEl.nextSibling);
-      }
-      noteEl.style.display = 'block';
-      if (remainingCents > 0) {
-        noteEl.textContent =
-          '$' + discountDollars + ' applied. $' + finalDollars +
-          ' minimum charge today (saves your card for annual renewal as we accept autopay). $' +
-          remainingDolls + ' remains in your account, can use for future transactions.';
-      } else {
-        noteEl.textContent = '$' + discountDollars + ' referral credit applied.';
-      }
-    });
-  }
-
-  /* Wrap the page's own updateButtonLabels so OUR display refreshes any
-     time a prepay checkbox toggles  the page rewrites the button text
-     to the prepay-aware 'today' amount, then our code re-applies the
-     credit on top. We hook it after the main script has loaded. */
-  function hookUpdateButtonLabels() {
-    if (window.__tmcUblHooked) return;
-    if (typeof window.updateButtonLabels !== 'function') return;
-    window.__tmcUblHooked = true;
-    var orig = window.updateButtonLabels;
-    window.updateButtonLabels = function () {
-      try { orig.apply(this, arguments); } catch (e) {}
-      try { updateCreditDisplay(); } catch (e) {}
-    };
-  }
-  /* The main script runs at end of body; hook on DOMContentLoaded.
-     Fall back to a short retry loop in case the main script hasn't run yet. */
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () {
-      hookUpdateButtonLabels();
-      setTimeout(hookUpdateButtonLabels, 50);
-      setTimeout(hookUpdateButtonLabels, 200);
-      setTimeout(updateCreditDisplay, 250);
-    });
-  } else {
-    hookUpdateButtonLabels();
-    setTimeout(hookUpdateButtonLabels, 50);
-    setTimeout(updateCreditDisplay, 100);
   }
   function inject(creditDollars) {
     if (creditDollars <= 0) return;
