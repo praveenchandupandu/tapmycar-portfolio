@@ -72,7 +72,7 @@
         bar.remove();
         return;
       }
-      startRenew(); /* TMC_PATCH46_FIX */
+      window.location.href = '/pricing.html';
     });
 
     /* Insert at top of body (below the sticky header if any). The header
@@ -122,39 +122,12 @@
     document.getElementById('tmc-modal-x').addEventListener('click', dismiss);
     document.getElementById('tmc-modal-close').addEventListener('click', dismiss);
     document.getElementById('tmc-modal-pay').addEventListener('click', function () {
-      startRenew(); /* TMC_PATCH46_FIX */
+      window.location.href = '/pricing.html';
     });
     /* Click outside dialog also dismisses. */
     ov.addEventListener('click', function (e) {
       if (e.target === ov) dismiss();
     });
-  }
-
-  /* TMC_PATCH46_FIX: post flow:'renew' so the user pays the annual
-     subscription fee (not the sticker price). Plan comes from the user
-     object cached by init(). The returned Stripe URL is followed
-     immediately. On failure, fall back to /pricing.html so the user has
-     SOMETHING actionable. */
-  function startRenew() {
-    var token = getToken();
-    var plan  = (window.__tmcRenewalUser && window.__tmcRenewalUser.plan) || 'standard';
-    if (!token) { window.location.href = '/signin.html'; return; }
-    fetch('/api/create-checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ user_id: token, flow: 'renew', plan: plan })
-    })
-      .then(function (r) { return r.json(); })
-      .then(function (d) {
-        if (d && d.free === true && d.redirect) {
-          window.location.href = d.redirect;
-          return;
-        }
-        if (d && d.url) { window.location.href = d.url; return; }
-        /* unexpected response  bounce to pricing as a safety net */
-        window.location.href = '/pricing.html';
-      })
-      .catch(function () { window.location.href = '/pricing.html'; });
   }
 
   function init() {
@@ -164,7 +137,6 @@
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         if (!d || !shouldShow(d.user)) return;
-        window.__tmcRenewalUser = d.user; /* TMC_PATCH46_FIX: cache plan */
         injectBanner();
         /* Modal only on pages that explicitly opt in (dashboard). The page
            sets window.__tmcShowRenewalModal = true before this script runs. */
