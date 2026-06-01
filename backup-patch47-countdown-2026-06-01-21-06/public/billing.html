@@ -129,17 +129,7 @@ async function loadBilling() {
       document.getElementById('b-renewal').textContent = fmtDate(data.giftExpiresAt);
       document.getElementById('b-renewal-sub').textContent = 'Your free gift trial ends on this date.';
     } else if (data.renewal) {
-      /* TMC_PATCH47_CD: always show days-from-now next to the renewal date. */
-      (function () {
-        var dateStr = fmtDate(data.renewal);
-        var ms = new Date(data.renewal).getTime() - Date.now();
-        var days = Math.ceil(ms / 86400000);
-        var suffix = '';
-        if (days > 1)        suffix = ' (in ' + days + ' days)';
-        else if (days === 1) suffix = ' (tomorrow)';
-        else if (days === 0) suffix = ' (today)';
-        document.getElementById('b-renewal').textContent = dateStr + suffix;
-      })();
+      document.getElementById('b-renewal').textContent = fmtDate(data.renewal);
       var rs = 'Your plan renews on this date.';
       if (data.nextAmountCents !== null && data.nextAmountCents !== undefined) {
         rs += ' Next charge: ' + fmtMoney(data.nextAmountCents) + '.';

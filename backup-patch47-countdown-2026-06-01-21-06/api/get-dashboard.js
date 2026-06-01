@@ -1,5 +1,4 @@
 const { createClient } = require('@supabase/supabase-js');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY); /* TMC_PATCH47_CD */
 const { resolveAdmin: _tmcResolveAdminCookie } = require('./_admin-auth'); /* TMC_PATCH40S3 */
 
 // TMC_PATCH2_ORIGIN_GUARD
@@ -361,33 +360,13 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  /* TMC_PATCH47_CD: enrich the response with renewal date and next charge
-     amount from Stripe. Non-fatal: any failure leaves the fields null. */
-  let renewal_iso = null;
-  let next_amount_cents = null;
-  if (user && user.subscription_id) {
-    try {
-      const sub = await stripe.subscriptions.retrieve(user.subscription_id);
-      if (sub && sub.current_period_end) {
-        renewal_iso = new Date(sub.current_period_end * 1000).toISOString();
-      }
-      if (sub && sub.items && sub.items.data && sub.items.data[0] && sub.items.data[0].price) {
-        next_amount_cents = sub.items.data[0].price.unit_amount || null;
-      }
-    } catch (e) {
-      console.warn('TMC_PATCH47_CD: stripe sub lookup failed:', e && e.message);
-    }
-  }
-
   res.json({
     user,
     tags: tags || [],
     scanCount,
     weekCount,
     recentScans: recentScans || [],
-    premiumCodes,
-    renewal_iso,            /* TMC_PATCH47_CD */
-    next_amount_cents       /* TMC_PATCH47_CD */
+    premiumCodes
   });
 };
 
