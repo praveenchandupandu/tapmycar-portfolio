@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<!-- TMC_PATCH46_FIX2 renew.html -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Renew  TapMyCar</title>
+  <link rel="icon" href="/favicon.png">
+  <style>
+    *{box-sizing:border-box}
+    body{font-family:Inter,system-ui,-apple-system,Arial,sans-serif;margin:0;background:#fff;color:#111;-webkit-font-smoothing:antialiased}
+    .wrap{max-width:480px;margin:0 auto;padding:18px 16px 32px}
+    .header{display:flex;align-items:center;gap:10px;padding:6px 0 18px}
+    .back{font-size:20px;background:transparent;border:0;cursor:pointer;color:#111}
+    .header h1{font-size:18px;font-weight:800;margin:0;flex:1}
+    .card{background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:18px;margin-top:12px;box-shadow:0 1px 2px rgba(0,0,0,0.02)}
+    .plan-name{font-size:13px;font-weight:700;color:#6B7280;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:6px}
+    .plan-price{font-size:28px;font-weight:800;color:#FF6B00}
+    .plan-sub{font-size:12px;color:#6B7280;margin-top:4px}
+    .credit-row{display:flex;gap:10px;align-items:flex-start;padding:14px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;margin-top:14px;cursor:pointer;user-select:none}
+    .credit-row input{margin-top:2px;flex-shrink:0;width:16px;height:16px;accent-color:#16A34A;cursor:pointer}
+    .credit-row .label{flex:1;font-size:13px;color:#166534;line-height:1.5}
+    .credit-row .label b{font-weight:800;color:#15803D}
+    .credit-row .label .note{display:block;font-size:11px;color:#15803D;margin-top:4px;font-weight:500;opacity:0.85}
+    .total{display:flex;justify-content:space-between;align-items:baseline;padding:14px 0 8px;border-top:1px solid #F3F4F6;margin-top:14px}
+    .total .label{font-size:13px;color:#6B7280;font-weight:600}
+    .total .amount{font-size:24px;font-weight:800;color:#111}
+    .btn{width:100%;padding:14px;background:#FF6B00;color:#fff;border:0;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;margin-top:14px}
+    .btn:disabled{opacity:0.55;cursor:wait}
+    .disclose{font-size:11px;color:#9CA3AF;line-height:1.55;margin-top:12px;text-align:center}
+    .err{color:#DC2626;font-size:12px;margin-top:10px;display:none}
+    .err.show{display:block}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <button type="button" class="back" onclick="history.back()" aria-label="Back">&lsaquo;</button>
+      <h1>Renew your subscription</h1>
+    </div>
+
+    <div class="card">
+      <div class="plan-name" id="plan-label">Standard  annual plan</div>
+      <div class="plan-price" id="plan-price">$9.99</div>
+      <div class="plan-sub">Reactivates your existing tag for one year</div>
+
+      <label class="credit-row" id="credit-row" style="display:none">
+        <input type="checkbox" id="apply-credit">
+        <span class="label">
+          <b>You have <span id="credit-balance">$0.00</span> in referral credit.</b>
+          <span class="note" id="credit-note">Tick to apply your credit to this renewal.</span>
+        </span>
+      </label>
+
+      <div class="total">
+        <div class="label">You'll pay today</div>
+        <div class="amount" id="pay-amount">$9.99</div>
+      </div>
+
+      <button type="button" class="btn" id="renew-btn" onclick="doRenew()">Renew now</button>
+      <div class="err" id="err"></div>
+      <div class="disclose">Your card will be saved for next year's autopay. Cancel anytime in Settings. 14-day refund window applies.</div>
+    </div>
+  </div>
+
+<script>
+/* TMC_PATCH46_FIX2 renew.html logic. Pulls credit balance from
+   /api/get-referral, computes the live total based on the apply-credit
+   checkbox, then POSTs flow:'renew' with explicit apply_referral_credit. */
+(function () {
+  'use strict';
+  var PLAN_PRICES = { standard: 999, premium: 1999 }; /* cents */
+  var PLAN_NAMES  = { standard: 'Standard  annual plan', premium: 'Premium  annual plan' };
+
+  function getToken() {
+    try { return localStorage.getItem('tmc_session_token') || localStorage.getItem('tmc_token'); }
+    catch (e) { return null; }
+  }
+  function fmt(c) { return '$' + (c / 100).toFixed(2); }
+
+  var qs = new URLSearchParams(window.location.search);
+  var plan = qs.get('plan') || 'standard';
+  if (!PLAN_PRICES[plan]) plan = 'standard';
+  var priceCents = PLAN_PRICES[plan];
+  var creditCents = 0;
+
+  document.getElementById('plan-label').textContent = PLAN_NAMES[plan];
+  document.getElementById('plan-price').textContent = fmt(priceCents);
+  document.getElementById('pay-amount').textContent = fmt(priceCents);
+
+  function recomputeTotal() {
+    var apply = document.getElementById('apply-credit').checked;
+    var note  = document.getElementById('credit-note');
+    if (!apply || creditCents <= 0) {
+      document.getElementById('pay-amount').textContent = fmt(priceCents);
+      note.textContent = 'Tick to apply your credit to this renewal.';
+      return;
+    }
+    var applied  = Math.min(creditCents, priceCents);
+    var finalDue = priceCents - applied;
+    var leftover = creditCents - applied;
+    document.getElementById('pay-amount').textContent = fmt(finalDue);
+    if (leftover > 0) {
+      note.textContent = fmt(applied) + ' applied. ' + fmt(leftover) +
+        ' remains in your account for future transactions.';
+    } else if (applied < priceCents) {
+      note.textContent = fmt(applied) + ' applied. You\'ll pay ' + fmt(finalDue) + ' today.';
+    } else {
+      note.textContent = fmt(applied) + ' fully covers this renewal. No charge today.';
+    }
+  }
+
+  function loadCredit() {
+    var token = getToken();
+    if (!token) return;
+    fetch('/api/get-referral', { headers: { 'Authorization': 'Bearer ' + token } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.success) return;
+        var avail = (typeof d.credit_available === 'number') ? d.credit_available : 0;
+        if (avail <= 0) return;
+        creditCents = Math.round(avail * 100);
+        document.getElementById('credit-balance').textContent = '$' + avail.toFixed(2);
+        document.getElementById('credit-row').style.display = 'flex';
+        document.getElementById('apply-credit').addEventListener('change', recomputeTotal);
+      })
+      .catch(function () {});
+  }
+
+  window.doRenew = function () {
+    var token = getToken();
+    if (!token) { window.location.href = '/signin.html'; return; }
+    var apply = document.getElementById('apply-credit').checked;
+    var btn = document.getElementById('renew-btn');
+    var err = document.getElementById('err');
+    btn.disabled = true; btn.textContent = 'Loading...';
+    err.classList.remove('show');
+
+    fetch('/api/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({
+        user_id: token,
+        flow: 'renew',
+        plan: plan,
+        apply_referral_credit: !!apply
+      })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d && d.free === true && d.redirect) {
+          window.location.href = d.redirect;
+          return;
+        }
+        if (d && d.url) {
+          window.location.href = d.url;
+          return;
+        }
+        btn.disabled = false; btn.textContent = 'Renew now';
+        err.textContent = (d && d.error) || 'Could not start renewal. Please try again.';
+        err.classList.add('show');
+      })
+      .catch(function () {
+        btn.disabled = false; btn.textContent = 'Renew now';
+        err.textContent = 'Network error. Please try again.';
+        err.classList.add('show');
+      });
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadCredit);
+  } else { loadCredit(); }
+})();
+</script>
+</body>
+</html>

@@ -295,13 +295,6 @@ module.exports = async function handler(req, res) {
     let _tmcCreditCents = 0;
     let _tmcCreditRowIds = [];
     if (applyCredit) {
-      /* TMC_PATCH46_FIX2: stop collecting at the amount we could possibly
-         use for this transaction. Without this, a $9.99 renewal would
-         consume $12 of credit (all 4 rows) because the consume step
-         flips every collected row.
-         maxApply mirrors the math used below the loop. */
-      const _tmcFullCover  = (flow === 'renew' || flow === 'upgrade');
-      const _tmcMaxApply   = _tmcFullCover ? chargeTodayCents : Math.max(0, chargeTodayCents - 100);
       const nowIso = new Date().toISOString();
       const { data: avRows } = await supabase
         .from('referrals')
@@ -314,7 +307,6 @@ module.exports = async function handler(req, res) {
         (r.status === 'pending' && r.available_at && r.available_at <= nowIso)
       );
       for (const r of usable) {
-        if (_tmcCreditCents >= _tmcMaxApply) break;
         _tmcCreditCents += Math.round((parseFloat(r.credit_amount) || 0) * 100);
         _tmcCreditRowIds.push(r.id);
       }

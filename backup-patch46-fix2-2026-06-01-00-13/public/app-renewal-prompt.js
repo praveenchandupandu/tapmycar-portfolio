@@ -130,12 +130,31 @@
     });
   }
 
-  /* TMC_PATCH46_FIX2: route to the new /renew.html page so the user
-     can see the price + credit balance + apply checkbox BEFORE we hit
-     create-checkout. Plan passed as a query string param. */
+  /* TMC_PATCH46_FIX: post flow:'renew' so the user pays the annual
+     subscription fee (not the sticker price). Plan comes from the user
+     object cached by init(). The returned Stripe URL is followed
+     immediately. On failure, fall back to /pricing.html so the user has
+     SOMETHING actionable. */
   function startRenew() {
-    var plan = (window.__tmcRenewalUser && window.__tmcRenewalUser.plan) || 'standard';
-    window.location.href = '/renew.html?plan=' + encodeURIComponent(plan);
+    var token = getToken();
+    var plan  = (window.__tmcRenewalUser && window.__tmcRenewalUser.plan) || 'standard';
+    if (!token) { window.location.href = '/signin.html'; return; }
+    fetch('/api/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ user_id: token, flow: 'renew', plan: plan })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d && d.free === true && d.redirect) {
+          window.location.href = d.redirect;
+          return;
+        }
+        if (d && d.url) { window.location.href = d.url; return; }
+        /* unexpected response  bounce to pricing as a safety net */
+        window.location.href = '/pricing.html';
+      })
+      .catch(function () { window.location.href = '/pricing.html'; });
   }
 
   function init() {
