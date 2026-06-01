@@ -427,38 +427,12 @@ module.exports = async function handler(req, res) {
             }
           }
         }
-        /* TMC_PATCH46_FIX3: split-last-row consumption. _tmcCreditCents
-           is what we COLLECTED, _tmcCreditUsedCents is what was actually
-           APPLIED. The difference is leftover that must come back to the
-           user as a new 'available' row. Without this, a $9.99 renewal
-           that collects 4x$3 rows ($12) would burn all $12 even though
-           only $9.99 was needed.
-           Mark all collected rows consumed (clean audit trail), then
-           insert a fresh 'available' row for the leftover amount. */
+        /* Mark the consumed credits in the referrals table. */
         if (_tmcCreditRowIds.length > 0) {
           await supabase.from('referrals').update({
             status: 'consumed',
             consumed_at: new Date().toISOString()
           }).in('id', _tmcCreditRowIds);
-          const _tmcLeftoverCents = _tmcCreditCents - _tmcCreditUsedCents;
-          if (_tmcLeftoverCents > 0) {
-            const leftoverDollars = (_tmcLeftoverCents / 100).toFixed(2);
-            await supabase.from('referrals').insert({
-              referrer_user_id: user_id,
-              referred_user_id: null,
-              referral_code:    'LEFTOVER',
-              status:           'available',
-              credit_amount:    parseFloat(leftoverDollars),
-              /* paid_at is required for FIFO ordering; use now so this
-                 leftover gets used LAST among future purchases (we want
-                 older real referral rows to be spent first). Wait, 
-                 actually FIFO order='asc' means OLDEST paid_at first, so
-                 setting paid_at=now makes this the youngest = last. */
-              paid_at:          new Date().toISOString(),
-              available_at:     new Date().toISOString(),
-              applied_at:       new Date().toISOString()
-            });
-          }
         }
         return res.json({
           free: true,

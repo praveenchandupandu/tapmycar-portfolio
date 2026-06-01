@@ -404,47 +404,20 @@ async function handler(req, res) {
           console.log(`✓ Generated ${premiumCodes.length} Premium codes`);
         }
 
-        // ─── TMC_PATCH46_FIX3: mark consumed + split leftover ───
+        // ─── TMC_PATCH45B: mark consumed referral credits ───────
         try {
           const m = session.metadata || {};
           const ids = (m.referral_credit_row_ids || '').split(',').filter(Boolean);
-          const appliedCents = parseInt(m.referral_credit_applied || '0', 10) || 0;
           if (ids.length > 0) {
-            /* Fetch the rows' credit_amount so we can compute leftover.
-               This must happen BEFORE the update flips them to consumed. */
-            const { data: rowDetails } = await supabase
-              .from('referrals')
-              .select('id, credit_amount')
-              .in('id', ids);
-            const collectedCents = (rowDetails || []).reduce(function (sum, r) {
-              return sum + Math.round((parseFloat(r.credit_amount) || 0) * 100);
-            }, 0);
-
             await supabase.from('referrals').update({
               status: 'consumed',
               consumed_at: new Date().toISOString(),
               consumed_order_id: orderRow ? orderRow.id : null
             }).in('id', ids).in('status', ['available','pending']);
-
-            const leftoverCents = collectedCents - appliedCents;
-            if (leftoverCents > 0) {
-              const leftoverDollars = (leftoverCents / 100).toFixed(2);
-              await supabase.from('referrals').insert({
-                referrer_user_id: user_id,
-                referred_user_id: null,
-                referral_code:    'LEFTOVER',
-                status:           'available',
-                credit_amount:    parseFloat(leftoverDollars),
-                paid_at:          new Date().toISOString(),
-                available_at:     new Date().toISOString(),
-                applied_at:       new Date().toISOString()
-              });
-              console.log('p46-fix3: issued leftover available row $' + leftoverDollars);
-            }
-            console.log('p46-fix3: consumed ' + ids.length + ' rows for $' + (appliedCents / 100).toFixed(2));
+            console.log('p45b: marked ' + ids.length + ' referral credit(s) consumed');
           }
         } catch (e) {
-          console.warn('p46-fix3: credit consume failed (non-fatal):', e && e.message);
+          console.warn('p45b: credit consume failed (non-fatal):', e && e.message);
         }
 
         // ─── REFERRAL REWARDS ───────────────────────────────────
