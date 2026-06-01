@@ -128,14 +128,6 @@
     </div>
   </div>
 
-  <!-- TMC_PATCH47_PAYMENTS: payment history section -->
-  <div class="sl" id="payments-label" style="display:none">Payment history</div>
-  <div id="payments-section" style="display:none">
-    <div id="payments-list" style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;overflow:hidden"></div>
-    <button type="button" id="payments-toggle" onclick="togglePayments()"
-      style="display:none;width:100%;background:transparent;border:0;padding:10px;margin-top:8px;font-size:12px;font-weight:600;color:#FF6B00;cursor:pointer">See all</button>
-  </div>
-
   <!-- Cancel Subscription (only shown if user has an active subscription) -->
   <div class="set-row" id="cancel-sub-row" style="display:none" onclick="cancelSubscription()"><div class="set-l"><div class="set-ic" style="background:#FFF3EC"><svg viewBox="0 0 24 24" stroke="var(--or)"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div><div><div class="set-t">Cancel subscription</div><div class="set-s">Stop future charges. Keeps tag active until paid period ends.</div></div></div><div class="arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
 
@@ -575,75 +567,6 @@ function shareRefLink() {
 function signOut() { localStorage.clear(); window.location.href = '/signin.html'; }
 
 loadSettings();
-
-/* TMC_PATCH47_PAYMENTS: payment history rendering. */
-var __tmcPaymentsExpanded = false;
-var __tmcPayments = [];
-
-function fmtMoney(cents) { return '$' + (cents / 100).toFixed(2); }
-function fmtPaymentDate(iso) {
-  try { return new Date(iso).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }); }
-  catch (e) { return ''; }
-}
-function paymentTitle(o) {
-  var status = (o.order_status || '').toLowerCase();
-  if (status === 'renewal')    return 'Annual renewal  ' + (o.plan ? o.plan : '');
-  if (status === 'upgrade')    return 'Plan upgrade  Premium';
-  if (status === 'direct')     return (o.plan === 'premium' ? 'Premium' : 'Standard') + ' sticker';
-  if (status === 'processing') return 'Order processing  ' + (o.plan || '');
-  return 'Order  ' + (o.plan || '');
-}
-function paymentSubtitle(o) {
-  if (o.free)                                return 'Paid with referral credit';
-  if (o.credit_cents > 0 && o.amount_cents > 0) return fmtMoney(o.credit_cents) + ' credit + ' + fmtMoney(o.amount_cents) + ' card';
-  return null;
-}
-function renderPayments() {
-  var list = document.getElementById('payments-list');
-  var toggle = document.getElementById('payments-toggle');
-  var section = document.getElementById('payments-section');
-  var label = document.getElementById('payments-label');
-  if (!list || !section) return;
-  if (__tmcPayments.length === 0) {
-    section.style.display = 'none';
-    if (label) label.style.display = 'none';
-    return;
-  }
-  section.style.display = 'block';
-  if (label) label.style.display = 'block';
-  var visible = __tmcPaymentsExpanded ? __tmcPayments : __tmcPayments.slice(0, 5);
-  list.innerHTML = visible.map(function (o, i) {
-    var sub = paymentSubtitle(o);
-    var amount = o.free ? '$0.00' : fmtMoney(o.amount_cents);
-    var border = (i < visible.length - 1) ? 'border-bottom:1px solid #F3F4F6;' : '';
-    return '<div style="display:flex;align-items:center;gap:12px;padding:14px;' + border + '">' +
-      '<div style="flex:1;min-width:0">' +
-        '<div style="font-size:13px;font-weight:700;color:#111">' + paymentTitle(o) + '</div>' +
-        '<div style="font-size:11px;color:#6B7280;margin-top:2px">' + fmtPaymentDate(o.created_at) + (sub ? '  ' + sub : '') + '</div>' +
-      '</div>' +
-      '<div style="font-size:14px;font-weight:800;color:#111">' + amount + '</div>' +
-    '</div>';
-  }).join('');
-  if (__tmcPayments.length > 5) {
-    toggle.style.display = 'block';
-    toggle.textContent = __tmcPaymentsExpanded ? 'Show less' : ('See all ' + __tmcPayments.length);
-  } else { toggle.style.display = 'none'; }
-}
-function togglePayments() {
-  __tmcPaymentsExpanded = !__tmcPaymentsExpanded;
-  renderPayments();
-}
-async function loadPayments() {
-  try {
-    var res = await fetch('/api/get-orders-history');
-    if (!res.ok) return;
-    var data = await res.json();
-    if (!data || !data.ok || !Array.isArray(data.orders)) return;
-    __tmcPayments = data.orders;
-    renderPayments();
-  } catch (e) {}
-}
-loadPayments();
 loadReferrals();
 </script>
 <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }</script>
