@@ -11,9 +11,6 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'user_id and announcement_id required' });
   }
 
-  /* TMC_PATCH55A: with the unique index added in the migration, this
-     upsert now actually de-dupes via the onConflict clause. Before the
-     index existed, this call may have been failing silently or partially. */
   const { error } = await supabase
     .from('announcement_seen')
     .upsert(
@@ -21,14 +18,7 @@ module.exports = async function handler(req, res) {
       { onConflict: 'announcement_id,user_id' }
     );
   if (error) {
-    console.error('TMC_PATCH55A seen-announcement upsert error:', {
-      user_id: String(user_id),
-      announcement_id: announcement_id,
-      message: error.message,
-      details: error.details,
-      hint: error.hint,
-      code: error.code
-    });
+    console.error('seen-announcement error:', error.message);
     return res.status(500).json({ error: error.message });
   }
   return res.json({ success: true });
