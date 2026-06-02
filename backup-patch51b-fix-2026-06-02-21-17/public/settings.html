@@ -491,15 +491,12 @@ async function acceptRetentionOffer() {
       try { if (typeof loadReferrals === 'function') loadReferrals(); } catch (e) {}
       return;
     }
-    /* TMC_PATCH51B_FIX: if already_shown comes back, the server has the
-       lock set but somehow the modal slipped through. Close it and proceed
-       to delete  the user's actual intent. No nonsensical red text. */
+    /* If already_shown comes back, the user already used this offer.
+       Close the modal and fall through to delete  honest. */
     if (data && data.reason === 'already_shown') {
-      closePreDelete();
-      /* Proceed to delete using cached pre-delete answers. */
-      if (typeof declineRetentionOffer === 'function') {
-        declineRetentionOffer();
-      }
+      if (err) err.textContent = 'You\'ve already used this offer before.';
+      if (btn) { btn.disabled = false; btn.textContent = 'Yes, keep my account'; }
+      if (dec) dec.disabled = false;
       return;
     }
     throw new Error((data && data.error) || 'Could not apply credit');
@@ -574,17 +571,12 @@ async function submitPreDelete() {
   var consent    = !!document.getElementById('tmc-pd-consent').checked;
   var go = document.getElementById('tmc-pd-go');
 
-  /* TMC_PATCH51B_FIX: probe whether the user has already been shown the
-     retention offer. ONLY show the offer modal if we got a clean 200 AND
-     retention_offer_shown_at is null. Any error or non-null  fall through
-     to delete (the user's actual intent). Send auth header explicitly  the
-     original Patch 51b code omitted it, which silently 401'd and caused
-     the offer modal to show even for users who had already accepted. */
+  /* TMC_PATCH51B: if the user hasn't been shown the retention offer yet,
+     pause here and show step 2. The actual delete only runs after the user
+     either accepts the offer (which short-circuits delete entirely) or
+     declines it (which then proceeds with delete). */
   try {
-    var __tmcTok = s.token || localStorage.getItem('tmc_session_token') || localStorage.getItem('tmc_token');
-    var probe = await fetch('/api/get-dashboard', {
-      headers: { 'Authorization': 'Bearer ' + __tmcTok }
-    });
+    var probe = await fetch('/api/get-dashboard');
     if (probe.ok) {
       var probeData = await probe.json();
       var alreadyShown = probeData && probeData.user && probeData.user.retention_offer_shown_at;
@@ -593,12 +585,8 @@ async function submitPreDelete() {
         showRetentionOffer();
         return;
       }
-      /* alreadyShown is truthy  user has used the offer before, proceed to delete. */
     }
-    /* If probe failed or returned non-OK, also proceed to delete. The user
-       clicked Delete; respect that rather than show an offer we cannot
-       verify they are eligible for. */
-  } catch (e) { /* network error  fall through to delete */ }
+  } catch (e) { /* fall through to delete on probe failure */ }
 
   go.disabled = true; go.textContent = 'Deleting…'; err.textContent = '';
   try {
