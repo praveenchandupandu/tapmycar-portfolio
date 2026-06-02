@@ -670,20 +670,6 @@ async function submitPreDelete() {
   } catch (e) { /* network error  fall through to delete */ }
 
   go.disabled = true; go.textContent = 'Deleting…'; err.textContent = '';
-
-  /* TMC_PATCH52_FIX: capture email/name now so the post-delete newsletter
-     signup screen can pre-fill them. We already have s.token; just fetch
-     /api/get-dashboard one more time before the row is wiped. */
-  try {
-    var __tmcTok2 = s.token || localStorage.getItem('tmc_session_token') || localStorage.getItem('tmc_token');
-    var meRes2 = await fetch('/api/get-dashboard', { headers: { 'Authorization': 'Bearer ' + __tmcTok2 } });
-    if (meRes2.ok) {
-      var meData2 = await meRes2.json();
-      window.__tmcDelEmail = (meData2 && meData2.user && meData2.user.email) || '';
-      window.__tmcDelName  = (meData2 && meData2.user && meData2.user.name)  || '';
-    }
-  } catch (e) { /* non-fatal */ }
-
   try {
     var res = await fetch('/api/delete-account', {
       method: 'POST',
@@ -698,13 +684,10 @@ async function submitPreDelete() {
     });
     var data = await res.json();
     if (data.success) {
-      /* TMC_PATCH52_FIX: show post-delete newsletter signup screen. */
-      try { localStorage.clear(); } catch (e) {}
-      showPostDeleteSignup(
-        window.__tmcDelEmail || '',
-        window.__tmcDelName  || '',
-        reasonCode || ''
-      );
+      closePreDelete();
+      showToast('Account deleted. Goodbye!');
+      localStorage.clear();
+      setTimeout(function () { window.location.href = '/landing.html'; }, 1500);
     } else {
       go.disabled = false; go.textContent = 'Permanently delete';
       err.textContent = data.error || 'Failed to delete. Please contact support@tapmycar.io.';
