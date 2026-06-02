@@ -1678,24 +1678,11 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
             <span class="section-link" onclick="loadFailedRefunds()" style="cursor:pointer">Refresh</span>
           </div>
           <div style="font-size:12px;color:#6B7280;margin:6px 0 14px;line-height:1.5">Orders where Stripe refund-create returned an error. The user has been emailed asking us to follow up. After you process the refund manually in the Stripe Dashboard, click <b>Mark resolved</b> to clear it.</div>
-          <!-- TMC_PATCH53_FIX -->
-          <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:14px;font-size:12px;color:#6B7280">
-            <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer">
-              <input type="checkbox" id="refunds-include-resolved" onchange="loadFailedRefunds()">
-              <span>Include resolved failures</span>
-            </label>
-            <span style="display:inline-flex;align-items:center;gap:6px">
-              <span>Successful refunds in last</span>
-              <select id="refunds-window" onchange="loadFailedRefunds()" style="font-size:12px;padding:4px 6px;border-radius:6px;border:1px solid #D1D5DB">
-                <option value="30" selected>30 days</option>
-                <option value="90">90 days</option>
-                <option value="365">1 year</option>
-              </select>
-            </span>
-          </div>
-
-          <div id="refunds-failed-wrap" style="margin-bottom:18px"></div>
-          <div id="refunds-success-wrap"></div>
+          <div id="refunds-list" style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;overflow:hidden"></div>
+          <label style="display:inline-flex;align-items:center;gap:8px;margin-top:14px;font-size:12px;color:#6B7280;cursor:pointer">
+            <input type="checkbox" id="refunds-include-resolved" onchange="loadFailedRefunds()">
+            <span>Include already-resolved entries</span>
+          </label>
         </div>
       </div>
 
@@ -3834,95 +3821,58 @@ function downloadFile(content, filename, mime) {
 const TAB_TITLES = {"home": "Home", "users": "Users", "orders": "Orders", "leads": "Leads", "tags": "Tags", "analytics": "Analytics", "scans": "Scans", "upgrade": "Upgrade tracker", "reviews": "Reviews", "generate": "Generate", "receive": "Receive", "inventory": "Inventory", "promos": "Promos", "audit": "Audit", "broadcast": "Broadcast", "retention": "Retention", "refunds": "Refunds"}; /* TMC_PATCH42 */
 const TAB_SUBS = {"home": "At-a-glance view of the business", "users": "Search, manage, and gift plans", "orders": "Physical shipping and fulfillment", "leads": "Feedback emails captured on contact pages", "tags": "All tokens in the system", "analytics": "Revenue, scans, and growth metrics", "scans": "Raw scan history", "upgrade": "Users approaching day 30 auto-upgrade", "reviews": "Approve reviews, toggle visibility, feature on landing", "generate": "Create new NFC/QR token batches", "receive": "Verify stickers received from manufacturer", "inventory": "Stock levels by batch", "promos": "Gift plans, gift-activate tags, and promo codes", "audit": "Admin actions and system health", "broadcast": "Compose and send notifications to users", "retention": "Exit reasons, opt-in counts, lapsed emails", "refunds": "Failed Stripe refund attempts needing manual review"}; /* TMC_PATCH42 */
 
-/* TMC_PATCH53_FIX: refunds tab now shows BOTH failed and successful. */
+/* TMC_PATCH53_ADMIN: failed-refunds tab logic. */
 async function loadFailedRefunds() {
-  const failedWrap  = document.getElementById("refunds-failed-wrap");
-  const successWrap = document.getElementById("refunds-success-wrap");
-  const navCount    = document.getElementById("refunds-nav-count");
-  if (!failedWrap || !successWrap) return;
-  failedWrap.innerHTML  = '<div style="padding:18px;font-size:13px;color:#6B7280;text-align:center">Loading failed refunds...</div>';
-  successWrap.innerHTML = '<div style="padding:18px;font-size:13px;color:#6B7280;text-align:center">Loading successful refunds...</div>';
+  const list = document.getElementById("refunds-list");
+  const navCount = document.getElementById("refunds-nav-count");
+  if (!list) return;
+  list.innerHTML = '<div style="padding:18px;font-size:13px;color:#6B7280;text-align:center">Loading...</div>';
   const includeResolved = !!(document.getElementById("refunds-include-resolved") && document.getElementById("refunds-include-resolved").checked);
-  const win = (document.getElementById("refunds-window") && document.getElementById("refunds-window").value) || "30";
   try {
-    const url = "/api/admin-failed-refunds?days=" + encodeURIComponent(win) + (includeResolved ? "&include_resolved=1" : "");
-    const res = await fetch(url);
+    const res = await fetch("/api/admin-failed-refunds" + (includeResolved ? "?include_resolved=1" : ""));
     if (!res.ok) throw new Error("admin auth required");
     const data = await res.json();
-    const failed  = (data && data.failed)  || [];
-    const success = (data && data.success) || [];
+    const orders = (data && data.orders) || [];
+    /* Update the small red badge on the nav  unresolved count only. */
     if (navCount) {
-      const unresolved = failed.filter(function (o) { return !o.resolved; }).length;
+      const unresolved = orders.filter(function (o) { return !o.resolved; }).length;
       if (unresolved > 0) { navCount.textContent = String(unresolved); navCount.style.display = "inline-block"; }
       else                { navCount.style.display = "none"; }
     }
-    failedWrap.innerHTML  = renderFailedRefunds(failed);
-    successWrap.innerHTML = renderSuccessRefunds(success, win);
+    if (orders.length === 0) {
+      list.innerHTML = '<div style="padding:24px;font-size:13px;color:#6B7280;text-align:center">No failed refunds. \u2728</div>';
+      return;
+    }
+    list.innerHTML = orders.map(function (o, i) {
+      const border = (i < orders.length - 1) ? "border-bottom:1px solid #F3F4F6;" : "";
+      const userName  = (o.user && (o.user.name || o.user.email)) || o.user.id || "unknown user";
+      const userEmail = (o.user && o.user.email) || "";
+      const amount = "$" + ((o.amount_cents || 0) / 100).toFixed(2);
+      const when   = o.refund_failed_at ? new Date(o.refund_failed_at).toLocaleString() : "";
+      const err    = (o.refund_error_message || "").replace(/</g, "&lt;");
+      const statusBadge = o.resolved
+        ? '<span style="background:#D1FAE5;color:#065F46;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase">Resolved</span>'
+        : '<span style="background:#FEE2E2;color:#7F1D1D;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase">Open</span>';
+      const actionBtn = o.resolved
+        ? ''
+        : '<button type="button" onclick="resolveRefund(\'' + o.order_id + '\')" style="background:#FF6B00;color:#fff;border:0;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Mark resolved</button>';
+      return '<div style="padding:14px;' + border + '">' +
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">' +
+          '<div style="flex:1;min-width:0">' +
+            '<div style="font-size:13px;font-weight:700;color:#111">' + userName + '</div>' +
+            (userEmail && userEmail !== userName ? '<div style="font-size:11px;color:#6B7280">' + userEmail + '</div>' : "") +
+          '</div>' +
+          '<div style="font-size:14px;font-weight:800;color:#111">' + amount + '</div>' +
+          statusBadge +
+        '</div>' +
+        '<div style="font-size:11px;color:#6B7280;margin-bottom:8px">' + when + ' &middot; order ' + o.order_id.slice(0,8) + '</div>' +
+        '<div style="background:#FEF2F2;border:1px solid #FECACA;padding:8px 10px;border-radius:8px;font-size:11px;color:#7F1D1D;font-family:ui-monospace,monospace;word-break:break-word;line-height:1.5;margin-bottom:8px">' + (err || "(no error message)") + '</div>' +
+        actionBtn +
+      '</div>';
+    }).join("");
   } catch (e) {
-    failedWrap.innerHTML  = '<div style="padding:18px;font-size:13px;color:#DC2626;text-align:center">Could not load refunds.</div>';
-    successWrap.innerHTML = "";
+    list.innerHTML = '<div style="padding:18px;font-size:13px;color:#DC2626;text-align:center">Could not load failed refunds.</div>';
   }
-}
-
-function renderFailedRefunds(rows) {
-  const title = '<div style="font-size:11px;font-weight:700;color:#7F1D1D;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:8px">Failed refunds (need attention)</div>';
-  if (!rows || rows.length === 0) {
-    return title + '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:18px;font-size:13px;color:#6B7280;text-align:center">No failed refunds. \u2728</div>';
-  }
-  const inner = rows.map(function (o, i) {
-    const border = (i < rows.length - 1) ? "border-bottom:1px solid #F3F4F6;" : "";
-    const userName  = (o.user && (o.user.name || o.user.email)) || o.user.id || "unknown user";
-    const userEmail = (o.user && o.user.email) || "";
-    const amount = "$" + ((o.amount_cents || 0) / 100).toFixed(2);
-    const when   = o.refund_failed_at ? new Date(o.refund_failed_at).toLocaleString() : "";
-    const err    = (o.refund_error_message || "").replace(/</g, "&lt;");
-    const statusBadge = o.resolved
-      ? '<span style="background:#D1FAE5;color:#065F46;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase">Resolved</span>'
-      : '<span style="background:#FEE2E2;color:#7F1D1D;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase">Open</span>';
-    const actionBtn = o.resolved
-      ? ''
-      : '<button type="button" onclick="resolveRefund(\'' + o.order_id + '\')" style="background:#FF6B00;color:#fff;border:0;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Mark resolved</button>';
-    return '<div style="padding:14px;' + border + '">' +
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">' +
-        '<div style="flex:1;min-width:0">' +
-          '<div style="font-size:13px;font-weight:700;color:#111">' + userName + '</div>' +
-          (userEmail && userEmail !== userName ? '<div style="font-size:11px;color:#6B7280">' + userEmail + '</div>' : "") +
-        '</div>' +
-        '<div style="font-size:14px;font-weight:800;color:#111">' + amount + '</div>' +
-        statusBadge +
-      '</div>' +
-      '<div style="font-size:11px;color:#6B7280;margin-bottom:8px">' + when + ' &middot; order ' + o.order_id.slice(0,8) + '</div>' +
-      '<div style="background:#FEF2F2;border:1px solid #FECACA;padding:8px 10px;border-radius:8px;font-size:11px;color:#7F1D1D;font-family:ui-monospace,monospace;word-break:break-word;line-height:1.5;margin-bottom:8px">' + (err || "(no error message)") + '</div>' +
-      actionBtn +
-    '</div>';
-  }).join("");
-  return title + '<div style="background:#fff;border:1px solid #FECACA;border-radius:14px;overflow:hidden">' + inner + '</div>';
-}
-
-function renderSuccessRefunds(rows, win) {
-  const title = '<div style="font-size:11px;font-weight:700;color:#065F46;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:8px">Successful refunds (last ' + win + ' days)</div>';
-  if (!rows || rows.length === 0) {
-    return title + '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:18px;font-size:13px;color:#6B7280;text-align:center">No successful refunds in this window.</div>';
-  }
-  const inner = rows.map(function (o, i) {
-    const border = (i < rows.length - 1) ? "border-bottom:1px solid #F3F4F6;" : "";
-    const userName  = (o.user && (o.user.name || o.user.email)) || o.user.id || "unknown user";
-    const userEmail = (o.user && o.user.email) || "";
-    const refundAmt = "$" + ((o.refund_amount_cents || 0) / 100).toFixed(2);
-    const when      = o.refund_succeeded_at ? new Date(o.refund_succeeded_at).toLocaleString() : "";
-    const stripeRef = o.refund_stripe_id ? ' &middot; ' + o.refund_stripe_id : "";
-    return '<div style="padding:14px;' + border + '">' +
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">' +
-        '<div style="flex:1;min-width:0">' +
-          '<div style="font-size:13px;font-weight:700;color:#111">' + userName + '</div>' +
-          (userEmail && userEmail !== userName ? '<div style="font-size:11px;color:#6B7280">' + userEmail + '</div>' : "") +
-        '</div>' +
-        '<div style="font-size:14px;font-weight:800;color:#065F46">-' + refundAmt + '</div>' +
-      '</div>' +
-      '<div style="font-size:11px;color:#6B7280">' + when + stripeRef + '</div>' +
-    '</div>';
-  }).join("");
-  return title + '<div style="background:#fff;border:1px solid #D1FAE5;border-radius:14px;overflow:hidden">' + inner + '</div>';
 }
 
 async function resolveRefund(orderId) {

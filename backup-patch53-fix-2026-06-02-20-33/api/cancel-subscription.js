@@ -200,23 +200,6 @@ module.exports = async function handler(req, res) {
         refundAmountCents = refund.amount;
         refundId = refund.id;
         console.log('Refund issued ' + refund.id + ' for $' + (refund.amount / 100).toFixed(2));
-        /* TMC_PATCH53_FIX: record on the most recent order so admin can see */
-        try {
-          const { data: lastOrder } = await supabase
-            .from('orders')
-            .select('id')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single();
-          if (lastOrder && lastOrder.id) {
-            await supabase.from('orders').update({
-              refund_succeeded_at:  new Date().toISOString(),
-              refund_amount_cents:  refund.amount,
-              refund_stripe_id:     refund.id
-            }).eq('id', lastOrder.id);
-          }
-        } catch (e) { console.warn('p53-fix: refund success record failed:', e && e.message); }
       } catch (refundErr) {
         /* TMC_PATCH53: record the failure on the most recent renewal/direct
            order so admin can see it. Then send the user an honest email so
