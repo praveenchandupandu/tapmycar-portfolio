@@ -305,21 +305,14 @@ module.exports = async function handler(req, res) {
       const nowIso = new Date().toISOString();
       const { data: avRows } = await supabase
         .from('referrals')
-        .select('id, credit_amount, status, available_at, credit_kind')
+        .select('id, credit_amount, status, available_at')
         .eq('referrer_user_id', user_id)
         .in('status', ['pending','available'])
         .order('paid_at', { ascending: true });
-      /* TMC_PATCH51A: renewal_only credits are filtered OUT unless flow
-         is renew. General (default) credits work on anything. */
-      const _tmcIsRenew = (flow === 'renew');
-      const usable = (avRows || []).filter(r => {
-        const okStatus = r.status === 'available' ||
-          (r.status === 'pending' && r.available_at && r.available_at <= nowIso);
-        if (!okStatus) return false;
-        const kind = r.credit_kind || 'general';
-        if (kind === 'renewal_only' && !_tmcIsRenew) return false;
-        return true;
-      });
+      const usable = (avRows || []).filter(r =>
+        r.status === 'available' ||
+        (r.status === 'pending' && r.available_at && r.available_at <= nowIso)
+      );
       for (const r of usable) {
         if (_tmcCreditCents >= _tmcMaxApply) break;
         _tmcCreditCents += Math.round((parseFloat(r.credit_amount) || 0) * 100);

@@ -2,7 +2,6 @@
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 const { resolveUser, recordTokenType } = require('./_auth'); /* TMC_PATCH38S4 */
 
-/* TMC_PATCH51A: credit_kind read into rows for future use */
 module.exports = async function handler(req, res) {
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
   /* TMC_PATCH38S4: identify the caller from a signed session token or a
@@ -14,7 +13,7 @@ module.exports = async function handler(req, res) {
   const user_id = _tmcAuth.userId;
   await recordTokenType(supabase, user_id, _tmcAuth.viaLegacy);
 
-  const { data: user } = await supabase.from("users").select("referral_code, referral_count, referral_credits, referral_reward_pending, credit_kind").eq("id", user_id).single();
+  const { data: user } = await supabase.from("users").select("referral_code, referral_count, referral_credits, referral_reward_pending").eq("id", user_id).single();
   if (!user) return res.status(404).json({ error: "User not found" });
 
   /* TMC_PATCH45A: derive the four numbers from the referrals table. The
