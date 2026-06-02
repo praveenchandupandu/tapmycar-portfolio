@@ -521,17 +521,6 @@ async function declineRetentionOffer() {
     });
   } catch (e) { /* non-fatal */ }
 
-  /* TMC_PATCH52: capture email/name now, before the delete wipes them. */
-  try {
-    var __tmcTok = s.token || localStorage.getItem('tmc_session_token') || localStorage.getItem('tmc_token');
-    var meRes = await fetch('/api/get-dashboard', { headers: { 'Authorization': 'Bearer ' + __tmcTok } });
-    if (meRes.ok) {
-      var meData = await meRes.json();
-      window.__tmcDelEmail = (meData && meData.user && meData.user.email) || '';
-      window.__tmcDelName  = (meData && meData.user && meData.user.name)  || '';
-    }
-  } catch (e) { /* non-fatal  signup screen will just have blank fields */ }
-
   /* Now actually proceed with the delete. We rebuild the spinner state
      inside the modal so the user sees something is happening. */
   var modal = document.getElementById('tmc-predelete-modal');
@@ -553,15 +542,10 @@ async function declineRetentionOffer() {
     });
     var data = await res.json();
     if (data && data.success) {
-      /* TMC_PATCH52: show post-delete newsletter signup screen instead of
-         immediately redirecting. Captured email comes from window.__tmcDelEmail
-         and window.__tmcDelName which we set just before calling delete. */
-      try { localStorage.clear(); } catch (e) {}
-      showPostDeleteSignup(
-        window.__tmcDelEmail || '',
-        window.__tmcDelName  || '',
-        (st && st.reasonCode) || ''
-      );
+      closePreDelete();
+      showToast('Account deleted. Goodbye!');
+      localStorage.clear();
+      setTimeout(function () { window.location.href = '/landing.html'; }, 1500);
     } else {
       closePreDelete();
       alert((data && data.error) || 'Failed to delete. Please contact support@tapmycar.io.');
@@ -569,59 +553,6 @@ async function declineRetentionOffer() {
   } catch (e) {
     closePreDelete();
     alert('Network error \u2014 please try again.');
-  }
-}
-
-/* TMC_PATCH52: post-delete newsletter signup screen.
-   Replaces the modal contents (account is already deleted at this point).
-   Subscribe POSTs to /api/newsletter-subscribe; Skip just redirects. */
-function showPostDeleteSignup(email, name, exitReason) {
-  var modal = document.getElementById('tmc-predelete-modal');
-  if (!modal) { window.location.href = '/landing.html'; return; }
-  var card = modal.querySelector('div');
-  if (!card) { window.location.href = '/landing.html'; return; }
-  var emailEsc = (email || '').replace(/"/g, '&quot;');
-  card.innerHTML = '' +
-    '<div style="text-align:center;margin-bottom:14px">' +
-      '<div style="font-size:28px;margin-bottom:6px">\uD83D\uDC4B</div>' +
-      '<div style="font-size:18px;font-weight:800;color:#111">Account deleted. Goodbye!</div>' +
-    '</div>' +
-    '<div style="font-size:13px;color:#6B7280;line-height:1.6;margin-bottom:16px;text-align:center">Want to hear from us when we launch new features? Stay on a low-touch newsletter \u2014 no spam, easy unsubscribe.</div>' +
-    '<input type="email" id="tmc-pd-news-email" value="' + emailEsc + '" placeholder="you@example.com" style="width:100%;box-sizing:border-box;padding:12px;font-size:14px;border:1.5px solid #E5E7EB;border-radius:10px;margin-bottom:10px">' +
-    '<div id="tmc-pd-news-err" style="font-size:12px;color:#DC2626;min-height:18px;margin-bottom:6px;text-align:center"></div>' +
-    '<div style="display:flex;flex-direction:column;gap:8px">' +
-      '<button type="button" id="tmc-pd-news-sub" onclick="submitNewsletterSignup(' + JSON.stringify(exitReason || '') + ', ' + JSON.stringify(name || '') + ')" style="width:100%;padding:13px;background:#FF6B00;color:#fff;border:0;border-radius:11px;font-weight:700;font-size:14px;cursor:pointer">Subscribe to newsletter</button>' +
-      '<button type="button" onclick="window.location.href=&quot;/landing.html&quot;" style="width:100%;padding:11px;background:transparent;color:#6B7280;border:0;font-weight:600;font-size:13px;cursor:pointer">Skip, take me to the homepage</button>' +
-    '</div>';
-}
-
-async function submitNewsletterSignup(exitReason, name) {
-  var emailEl = document.getElementById('tmc-pd-news-email');
-  var btn = document.getElementById('tmc-pd-news-sub');
-  var err = document.getElementById('tmc-pd-news-err');
-  var email = (emailEl && emailEl.value || '').trim();
-  if (err) err.textContent = '';
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    if (err) err.textContent = 'Please enter a valid email.';
-    return;
-  }
-  if (btn) { btn.disabled = true; btn.textContent = 'Subscribing\u2026'; }
-  try {
-    var res = await fetch('/api/newsletter-subscribe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email, name: name || '', exit_reason: exitReason || '' })
-    });
-    var data = await res.json();
-    if (data && data.ok) {
-      window.location.href = '/landing.html?subscribed=1';
-      return;
-    }
-    if (err) err.textContent = (data && data.error) || 'Could not subscribe. Try again.';
-    if (btn) { btn.disabled = false; btn.textContent = 'Subscribe to newsletter'; }
-  } catch (e) {
-    if (err) err.textContent = 'Network error. Try again.';
-    if (btn) { btn.disabled = false; btn.textContent = 'Subscribe to newsletter'; }
   }
 }
 

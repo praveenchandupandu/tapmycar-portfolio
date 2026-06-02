@@ -7,28 +7,8 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const { user_id, token, action, list } = req.body || {};
+  const { user_id, token, action } = req.body || {};
   if (!user_id || !token) return res.status(400).json({ error: "Missing user_id or token" });
-
-  /* TMC_PATCH52: if &list=newsletter or user_id matches a newsletter row,
-     route to the newsletter_subscribers table instead of users. */
-  if (list === 'newsletter') {
-    const { data: nrow, error: nerr } = await supabase
-      .from('newsletter_subscribers')
-      .select('id, unsubscribe_token, unsubscribed_at')
-      .eq('id', user_id)
-      .single();
-    if (nerr || !nrow) return res.status(404).json({ error: 'Not found' });
-    if (!nrow.unsubscribe_token || nrow.unsubscribe_token !== token) {
-      return res.status(403).json({ error: 'Invalid unsubscribe link' });
-    }
-    const isResub = action === 'resubscribe';
-    const { error: upErr } = await supabase.from('newsletter_subscribers').update({
-      unsubscribed_at: isResub ? null : new Date().toISOString()
-    }).eq('id', user_id);
-    if (upErr) return res.status(500).json({ error: upErr.message });
-    return res.json({ ok: true, list: 'newsletter', opted_out: !isResub });
-  }
 
   const { data: user, error } = await supabase
     .from("users")

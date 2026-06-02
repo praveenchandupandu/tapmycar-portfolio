@@ -1120,7 +1120,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
     <button class="sb-item" data-tab="broadcast" onclick="navTo('broadcast')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg><span>Broadcast</span></button><!-- TMC_PATCH44_BROADCAST -->
     <button class="sb-item" data-tab="retention" onclick="navTo('retention')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span>Retention</span></button><!-- TMC_PATCH42 -->
     <button class="sb-item" data-tab="refunds" onclick="navTo('refunds')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>Refunds</span><span id="refunds-nav-count" style="display:none;margin-left:auto;background:#DC2626;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px"></span></button><!-- TMC_PATCH53_ADMIN -->
-    <button class="sb-item" data-tab="newsletter" onclick="navTo('newsletter')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M22 6l-10 7L2 6"/></svg><span>Newsletter</span></button><!-- TMC_PATCH52 -->
     </nav>
     <div class="sidebar-foot">
       <button class="sb-logout" onclick="adminLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Logout</span></button>
@@ -1669,29 +1668,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
         </div>
 
         <div id="reviews-list"><div class="empty">Loading reviews...</div></div>
-      </div>
-
-      <!-- TMC_PATCH52 Newsletter panel -->
-      <div class="panel" id="panel-newsletter">
-        <div class="section">
-          <div class="section-head">
-            <div class="section-title">Newsletter subscribers</div>
-            <span class="section-link" onclick="loadNewsletter()" style="cursor:pointer">Refresh</span>
-          </div>
-          <div style="font-size:12px;color:#6B7280;margin:6px 0 14px;line-height:1.5">Captured from the post-deletion signup screen. Use the CSV to import into Mailchimp, Beehiiv, or another email service for sending.</div>
-          <div id="news-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px">
-            <div style="background:#F9FAFB;border-radius:10px;padding:12px"><div style="font-size:11px;color:#6B7280;text-transform:uppercase;font-weight:700;letter-spacing:0.04em">Active</div><div id="news-active" style="font-size:22px;font-weight:800;color:#15803D;margin-top:4px">…</div></div>
-            <div style="background:#F9FAFB;border-radius:10px;padding:12px"><div style="font-size:11px;color:#6B7280;text-transform:uppercase;font-weight:700;letter-spacing:0.04em">Unsubscribed</div><div id="news-unsub" style="font-size:22px;font-weight:800;color:#111;margin-top:4px">…</div></div>
-          </div>
-          <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:14px;font-size:12px;color:#6B7280">
-            <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer">
-              <input type="checkbox" id="news-include-unsub" onchange="loadNewsletter()">
-              <span>Include unsubscribed</span>
-            </label>
-            <a href="/api/admin-newsletter-export" download style="display:inline-flex;align-items:center;gap:6px;background:#FF6B00;color:#fff;text-decoration:none;padding:8px 14px;border-radius:8px;font-weight:700;font-size:12px">Export CSV</a>
-          </div>
-          <div id="news-list" style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;overflow:hidden"></div>
-        </div>
       </div>
 
       <!-- TMC_PATCH53_ADMIN Refunds panel -->
@@ -3867,8 +3843,8 @@ function downloadFile(content, filename, mime) {
 </script>
 <script>
 // ─── NAV HELPERS (defined AFTER preserved script so our showTab wins) ──
-const TAB_TITLES = {"home": "Home", "users": "Users", "orders": "Orders", "leads": "Leads", "tags": "Tags", "analytics": "Analytics", "scans": "Scans", "upgrade": "Upgrade tracker", "reviews": "Reviews", "generate": "Generate", "receive": "Receive", "inventory": "Inventory", "promos": "Promos", "audit": "Audit", "broadcast": "Broadcast", "retention": "Retention", "refunds": "Refunds", "newsletter": "Newsletter"}; /* TMC_PATCH42 */
-const TAB_SUBS = {"home": "At-a-glance view of the business", "users": "Search, manage, and gift plans", "orders": "Physical shipping and fulfillment", "leads": "Feedback emails captured on contact pages", "tags": "All tokens in the system", "analytics": "Revenue, scans, and growth metrics", "scans": "Raw scan history", "upgrade": "Users approaching day 30 auto-upgrade", "reviews": "Approve reviews, toggle visibility, feature on landing", "generate": "Create new NFC/QR token batches", "receive": "Verify stickers received from manufacturer", "inventory": "Stock levels by batch", "promos": "Gift plans, gift-activate tags, and promo codes", "audit": "Admin actions and system health", "broadcast": "Compose and send notifications to users", "retention": "Exit reasons, opt-in counts, lapsed emails", "refunds": "Failed Stripe refund attempts needing manual review", "newsletter": "Post-deletion newsletter signups  export to CSV for Mailchimp/Beehiiv"}; /* TMC_PATCH42 */
+const TAB_TITLES = {"home": "Home", "users": "Users", "orders": "Orders", "leads": "Leads", "tags": "Tags", "analytics": "Analytics", "scans": "Scans", "upgrade": "Upgrade tracker", "reviews": "Reviews", "generate": "Generate", "receive": "Receive", "inventory": "Inventory", "promos": "Promos", "audit": "Audit", "broadcast": "Broadcast", "retention": "Retention", "refunds": "Refunds"}; /* TMC_PATCH42 */
+const TAB_SUBS = {"home": "At-a-glance view of the business", "users": "Search, manage, and gift plans", "orders": "Physical shipping and fulfillment", "leads": "Feedback emails captured on contact pages", "tags": "All tokens in the system", "analytics": "Revenue, scans, and growth metrics", "scans": "Raw scan history", "upgrade": "Users approaching day 30 auto-upgrade", "reviews": "Approve reviews, toggle visibility, feature on landing", "generate": "Create new NFC/QR token batches", "receive": "Verify stickers received from manufacturer", "inventory": "Stock levels by batch", "promos": "Gift plans, gift-activate tags, and promo codes", "audit": "Admin actions and system health", "broadcast": "Compose and send notifications to users", "retention": "Exit reasons, opt-in counts, lapsed emails", "refunds": "Failed Stripe refund attempts needing manual review"}; /* TMC_PATCH42 */
 
 /* TMC_PATCH53_FIX: refunds tab now shows BOTH failed and successful. */
 async function loadFailedRefunds() {
@@ -3975,52 +3951,6 @@ async function resolveRefund(orderId) {
     alert("Could not mark as resolved. Try again.");
   }
 }
-
-/* TMC_PATCH52 newsletter tab loader */
-async function loadNewsletter() {
-  const listEl   = document.getElementById("news-list");
-  const activeEl = document.getElementById("news-active");
-  const unsubEl  = document.getElementById("news-unsub");
-  if (!listEl) return;
-  listEl.innerHTML = '<div style="padding:18px;font-size:13px;color:#6B7280;text-align:center">Loading\u2026</div>';
-  const includeUnsub = !!(document.getElementById("news-include-unsub") && document.getElementById("news-include-unsub").checked);
-  try {
-    const res = await fetch("/api/admin-newsletter-list" + (includeUnsub ? "?include_unsubscribed=1" : ""));
-    if (!res.ok) throw new Error("admin auth required");
-    const d = await res.json();
-    if (activeEl) activeEl.textContent = String(d.active_count);
-    if (unsubEl)  unsubEl.textContent  = String(d.unsubscribed_count);
-    const rows = (d && d.subscribers) || [];
-    if (rows.length === 0) {
-      listEl.innerHTML = '<div style="padding:24px;font-size:13px;color:#6B7280;text-align:center">No newsletter subscribers yet.</div>';
-      return;
-    }
-    listEl.innerHTML = rows.map(function (r, i) {
-      const border = (i < rows.length - 1) ? "border-bottom:1px solid #F3F4F6;" : "";
-      const when = r.created_at ? new Date(r.created_at).toLocaleDateString() : "";
-      const exitReason = r.signup_exit_reason ? ' \u00b7 reason: ' + r.signup_exit_reason : "";
-      const statusBadge = r.unsubscribed_at
-        ? '<span style="background:#F3F4F6;color:#6B7280;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase">Unsubscribed</span>'
-        : '<span style="background:#D1FAE5;color:#065F46;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase">Active</span>';
-      const name = r.name ? '<span style="color:#6B7280;font-weight:500">(' + r.name + ')</span>' : "";
-      return '<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;' + border + '">' +
-        '<div style="flex:1;min-width:0;font-size:13px"><b>' + r.email + '</b> ' + name + '<div style="font-size:11px;color:#9CA3AF;margin-top:2px">' + when + exitReason + '</div></div>' +
-        statusBadge +
-      '</div>';
-    }).join("");
-  } catch (e) {
-    listEl.innerHTML = '<div style="padding:18px;font-size:13px;color:#DC2626;text-align:center">Could not load subscribers.</div>';
-  }
-}
-
-(function () {
-  if (window.__tmcNewsInit) return;
-  window.__tmcNewsInit = true;
-  document.addEventListener("click", function (e) {
-    const btn = e.target.closest && e.target.closest("[data-tab=\"newsletter\"]");
-    if (btn) setTimeout(loadNewsletter, 20);
-  });
-})();
 
 /* Auto-load the refunds list whenever the Refunds tab is opened, and also
    once on page load so the nav badge gets populated. */
