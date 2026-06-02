@@ -1701,18 +1701,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 
       <!-- TMC_PATCH42 Retention panel -->
       <div class="panel" id="panel-retention">
-        <!-- TMC_PATCH51B Retention offers section -->
-        <div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:16px;margin-bottom:18px">
-          <div style="font-weight:800;font-size:14px;margin-bottom:10px">Pre-delete retention offer (last 90 days)</div>
-          <div id="ret-offer-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px">
-            <div style="background:#F9FAFB;border-radius:10px;padding:12px"><div style="font-size:11px;color:#6B7280;text-transform:uppercase;font-weight:700;letter-spacing:0.04em">Offers shown</div><div id="ret-offer-shown" style="font-size:22px;font-weight:800;color:#111;margin-top:4px">…</div></div>
-            <div style="background:#F9FAFB;border-radius:10px;padding:12px"><div style="font-size:11px;color:#6B7280;text-transform:uppercase;font-weight:700;letter-spacing:0.04em">Accepted</div><div id="ret-offer-accepted" style="font-size:22px;font-weight:800;color:#15803D;margin-top:4px">…</div></div>
-            <div style="background:#F9FAFB;border-radius:10px;padding:12px"><div style="font-size:11px;color:#6B7280;text-transform:uppercase;font-weight:700;letter-spacing:0.04em">Accept rate</div><div id="ret-offer-rate" style="font-size:22px;font-weight:800;color:#111;margin-top:4px">…</div></div>
-            <div style="background:#F9FAFB;border-radius:10px;padding:12px"><div style="font-size:11px;color:#6B7280;text-transform:uppercase;font-weight:700;letter-spacing:0.04em">Credit issued</div><div id="ret-offer-credit" style="font-size:22px;font-weight:800;color:#FF6B00;margin-top:4px">…</div></div>
-          </div>
-          <div id="ret-offer-recent" style="font-size:12px;color:#6B7280"></div>
-        </div>
-
         <div id="ret-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px">
           <div class="empty">Loading…</div>
         </div>
@@ -5306,49 +5294,6 @@ function p35bsCloseQr() {
 
 
 <script>
-// TMC_PATCH51B Retention offer stats loader
-async function loadRetentionOfferStats() {
-  try {
-    const res = await fetch("/api/get-retention-offer-stats");
-    if (!res.ok) return;
-    const d = await res.json();
-    if (!d || !d.ok) return;
-    const shownEl    = document.getElementById("ret-offer-shown");
-    const acceptedEl = document.getElementById("ret-offer-accepted");
-    const rateEl     = document.getElementById("ret-offer-rate");
-    const creditEl   = document.getElementById("ret-offer-credit");
-    const recentEl   = document.getElementById("ret-offer-recent");
-    if (shownEl)    shownEl.textContent    = String(d.shown);
-    if (acceptedEl) acceptedEl.textContent = String(d.accepted);
-    if (rateEl)     rateEl.textContent     = (d.shown > 0 ? d.accept_rate + "%" : "—");
-    if (creditEl)   creditEl.textContent   = "$" + ((d.credit_issued_cents || 0) / 100).toFixed(2);
-    if (recentEl) {
-      if (!d.recent_accepted || d.recent_accepted.length === 0) {
-        recentEl.innerHTML = '<div style="padding:6px 0;color:#9CA3AF;font-style:italic">No recent acceptances</div>';
-      } else {
-        recentEl.innerHTML = '<div style="font-weight:700;color:#111;margin-bottom:6px">Recent acceptances</div>' +
-          d.recent_accepted.map(function (u) {
-            const when = u.accepted_at ? new Date(u.accepted_at).toLocaleDateString() : "";
-            const who  = (u.name || u.email || "unknown");
-            const why  = u.exit_reason ? ' \u00b7 reason: ' + u.exit_reason : "";
-            return '<div style="padding:4px 0;border-bottom:1px solid #F3F4F6">' + when + ' \u00b7 ' + who + why + '</div>';
-          }).join("");
-      }
-    }
-  } catch (e) { /* swallow */ }
-}
-
-/* Load retention-offer stats whenever the Retention tab is opened. */
-(function () {
-  if (window.__tmcRetOfferInit) return;
-  window.__tmcRetOfferInit = true;
-  document.addEventListener("click", function (e) {
-    const btn = e.target.closest && e.target.closest("[data-tab=\"retention\"]");
-    if (btn) setTimeout(loadRetentionOfferStats, 20);
-  });
-  setTimeout(loadRetentionOfferStats, 1200);
-})();
-
 // TMC_PATCH42 Retention tab logic
 (function () {
   var LABEL = {

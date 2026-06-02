@@ -447,120 +447,10 @@ function deleteAccount() {
   }
 }
 
-/* TMC_PATCH51B: pre-delete retention offer (step 2) */
-function showRetentionOffer() {
-  /* Hide step-1 contents, show step-2 inside the SAME modal. */
-  var modal = document.getElementById('tmc-predelete-modal');
-  if (!modal) return;
-  var card = modal.querySelector('div');
-  if (!card) return;
-  card.innerHTML = '' +
-    '<div style="text-align:center;margin-bottom:14px">' +
-      '<div style="font-size:32px;margin-bottom:4px">\uD83C\uDF81</div>' +
-      '<div style="font-size:18px;font-weight:800;color:#111">Wait \u2014 here\'s $3 off your next renewal</div>' +
-    '</div>' +
-    '<div style="font-size:13px;color:#6B7280;line-height:1.6;margin-bottom:16px;text-align:center">As a thank-you for trying TapMyCar, we\'d like to credit your account with $3 toward your next annual subscription renewal. Your tag stays active, no charge today.</div>' +
-    '<div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;padding:12px;margin-bottom:14px;font-size:12px;color:#15803D;text-align:center">' +
-      '<b>$3.00 credit</b>  applies automatically at your next annual renewal' +
-    '</div>' +
-    '<div id="tmc-ret-err" style="font-size:12px;color:#DC2626;min-height:18px;margin-bottom:6px;text-align:center"></div>' +
-    '<div style="display:flex;flex-direction:column;gap:8px">' +
-      '<button type="button" id="tmc-ret-accept" onclick="acceptRetentionOffer()" style="width:100%;padding:13px;background:#FF6B00;color:#fff;border:0;border-radius:11px;font-weight:700;font-size:14px;cursor:pointer">Yes, keep my account</button>' +
-      '<button type="button" id="tmc-ret-decline" onclick="declineRetentionOffer()" style="width:100%;padding:11px;background:transparent;color:#6B7280;border:0;font-weight:600;font-size:13px;cursor:pointer">No thanks, delete my account</button>' +
-    '</div>';
-}
-
-async function acceptRetentionOffer() {
-  var btn = document.getElementById('tmc-ret-accept');
-  var dec = document.getElementById('tmc-ret-decline');
-  var err = document.getElementById('tmc-ret-err');
-  if (btn) { btn.disabled = true; btn.textContent = 'Applying \u2026'; }
-  if (dec) dec.disabled = true;
-  if (err) err.textContent = '';
-  try {
-    var res = await fetch('/api/grant-retention-credit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ exit_reason: __tmcPreDeleteState && __tmcPreDeleteState.reasonCode })
-    });
-    var data = await res.json();
-    if (data && data.ok) {
-      closePreDelete();
-      showToast('$3 credit added to your account for next renewal!');
-      /* Refresh referrals card so the user sees something happened. */
-      try { if (typeof loadReferrals === 'function') loadReferrals(); } catch (e) {}
-      return;
-    }
-    /* If already_shown comes back, the user already used this offer.
-       Close the modal and fall through to delete  honest. */
-    if (data && data.reason === 'already_shown') {
-      if (err) err.textContent = 'You\'ve already used this offer before.';
-      if (btn) { btn.disabled = false; btn.textContent = 'Yes, keep my account'; }
-      if (dec) dec.disabled = false;
-      return;
-    }
-    throw new Error((data && data.error) || 'Could not apply credit');
-  } catch (e) {
-    if (err) err.textContent = 'Something went wrong applying the credit. Try again or contact support@tapmycar.io';
-    if (btn) { btn.disabled = false; btn.textContent = 'Yes, keep my account'; }
-    if (dec) dec.disabled = false;
-  }
-}
-
-async function declineRetentionOffer() {
-  var st = __tmcPreDeleteState || { reasonCode: '', reasonText: '', consent: false };
-  /* Consume the one-time gate so they can\'t come back and farm it. */
-  try {
-    await fetch('/api/decline-retention-offer', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ exit_reason: st.reasonCode })
-    });
-  } catch (e) { /* non-fatal */ }
-
-  /* Now actually proceed with the delete. We rebuild the spinner state
-     inside the modal so the user sees something is happening. */
-  var modal = document.getElementById('tmc-predelete-modal');
-  if (modal) {
-    var card = modal.querySelector('div');
-    if (card) card.innerHTML = '<div style="padding:30px;text-align:center;font-size:14px;color:#6B7280">Deleting your account\u2026</div>';
-  }
-  try {
-    var res = await fetch('/api/delete-account', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        user_id: s.token,
-        confirm: 'DELETE',
-        exit_reason_code: st.reasonCode,
-        exit_reason_text: st.reasonText,
-        marketing_consent: !!st.consent
-      })
-    });
-    var data = await res.json();
-    if (data && data.success) {
-      closePreDelete();
-      showToast('Account deleted. Goodbye!');
-      localStorage.clear();
-      setTimeout(function () { window.location.href = '/landing.html'; }, 1500);
-    } else {
-      closePreDelete();
-      alert((data && data.error) || 'Failed to delete. Please contact support@tapmycar.io.');
-    }
-  } catch (e) {
-    closePreDelete();
-    alert('Network error \u2014 please try again.');
-  }
-}
-
 function closePreDelete() {
   var m = document.getElementById('tmc-predelete-modal');
   if (m) m.remove();
 }
-
-/* TMC_PATCH51B: cache the user's step-1 answers so we can use them after
-   the retention offer step resolves. */
-var __tmcPreDeleteState = null;
 
 async function submitPreDelete() {
   var radio = document.querySelector('input[name="tmc-pd-reason"]:checked');
@@ -570,24 +460,6 @@ async function submitPreDelete() {
   var reasonText = (document.getElementById('tmc-pd-text').value || '').trim().slice(0, 1000);
   var consent    = !!document.getElementById('tmc-pd-consent').checked;
   var go = document.getElementById('tmc-pd-go');
-
-  /* TMC_PATCH51B: if the user hasn't been shown the retention offer yet,
-     pause here and show step 2. The actual delete only runs after the user
-     either accepts the offer (which short-circuits delete entirely) or
-     declines it (which then proceeds with delete). */
-  try {
-    var probe = await fetch('/api/get-dashboard');
-    if (probe.ok) {
-      var probeData = await probe.json();
-      var alreadyShown = probeData && probeData.user && probeData.user.retention_offer_shown_at;
-      if (!alreadyShown) {
-        __tmcPreDeleteState = { reasonCode: reasonCode, reasonText: reasonText, consent: consent };
-        showRetentionOffer();
-        return;
-      }
-    }
-  } catch (e) { /* fall through to delete on probe failure */ }
-
   go.disabled = true; go.textContent = 'Deleting…'; err.textContent = '';
   try {
     var res = await fetch('/api/delete-account', {
