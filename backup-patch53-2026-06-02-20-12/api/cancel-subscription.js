@@ -161,19 +161,6 @@ module.exports = async function handler(req, res) {
   if (!user) return res.status(404).json({ error: "User not found" });
   if (!user.subscription_id) return res.status(400).json({ error: "No active subscription" });
 
-  /* TMC_PATCH53: advisory lock against rapid double-clicks. If another
-     cancel for this user is in progress within the last 60 seconds, refuse.
-     We set the timestamp on success, clear it at the end via finally. */
-  const lockNow = new Date();
-  const lockExpiry = new Date(lockNow.getTime() - 60 * 1000);
-  const { data: lockCheck } = await supabase.from('users')
-    .select('refund_in_progress_at')
-    .eq('id', user.id).single();
-  if (lockCheck && lockCheck.refund_in_progress_at && new Date(lockCheck.refund_in_progress_at) > lockExpiry) {
-    return res.status(409).json({ error: 'A cancellation is already in progress. Please wait a moment.' });
-  }
-  await supabase.from('users').update({ refund_in_progress_at: lockNow.toISOString() }).eq('id', user.id);
-
   try {
     // 1. Compute refund eligibility
     const elig = await computeEligibility(user);
@@ -201,49 +188,10 @@ module.exports = async function handler(req, res) {
         refundId = refund.id;
         console.log('Refund issued ' + refund.id + ' for $' + (refund.amount / 100).toFixed(2));
       } catch (refundErr) {
-        /* TMC_PATCH53: record the failure on the most recent renewal/direct
-           order so admin can see it. Then send the user an honest email so
-           they know support will contact them. We still cancel the sub. */
-        console.error('Refund failed:', refundErr && refundErr.message);
-        try {
-          const { data: lastOrder } = await supabase
-            .from('orders')
-            .select('id')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single();
-          if (lastOrder && lastOrder.id) {
-            await supabase.from('orders').update({
-              refund_failed_at: new Date().toISOString(),
-              refund_error_message: (refundErr && refundErr.message) || 'unknown'
-            }).eq('id', lastOrder.id);
-          }
-        } catch (e) { console.warn('p53: could not flag order:', e && e.message); }
-
-        /* User-facing email about the refund failure (not the cancellation). */
-        try {
-          if (user.email) {
-            const { Resend } = require('resend');
-            const _r = new Resend(process.env.RESEND_API_KEY);
-            await _r.emails.send({
-              from: 'TapMyCar <noreply@tapmycar.io>',
-              to: user.email,
-              subject: 'Your TapMyCar refund needs attention',
-              html: ''+
-                '<div style="font-family:Inter,Arial,sans-serif;max-width:480px;margin:0 auto;color:#111">' +
-                  '<div style="font-size:22px;font-weight:800;padding:12px 4px">TapMyCar<span style="color:#FF6B00">.</span></div>' +
-                  '<div style="background:#fff;border:1px solid #FED7AA;border-left:4px solid #FF6B00;border-radius:14px;padding:26px 24px">' +
-                    '<h1 style="font-size:18px;font-weight:800;margin:0 0 12px;color:#C2410C">We need to look at your refund</h1>' +
-                    '<p style="font-size:14px;line-height:1.65;color:#374151">Your subscription has been canceled, but our automatic refund attempt did not complete. This is unusual and means our team needs to step in manually.</p>' +
-                    '<p style="font-size:14px;line-height:1.65;color:#374151">A member of our team will reach out within one business day to confirm and process your refund. No action needed from you.</p>' +
-                    '<p style="font-size:13px;line-height:1.6;color:#6B7280">If you have not heard from us within 24 hours, email <a href="mailto:support@tapmycar.io" style="color:#FF6B00">support@tapmycar.io</a>.</p>' +
-                  '</div>' +
-                  '<div style="font-size:11px;color:#9CA3AF;padding:16px 6px;line-height:1.6">Praman Tech LLC, Connecticut, USA</div>' +
-                '</div>'
-            });
-          }
-        } catch (e) { console.warn('p53: could not send refund-fail email:', e && e.message); }
+        console.error('Refund failed (continuing with cancel):', refundErr.message);
+        // We still proceed to cancel the subscription. If the refund failed,
+        // the customer can contact support. We don't want to leave them stuck
+        // with an uncanceled subscription.
       }
     }
 
@@ -338,9 +286,6 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    /* TMC_PATCH53: clear the lock on success. */
-    try { await supabase.from('users').update({ refund_in_progress_at: null }).eq('id', user.id); }
-    catch (e) { console.warn('p53: lock clear failed:', e && e.message); }
     return res.json({
       success: true,
       refund_issued: refundIssued,
@@ -349,9 +294,6 @@ module.exports = async function handler(req, res) {
       eligibility_reason: elig.reason
     });
   } catch (err) {
-    /* TMC_PATCH53: clear the lock on error too, so retry is possible. */
-    try { await supabase.from('users').update({ refund_in_progress_at: null }).eq('id', user.id); }
-    catch (e) { console.warn('p53: lock clear failed:', e && e.message); }
     console.error("Cancel subscription error:", err.message);
     res.status(500).json({ error: err.message });
   }
