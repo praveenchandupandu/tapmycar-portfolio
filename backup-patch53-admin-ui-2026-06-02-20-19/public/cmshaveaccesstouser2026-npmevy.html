@@ -1119,7 +1119,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
     <button class="sb-item" data-tab="audit" onclick="navTo('audit')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6a2 2 0 012 2v0H7v0a2 2 0 012-2z"/><path d="M8 4H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg><span>Audit</span></button>
     <button class="sb-item" data-tab="broadcast" onclick="navTo('broadcast')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg><span>Broadcast</span></button><!-- TMC_PATCH44_BROADCAST -->
     <button class="sb-item" data-tab="retention" onclick="navTo('retention')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span>Retention</span></button><!-- TMC_PATCH42 -->
-    <button class="sb-item" data-tab="refunds" onclick="navTo('refunds')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>Refunds</span><span id="refunds-nav-count" style="display:none;margin-left:auto;background:#DC2626;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px"></span></button><!-- TMC_PATCH53_ADMIN -->
     </nav>
     <div class="sidebar-foot">
       <button class="sb-logout" onclick="adminLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Logout</span></button>
@@ -1668,22 +1667,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
         </div>
 
         <div id="reviews-list"><div class="empty">Loading reviews...</div></div>
-      </div>
-
-      <!-- TMC_PATCH53_ADMIN Refunds panel -->
-      <div class="panel" id="panel-refunds">
-        <div class="section">
-          <div class="section-head">
-            <div class="section-title">Failed refunds</div>
-            <span class="section-link" onclick="loadFailedRefunds()" style="cursor:pointer">Refresh</span>
-          </div>
-          <div style="font-size:12px;color:#6B7280;margin:6px 0 14px;line-height:1.5">Orders where Stripe refund-create returned an error. The user has been emailed asking us to follow up. After you process the refund manually in the Stripe Dashboard, click <b>Mark resolved</b> to clear it.</div>
-          <div id="refunds-list" style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;overflow:hidden"></div>
-          <label style="display:inline-flex;align-items:center;gap:8px;margin-top:14px;font-size:12px;color:#6B7280;cursor:pointer">
-            <input type="checkbox" id="refunds-include-resolved" onchange="loadFailedRefunds()">
-            <span>Include already-resolved entries</span>
-          </label>
-        </div>
       </div>
 
       <!-- TMC_PATCH42 Retention panel -->
@@ -3818,91 +3801,8 @@ function downloadFile(content, filename, mime) {
 </script>
 <script>
 // ─── NAV HELPERS (defined AFTER preserved script so our showTab wins) ──
-const TAB_TITLES = {"home": "Home", "users": "Users", "orders": "Orders", "leads": "Leads", "tags": "Tags", "analytics": "Analytics", "scans": "Scans", "upgrade": "Upgrade tracker", "reviews": "Reviews", "generate": "Generate", "receive": "Receive", "inventory": "Inventory", "promos": "Promos", "audit": "Audit", "broadcast": "Broadcast", "retention": "Retention", "refunds": "Refunds"}; /* TMC_PATCH42 */
-const TAB_SUBS = {"home": "At-a-glance view of the business", "users": "Search, manage, and gift plans", "orders": "Physical shipping and fulfillment", "leads": "Feedback emails captured on contact pages", "tags": "All tokens in the system", "analytics": "Revenue, scans, and growth metrics", "scans": "Raw scan history", "upgrade": "Users approaching day 30 auto-upgrade", "reviews": "Approve reviews, toggle visibility, feature on landing", "generate": "Create new NFC/QR token batches", "receive": "Verify stickers received from manufacturer", "inventory": "Stock levels by batch", "promos": "Gift plans, gift-activate tags, and promo codes", "audit": "Admin actions and system health", "broadcast": "Compose and send notifications to users", "retention": "Exit reasons, opt-in counts, lapsed emails", "refunds": "Failed Stripe refund attempts needing manual review"}; /* TMC_PATCH42 */
-
-/* TMC_PATCH53_ADMIN: failed-refunds tab logic. */
-async function loadFailedRefunds() {
-  const list = document.getElementById("refunds-list");
-  const navCount = document.getElementById("refunds-nav-count");
-  if (!list) return;
-  list.innerHTML = '<div style="padding:18px;font-size:13px;color:#6B7280;text-align:center">Loading...</div>';
-  const includeResolved = !!(document.getElementById("refunds-include-resolved") && document.getElementById("refunds-include-resolved").checked);
-  try {
-    const res = await fetch("/api/admin-failed-refunds" + (includeResolved ? "?include_resolved=1" : ""));
-    if (!res.ok) throw new Error("admin auth required");
-    const data = await res.json();
-    const orders = (data && data.orders) || [];
-    /* Update the small red badge on the nav  unresolved count only. */
-    if (navCount) {
-      const unresolved = orders.filter(function (o) { return !o.resolved; }).length;
-      if (unresolved > 0) { navCount.textContent = String(unresolved); navCount.style.display = "inline-block"; }
-      else                { navCount.style.display = "none"; }
-    }
-    if (orders.length === 0) {
-      list.innerHTML = '<div style="padding:24px;font-size:13px;color:#6B7280;text-align:center">No failed refunds. \u2728</div>';
-      return;
-    }
-    list.innerHTML = orders.map(function (o, i) {
-      const border = (i < orders.length - 1) ? "border-bottom:1px solid #F3F4F6;" : "";
-      const userName  = (o.user && (o.user.name || o.user.email)) || o.user.id || "unknown user";
-      const userEmail = (o.user && o.user.email) || "";
-      const amount = "$" + ((o.amount_cents || 0) / 100).toFixed(2);
-      const when   = o.refund_failed_at ? new Date(o.refund_failed_at).toLocaleString() : "";
-      const err    = (o.refund_error_message || "").replace(/</g, "&lt;");
-      const statusBadge = o.resolved
-        ? '<span style="background:#D1FAE5;color:#065F46;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase">Resolved</span>'
-        : '<span style="background:#FEE2E2;color:#7F1D1D;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase">Open</span>';
-      const actionBtn = o.resolved
-        ? ''
-        : '<button type="button" onclick="resolveRefund(\'' + o.order_id + '\')" style="background:#FF6B00;color:#fff;border:0;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Mark resolved</button>';
-      return '<div style="padding:14px;' + border + '">' +
-        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">' +
-          '<div style="flex:1;min-width:0">' +
-            '<div style="font-size:13px;font-weight:700;color:#111">' + userName + '</div>' +
-            (userEmail && userEmail !== userName ? '<div style="font-size:11px;color:#6B7280">' + userEmail + '</div>' : "") +
-          '</div>' +
-          '<div style="font-size:14px;font-weight:800;color:#111">' + amount + '</div>' +
-          statusBadge +
-        '</div>' +
-        '<div style="font-size:11px;color:#6B7280;margin-bottom:8px">' + when + ' &middot; order ' + o.order_id.slice(0,8) + '</div>' +
-        '<div style="background:#FEF2F2;border:1px solid #FECACA;padding:8px 10px;border-radius:8px;font-size:11px;color:#7F1D1D;font-family:ui-monospace,monospace;word-break:break-word;line-height:1.5;margin-bottom:8px">' + (err || "(no error message)") + '</div>' +
-        actionBtn +
-      '</div>';
-    }).join("");
-  } catch (e) {
-    list.innerHTML = '<div style="padding:18px;font-size:13px;color:#DC2626;text-align:center">Could not load failed refunds.</div>';
-  }
-}
-
-async function resolveRefund(orderId) {
-  if (!confirm("Mark this refund as manually resolved? This means you have already processed the refund in Stripe.")) return;
-  try {
-    const res = await fetch("/api/admin-resolve-refund", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ order_id: orderId })
-    });
-    if (!res.ok) throw new Error("resolve failed");
-    loadFailedRefunds();
-  } catch (e) {
-    alert("Could not mark as resolved. Try again.");
-  }
-}
-
-/* Auto-load the refunds list whenever the Refunds tab is opened, and also
-   once on page load so the nav badge gets populated. */
-(function () {
-  if (window.__tmcRefundsInit) return;
-  window.__tmcRefundsInit = true;
-  /* On any nav button click that targets refunds, reload. */
-  document.addEventListener("click", function (e) {
-    const btn = e.target.closest && e.target.closest("[data-tab=\"refunds\"]");
-    if (btn) setTimeout(loadFailedRefunds, 20);
-  });
-  /* Also load once a bit after page render so the badge gets a count. */
-  setTimeout(loadFailedRefunds, 1200);
-})();
+const TAB_TITLES = {"home": "Home", "users": "Users", "orders": "Orders", "leads": "Leads", "tags": "Tags", "analytics": "Analytics", "scans": "Scans", "upgrade": "Upgrade tracker", "reviews": "Reviews", "generate": "Generate", "receive": "Receive", "inventory": "Inventory", "promos": "Promos", "audit": "Audit", "broadcast": "Broadcast", "retention": "Retention"}; /* TMC_PATCH42 */
+const TAB_SUBS = {"home": "At-a-glance view of the business", "users": "Search, manage, and gift plans", "orders": "Physical shipping and fulfillment", "leads": "Feedback emails captured on contact pages", "tags": "All tokens in the system", "analytics": "Revenue, scans, and growth metrics", "scans": "Raw scan history", "upgrade": "Users approaching day 30 auto-upgrade", "reviews": "Approve reviews, toggle visibility, feature on landing", "generate": "Create new NFC/QR token batches", "receive": "Verify stickers received from manufacturer", "inventory": "Stock levels by batch", "promos": "Gift plans, gift-activate tags, and promo codes", "audit": "Admin actions and system health", "broadcast": "Compose and send notifications to users", "retention": "Exit reasons, opt-in counts, lapsed emails"}; /* TMC_PATCH42 */
 // TMC_PATCH35B_GIFT_ADMIN: Gift Activate Tag form handler + gifts-in-flight list
 let p35bGiftsCache = [];
 
