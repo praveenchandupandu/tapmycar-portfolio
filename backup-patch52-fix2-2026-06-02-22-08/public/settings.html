@@ -656,13 +656,6 @@ async function submitPreDelete() {
     });
     if (probe.ok) {
       var probeData = await probe.json();
-      /* TMC_PATCH52_FIX2: while we're already here, capture email/name
-         for the post-delete newsletter screen. This is the EARLIEST point
-         where we know the user object is fresh from DB. */
-      try {
-        window.__tmcDelEmail = (probeData && probeData.user && probeData.user.email) || window.__tmcDelEmail || '';
-        window.__tmcDelName  = (probeData && probeData.user && probeData.user.name)  || window.__tmcDelName  || '';
-      } catch (e) {}
       var alreadyShown = probeData && probeData.user && probeData.user.retention_offer_shown_at;
       if (!alreadyShown) {
         __tmcPreDeleteState = { reasonCode: reasonCode, reasonText: reasonText, consent: consent };
