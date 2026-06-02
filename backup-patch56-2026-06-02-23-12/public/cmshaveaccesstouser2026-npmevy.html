@@ -1121,6 +1121,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
     <button class="sb-item" data-tab="retention" onclick="navTo('retention')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span>Retention</span></button><!-- TMC_PATCH42 -->
     <button class="sb-item" data-tab="refunds" onclick="navTo('refunds')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>Refunds</span><span id="refunds-nav-count" style="display:none;margin-left:auto;background:#DC2626;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px"></span></button><!-- TMC_PATCH53_ADMIN -->
     <button class="sb-item" data-tab="newsletter" onclick="navTo('newsletter')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M22 6l-10 7L2 6"/></svg><span>Newsletter</span></button><!-- TMC_PATCH52 -->
+    <button class="sb-item" data-tab="announcements" onclick="navTo('announcements')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/><path d="M11 13l5-2"/></svg><span>Announcements</span></button><!-- TMC_PATCH55B -->
     </nav>
     <div class="sidebar-foot">
       <button class="sb-logout" onclick="adminLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Logout</span></button>
@@ -1671,6 +1672,51 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
         <div id="reviews-list"><div class="empty">Loading reviews...</div></div>
       </div>
 
+      <!-- TMC_PATCH55B Announcements panel -->
+      <div class="panel" id="panel-announcements">
+        <div class="section">
+          <div class="section-head">
+            <div class="section-title">Create announcement</div>
+            <span class="section-link" onclick="loadAnnouncements()" style="cursor:pointer">Refresh list</span>
+          </div>
+          <div style="font-size:12px;color:#6B7280;margin:6px 0 14px;line-height:1.5">Popup that appears in-app for users during the active date window. Dismissals are tracked  each user sees an announcement at most once.</div>
+          <div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:16px;margin-bottom:24px">
+            <div style="display:grid;grid-template-columns:1fr;gap:10px">
+              <div>
+                <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.04em">Title (optional)</label>
+                <input type="text" id="ann-title" maxlength="200" placeholder="e.g. New feature available" style="margin-top:4px;width:100%;border:1px solid #D1D5DB;border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;color:#111;background:#fff;-webkit-text-fill-color:#111">
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.04em">Body *</label>
+                <textarea id="ann-body" maxlength="2000" rows="3" placeholder="What do you want users to know?" style="margin-top:4px;width:100%;border:1px solid #D1D5DB;border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;resize:vertical;color:#111;background:#fff;-webkit-text-fill-color:#111"></textarea>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div>
+                  <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.04em">Start</label>
+                  <input type="datetime-local" id="ann-start" style="margin-top:4px;width:100%;border:1px solid #D1D5DB;border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;color:#111;background:#fff;-webkit-text-fill-color:#111">
+                </div>
+                <div>
+                  <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.04em">End</label>
+                  <input type="datetime-local" id="ann-end" style="margin-top:4px;width:100%;border:1px solid #D1D5DB;border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;color:#111;background:#fff;-webkit-text-fill-color:#111">
+                </div>
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.04em">Audience</label>
+                <select id="ann-audience" style="margin-top:4px;width:100%;border:1px solid #D1D5DB;border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;color:#111;background:#fff;-webkit-text-fill-color:#111">
+                  <option value="all">All users</option>
+                  <option value="existing">Existing users only (signed up before this announcement)</option>
+                </select>
+              </div>
+              <div id="ann-create-err" style="font-size:12px;color:#DC2626;min-height:16px"></div>
+              <button type="button" id="ann-create-btn" onclick="createAnnouncement()" style="width:100%;padding:12px;background:#FF6B00;color:#fff;border:0;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer">Create announcement</button>
+            </div>
+          </div>
+
+          <div style="font-weight:800;font-size:14px;margin-bottom:10px">All announcements</div>
+          <div id="ann-list" style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;overflow:hidden"></div>
+        </div>
+      </div>
+
       <!-- TMC_PATCH52 Newsletter panel -->
       <div class="panel" id="panel-newsletter">
         <div class="section">
@@ -1817,28 +1863,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
                 <input type="checkbox" id="bc-ch-sms" onchange="bcResetCount()"> SMS</label>
               <!-- TMC_PATCH60_INAPP_UI -->
               <label style="display:inline-flex;align-items:center;gap:6px;margin-right:18px;font-size:14px;font-weight:600;color:#374151;cursor:pointer">
-                <input type="checkbox" id="bc-ch-inapp" onchange="bcResetCount(); bcToggleInappOpts()"> In-app popup</label>
-              <!-- TMC_PATCH56: inapp-only options. Shown when In-app is checked. -->
-              <div id="bc-inapp-opts" style="display:none;margin:10px 0 0 24px;padding:12px 14px;border-left:3px solid #FF6B00;background:#FFF7ED;border-radius:0 9px 9px 0">
-                <div style="font-size:11px;font-weight:700;color:#9A3412;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px">In-app popup options</div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-                  <div>
-                    <label style="font-size:11px;color:#6B7280;display:block;margin-bottom:3px">Start</label>
-                    <input type="datetime-local" id="bc-inapp-start" class="bc-input" style="font-size:13px">
-                  </div>
-                  <div>
-                    <label style="font-size:11px;color:#6B7280;display:block;margin-bottom:3px">End</label>
-                    <input type="datetime-local" id="bc-inapp-end" class="bc-input" style="font-size:13px">
-                  </div>
-                </div>
-                <div>
-                  <label style="font-size:11px;color:#6B7280;display:block;margin-bottom:3px">Audience</label>
-                  <select id="bc-inapp-audience" class="bc-select" style="font-size:13px">
-                    <option value="all">All users</option>
-                    <option value="existing">Existing users only (signed up before this broadcast)</option>
-                  </select>
-                </div>
-              </div>
+                <input type="checkbox" id="bc-ch-inapp" onchange="bcResetCount()"> In-app popup</label>
               <div class="bc-note" style="margin-top:10px">
                 <b>Email</b> skips unsubscribed users and includes an unsubscribe link.
                 <b>Web push</b> reaches only users who enabled browser notifications.
@@ -3888,8 +3913,8 @@ function downloadFile(content, filename, mime) {
 </script>
 <script>
 // ─── NAV HELPERS (defined AFTER preserved script so our showTab wins) ──
-const TAB_TITLES = {"home": "Home", "users": "Users", "orders": "Orders", "leads": "Leads", "tags": "Tags", "analytics": "Analytics", "scans": "Scans", "upgrade": "Upgrade tracker", "reviews": "Reviews", "generate": "Generate", "receive": "Receive", "inventory": "Inventory", "promos": "Promos", "audit": "Audit", "broadcast": "Broadcast", "retention": "Retention", "refunds": "Refunds", "newsletter": "Newsletter"}; /* TMC_PATCH42 */
-const TAB_SUBS = {"home": "At-a-glance view of the business", "users": "Search, manage, and gift plans", "orders": "Physical shipping and fulfillment", "leads": "Feedback emails captured on contact pages", "tags": "All tokens in the system", "analytics": "Revenue, scans, and growth metrics", "scans": "Raw scan history", "upgrade": "Users approaching day 30 auto-upgrade", "reviews": "Approve reviews, toggle visibility, feature on landing", "generate": "Create new NFC/QR token batches", "receive": "Verify stickers received from manufacturer", "inventory": "Stock levels by batch", "promos": "Gift plans, gift-activate tags, and promo codes", "audit": "Admin actions and system health", "broadcast": "Compose and send notifications to users", "retention": "Exit reasons, opt-in counts, lapsed emails", "refunds": "Failed Stripe refund attempts needing manual review", "newsletter": "Post-deletion newsletter signups  export to CSV for Mailchimp/Beehiiv"}; /* TMC_PATCH42 */
+const TAB_TITLES = {"home": "Home", "users": "Users", "orders": "Orders", "leads": "Leads", "tags": "Tags", "analytics": "Analytics", "scans": "Scans", "upgrade": "Upgrade tracker", "reviews": "Reviews", "generate": "Generate", "receive": "Receive", "inventory": "Inventory", "promos": "Promos", "audit": "Audit", "broadcast": "Broadcast", "retention": "Retention", "refunds": "Refunds", "newsletter": "Newsletter", "announcements": "Announcements"}; /* TMC_PATCH42 */
+const TAB_SUBS = {"home": "At-a-glance view of the business", "users": "Search, manage, and gift plans", "orders": "Physical shipping and fulfillment", "leads": "Feedback emails captured on contact pages", "tags": "All tokens in the system", "analytics": "Revenue, scans, and growth metrics", "scans": "Raw scan history", "upgrade": "Users approaching day 30 auto-upgrade", "reviews": "Approve reviews, toggle visibility, feature on landing", "generate": "Create new NFC/QR token batches", "receive": "Verify stickers received from manufacturer", "inventory": "Stock levels by batch", "promos": "Gift plans, gift-activate tags, and promo codes", "audit": "Admin actions and system health", "broadcast": "Compose and send notifications to users", "retention": "Exit reasons, opt-in counts, lapsed emails", "refunds": "Failed Stripe refund attempts needing manual review", "newsletter": "Post-deletion newsletter signups  export to CSV for Mailchimp/Beehiiv", "announcements": "Create and manage in-app popup announcements"}; /* TMC_PATCH42 */
 
 /* TMC_PATCH53_FIX: refunds tab now shows BOTH failed and successful. */
 async function loadFailedRefunds() {
@@ -3996,6 +4021,153 @@ async function resolveRefund(orderId) {
     alert("Could not mark as resolved. Try again.");
   }
 }
+
+/* TMC_PATCH55B announcements tab logic */
+function annStatusBadge(status) {
+  const map = {
+    live:      { bg: "#D1FAE5", fg: "#065F46", text: "Live" },
+    scheduled: { bg: "#DBEAFE", fg: "#1E40AF", text: "Scheduled" },
+    expired:   { bg: "#F3F4F6", fg: "#6B7280", text: "Expired" },
+    disabled:  { bg: "#FEE2E2", fg: "#7F1D1D", text: "Disabled" }
+  };
+  const c = map[status] || map.disabled;
+  return '<span style="background:' + c.bg + ';color:' + c.fg + ';font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase">' + c.text + '</span>';
+}
+function annEscape(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+function setAnnCreateDefaults() {
+  const startEl = document.getElementById("ann-start");
+  const endEl   = document.getElementById("ann-end");
+  if (!startEl || !endEl) return;
+  /* If already set (e.g. user typed something), don't overwrite. */
+  if (startEl.value) return;
+  const now    = new Date();
+  const later  = new Date(now.getTime() + 14 * 86400000);
+  function toLocal(d) {
+    const pad = function (n) { return String(n).padStart(2, "0"); };
+    return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()) +
+           "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
+  }
+  startEl.value = toLocal(now);
+  endEl.value   = toLocal(later);
+}
+
+async function loadAnnouncements() {
+  const listEl = document.getElementById("ann-list");
+  if (!listEl) return;
+  listEl.innerHTML = '<div style="padding:18px;font-size:13px;color:#6B7280;text-align:center">Loading\u2026</div>';
+  try {
+    const res = await fetch("/api/admin-list-announcements");
+    if (!res.ok) throw new Error("admin auth required");
+    const d = await res.json();
+    const rows = (d && d.announcements) || [];
+    if (rows.length === 0) {
+      listEl.innerHTML = '<div style="padding:24px;font-size:13px;color:#6B7280;text-align:center">No announcements yet.</div>';
+      return;
+    }
+    listEl.innerHTML = rows.map(function (r, i) {
+      const border = (i < rows.length - 1) ? "border-bottom:1px solid #F3F4F6;" : "";
+      const titleHtml = r.title ? ('<b>' + annEscape(r.title) + '</b><br>') : "";
+      const bodyHtml = annEscape((r.body || "").slice(0, 200));
+      const start = r.start_date ? new Date(r.start_date).toLocaleDateString() : "?";
+      const end   = r.end_date   ? new Date(r.end_date).toLocaleDateString()   : "?";
+      const audLabel = (r.audience === "existing") ? "Existing users only" : "All users";
+      const actionBtn = r.active
+        ? '<button type="button" onclick="toggleAnnouncement(\'' + r.id + '\',false)" style="background:#FEE2E2;color:#7F1D1D;border:0;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">Disable</button>'
+        : '<button type="button" onclick="toggleAnnouncement(\'' + r.id + '\',true)" style="background:#D1FAE5;color:#065F46;border:0;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">Re-enable</button>';
+      return '<div style="padding:14px;' + border + '">' +
+        '<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:6px">' +
+          '<div style="flex:1;min-width:0;font-size:13px;color:#111;line-height:1.5">' + titleHtml + bodyHtml + '</div>' +
+          annStatusBadge(r.status) +
+        '</div>' +
+        '<div style="font-size:11px;color:#6B7280;margin-bottom:10px">' + start + ' \u2192 ' + end + ' \u00b7 ' + audLabel + ' \u00b7 ' + r.dismiss_count + ' dismissed' + '</div>' +
+        actionBtn +
+      '</div>';
+    }).join("");
+  } catch (e) {
+    listEl.innerHTML = '<div style="padding:18px;font-size:13px;color:#DC2626;text-align:center">Could not load announcements.</div>';
+  }
+}
+
+async function createAnnouncement() {
+  const titleEl = document.getElementById("ann-title");
+  const bodyEl  = document.getElementById("ann-body");
+  const startEl = document.getElementById("ann-start");
+  const endEl   = document.getElementById("ann-end");
+  const audEl   = document.getElementById("ann-audience");
+  const errEl   = document.getElementById("ann-create-err");
+  const btnEl   = document.getElementById("ann-create-btn");
+  if (errEl) errEl.textContent = "";
+
+  const body = (bodyEl && bodyEl.value || "").trim();
+  if (!body) { if (errEl) errEl.textContent = "Body is required"; return; }
+  const startVal = startEl && startEl.value;
+  const endVal   = endEl   && endEl.value;
+  if (!startVal || !endVal) { if (errEl) errEl.textContent = "Both start and end dates are required"; return; }
+  /* datetime-local values are local timezone strings without offset.
+     new Date() parses them as local time, which is what we want. */
+  const startIso = new Date(startVal).toISOString();
+  const endIso   = new Date(endVal).toISOString();
+  if (new Date(endIso).getTime() <= new Date(startIso).getTime()) {
+    if (errEl) errEl.textContent = "End must be after start"; return;
+  }
+
+  if (btnEl) { btnEl.disabled = true; btnEl.textContent = "Creating\u2026"; }
+  try {
+    const res = await fetch("/api/admin-create-announcement", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title:      (titleEl && titleEl.value || "").trim(),
+        body:       body,
+        start_date: startIso,
+        end_date:   endIso,
+        audience:   (audEl && audEl.value) || "all"
+      })
+    });
+    const data = await res.json();
+    if (data && data.ok) {
+      if (titleEl) titleEl.value = "";
+      if (bodyEl)  bodyEl.value  = "";
+      if (audEl)   audEl.value   = "all";
+      /* Re-prime defaults for the next create. */
+      if (startEl) startEl.value = "";
+      if (endEl)   endEl.value   = "";
+      setAnnCreateDefaults();
+      loadAnnouncements();
+    } else {
+      if (errEl) errEl.textContent = (data && data.error) || "Could not create";
+    }
+  } catch (e) {
+    if (errEl) errEl.textContent = "Network error";
+  }
+  if (btnEl) { btnEl.disabled = false; btnEl.textContent = "Create announcement"; }
+}
+
+async function toggleAnnouncement(id, active) {
+  const verb = active ? "re-enable" : "disable";
+  if (!confirm(verb.charAt(0).toUpperCase() + verb.slice(1) + " this announcement?")) return;
+  try {
+    const res = await fetch("/api/admin-disable-announcement", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: id, active: !!active })
+    });
+    if (!res.ok) throw new Error();
+    loadAnnouncements();
+  } catch (e) {
+    alert("Could not " + verb + ". Try again.");
+  }
+}
+
+(function () {
+  if (window.__tmcAnnInit) return;
+  window.__tmcAnnInit = true;
+  document.addEventListener("click", function (e) {
+    const btn = e.target.closest && e.target.closest("[data-tab=\"announcements\"]");
+    if (btn) setTimeout(function () { setAnnCreateDefaults(); loadAnnouncements(); }, 20);
+  });
+})();
 
 /* TMC_PATCH52 newsletter tab loader */
 async function loadNewsletter() {
@@ -5593,37 +5765,6 @@ async function loadRetentionOfferStats() {
     if (inappEl && inappEl.checked) out.push("inapp");
     return out;
   }
-
-  /* TMC_PATCH56: inapp-options visibility + payload helper. */
-  window.bcToggleInappOpts = function () {
-    var box = document.getElementById("bc-inapp-opts");
-    var cb  = document.getElementById("bc-ch-inapp");
-    if (!box || !cb) return;
-    box.style.display = cb.checked ? "block" : "none";
-    if (cb.checked) {
-      var startEl = document.getElementById("bc-inapp-start");
-      var endEl   = document.getElementById("bc-inapp-end");
-      function toLocal(d) {
-        var pad = function (n) { return String(n).padStart(2, "0"); };
-        return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()) +
-               "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
-      }
-      if (startEl && !startEl.value) startEl.value = toLocal(new Date());
-      if (endEl   && !endEl.value)   endEl.value   = toLocal(new Date(Date.now() + 14*86400000));
-    }
-  };
-  window.bcInappOpts = function () {
-    var cb = document.getElementById("bc-ch-inapp");
-    if (!cb || !cb.checked) return null;
-    var s = document.getElementById("bc-inapp-start");
-    var e = document.getElementById("bc-inapp-end");
-    var a = document.getElementById("bc-inapp-audience");
-    var out = {};
-    try { if (s && s.value) out.inapp_start_date = new Date(s.value).toISOString(); } catch (x) {}
-    try { if (e && e.value) out.inapp_end_date   = new Date(e.value).toISOString(); } catch (x) {}
-    out.inapp_audience = (a && a.value) || "all";
-    return out;
-  };
   var CH_LABEL = { email: "Email", push: "Web push", sms: "SMS", inapp: "In-app popup" };
 
   function bcApi(payload){
@@ -5641,7 +5782,7 @@ async function loadRetentionOfferStats() {
     if (!channels.length) { out.textContent = "Select at least one channel."; return; }
     var btn = document.getElementById("bc-preview-btn");
     btn.disabled = true; out.innerHTML = "Checking…";
-    bcApi(Object.assign({ channels: channels, dry_run: true, recipients: bcRecipients() }, (typeof bcInappOpts === "function" && bcInappOpts()) || {}))
+    bcApi({ channels: channels, dry_run: true, recipients: bcRecipients() })
       .then(function(d){
         btn.disabled = false;
         if (d && d.success) {
@@ -5683,7 +5824,7 @@ async function loadRetentionOfferStats() {
 
     var btn = document.getElementById("bc-send-btn");
     btn.disabled = true; btn.textContent = "Sending…";
-    bcApi(Object.assign({ channels: channels, subject: subject, body: body, recipients: rcp }, (typeof bcInappOpts === "function" && bcInappOpts()) || {}))
+    bcApi({ channels: channels, subject: subject, body: body, recipients: rcp })
       .then(function(d){
         btn.disabled = false; btn.textContent = "Send broadcast";
         if (d && d.success) {

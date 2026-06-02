@@ -384,20 +384,9 @@ module.exports = async function handler(req, res) {
       // given - so a no-subject popup shows no heading. Email keeps the
       // "TapMyCar Update" fallback separately; that does not come here.
       const annTitle = (subject && String(subject).trim()) ? String(subject).trim() : '';
-      /* TMC_PATCH56: read date window + audience from request. Defaults
-         keep behavior backward-compatible (start=now, end=now+14d, all). */
-      const _nowMs56 = Date.now();
-      let _startMs56 = body.inapp_start_date ? Date.parse(body.inapp_start_date) : _nowMs56;
-      let _endMs56   = body.inapp_end_date   ? Date.parse(body.inapp_end_date)   : (_nowMs56 + 14*86400000);
-      if (isNaN(_startMs56)) _startMs56 = _nowMs56;
-      if (isNaN(_endMs56) || _endMs56 <= _startMs56) _endMs56 = _startMs56 + 14*86400000;
-      const _aud56 = (body.inapp_audience === 'existing') ? 'existing' : 'all';
       const { error: annErr } = await supabase.from('announcements').insert({
         title: annTitle, body: String(body.body),
-        active: true, created_by: 'admin', broadcast_id: broadcastId,
-        start_date: new Date(_startMs56).toISOString(),
-        end_date:   new Date(_endMs56).toISOString(),
-        audience:   _aud56
+        active: true, created_by: 'admin', broadcast_id: broadcastId
       });
       if (annErr) console.error('announcement insert failed:', annErr.message);
       else announcementCreated = true;
