@@ -4128,7 +4128,11 @@ async function vidUpload() {
   pl.textContent = 'Extracting thumbnail\u2026'; pb.style.width = '5%';
 
   try {
+    /* __tmcThumbRequired: insist on a usable thumbnail before proceeding. */
     var thumbBlob = await extractThumb(file);
+    if (!thumbBlob) {
+      throw new Error('Could not read a thumbnail from this video. Please upload a thumbnail image (jpg/png) in the field above and try again.');
+    }
     var thumbExt = thumbBlob ? 'jpg' : null;
 
     pl.textContent = 'Preparing upload\u2026'; pb.style.width = '15%';
