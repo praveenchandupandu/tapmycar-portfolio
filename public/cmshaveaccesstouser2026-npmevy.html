@@ -1121,6 +1121,8 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
     <button class="sb-item" data-tab="retention" onclick="navTo('retention')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span>Retention</span></button><!-- TMC_PATCH42 -->
     <button class="sb-item" data-tab="refunds" onclick="navTo('refunds')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>Refunds</span><span id="refunds-nav-count" style="display:none;margin-left:auto;background:#DC2626;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px"></span></button><!-- TMC_PATCH53_ADMIN -->
     <button class="sb-item" data-tab="newsletter" onclick="navTo('newsletter')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M22 6l-10 7L2 6"/></svg><span>Newsletter</span></button><!-- TMC_PATCH52 -->
+    <button class="sb-item" data-tab="videos" onclick="navTo('videos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg><span>Videos</span></button><!-- TMC_VIDEOS -->
+
     </nav>
     <div class="sidebar-foot">
       <button class="sb-logout" onclick="adminLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Logout</span></button>
@@ -1670,6 +1672,75 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 
         <div id="reviews-list"><div class="empty">Loading reviews...</div></div>
       </div>
+
+      <!-- TMC_VIDEOS Videos admin panel -->
+      <div class="panel" id="panel-videos">
+        <div class="section">
+          <div class="section-head">
+            <div class="section-title">Upload video</div>
+            <span class="section-link" onclick="vidLoadList()" style="cursor:pointer">Refresh list</span>
+          </div>
+          <div style="font-size:12px;color:#6B7280;margin:6px 0 14px;line-height:1.5">Vertical (portrait 9:16) videos work best. Max 100 MB. Thumbnail auto-extracted from the first frame, or upload your own.</div>
+          <div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:16px;margin-bottom:24px">
+            <div style="display:grid;grid-template-columns:1fr;gap:10px">
+              <div>
+                <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.04em">Kind</label>
+                <select id="vid-kind" style="margin-top:4px;width:100%;border:1px solid #D1D5DB;border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;color:#111;background:#fff;-webkit-text-fill-color:#111">
+                  <option value="demo">Demo video</option>
+                  <option value="review">Customer review</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.04em">Title *</label>
+                <input type="text" id="vid-title" maxlength="200" placeholder="e.g. How NFC works" style="margin-top:4px;width:100%;border:1px solid #D1D5DB;border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;color:#111;background:#fff;-webkit-text-fill-color:#111">
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.04em">Caption</label>
+                <textarea id="vid-caption" maxlength="500" rows="2" placeholder="Short description shown on the player overlay" style="margin-top:4px;width:100%;border:1px solid #D1D5DB;border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;resize:vertical;color:#111;background:#fff;-webkit-text-fill-color:#111"></textarea>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div>
+                  <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.04em">Creator name</label>
+                  <input type="text" id="vid-cname" maxlength="100" value="TapMyCar" style="margin-top:4px;width:100%;border:1px solid #D1D5DB;border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;color:#111;background:#fff;-webkit-text-fill-color:#111">
+                </div>
+                <div>
+                  <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.04em">Sub-label</label>
+                  <input type="text" id="vid-csub" maxlength="200" value="Official  ·  Verified" style="margin-top:4px;width:100%;border:1px solid #D1D5DB;border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;color:#111;background:#fff;-webkit-text-fill-color:#111">
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 2fr;gap:10px">
+                <div>
+                  <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.04em">CTA label</label>
+                  <input type="text" id="vid-cta-label" maxlength="80" placeholder="Get yours" style="margin-top:4px;width:100%;border:1px solid #D1D5DB;border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;color:#111;background:#fff;-webkit-text-fill-color:#111">
+                </div>
+                <div>
+                  <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.04em">CTA link</label>
+                  <input type="text" id="vid-cta-href" maxlength="500" placeholder="https://tapmycar.io/pricing.html" style="margin-top:4px;width:100%;border:1px solid #D1D5DB;border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;color:#111;background:#fff;-webkit-text-fill-color:#111">
+                </div>
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.04em">Video file (mp4, webm, mov  max 100 MB) *</label>
+                <input type="file" id="vid-file" accept="video/mp4,video/webm,video/quicktime" style="margin-top:6px;width:100%;font-size:13px">
+              </div>
+              <div id="vid-preview-wrap" style="display:none">
+                <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.04em">Preview</label>
+                <video id="vid-preview" controls playsinline muted style="margin-top:6px;width:100%;max-width:240px;border-radius:12px;background:#000"></video>
+              </div>
+              <div id="vid-progress-wrap" style="display:none">
+                <div style="font-size:11px;color:#6B7280;margin-bottom:4px" id="vid-progress-label">Uploading...</div>
+                <div style="height:6px;background:#F3F4F6;border-radius:3px;overflow:hidden"><div id="vid-progress-bar" style="height:100%;width:0%;background:#FF6B00;transition:width .2s ease"></div></div>
+              </div>
+              <div id="vid-err" style="font-size:12px;color:#DC2626;min-height:16px"></div>
+              <button type="button" id="vid-upload-btn" onclick="vidUpload()" style="width:100%;padding:12px;background:#FF6B00;color:#fff;border:0;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer">Upload video</button>
+            </div>
+          </div>
+
+          <div style="font-weight:800;font-size:14px;margin-bottom:10px">All videos</div>
+          <div id="vid-list" style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;overflow:hidden"></div>
+        </div>
+      </div>
+
+      <!-- /TMC_VIDEOS -->
 
       <!-- TMC_PATCH52 Newsletter panel -->
       <div class="panel" id="panel-newsletter">
@@ -3888,8 +3959,8 @@ function downloadFile(content, filename, mime) {
 </script>
 <script>
 // ─── NAV HELPERS (defined AFTER preserved script so our showTab wins) ──
-const TAB_TITLES = {"home": "Home", "users": "Users", "orders": "Orders", "leads": "Leads", "tags": "Tags", "analytics": "Analytics", "scans": "Scans", "upgrade": "Upgrade tracker", "reviews": "Reviews", "generate": "Generate", "receive": "Receive", "inventory": "Inventory", "promos": "Promos", "audit": "Audit", "broadcast": "Broadcast", "retention": "Retention", "refunds": "Refunds", "newsletter": "Newsletter"}; /* TMC_PATCH42 */
-const TAB_SUBS = {"home": "At-a-glance view of the business", "users": "Search, manage, and gift plans", "orders": "Physical shipping and fulfillment", "leads": "Feedback emails captured on contact pages", "tags": "All tokens in the system", "analytics": "Revenue, scans, and growth metrics", "scans": "Raw scan history", "upgrade": "Users approaching day 30 auto-upgrade", "reviews": "Approve reviews, toggle visibility, feature on landing", "generate": "Create new NFC/QR token batches", "receive": "Verify stickers received from manufacturer", "inventory": "Stock levels by batch", "promos": "Gift plans, gift-activate tags, and promo codes", "audit": "Admin actions and system health", "broadcast": "Compose and send notifications to users", "retention": "Exit reasons, opt-in counts, lapsed emails", "refunds": "Failed Stripe refund attempts needing manual review", "newsletter": "Post-deletion newsletter signups  export to CSV for Mailchimp/Beehiiv"}; /* TMC_PATCH42 */
+const TAB_TITLES = {"home": "Home", "users": "Users", "orders": "Orders", "leads": "Leads", "tags": "Tags", "analytics": "Analytics", "scans": "Scans", "upgrade": "Upgrade tracker", "reviews": "Reviews", "generate": "Generate", "receive": "Receive", "inventory": "Inventory", "promos": "Promos", "audit": "Audit", "broadcast": "Broadcast", "retention": "Retention", "refunds": "Refunds", "newsletter": "Newsletter", "videos": "Videos"}; /* TMC_PATCH42 */
+const TAB_SUBS = {"home": "At-a-glance view of the business", "users": "Search, manage, and gift plans", "orders": "Physical shipping and fulfillment", "leads": "Feedback emails captured on contact pages", "tags": "All tokens in the system", "analytics": "Revenue, scans, and growth metrics", "scans": "Raw scan history", "upgrade": "Users approaching day 30 auto-upgrade", "reviews": "Approve reviews, toggle visibility, feature on landing", "generate": "Create new NFC/QR token batches", "receive": "Verify stickers received from manufacturer", "inventory": "Stock levels by batch", "promos": "Gift plans, gift-activate tags, and promo codes", "audit": "Admin actions and system health", "broadcast": "Compose and send notifications to users", "retention": "Exit reasons, opt-in counts, lapsed emails", "refunds": "Failed Stripe refund attempts needing manual review", "newsletter": "Post-deletion newsletter signups  export to CSV for Mailchimp/Beehiiv", "videos": "Upload and manage demo + customer review videos for dashboard and landing"}; /* TMC_PATCH42 */
 
 /* TMC_PATCH53_FIX: refunds tab now shows BOTH failed and successful. */
 async function loadFailedRefunds() {
@@ -3996,6 +4067,188 @@ async function resolveRefund(orderId) {
     alert("Could not mark as resolved. Try again.");
   }
 }
+
+
+/* TMC_VIDEOS admin tab logic */
+async function vidPreviewFile() {
+  var file = document.getElementById('vid-file').files[0];
+  var wrap = document.getElementById('vid-preview-wrap');
+  var preview = document.getElementById('vid-preview');
+  if (!file) { wrap.style.display = 'none'; return; }
+  preview.src = URL.createObjectURL(file);
+  wrap.style.display = '';
+}
+async function extractThumb(videoFile) {
+  return new Promise(function (resolve, reject) {
+    var v = document.createElement('video');
+    v.preload = 'metadata'; v.muted = true; v.playsInline = true;
+    v.src = URL.createObjectURL(videoFile);
+    v.addEventListener('loadeddata', function () {
+      var seekTo = Math.min(0.5, (v.duration || 1) * 0.1);
+      try { v.currentTime = seekTo; } catch (e) {}
+    });
+    v.addEventListener('seeked', function () {
+      var canvas = document.createElement('canvas');
+      canvas.width  = Math.min(720, v.videoWidth);
+      canvas.height = Math.round(canvas.width * (v.videoHeight / v.videoWidth));
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(function (blob) { resolve(blob); }, 'image/jpeg', 0.85);
+    });
+    v.addEventListener('error', function () { resolve(null); });
+    setTimeout(function () { resolve(null); }, 8000);
+  });
+}
+async function vidUpload() {
+  var btn = document.getElementById('vid-upload-btn');
+  var err = document.getElementById('vid-err');
+  var pw  = document.getElementById('vid-progress-wrap');
+  var pb  = document.getElementById('vid-progress-bar');
+  var pl  = document.getElementById('vid-progress-label');
+  err.textContent = '';
+
+  var kind   = document.getElementById('vid-kind').value;
+  var title  = document.getElementById('vid-title').value.trim();
+  var file   = document.getElementById('vid-file').files[0];
+  if (!title) { err.textContent = 'Title is required'; return; }
+  if (!file)  { err.textContent = 'Pick a video file'; return; }
+  if (file.size > 100 * 1024 * 1024) { err.textContent = 'File is over 100 MB'; return; }
+  var ext = (file.name.split('.').pop() || 'mp4').toLowerCase();
+  if (!['mp4','webm','mov'].includes(ext)) { err.textContent = 'Use mp4, webm, or mov'; return; }
+
+  btn.disabled = true; btn.textContent = 'Uploading\u2026';
+  pw.style.display = '';
+  pl.textContent = 'Extracting thumbnail\u2026'; pb.style.width = '5%';
+
+  try {
+    var thumbBlob = await extractThumb(file);
+    var thumbExt = thumbBlob ? 'jpg' : null;
+
+    pl.textContent = 'Preparing upload\u2026'; pb.style.width = '15%';
+    var prepRes = await fetch('/api/admin-video-prepare-upload', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ video_ext: ext, thumb_ext: thumbExt })
+    });
+    var prep = await prepRes.json();
+    if (!prepRes.ok || !prep.ok) throw new Error(prep.error || 'Could not get upload URL');
+
+    pl.textContent = 'Uploading video\u2026';
+    await uploadToSignedUrl(prep.video.signed_url, file, function (pct) {
+      pb.style.width = (20 + pct * 0.6) + '%';
+    });
+
+    var thumbUrl = null;
+    if (thumbBlob && prep.thumb) {
+      pl.textContent = 'Uploading thumbnail\u2026'; pb.style.width = '82%';
+      await uploadToSignedUrl(prep.thumb.signed_url, thumbBlob, function () {});
+      thumbUrl = prep.thumb.public_url;
+    }
+
+    pl.textContent = 'Saving\u2026'; pb.style.width = '92%';
+    var reg = await fetch('/api/admin-video-register', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        kind: kind, title: title,
+        caption: document.getElementById('vid-caption').value.trim(),
+        video_url: prep.video.public_url,
+        thumbnail_url: thumbUrl,
+        poster_initial: (document.getElementById('vid-cname').value || 'T').trim().charAt(0),
+        creator_name: document.getElementById('vid-cname').value.trim() || 'TapMyCar',
+        creator_sub: document.getElementById('vid-csub').value.trim(),
+        cta_label: document.getElementById('vid-cta-label').value.trim(),
+        cta_href: document.getElementById('vid-cta-href').value.trim()
+      })
+    });
+    var regData = await reg.json();
+    if (!reg.ok || !regData.ok) throw new Error(regData.error || 'Could not save');
+
+    pb.style.width = '100%'; pl.textContent = 'Done!';
+    setTimeout(function () {
+      pw.style.display = 'none'; pb.style.width = '0%';
+      document.getElementById('vid-title').value = '';
+      document.getElementById('vid-caption').value = '';
+      document.getElementById('vid-cta-label').value = '';
+      document.getElementById('vid-cta-href').value = '';
+      document.getElementById('vid-file').value = '';
+      document.getElementById('vid-preview-wrap').style.display = 'none';
+      btn.disabled = false; btn.textContent = 'Upload video';
+      vidLoadList();
+    }, 500);
+  } catch (e) {
+    err.textContent = e.message || 'Upload failed';
+    pw.style.display = 'none'; pb.style.width = '0%';
+    btn.disabled = false; btn.textContent = 'Upload video';
+  }
+}
+function uploadToSignedUrl(url, blob, onProgress) {
+  return new Promise(function (resolve, reject) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('PUT', url);
+    xhr.setRequestHeader('Content-Type', blob.type || 'application/octet-stream');
+    xhr.upload.onprogress = function (e) { if (e.lengthComputable) onProgress(e.loaded / e.total); };
+    xhr.onload = function () {
+      if (xhr.status >= 200 && xhr.status < 300) resolve();
+      else reject(new Error('Upload failed (' + xhr.status + ')'));
+    };
+    xhr.onerror = function () { reject(new Error('Network error')); };
+    xhr.send(blob);
+  });
+}
+async function vidLoadList() {
+  var listEl = document.getElementById('vid-list'); if (!listEl) return;
+  listEl.innerHTML = '<div style="padding:18px;font-size:13px;color:#6B7280;text-align:center">Loading\u2026</div>';
+  try {
+    var res = await fetch('/api/admin-list-videos');
+    var d = await res.json();
+    var rows = (d && d.videos) || [];
+    if (rows.length === 0) { listEl.innerHTML = '<div style="padding:24px;font-size:13px;color:#6B7280;text-align:center">No videos yet.</div>'; return; }
+    listEl.innerHTML = rows.map(function (r, i) {
+      var border = (i < rows.length - 1) ? 'border-bottom:1px solid #F3F4F6;' : '';
+      var thumb = r.thumbnail_url
+        ? '<img src="' + r.thumbnail_url + '" style="width:60px;height:106px;object-fit:cover;border-radius:8px;background:#000">'
+        : '<div style="width:60px;height:106px;background:' + (r.poster_color || '#FF6B00') + ';border-radius:8px"></div>';
+      var statusBadge = r.active
+        ? '<span style="background:#D1FAE5;color:#065F46;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase">Live</span>'
+        : '<span style="background:#FEE2E2;color:#7F1D1D;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase">Disabled</span>';
+      var kindBadge = '<span style="background:#F3F4F6;color:#6B7280;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase">' + r.kind + '</span>';
+      var actionBtn = r.active
+        ? '<button type="button" onclick="vidToggle(\'' + r.id + '\', false)" style="background:#FEE2E2;color:#7F1D1D;border:0;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">Disable</button>'
+        : '<button type="button" onclick="vidToggle(\'' + r.id + '\', true)" style="background:#D1FAE5;color:#065F46;border:0;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">Re-enable</button>';
+      var delBtn = '<button type="button" onclick="vidDelete(\'' + r.id + '\')" style="background:transparent;color:#DC2626;border:0;padding:6px 8px;font-size:11px;font-weight:700;cursor:pointer;margin-left:6px">Delete</button>';
+      return '<div style="display:flex;gap:12px;padding:12px 14px;' + border + '">' +
+        thumb +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' + kindBadge + statusBadge + '</div>' +
+          '<div style="font-size:13px;font-weight:700;color:#111;margin-bottom:3px">' + (r.title || '') + '</div>' +
+          '<div style="font-size:11px;color:#6B7280;margin-bottom:8px">' + (r.caption || '') + '</div>' +
+          '<div>' + actionBtn + delBtn + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } catch (e) {
+    listEl.innerHTML = '<div style="padding:18px;font-size:13px;color:#DC2626;text-align:center">Could not load videos.</div>';
+  }
+}
+async function vidToggle(id, active) {
+  await fetch('/api/admin-toggle-video', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: id, active: active }) });
+  vidLoadList();
+}
+async function vidDelete(id) {
+  if (!confirm('Delete this video? (cannot be undone)')) return;
+  await fetch('/api/admin-toggle-video', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: id, action: 'delete' }) });
+  vidLoadList();
+}
+(function () {
+  if (window.__tmcVidInit) return;
+  window.__tmcVidInit = true;
+  document.addEventListener('change', function (e) {
+    if (e.target && e.target.id === 'vid-file') vidPreviewFile();
+  });
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest && e.target.closest('[data-tab="videos"]');
+    if (btn) setTimeout(vidLoadList, 20);
+  });
+})();
 
 /* TMC_PATCH52 newsletter tab loader */
 async function loadNewsletter() {

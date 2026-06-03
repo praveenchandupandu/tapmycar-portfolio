@@ -1,0 +1,45 @@
+/* ============================================================================
+ * TapMyCar  Patch Videos-A  backend (storage + table + 5 endpoints)
+ * Run from project root:  node tapmycar-patch-videos-a-backend.js
+ *
+ * MUST run patch-videos-migration.sql in Supabase FIRST.
+ * ==========================================================================*/
+'use strict';
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+
+const STAMP = new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-');
+const BACKUP_DIR = 'backup-videos-a-' + STAMP;
+fs.mkdirSync(BACKUP_DIR, { recursive: true });
+
+const files = {
+  "api/admin-video-prepare-upload.js": "// TMC_VIDEOS prepare signed upload URLs for video + thumbnail.\nconst { createClient } = require('@supabase/supabase-js');\nconst { resolveAdmin } = require('./_admin-auth');\nconst crypto = require('crypto');\n\nconst supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);\n\nmodule.exports = async function handler(req, res) {\n  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });\n  const admin = await resolveAdmin(req);\n  if (!admin) return res.status(401).json({ error: 'Unauthorized' });\n\n  const { video_ext, thumb_ext } = req.body || {};\n  const okVideoExt = ['mp4','webm','mov'].includes(String(video_ext || '').toLowerCase());\n  const okThumbExt = ['jpg','jpeg','png','webp'].includes(String(thumb_ext || '').toLowerCase());\n  if (!okVideoExt) return res.status(400).json({ error: 'video_ext must be mp4/webm/mov' });\n\n  const id = crypto.randomBytes(8).toString('hex');\n  const videoPath = 'videos/' + id + '.' + String(video_ext).toLowerCase();\n  const thumbPath = okThumbExt ? ('thumbs/' + id + '.' + String(thumb_ext).toLowerCase()) : null;\n\n  try {\n    const { data: vSign, error: vErr } = await supabase.storage\n      .from('videos')\n      .createSignedUploadUrl(videoPath);\n    if (vErr) throw vErr;\n    let tSign = null;\n    if (thumbPath) {\n      const { data, error } = await supabase.storage\n        .from('videos')\n        .createSignedUploadUrl(thumbPath);\n      if (error) throw error;\n      tSign = data;\n    }\n    const baseUrl = (process.env.SUPABASE_URL || '').replace(/\\/$/, '') + '/storage/v1/object/public/videos/';\n    return res.json({\n      ok: true,\n      video: { signed_url: vSign.signedUrl, token: vSign.token, path: videoPath, public_url: baseUrl + videoPath },\n      thumb: tSign ? { signed_url: tSign.signedUrl, token: tSign.token, path: thumbPath, public_url: baseUrl + thumbPath } : null\n    });\n  } catch (e) {\n    return res.status(500).json({ error: e.message || 'Could not create upload URL' });\n  }\n};\n",
+  "api/admin-video-register.js": "// TMC_VIDEOS register video row after upload.\nconst { createClient } = require('@supabase/supabase-js');\nconst { resolveAdmin } = require('./_admin-auth');\nconst supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);\n\nmodule.exports = async function handler(req, res) {\n  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });\n  const admin = await resolveAdmin(req);\n  if (!admin) return res.status(401).json({ error: 'Unauthorized' });\n\n  const b = req.body || {};\n  if (!b.kind || !['demo','review'].includes(b.kind)) return res.status(400).json({ error: 'kind required' });\n  if (!b.title) return res.status(400).json({ error: 'title required' });\n  if (!b.video_url) return res.status(400).json({ error: 'video_url required' });\n\n  const { data: maxRow } = await supabase\n    .from('videos')\n    .select('sort_order')\n    .eq('kind', b.kind)\n    .order('sort_order', { ascending: false })\n    .limit(1)\n    .maybeSingle();\n  const nextOrder = ((maxRow && maxRow.sort_order) || 0) + 10;\n\n  const { data, error } = await supabase.from('videos').insert({\n    kind:           b.kind,\n    title:          String(b.title).slice(0, 200),\n    caption:        b.caption ? String(b.caption).slice(0, 500) : null,\n    video_url:      String(b.video_url).slice(0, 1000),\n    thumbnail_url:  b.thumbnail_url ? String(b.thumbnail_url).slice(0, 1000) : null,\n    poster_initial: b.poster_initial ? String(b.poster_initial).slice(0, 2).toUpperCase() : 'T',\n    poster_color:   b.poster_color || '#FF6B00',\n    creator_name:   b.creator_name ? String(b.creator_name).slice(0, 100) : 'TapMyCar',\n    creator_sub:    b.creator_sub  ? String(b.creator_sub).slice(0, 200)  : 'Official  ·  Verified',\n    cta_label:      b.cta_label    ? String(b.cta_label).slice(0, 80)    : null,\n    cta_href:       b.cta_href     ? String(b.cta_href).slice(0, 500)    : null,\n    sort_order:     nextOrder,\n    active:         true\n  }).select('id').single();\n\n  if (error) return res.status(500).json({ error: error.message });\n  return res.json({ ok: true, id: data && data.id });\n};\n",
+  "api/get-videos.js": "// TMC_VIDEOS public endpoint  list active videos by kind.\nconst { createClient } = require('@supabase/supabase-js');\nconst supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);\n\nmodule.exports = async function handler(req, res) {\n  const kind = String((req.query && req.query.kind) || '').toLowerCase();\n  if (!['demo','review'].includes(kind)) return res.status(400).json({ error: 'kind=demo|review required' });\n\n  const { data, error } = await supabase\n    .from('videos')\n    .select('id, kind, title, caption, video_url, thumbnail_url, poster_initial, poster_color, creator_name, creator_sub, cta_label, cta_href, views, likes')\n    .eq('kind', kind)\n    .eq('active', true)\n    .order('sort_order', { ascending: true })\n    .limit(20);\n\n  if (error) return res.status(500).json({ error: error.message });\n  res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');\n  return res.json({ ok: true, videos: data || [] });\n};\n",
+  "api/admin-list-videos.js": "// TMC_VIDEOS admin list (active + disabled).\nconst { createClient } = require('@supabase/supabase-js');\nconst { resolveAdmin } = require('./_admin-auth');\nconst supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);\n\nmodule.exports = async function handler(req, res) {\n  const admin = await resolveAdmin(req);\n  if (!admin) return res.status(401).json({ error: 'Unauthorized' });\n\n  const kind = (req.query && req.query.kind) ? String(req.query.kind) : null;\n  let q = supabase.from('videos')\n    .select('*')\n    .order('kind', { ascending: true })\n    .order('sort_order', { ascending: true });\n  if (kind && ['demo','review'].includes(kind)) q = q.eq('kind', kind);\n\n  const { data, error } = await q;\n  if (error) return res.status(500).json({ error: error.message });\n  return res.json({ ok: true, videos: data || [] });\n};\n",
+  "api/admin-toggle-video.js": "// TMC_VIDEOS admin toggle active or delete.\nconst { createClient } = require('@supabase/supabase-js');\nconst { resolveAdmin } = require('./_admin-auth');\nconst supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);\n\nmodule.exports = async function handler(req, res) {\n  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });\n  const admin = await resolveAdmin(req);\n  if (!admin) return res.status(401).json({ error: 'Unauthorized' });\n\n  const { id, action, active, sort_order } = req.body || {};\n  if (!id) return res.status(400).json({ error: 'id required' });\n\n  if (action === 'delete') {\n    const { error } = await supabase.from('videos').delete().eq('id', id);\n    if (error) return res.status(500).json({ error: error.message });\n    return res.json({ ok: true, deleted: true });\n  }\n\n  const patch = {};\n  if (typeof active === 'boolean') patch.active = active;\n  if (typeof sort_order === 'number') patch.sort_order = sort_order;\n  if (Object.keys(patch).length === 0) return res.status(400).json({ error: 'nothing to update' });\n  patch.updated_at = new Date().toISOString();\n\n  const { error } = await supabase.from('videos').update(patch).eq('id', id);\n  if (error) return res.status(500).json({ error: error.message });\n  return res.json({ ok: true });\n};\n"
+};
+
+let changed = 0;
+for (const fp of Object.keys(files)) {
+  if (fs.existsSync(fp) && fs.readFileSync(fp, 'utf8').indexOf('TMC_VIDEOS') !== -1) {
+    console.log(fp + ': skip (already present)');
+    continue;
+  }
+  if (fs.existsSync(fp)) {
+    fs.mkdirSync(path.join(BACKUP_DIR, 'api'), { recursive: true });
+    fs.copyFileSync(fp, path.join(BACKUP_DIR, fp));
+  }
+  fs.writeFileSync(fp, files[fp], 'utf8');
+  execSync('node --check "' + fp + '"', { stdio: 'pipe' });
+  console.log(fp + ': written, node --check OK');
+  changed++;
+}
+
+console.log('\nDone. Files written: ' + changed);
+console.log('\nNEXT STEPS:');
+console.log('  1. Run patch-videos-migration.sql in Supabase first');
+console.log('  2. git add -A');
+console.log('  3. git commit -m "Patch Videos A: backend (storage + 5 endpoints)"');
+console.log('  4. git push');
