@@ -21,6 +21,10 @@
       "destination": "/register.html?ref=:code"
     },
     {
+      "source": "/v/:id",
+      "destination": "/api/v?id=:id"
+    },
+    {
       "source": "/api/:path*",
       "destination": "/api/:path*"
     }

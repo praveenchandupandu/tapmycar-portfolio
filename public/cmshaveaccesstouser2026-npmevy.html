@@ -1722,6 +1722,13 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
                 <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.04em">Video file (mp4, webm, mov  max 100 MB) *</label>
                 <input type="file" id="vid-file" accept="video/mp4,video/webm,video/quicktime" style="margin-top:6px;width:100%;font-size:13px">
               </div>
+              <div>
+                <!-- TMC_VIDEOS_EDIT -->
+                <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.04em">Thumbnail image (jpg/png, optional)</label>
+                <input type="file" id="vid-thumb-file" accept="image/jpeg,image/png,image/webp" style="margin-top:6px;width:100%;font-size:13px">
+                <div style="font-size:11px;color:#9CA3AF;margin-top:4px">Upload your own thumbnail (recommended). If omitted, we try to auto-extract from the first frame.</div>
+                <img id="vid-thumb-preview" style="display:none;margin-top:8px;width:100px;height:178px;object-fit:cover;border-radius:8px;background:#000">
+              </div>
               <div id="vid-preview-wrap" style="display:none">
                 <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.04em">Preview</label>
                 <video id="vid-preview" controls playsinline muted style="margin-top:6px;width:100%;max-width:240px;border-radius:12px;background:#000"></video>
@@ -4215,13 +4222,14 @@ async function vidLoadList() {
         ? '<button type="button" onclick="vidToggle(\'' + r.id + '\', false)" style="background:#FEE2E2;color:#7F1D1D;border:0;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">Disable</button>'
         : '<button type="button" onclick="vidToggle(\'' + r.id + '\', true)" style="background:#D1FAE5;color:#065F46;border:0;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">Re-enable</button>';
       var delBtn = '<button type="button" onclick="vidDelete(\'' + r.id + '\')" style="background:transparent;color:#DC2626;border:0;padding:6px 8px;font-size:11px;font-weight:700;cursor:pointer;margin-left:6px">Delete</button>';
+      var editBtn = '<button type="button" onclick="vidEdit(\'' + r.id + '\')" style="background:#FFF7ED;color:#9A3412;border:0;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">Edit</button>';
       return '<div style="display:flex;gap:12px;padding:12px 14px;' + border + '">' +
         thumb +
         '<div style="flex:1;min-width:0">' +
           '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' + kindBadge + statusBadge + '</div>' +
           '<div style="font-size:13px;font-weight:700;color:#111;margin-bottom:3px">' + (r.title || '') + '</div>' +
           '<div style="font-size:11px;color:#6B7280;margin-bottom:8px">' + (r.caption || '') + '</div>' +
-          '<div>' + actionBtn + delBtn + '</div>' +
+          '<div>' + editBtn + actionBtn + delBtn + '</div>' +
         '</div>' +
       '</div>';
     }).join('');
@@ -4229,6 +4237,131 @@ async function vidLoadList() {
     listEl.innerHTML = '<div style="padding:18px;font-size:13px;color:#DC2626;text-align:center">Could not load videos.</div>';
   }
 }
+/* TMC_VIDEOS_EDIT: edit mode + manual thumb upload */
+var __vidEditId = null;
+
+document.addEventListener('change', function (e) {
+  if (e.target && e.target.id === 'vid-thumb-file') {
+    var f = e.target.files[0];
+    var img = document.getElementById('vid-thumb-preview');
+    if (!f || !img) { if (img) img.style.display='none'; return; }
+    img.src = URL.createObjectURL(f); img.style.display='';
+  }
+});
+
+async function vidEdit(id) {
+  try {
+    var res = await fetch('/api/admin-list-videos');
+    var d = await res.json();
+    var row = (d.videos || []).find(function (r) { return r.id === id; });
+    if (!row) { alert('Not found'); return; }
+    __vidEditId = id;
+    document.getElementById('vid-kind').value         = row.kind || 'demo';
+    document.getElementById('vid-title').value        = row.title || '';
+    document.getElementById('vid-caption').value      = row.caption || '';
+    document.getElementById('vid-cname').value        = row.creator_name || 'TapMyCar';
+    document.getElementById('vid-csub').value         = row.creator_sub || '';
+    document.getElementById('vid-cta-label').value    = row.cta_label || '';
+    document.getElementById('vid-cta-href').value     = row.cta_href || '';
+    var btn = document.getElementById('vid-upload-btn');
+    btn.textContent = 'Save changes';
+    btn.style.background = '#0F766E';
+    if (!document.getElementById('vid-cancel-edit')) {
+      var cancel = document.createElement('button');
+      cancel.id = 'vid-cancel-edit'; cancel.type = 'button';
+      cancel.textContent = 'Cancel edit';
+      cancel.style.cssText = 'width:100%;padding:10px;background:transparent;color:#6B7280;border:1px solid #E5E7EB;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer;margin-top:8px';
+      cancel.onclick = vidCancelEdit;
+      btn.parentNode.insertBefore(cancel, btn.nextSibling);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (e) { alert('Could not load video for edit'); }
+}
+
+function vidCancelEdit() {
+  __vidEditId = null;
+  document.getElementById('vid-title').value = '';
+  document.getElementById('vid-caption').value = '';
+  document.getElementById('vid-cta-label').value = '';
+  document.getElementById('vid-cta-href').value = '';
+  document.getElementById('vid-thumb-file').value = '';
+  document.getElementById('vid-thumb-preview').style.display = 'none';
+  var btn = document.getElementById('vid-upload-btn');
+  btn.textContent = 'Upload video';
+  btn.style.background = '#FF6B00';
+  var c = document.getElementById('vid-cancel-edit'); if (c) c.remove();
+}
+
+async function uploadManualThumb() {
+  var f = document.getElementById('vid-thumb-file').files[0];
+  if (!f) return null;
+  var ext = (f.name.split('.').pop() || 'jpg').toLowerCase();
+  if (ext === 'jpeg') ext = 'jpg';
+  if (!['jpg','png','webp'].includes(ext)) ext = 'jpg';
+  var prep = await fetch('/api/admin-thumb-prepare-upload', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ thumb_ext: ext })
+  });
+  var pd = await prep.json();
+  if (!prep.ok || !pd.ok) throw new Error(pd.error || 'thumb prepare failed');
+  await uploadToSignedUrl(pd.thumb.signed_url, f, function () {});
+  return pd.thumb.public_url;
+}
+
+var __vidUploadOriginal = vidUpload;
+window.vidUpload = async function () {
+  var err = document.getElementById('vid-err');
+  err.textContent = '';
+  if (__vidEditId) {
+    var btn = document.getElementById('vid-upload-btn');
+    btn.disabled = true; btn.textContent = 'Saving\u2026';
+    try {
+      var thumbUrl = null;
+      var thumbFile = document.getElementById('vid-thumb-file').files[0];
+      if (thumbFile) thumbUrl = await uploadManualThumb();
+      var body = {
+        id: __vidEditId,
+        kind: document.getElementById('vid-kind').value,
+        title: document.getElementById('vid-title').value.trim(),
+        caption: document.getElementById('vid-caption').value.trim(),
+        creator_name: document.getElementById('vid-cname').value.trim() || 'TapMyCar',
+        creator_sub: document.getElementById('vid-csub').value.trim(),
+        cta_label: document.getElementById('vid-cta-label').value.trim(),
+        cta_href: document.getElementById('vid-cta-href').value.trim(),
+        poster_initial: (document.getElementById('vid-cname').value || 'T').trim().charAt(0)
+      };
+      if (thumbUrl) body.thumbnail_url = thumbUrl;
+      var res = await fetch('/api/admin-video-update', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      var data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || 'Could not save');
+      vidCancelEdit();
+      vidLoadList();
+    } catch (e) {
+      err.textContent = e.message || 'Save failed';
+    }
+    btn.disabled = false;
+    return;
+  }
+  try {
+    var manualThumbFile = document.getElementById('vid-thumb-file').files[0];
+    if (manualThumbFile) {
+      var origExtract = window.extractThumb;
+      window.extractThumb = async function () { return manualThumbFile; };
+      try { await __vidUploadOriginal(); }
+      finally { window.extractThumb = origExtract; }
+      document.getElementById('vid-thumb-file').value = '';
+      document.getElementById('vid-thumb-preview').style.display = 'none';
+    } else {
+      await __vidUploadOriginal();
+    }
+  } catch (e) {
+    err.textContent = e.message || 'Upload failed';
+  }
+};
+
 async function vidToggle(id, active) {
   await fetch('/api/admin-toggle-video', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: id, active: active }) });
   vidLoadList();
