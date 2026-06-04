@@ -1122,6 +1122,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
     <button class="sb-item" data-tab="refunds" onclick="navTo('refunds')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>Refunds</span><span id="refunds-nav-count" style="display:none;margin-left:auto;background:#DC2626;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px"></span></button><!-- TMC_PATCH53_ADMIN -->
     <button class="sb-item" data-tab="newsletter" onclick="navTo('newsletter')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M22 6l-10 7L2 6"/></svg><span>Newsletter</span></button><!-- TMC_PATCH52 -->
     <button class="sb-item" data-tab="videos" onclick="navTo('videos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg><span>Videos</span></button><!-- TMC_VIDEOS -->
+    <button class="sb-item" data-tab="branding" onclick="navTo('branding')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg><span>Branding</span></button><!-- TMC_BRANDING -->
 
     </nav>
     <div class="sidebar-foot">
@@ -1748,6 +1749,36 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
       </div>
 
       <!-- /TMC_VIDEOS -->
+
+            <!-- TMC_BRANDING Branding admin panel -->
+      <div class="panel" id="panel-branding">
+        <div class="section">
+          <div class="section-head">
+            <div class="section-title">Landing hero sticker</div>
+          </div>
+          <div style="font-size:12px;color:#6B7280;margin:6px 0 14px;line-height:1.5">Upload a square image (PNG with transparency works best) to display inside the rotating 3D sticker on your landing page hero. Recommended size: 400x400px.</div>
+          <div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:16px;margin-bottom:24px">
+            <div style="display:grid;grid-template-columns:1fr;gap:12px">
+              <div>
+                <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.04em">Current sticker</label>
+                <div id="brand-current-wrap" style="margin-top:8px;width:140px;height:140px;border-radius:14px;background:linear-gradient(135deg,#FF6B00,#FF9540);padding:6px;box-shadow:0 8px 22px rgba(255,107,0,.3)">
+                  <div id="brand-current" style="width:100%;height:100%;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#9CA3AF;font-size:11px">Loading…</div>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.04em">Upload new sticker image (jpg/png/webp, max 5 MB)</label>
+                <input type="file" id="brand-file" accept="image/jpeg,image/png,image/webp" style="margin-top:6px;width:100%;font-size:13px">
+                <img id="brand-preview" style="display:none;margin-top:10px;width:120px;height:120px;object-fit:contain;border-radius:10px;background:#F4F4F6;padding:6px">
+              </div>
+              <div id="brand-err" style="font-size:12px;color:#DC2626;min-height:16px"></div>
+              <div style="display:flex;gap:8px">
+                <button type="button" id="brand-save-btn" onclick="brandSave()" style="flex:1;padding:12px;background:#FF6B00;color:#fff;border:0;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer">Save sticker</button>
+                <button type="button" id="brand-clear-btn" onclick="brandClear()" style="padding:12px 16px;background:transparent;color:#6B7280;border:1px solid #E5E7EB;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer">Reset to default</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- TMC_PATCH52 Newsletter panel -->
       <div class="panel" id="panel-newsletter">
@@ -3966,8 +3997,8 @@ function downloadFile(content, filename, mime) {
 </script>
 <script>
 // ─── NAV HELPERS (defined AFTER preserved script so our showTab wins) ──
-const TAB_TITLES = {"home": "Home", "users": "Users", "orders": "Orders", "leads": "Leads", "tags": "Tags", "analytics": "Analytics", "scans": "Scans", "upgrade": "Upgrade tracker", "reviews": "Reviews", "generate": "Generate", "receive": "Receive", "inventory": "Inventory", "promos": "Promos", "audit": "Audit", "broadcast": "Broadcast", "retention": "Retention", "refunds": "Refunds", "newsletter": "Newsletter", "videos": "Videos"}; /* TMC_PATCH42 */
-const TAB_SUBS = {"home": "At-a-glance view of the business", "users": "Search, manage, and gift plans", "orders": "Physical shipping and fulfillment", "leads": "Feedback emails captured on contact pages", "tags": "All tokens in the system", "analytics": "Revenue, scans, and growth metrics", "scans": "Raw scan history", "upgrade": "Users approaching day 30 auto-upgrade", "reviews": "Approve reviews, toggle visibility, feature on landing", "generate": "Create new NFC/QR token batches", "receive": "Verify stickers received from manufacturer", "inventory": "Stock levels by batch", "promos": "Gift plans, gift-activate tags, and promo codes", "audit": "Admin actions and system health", "broadcast": "Compose and send notifications to users", "retention": "Exit reasons, opt-in counts, lapsed emails", "refunds": "Failed Stripe refund attempts needing manual review", "newsletter": "Post-deletion newsletter signups  export to CSV for Mailchimp/Beehiiv", "videos": "Upload and manage demo + customer review videos for dashboard and landing"}; /* TMC_PATCH42 */
+const TAB_TITLES = {"home": "Home", "users": "Users", "orders": "Orders", "leads": "Leads", "tags": "Tags", "analytics": "Analytics", "scans": "Scans", "upgrade": "Upgrade tracker", "reviews": "Reviews", "generate": "Generate", "receive": "Receive", "inventory": "Inventory", "promos": "Promos", "audit": "Audit", "broadcast": "Broadcast", "retention": "Retention", "refunds": "Refunds", "newsletter": "Newsletter", "videos": "Videos", "branding": "Branding"}; /* TMC_PATCH42 */
+const TAB_SUBS = {"home": "At-a-glance view of the business", "users": "Search, manage, and gift plans", "orders": "Physical shipping and fulfillment", "leads": "Feedback emails captured on contact pages", "tags": "All tokens in the system", "analytics": "Revenue, scans, and growth metrics", "scans": "Raw scan history", "upgrade": "Users approaching day 30 auto-upgrade", "reviews": "Approve reviews, toggle visibility, feature on landing", "generate": "Create new NFC/QR token batches", "receive": "Verify stickers received from manufacturer", "inventory": "Stock levels by batch", "promos": "Gift plans, gift-activate tags, and promo codes", "audit": "Admin actions and system health", "broadcast": "Compose and send notifications to users", "retention": "Exit reasons, opt-in counts, lapsed emails", "refunds": "Failed Stripe refund attempts needing manual review", "newsletter": "Post-deletion newsletter signups  export to CSV for Mailchimp/Beehiiv", "videos": "Upload and manage demo + customer review videos for dashboard and landing", "branding": "Customize the landing page hero sticker image"}; /* TMC_PATCH42 */
 
 /* TMC_PATCH53_FIX: refunds tab now shows BOTH failed and successful. */
 async function loadFailedRefunds() {
@@ -4075,6 +4106,98 @@ async function resolveRefund(orderId) {
   }
 }
 
+
+/* TMC_BRANDING admin tab */
+async function brandLoad() {
+  var el = document.getElementById('brand-current');
+  if (!el) return;
+  try {
+    var res = await fetch('/api/get-branding');
+    var d = await res.json();
+    if (d && d.ok && d.sticker_url) {
+      el.innerHTML = '<img src="' + d.sticker_url + '" style="width:100%;height:100%;object-fit:contain">';
+    } else {
+      el.innerHTML = '<div style="text-align:center;font-size:10px;color:#9CA3AF;line-height:1.4">No custom<br>sticker yet</div>';
+    }
+  } catch (e) {
+    el.innerHTML = '<div style="font-size:10px;color:#DC2626">Load failed</div>';
+  }
+}
+
+document.addEventListener('change', function (e) {
+  if (e.target && e.target.id === 'brand-file') {
+    var f = e.target.files[0];
+    var img = document.getElementById('brand-preview');
+    if (!f || !img) { if (img) img.style.display='none'; return; }
+    img.src = URL.createObjectURL(f); img.style.display='';
+  }
+});
+
+async function brandSave() {
+  var err = document.getElementById('brand-err');
+  err.textContent = '';
+  var f = document.getElementById('brand-file').files[0];
+  if (!f) { err.textContent = 'Pick an image first.'; return; }
+  if (f.size > 5 * 1024 * 1024) { err.textContent = 'Image is over 5 MB.'; return; }
+  var ext = (f.name.split('.').pop() || 'png').toLowerCase();
+  if (ext === 'jpeg') ext = 'jpg';
+  if (!['jpg','png','webp'].includes(ext)) ext = 'png';
+
+  var btn = document.getElementById('brand-save-btn');
+  btn.disabled = true; btn.textContent = 'Uploading\u2026';
+  try {
+    var prep = await fetch('/api/admin-thumb-prepare-upload', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ thumb_ext: ext })
+    });
+    var pd = await prep.json();
+    if (!prep.ok || !pd.ok) throw new Error(pd.error || 'prepare failed');
+    await new Promise(function (resolve, reject) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('PUT', pd.thumb.signed_url);
+      xhr.setRequestHeader('Content-Type', f.type || 'application/octet-stream');
+      xhr.onload = function () { if (xhr.status >= 200 && xhr.status < 300) resolve(); else reject(new Error('upload ' + xhr.status)); };
+      xhr.onerror = function () { reject(new Error('network')); };
+      xhr.send(f);
+    });
+    var save = await fetch('/api/admin-set-branding', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sticker_url: pd.thumb.public_url })
+    });
+    var sd = await save.json();
+    if (!save.ok || !sd.ok) throw new Error(sd.error || 'save failed');
+    document.getElementById('brand-file').value = '';
+    document.getElementById('brand-preview').style.display = 'none';
+    brandLoad();
+  } catch (e) {
+    err.textContent = e.message || 'Upload failed';
+  }
+  btn.disabled = false; btn.textContent = 'Save sticker';
+}
+
+async function brandClear() {
+  if (!confirm('Reset to the default placeholder?')) return;
+  var err = document.getElementById('brand-err');
+  err.textContent = '';
+  try {
+    var res = await fetch('/api/admin-set-branding', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sticker_url: '' })
+    });
+    var d = await res.json();
+    if (!res.ok || !d.ok) throw new Error(d.error || 'reset failed');
+    brandLoad();
+  } catch (e) { err.textContent = e.message || 'Reset failed'; }
+}
+
+(function () {
+  if (window.__tmcBrandInit) return;
+  window.__tmcBrandInit = true;
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest && e.target.closest('[data-tab="branding"]');
+    if (btn) setTimeout(brandLoad, 20);
+  });
+})();
 
 /* TMC_VIDEOS admin tab logic */
 async function vidPreviewFile() {
