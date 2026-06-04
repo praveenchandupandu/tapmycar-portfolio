@@ -302,7 +302,7 @@
     fetch('/api/get-videos?kind=' + kind).then(function (r) { return r.json(); }).then(function (d) {
       var list = (d && d.videos) || [];
       if (!list.length) { anchor.style.display = 'none'; return; }
-      var sectionClass = 'tmc-r-sec' + (kind === 'review' ? ' dark' : '');
+      var sectionClass = 'tmc-r-sec';
       anchor.innerHTML = '<div class="' + sectionClass + '">' +
         '<div class="tmc-r-sec-head"><div class="tmc-r-sec-title">' + label + '</div></div>' +
         '<div class="tmc-r-row"></div>' +
