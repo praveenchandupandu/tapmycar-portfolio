@@ -59,7 +59,12 @@ body { font-family: 'Inter', sans-serif; background: #fff; color: #111; max-widt
 .tmc-scene-ring2 { position: absolute; inset: 6px; border-radius: 50%; border: 1px dashed rgba(255,255,255,.4); animation: tmcRingSpin 30s linear infinite reverse; }
 @keyframes tmcRingSpin { to { transform: rotate(360deg); } }
 .tmc-sticker-3d { position: absolute; inset: 34px; border-radius: 30px; background: linear-gradient(135deg,#fff 0%,#f0f0f0 100%); box-shadow: 0 0 0 4px #FF6B00, 0 22px 50px rgba(0,0,0,.35), 0 12px 28px rgba(255,107,0,.5), inset 0 2px 0 rgba(255,255,255,.85); display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; transform-style: preserve-3d; animation: tmcStickerFloat 6s ease-in-out infinite; padding: 10px; }
-@keyframes tmcStickerFloat { 0%,100% { transform: rotateY(-22deg) rotateX(8deg) translateY(0); } 50% { transform: rotateY(22deg) rotateX(-6deg) translateY(-6px); } }
+@keyframes tmcStickerFloat { 0%,100% { transform: rotateY(-32deg) rotateX(14deg) translateY(0); } 50% { transform: rotateY(32deg) rotateX(-10deg) translateY(-10px); } }
+.tmc-scene:hover .tmc-sticker-3d { animation-play-state: paused; }
+.tmc-scene { cursor: pointer; }
+.tmc-scene:hover .tmc-scene-glow { animation: none; opacity: 1; transform: scale(1.2); }
+.tmc-scene:hover .tmc-scene-ring { animation-duration: 6s; }
+.tmc-scene:hover .tmc-scene-ring2 { animation-duration: 9s; }
 .tmc-sticker-3d img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .tmc-sticker-3d-fallback { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
 .tmc-sticker-3d-fallback svg { width: 60px; height: 60px; }
@@ -85,6 +90,60 @@ body { font-family: 'Inter', sans-serif; background: #fff; color: #111; max-widt
 .step .step-num { position: relative; }
 .step .step-num::after { content: ''; position: absolute; inset: -4px; border-radius: 14px; background: linear-gradient(135deg, #FF6B00, #FF9540); opacity: .25; z-index: -1; animation: tmcRingPulse 2s ease-in-out infinite; }
 @keyframes tmcRingPulse { 0%,100% { transform: scale(1); opacity: .25; } 50% { transform: scale(1.35); opacity: 0; } }
+
+/* TMC_BREATHE: continuous slow breathing on every risk/sol/feat card */
+.risk, .sol, .feat { will-change: transform, box-shadow; transform: translateY(0); }
+
+.risk { box-shadow: 0 2px 6px rgba(220,38,38,.06); animation: tmcBreatheRed 10s ease-in-out infinite; }
+.risk:nth-child(2) { animation-delay: -2.5s; }
+.risk:nth-child(3) { animation-delay: -5s; }
+.risk:nth-child(4) { animation-delay: -7.5s; }
+.risk-icon { animation: tmcBreatheIconRed 10s ease-in-out infinite; will-change: transform; }
+.risk:nth-child(2) .risk-icon { animation-delay: -2.5s; }
+.risk:nth-child(3) .risk-icon { animation-delay: -5s; }
+.risk:nth-child(4) .risk-icon { animation-delay: -7.5s; }
+@keyframes tmcBreatheRed {
+  0%, 100% { transform: translateY(0); box-shadow: 0 2px 6px rgba(220,38,38,.06); }
+  50%      { transform: translateY(-4px); box-shadow: 0 18px 36px rgba(220,38,38,.22), 0 4px 10px rgba(220,38,38,.08); }
+}
+@keyframes tmcBreatheIconRed { 0%,100% { transform: scale(1) rotate(0); } 50% { transform: scale(1.08) rotate(-4deg); } }
+
+.sol { box-shadow: 0 2px 6px rgba(22,163,74,.06); animation: tmcBreatheGreen 11s ease-in-out infinite; }
+.sol:nth-child(2) { animation-delay: -2.75s; }
+.sol:nth-child(3) { animation-delay: -5.5s; }
+.sol:nth-child(4) { animation-delay: -8.25s; }
+.sol-icon { animation: tmcBreatheIconGreen 11s ease-in-out infinite; will-change: transform; }
+.sol:nth-child(2) .sol-icon { animation-delay: -2.75s; }
+.sol:nth-child(3) .sol-icon { animation-delay: -5.5s; }
+.sol:nth-child(4) .sol-icon { animation-delay: -8.25s; }
+@keyframes tmcBreatheGreen {
+  0%, 100% { transform: translateY(0); box-shadow: 0 2px 6px rgba(22,163,74,.06); }
+  50%      { transform: translateY(-4px); box-shadow: 0 18px 36px rgba(22,163,74,.22), 0 4px 10px rgba(22,163,74,.08); }
+}
+@keyframes tmcBreatheIconGreen { 0%,100% { transform: scale(1) rotate(0); } 50% { transform: scale(1.08) rotate(4deg); } }
+
+.feat { box-shadow: 0 2px 6px rgba(255,107,0,.05); animation: tmcBreatheOrange 12s ease-in-out infinite; }
+.feat:nth-child(2) { animation-delay: -2s; }
+.feat:nth-child(3) { animation-delay: -4s; }
+.feat:nth-child(4) { animation-delay: -6s; }
+.feat:nth-child(5) { animation-delay: -8s; }
+.feat:nth-child(6) { animation-delay: -10s; }
+.feat-icon { animation: tmcBreatheIconOrange 12s ease-in-out infinite; will-change: transform, background; }
+.feat:nth-child(2) .feat-icon { animation-delay: -2s; }
+.feat:nth-child(3) .feat-icon { animation-delay: -4s; }
+.feat:nth-child(4) .feat-icon { animation-delay: -6s; }
+.feat:nth-child(5) .feat-icon { animation-delay: -8s; }
+.feat:nth-child(6) .feat-icon { animation-delay: -10s; }
+@keyframes tmcBreatheOrange {
+  0%, 100% { transform: translateY(0); box-shadow: 0 2px 6px rgba(255,107,0,.05); border-color: #E5E7EB; }
+  50%      { transform: translateY(-4px); box-shadow: 0 18px 36px rgba(255,107,0,.22), 0 4px 10px rgba(255,107,0,.08); border-color: #FED7AA; }
+}
+@keyframes tmcBreatheIconOrange { 0%,100% { transform: scale(1) rotate(0); background: #FFF3EC; } 50% { transform: scale(1.1) rotate(-5deg); background: #FED7AA; } }
+
+/* Respect reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .risk, .sol, .feat, .risk-icon, .sol-icon, .feat-icon { animation: none !important; }
+}
 
 /* HOW IT WORKS */
 .steps { display: flex; flex-direction: column; gap: 16px; }
@@ -141,6 +200,195 @@ body { font-family: 'Inter', sans-serif; background: #fff; color: #111; max-widt
 .footer a { color: #FF6B00; text-decoration: none; font-weight: 600; }
 
 @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.45;transform:scale(.75)} }
+
+/* TMC_V3BOLD: mobile-friendly always-on animations + tap effects */
+@keyframes tmcCardFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes tmcIconBreath { 0%,100% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.06) rotate(-2deg); } }
+@keyframes tmcSweep { 0% { left: -120%; } 60%, 100% { left: 150%; } }
+@keyframes tmcDoubleRing { 0%,100% { transform: scale(1); opacity: .3; } 50% { transform: scale(1.4); opacity: 0; } }
+
+/* HERO buttons  3D press + shimmer  always works on mobile */
+.hero-btn-primary {
+  background: linear-gradient(135deg, #fff 0%, #fff5ee 100%) !important;
+  box-shadow: 0 6px 0 rgba(196,84,10,.55), 0 14px 30px rgba(0,0,0,.22) !important;
+  position: relative; overflow: hidden;
+  transition: transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s ease;
+}
+.hero-btn-primary::before {
+  content: ''; position: absolute; top: 0; left: -120%; width: 70%; height: 100%;
+  background: linear-gradient(110deg, transparent 30%, rgba(255,107,0,.4) 50%, transparent 70%);
+  animation: tmcSweep 2.6s ease-in-out infinite;
+  pointer-events: none;
+}
+.hero-btn-primary:active { transform: translateY(3px); box-shadow: 0 0 0 rgba(196,84,10,.55), 0 6px 14px rgba(0,0,0,.18) !important; }
+.hero-btn-secondary {
+  transition: background .25s ease, border-color .25s ease, transform .18s ease;
+  position: relative; overflow: hidden;
+}
+.hero-btn-secondary:active { background: rgba(255,255,255,.35); transform: translateY(2px); }
+
+/* NAV button (Get Started) */
+.tmc-nav-cta { transition: transform .2s ease, box-shadow .2s ease !important; box-shadow: 0 6px 16px rgba(255,107,0,.4) !important; }
+.tmc-nav-cta:active { transform: translateY(2px); box-shadow: 0 2px 8px rgba(255,107,0,.45) !important; }
+
+/* RISK cards  float + tap press */
+.risk {
+  animation: tmcCardFloat 4s ease-in-out infinite;
+  transition: transform .15s ease, box-shadow .15s ease !important;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(220,38,38,.08);
+}
+.risk:nth-child(1) { animation-delay: 0s; }
+.risk:nth-child(2) { animation-delay: -1s; }
+.risk:nth-child(3) { animation-delay: -2s; }
+.risk:nth-child(4) { animation-delay: -3s; }
+.risk:active { transform: scale(.97) !important; box-shadow: 0 4px 8px rgba(220,38,38,.18) !important; }
+.risk-icon { animation: tmcIconBreath 4s ease-in-out infinite; }
+.risk:nth-child(2) .risk-icon { animation-delay: -1s; }
+.risk:nth-child(3) .risk-icon { animation-delay: -2s; }
+.risk:nth-child(4) .risk-icon { animation-delay: -3s; }
+
+/* SOLUTION cards */
+.sol {
+  animation: tmcCardFloat 4.5s ease-in-out infinite;
+  transition: transform .15s ease, box-shadow .15s ease !important;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(22,163,74,.08);
+}
+.sol:nth-child(1) { animation-delay: -.5s; }
+.sol:nth-child(2) { animation-delay: -1.5s; }
+.sol:nth-child(3) { animation-delay: -2.5s; }
+.sol:nth-child(4) { animation-delay: -3.5s; }
+.sol:active { transform: scale(.97) !important; box-shadow: 0 4px 8px rgba(22,163,74,.18) !important; }
+.sol-icon { animation: tmcIconBreath 4.5s ease-in-out infinite; }
+.sol:nth-child(2) .sol-icon { animation-delay: -1.5s; }
+.sol:nth-child(3) .sol-icon { animation-delay: -2.5s; }
+.sol:nth-child(4) .sol-icon { animation-delay: -3.5s; }
+
+/* STEP NUMBERS  double pulsing ring */
+.step .step-num {
+  position: relative;
+  background: linear-gradient(135deg, #FF6B00, #FF9540) !important;
+  box-shadow: 0 8px 20px rgba(255,107,0,.5), inset 0 2px 0 rgba(255,255,255,.35) !important;
+}
+.step .step-num::before {
+  content: ''; position: absolute; inset: -5px; border-radius: 15px;
+  background: linear-gradient(135deg, #FF6B00, #FF9540);
+  opacity: .3; z-index: -1;
+  animation: tmcDoubleRing 2s ease-in-out infinite;
+}
+.step .step-num::after {
+  content: ''; position: absolute; inset: -10px; border-radius: 18px;
+  background: linear-gradient(135deg, #FF6B00, #FF9540);
+  opacity: .15; z-index: -2;
+  animation: tmcDoubleRing 2s ease-in-out infinite .5s;
+}
+
+/* eTag toggle */
+#etag-toggle { transition: transform .18s ease, box-shadow .18s ease, background .25s ease !important; cursor: pointer; }
+#etag-toggle:active { transform: scale(.98) !important; background: #FFF7ED !important; }
+
+/* LEARN button (How TapMyCar solves this) */
+.learn-btn { transition: transform .18s ease, box-shadow .18s ease, background .25s ease, gap .25s ease !important; position: relative; overflow: hidden; }
+.learn-btn:active { transform: translateY(2px); background: #FFE0CC !important; }
+
+/* FEATURES grid */
+.feat {
+  animation: tmcCardFloat 5s ease-in-out infinite;
+  transition: transform .15s ease, box-shadow .15s ease !important;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,.04);
+}
+.feat:nth-child(1) { animation-delay: 0s; }
+.feat:nth-child(2) { animation-delay: -1.25s; }
+.feat:nth-child(3) { animation-delay: -2.5s; }
+.feat:nth-child(4) { animation-delay: -3.75s; }
+.feat:nth-child(5) { animation-delay: -5s; }
+.feat:nth-child(6) { animation-delay: -6.25s; }
+.feat:active { transform: scale(.97) !important; box-shadow: 0 4px 8px rgba(255,107,0,.18) !important; }
+.feat-icon { animation: tmcIconBreath 5s ease-in-out infinite; }
+
+/* PRICING cards */
+.pricing-card {
+  transition: transform .2s ease, box-shadow .2s ease !important;
+  cursor: pointer;
+  position: relative; overflow: hidden;
+}
+.pricing-card:active { transform: scale(.98) !important; }
+
+/* PRICING button (Get Standard / Get Premium / Get free eTag) */
+.tmc-cta-orange {
+  background: linear-gradient(135deg, #FF6B00, #FF8420) !important;
+  box-shadow: 0 6px 0 rgba(196,84,10,.45), 0 12px 28px rgba(255,107,0,.4) !important;
+  position: relative; overflow: hidden;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.tmc-cta-orange::before {
+  content: ''; position: absolute; top: 0; left: -120%; width: 70%; height: 100%;
+  background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.35) 50%, transparent 70%);
+  animation: tmcSweep 3s ease-in-out infinite;
+  pointer-events: none;
+}
+.tmc-cta-orange:active { transform: translateY(3px); box-shadow: 0 0 0 rgba(196,84,10,.45), 0 6px 14px rgba(255,107,0,.3) !important; }
+
+/* APP BANNER button */
+.app-btn {
+  background: linear-gradient(135deg, #FF6B00, #FF8420) !important;
+  box-shadow: 0 6px 0 rgba(196,84,10,.5), 0 14px 30px rgba(255,107,0,.4) !important;
+  position: relative; overflow: hidden;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.app-btn::before {
+  content: ''; position: absolute; top: 0; left: -120%; width: 70%; height: 100%;
+  background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.35) 50%, transparent 70%);
+  animation: tmcSweep 3s ease-in-out infinite;
+  pointer-events: none;
+}
+.app-btn:active { transform: translateY(3px); box-shadow: 0 0 0 rgba(196,84,10,.5), 0 6px 14px rgba(255,107,0,.3) !important; }
+
+/* TESTIMONIAL card */
+.testimonial {
+  animation: tmcCardFloat 5s ease-in-out infinite;
+  transition: transform .15s ease, box-shadow .15s ease !important;
+  cursor: pointer;
+  position: relative; overflow: hidden;
+}
+.testimonial::before {
+  content: '\201C'; position: absolute; top: -8px; right: 12px;
+  font-family: Georgia, serif; font-size: 80px; color: #FF6B00;
+  opacity: .15; pointer-events: none; line-height: 1;
+}
+.testimonial:active { transform: scale(.98) !important; }
+.testimonial > * { position: relative; z-index: 1; }
+.test-av { box-shadow: 0 4px 12px rgba(255,107,0,.4); }
+
+/* FINAL CTA button  bigger 3D press */
+.cta-btn {
+  background: linear-gradient(135deg, #fff 0%, #fff5ee 100%) !important;
+  box-shadow: 0 6px 0 rgba(196,84,10,.55), 0 16px 36px rgba(0,0,0,.28) !important;
+  position: relative; overflow: hidden;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.cta-btn::before {
+  content: ''; position: absolute; top: 0; left: -120%; width: 70%; height: 100%;
+  background: linear-gradient(110deg, transparent 30%, rgba(255,107,0,.4) 50%, transparent 70%);
+  animation: tmcSweep 2.8s ease-in-out infinite;
+  pointer-events: none;
+}
+.cta-btn:active { transform: translateY(3px); box-shadow: 0 0 0 rgba(196,84,10,.55), 0 6px 16px rgba(0,0,0,.2) !important; }
+
+/* eTag activation step circles  pulsing rings */
+.etag-step-num {
+  position: relative;
+  background: linear-gradient(135deg, #FF6B00, #FF9540) !important;
+  box-shadow: 0 4px 10px rgba(255,107,0,.45) !important;
+}
+.etag-step-num::before {
+  content: ''; position: absolute; inset: -3px; border-radius: 50%;
+  background: linear-gradient(135deg, #FF6B00, #FF9540);
+  opacity: .3; z-index: -1;
+  animation: tmcDoubleRing 2.2s ease-in-out infinite;
+}
 </style>
 <!-- Favicon -->
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -168,7 +416,7 @@ body { font-family: 'Inter', sans-serif; background: #fff; color: #111; max-widt
 <!-- NAV -->
 <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:.5px solid #E5E7EB;position:sticky;top:0;background:#fff;z-index:100">
   <a href="/landing.html" aria-label="TapMyCar" style="display:flex;align-items:center;gap:12px;text-decoration:none;font-size:30px;font-weight:900;color:#111;letter-spacing:-2.5px;line-height:1"><img src="/logo.png" alt="" style="height:52px;width:auto;display:block"><span style="white-space:nowrap;display:inline-block">Tap<span style="color:#FF6B00">My</span>Car</span></a>
-  <a href="/register.html" data-tmc-cta="1" style="background:#FF6B00;color:#fff;font-size:12px;font-weight:700;padding:8px 16px;border-radius:10px;text-decoration:none">Get started</a>
+  <a href="/register.html" data-tmc-cta="1" style="background:#FF6B00;color:#fff;font-size:12px;font-weight:700;padding:8px 16px;border-radius:10px;text-decoration:none" class="tmc-nav-cta">Get started</a>
 </div>
 
 <!-- HERO -->
@@ -206,14 +454,14 @@ body { font-family: 'Inter', sans-serif; background: #fff; color: #111; max-widt
 <!-- TMC_BRANDING trusted-by marquee -->
 <div class="tmc-trust">
   <div class="tmc-trust-track">
-    <span class="tmc-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="#9A3412" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Masked calls via Twilio</span>
-    <span class="tmc-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="#9A3412" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Praman Tech LLC</span>
+    <span class="tmc-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="#9A3412" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Masked calling</span>
+    <span class="tmc-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="#9A3412" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Privacy by design</span>
     <span class="tmc-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="#9A3412" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> NFC + QR sticker</span>
-    <span class="tmc-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="#9A3412" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> 14-day refund</span>
-    <span class="tmc-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="#9A3412" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Masked calls via Twilio</span>
-    <span class="tmc-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="#9A3412" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Praman Tech LLC</span>
+    <span class="tmc-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="#9A3412" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> No app needed</span>
+    <span class="tmc-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="#9A3412" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Masked calling</span>
+    <span class="tmc-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="#9A3412" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Privacy by design</span>
     <span class="tmc-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="#9A3412" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> NFC + QR sticker</span>
-    <span class="tmc-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="#9A3412" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> 14-day refund</span>
+    <span class="tmc-trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="#9A3412" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> No app needed</span>
   </div>
 </div>
 
@@ -323,19 +571,19 @@ body { font-family: 'Inter', sans-serif; background: #fff; color: #111; max-widt
       <div style="font-size:12px;color:#6B7280;line-height:1.6;margin-bottom:12px">The eTag gives you a downloadable QR code you can print and stick anywhere. Calls still route through TapMyCar  your number stays hidden, just like the physical sticker.</div>
       <div style="display:flex;flex-direction:column;gap:10px">
         <div style="display:flex;gap:10px;align-items:flex-start">
-          <div style="flex:0 0 22px;height:22px;border-radius:50%;background:#FF6B00;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center">1</div>
+          <div style="flex:0 0 22px;height:22px;border-radius:50%;background:#FF6B00;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center" class="etag-step-num">1</div>
           <div><div style="font-size:13px;font-weight:700;color:#111;margin-bottom:1px">Sign up free</div><div style="font-size:12px;color:#6B7280">No credit card. Pick the eTag plan during signup.</div></div>
         </div>
         <div style="display:flex;gap:10px;align-items:flex-start">
-          <div style="flex:0 0 22px;height:22px;border-radius:50%;background:#FF6B00;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center">2</div>
+          <div style="flex:0 0 22px;height:22px;border-radius:50%;background:#FF6B00;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center" class="etag-step-num">2</div>
           <div><div style="font-size:13px;font-weight:700;color:#111;margin-bottom:1px">Download your QR</div><div style="font-size:12px;color:#6B7280">Your unique TapMyCar QR is generated instantly. Print it on paper or a sticker.</div></div>
         </div>
         <div style="display:flex;gap:10px;align-items:flex-start">
-          <div style="flex:0 0 22px;height:22px;border-radius:50%;background:#FF6B00;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center">3</div>
+          <div style="flex:0 0 22px;height:22px;border-radius:50%;background:#FF6B00;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center" class="etag-step-num">3</div>
           <div><div style="font-size:13px;font-weight:700;color:#111;margin-bottom:1px">Stick it on your windshield</div><div style="font-size:12px;color:#6B7280">Any visible spot inside the windshield works. Anyone can scan it with a phone.</div></div>
         </div>
         <div style="display:flex;gap:10px;align-items:flex-start">
-          <div style="flex:0 0 22px;height:22px;border-radius:50%;background:#FF6B00;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center">4</div>
+          <div style="flex:0 0 22px;height:22px;border-radius:50%;background:#FF6B00;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center" class="etag-step-num">4</div>
           <div><div style="font-size:13px;font-weight:700;color:#111;margin-bottom:1px">Receive private calls</div><div style="font-size:12px;color:#6B7280">Same masked call system as the physical sticker. Your real number is never exposed.</div></div>
         </div>
       </div>
@@ -423,7 +671,7 @@ body { font-family: 'Inter', sans-serif; background: #fff; color: #111; max-widt
       <div class="pf"><div class="pf-dot"></div>SMS alert on every scan</div>
       <div class="pf"><div class="pf-dot"></div>Voice screening system</div>
     </div>
-    <a href="/register.html" style="background:#FF6B00;color:#fff;font-size:14px;font-weight:700;padding:13px 0;border-radius:13px;text-decoration:none;display:block;text-align:center">Get Standard</a>
+    <a href="/register.html" style="background:#FF6B00;color:#fff;font-size:14px;font-weight:700;padding:13px 0;border-radius:13px;text-decoration:none;display:block;text-align:center" class="tmc-cta-orange">Get Standard</a>
   </div>
 
   <div class="pricing-card" style="border-color:#1A1A1A;background:#FAFAFA">
@@ -437,7 +685,7 @@ body { font-family: 'Inter', sans-serif; background: #fff; color: #111; max-widt
       <div class="pf"><div class="pf-dot"></div>Everything in Standard plan</div>
       <div class="pf"><div class="pf-dot"></div>Priority support</div>
     </div>
-    <a href="/register.html" style="background:#1A1A1A;color:#fff;font-size:14px;font-weight:700;padding:13px 0;border-radius:13px;text-decoration:none;display:block;text-align:center">Get Premium</a>
+    <a href="/register.html" style="background:#1A1A1A;color:#fff;font-size:14px;font-weight:700;padding:13px 0;border-radius:13px;text-decoration:none;display:block;text-align:center" class="tmc-cta-orange">Get Premium</a>
   </div>
 
   <div style="background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:18px;padding:18px;margin-bottom:12px">
@@ -448,7 +696,7 @@ body { font-family: 'Inter', sans-serif; background: #fff; color: #111; max-widt
     <!-- TMC_PATCH64 -->
     <div style="font-size:12px;color:#15803D;margin-bottom:6px">Download instantly · Get started in 2 minutes</div>
     <div style="font-size:11px;color:#6B7280;margin-bottom:14px;line-height:1.5">Free to download. Activate for $1 to experience TapMyCar for 30 days; your chosen plan continues after — see <a href="/pricing.html" style="color:#FF6B00">pricing</a>.</div>
-    <a href="/register.html" style="background:#16A34A;color:#fff;font-size:14px;font-weight:700;padding:13px 0;border-radius:13px;text-decoration:none;display:block;text-align:center">Get free eTag</a>
+    <a href="/register.html" style="background:#16A34A;color:#fff;font-size:14px;font-weight:700;padding:13px 0;border-radius:13px;text-decoration:none;display:block;text-align:center" class="tmc-cta-orange">Get free eTag</a>
   </div>
 
   <div style="text-align:center;font-size:12px;color:#6B7280">
@@ -594,6 +842,64 @@ if ('serviceWorker' in navigator) {
     if (!el) return;
     el.innerHTML = '<img src="' + d.sticker_url + '" alt="TapMyCar sticker">';
   }).catch(function(){});
+
+  /* Mouse-follow tilt on the sticker scene */
+  var scene = document.getElementById('tmc-hero-scene');
+  var sticker = document.getElementById('tmc-hero-sticker');
+  if (scene && sticker) {
+    var rect = null;
+    scene.addEventListener('mouseenter', function () { rect = scene.getBoundingClientRect(); sticker.style.transition = 'transform .15s ease-out'; });
+    scene.addEventListener('mousemove', function (e) {
+      if (!rect) rect = scene.getBoundingClientRect();
+      var cx = rect.left + rect.width / 2;
+      var cy = rect.top + rect.height / 2;
+      var dx = (e.clientX - cx) / (rect.width / 2);
+      var dy = (e.clientY - cy) / (rect.height / 2);
+      sticker.style.animation = 'none';
+      sticker.style.transform = 'rotateY(' + (dx * 35) + 'deg) rotateX(' + (-dy * 25) + 'deg) translateY(-4px) scale(1.05)';
+    });
+    scene.addEventListener('mouseleave', function () {
+      sticker.style.transition = 'transform .4s cubic-bezier(.2,.8,.2,1)';
+      sticker.style.transform = '';
+      sticker.style.animation = '';
+      rect = null;
+    });
+  }
+
+  /* Ripple on every CTA + step num */
+  function attachRipple(el) {
+    el.style.position = 'relative';
+    el.style.overflow = 'hidden';
+    el.addEventListener('click', function (e) {
+      var r = el.getBoundingClientRect();
+      var ripple = document.createElement('span');
+      var size = Math.max(r.width, r.height) * 2;
+      ripple.style.cssText = 'position:absolute;left:' + (e.clientX - r.left - size/2) + 'px;top:' + (e.clientY - r.top - size/2) + 'px;width:' + size + 'px;height:' + size + 'px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.55),transparent 65%);pointer-events:none;transform:scale(0);animation:tmcRipple .6s ease-out forwards;z-index:1';
+      el.appendChild(ripple);
+      setTimeout(function () { ripple.remove(); }, 650);
+    });
+  }
+  document.querySelectorAll('.hero-btn-primary, .hero-btn-secondary, .app-btn, .cta-btn, [data-tmc-cta]').forEach(attachRipple);
+
+  /* Inject ripple keyframes if not present */
+  if (!document.getElementById('tmc-ripple-style')) {
+    var st = document.createElement('style');
+    st.id = 'tmc-ripple-style';
+    st.textContent = '@keyframes tmcRipple { to { transform: scale(1); opacity: 0; } }\n' +
+      '.hero-btn-primary, .hero-btn-secondary, .cta-btn, .app-btn, [data-tmc-cta] { transition: transform .2s ease, box-shadow .2s ease; }\n' +
+      '.hero-btn-primary:hover, .cta-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 14px 32px rgba(0,0,0,.22); }\n' +
+      '.hero-btn-secondary:hover { transform: translateY(-2px); background: rgba(255,255,255,.25); }\n' +
+      '.app-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(255,107,0,.5); }\n' +
+      '[data-tmc-cta]:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 6px 18px rgba(255,107,0,.45); }\n' +
+      '.tmc-stat { transition: transform .2s ease; }\n' +
+      '.tmc-stat:hover { transform: translateY(-3px); }\n' +
+      '.tmc-stat:hover .tmc-stat-n { color: #FF8420; }\n' +
+      '.step-num { transition: transform .25s cubic-bezier(.2,.8,.2,1); }\n' +
+      '.step:hover .step-num { transform: scale(1.15) rotate(-6deg); }\n' +
+      '.step { transition: transform .25s ease; }\n' +
+      '.step:hover { transform: translateX(4px); }';
+    document.head.appendChild(st);
+  }
 })();
 </script>
 </body>
