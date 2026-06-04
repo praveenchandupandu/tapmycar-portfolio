@@ -50,6 +50,9 @@ body { font-family: 'Inter', sans-serif; background: #fff; color: #111; max-widt
 .sol h3 { font-size: 13px; font-weight: 700; color: #166534; margin-bottom: 2px; }
 .sol p { font-size: 11px; color: #15803D; line-height: 1.5; margin-bottom: 0; }
 
+/* TMC_STICKER_FLASH_FIX: hide hero sticker on first paint until JS decides */
+#tmc-hero-sticker.tmc-pre-hidden { visibility: hidden; }
+
 /* TMC_BRANDING: hero sticker scene + stats card + marquee + step ring */
 .tmc-scene { position: relative; width: 220px; height: 220px; margin: 6px auto 22px; perspective: 1000px; z-index: 2; }
 .tmc-scene-glow { position: absolute; inset: -20px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.40) 0%, transparent 60%); filter: blur(28px); animation: tmcSceneGlow 3.2s ease-in-out infinite alternate; }
@@ -431,7 +434,7 @@ body { font-family: 'Inter', sans-serif; background: #fff; color: #111; max-widt
     <div class="tmc-scene-glow"></div>
     <div class="tmc-scene-ring"></div>
     <div class="tmc-scene-ring2"></div>
-    <div class="tmc-sticker-3d" id="tmc-hero-sticker">
+    <div class="tmc-sticker-3d tmc-pre-hidden" id="tmc-hero-sticker">
       <div class="tmc-sticker-3d-fallback">
         <svg viewBox="0 0 24 24" fill="none" stroke="#FF6B00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg>
         <div class="l1">TAPMYCAR</div>
@@ -763,7 +766,7 @@ body { font-family: 'Inter', sans-serif; background: #fff; color: #111; max-widt
 <div class="footer">
   <p style="margin-bottom:6px"><a href="/register.html">Sign up</a> <span style="color:#D1D5DB;margin:0 6px">|</span> <a href="/signin.html">Sign in</a> <span style="color:#D1D5DB;margin:0 6px">|</span> <a href="/pricing.html">Pricing</a></p>
   <p style="margin-bottom:6px"><a href="/privacy.html">Privacy Policy</a> <span style="color:#D1D5DB;margin:0 6px">|</span> <a href="/terms.html">Terms of Service</a></p>
-  <p> 2026 Praman Tech LLC  Connecticut, USA  <a href="#" onclick="event.preventDefault();if(typeof toggleChat==='function'){toggleChat();}else{window.location.href='mailto:support@tapmycar.io';}">Contact</a></p>
+  <p> 2026 Praman Tech LLC  Connecticut, USA</p>
 </div>
 <script>
 if ('serviceWorker' in navigator) {
@@ -834,14 +837,28 @@ if ('serviceWorker' in navigator) {
 </script>
 <script src="/tmc-reels.js"></script>
 <script>
-/* TMC_BRANDING: fetch hero sticker image and inject */
+/* TMC_BRANDING_PRELOAD: avoid fallback flash via sessionStorage cache */
 (function(){
+  var KEY = 'tmc_hero_sticker_url';
+  var el = document.getElementById('tmc-hero-sticker');
+  if (!el) return;
+  try {
+    var cached = sessionStorage.getItem(KEY);
+    if (cached && cached !== 'null') {
+      el.innerHTML = '<img src="' + cached + '" alt="TapMyCar sticker">';
+    } else if (cached !== 'null') {
+      el.style.visibility = 'hidden';
+    }
+  } catch (e) {}
   fetch('/api/get-branding').then(function(r){ return r.json(); }).then(function(d){
-    if (!d || !d.ok || !d.sticker_url) return;
-    var el = document.getElementById('tmc-hero-sticker');
-    if (!el) return;
-    el.innerHTML = '<img src="' + d.sticker_url + '" alt="TapMyCar sticker">';
-  }).catch(function(){});
+    var url = (d && d.ok && d.sticker_url) ? d.sticker_url : null;
+    try { sessionStorage.setItem(KEY, url == null ? 'null' : url); } catch (e) {}
+    el.style.visibility = ''; el.classList.remove('tmc-pre-hidden');
+    if (url) {
+      var cur = el.querySelector('img');
+      if (!cur || cur.src !== url) el.innerHTML = '<img src="' + url + '" alt="TapMyCar sticker">';
+    }
+  }).catch(function(){ el.style.visibility = ''; el.classList.remove('tmc-pre-hidden'); });
 
   /* Mouse-follow tilt on the sticker scene */
   var scene = document.getElementById('tmc-hero-scene');
@@ -901,6 +918,65 @@ if ('serviceWorker' in navigator) {
     document.head.appendChild(st);
   }
 })();
+
+/* TMC_COMIC: load + run slideshow */
+(function(){
+  fetch('/api/get-comic').then(function(r){ return r.json(); }).then(function(d){
+    var panels = (d && d.panels) || [];
+    var withImg = panels.filter(function(p){ return p && p.image_url; });
+    if (!withImg.length) return;
+    var section = document.getElementById('tmc-comic-section');
+    var panelsBox = document.getElementById('tmc-comic-panels');
+    var progBox = document.getElementById('tmc-comic-prog');
+    var dotsBox = document.getElementById('tmc-comic-dots');
+    if (!section || !panelsBox || !progBox || !dotsBox) return;
+    section.hidden = false;
+    function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+    panelsBox.innerHTML = withImg.map(function(p, i){
+      return '<div class="tmc-comic-panel">' +
+        '<div class="tmc-comic-art">' +
+          '<img loading="lazy" src="' + esc(p.image_url) + '" alt="">' +
+          '<div class="tmc-comic-overlay"></div>' +
+          '<div class="tmc-comic-num">FRAME ' + (i+1) + ' / ' + withImg.length + '</div>' +
+          '<div class="tmc-comic-cap">' +
+            (p.title ? '<div class="tmc-comic-cap-t">' + esc(p.title) + '</div>' : '') +
+            (p.caption ? '<div class="tmc-comic-cap-s">' + esc(p.caption) + '</div>' : '') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    progBox.innerHTML = withImg.map(function(){ return '<div class="tmc-comic-prog-seg"><div class="fill"></div></div>'; }).join('');
+    dotsBox.innerHTML = withImg.map(function(_, i){ return '<button type="button" class="tmc-comic-dot" data-idx="' + i + '" aria-label="Frame ' + (i+1) + '"></button>'; }).join('');
+    var panelEls = panelsBox.querySelectorAll('.tmc-comic-panel');
+    var progEls = progBox.querySelectorAll('.tmc-comic-prog-seg');
+    var dotEls = dotsBox.querySelectorAll('.tmc-comic-dot');
+    var cur = 0, timer;
+    function go(i) {
+      cur = (i + panelEls.length) % panelEls.length;
+      panelEls.forEach(function(p, n){ p.classList.toggle('on', n === cur); });
+      dotEls.forEach(function(d, n){ d.classList.toggle('active', n === cur); });
+      progEls.forEach(function(s, n){
+        s.classList.remove('active','done');
+        if (n < cur) s.classList.add('done');
+        if (n === cur) s.classList.add('active');
+      });
+    }
+    function startT(){ clearInterval(timer); timer = setInterval(function(){ go(cur+1); }, 4500); }
+    go(0); startT();
+    document.getElementById('tmc-comic-prev').addEventListener('click', function(){ go(cur-1); startT(); });
+    document.getElementById('tmc-comic-next').addEventListener('click', function(){ go(cur+1); startT(); });
+    dotEls.forEach(function(d, i){ d.addEventListener('click', function(){ go(i); startT(); }); });
+    var startX = null;
+    var stage = document.getElementById('tmc-comic-stage');
+    stage.addEventListener('touchstart', function(e){ startX = e.touches[0].clientX; }, { passive: true });
+    stage.addEventListener('touchend', function(e){
+      if (startX === null) return;
+      var dx = e.changedTouches[0].clientX - startX; startX = null;
+      if (Math.abs(dx) > 40) { go(dx < 0 ? cur+1 : cur-1); startT(); }
+    });
+  }).catch(function(){});
+})();
+
 </script>
 </body>
 </html>
