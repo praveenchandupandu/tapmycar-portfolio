@@ -1344,6 +1344,18 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 
 <!-- RECEIVE & VERIFY TAB -->
 <div class="panel" id="panel-receive">
+  <!-- TMC_VERIFY_SOLO: independent per-tag verification (no batch needed) -->
+  <div class="verify-box" style="margin-bottom:18px;border:2px solid #FF6B00;border-radius:14px;padding:18px">
+    <h3 style="display:flex;align-items:center;gap:8px;margin:0 0 6px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF6B00" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Verify individual tags <span style="font-size:10px;font-weight:700;color:#FF6B00;background:#FFF3EC;padding:3px 8px;border-radius:8px;letter-spacing:0.5px">NO BATCH NEEDED</span></h3>
+    <p style="font-size:12px;color:#6B7280;margin:0 0 14px;line-height:1.5">Paste one or many tokens (one per line). Works for any token regardless of batch. Use this when you have physical stickers in hand but the batch was deleted.</p>
+    <textarea id="solo-tokens" rows="4" placeholder="TMC-AB12CD&#10;TMC-XY34ZW&#10;TMC-..." style="width:100%;border:1px solid #D1D5DB;border-radius:10px;padding:10px 12px;font-size:13px;font-family:Menlo, Consolas, monospace;box-sizing:border-box;color:#111;background:#fff;-webkit-text-fill-color:#111;resize:vertical;margin-bottom:10px"></textarea>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button type="button" onclick="soloCheck()" style="flex:1;padding:11px;background:#F4F4F6;color:#111;border:0;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer">Check status only</button>
+      <button type="button" onclick="soloVerify()" style="flex:1;padding:11px;background:#FF6B00;color:#fff;border:0;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer">Verify these tokens</button>
+    </div>
+    <div id="solo-results" style="font-size:12px;line-height:1.6"></div>
+  </div>
+
   <div class="verify-box">
     <h3>Scan received stickers</h3>
     <p>Scan each sticker as you receive it from the manufacturer. Only tokens from the selected batch are affected — unscanned tokens in THIS batch will be deleted when you finalize.</p>
@@ -3079,6 +3091,96 @@ function scanToken() {
 
   input.value = ''; input.focus();
   if (scanned === total) showToast('All ' + total + ' tokens scanned! Batch complete.');
+}
+
+/* TMC_VERIFY_SOLO: independent per-tag verify (no batch needed) */
+function soloParse() {
+  var raw = document.getElementById('solo-tokens').value || '';
+  return raw.split(/[\s,;]+/).map(function (t) { return t.trim().toUpperCase(); }).filter(function (t) { return /^TMC-[A-Z0-9]+$/.test(t); });
+}
+
+function soloRenderResults(results, mode) {
+  var box = document.getElementById('solo-results');
+  if (!results || !results.length) { box.innerHTML = '<div style="color:#9CA3AF">No valid token formats found. Tokens must look like TMC-AB12CD.</div>'; return; }
+  var summary = { ok: 0, missing: 0, already: 0, claimed: 0, voided: 0 };
+  var rows = results.map(function (r) {
+    var label, color, bg;
+    if (!r.exists) {
+      label = 'NOT FOUND'; color = '#7F1D1D'; bg = '#FEE2E2'; summary.missing++;
+    } else if (r.status === 'voided') {
+      label = 'VOIDED'; color = '#6B7280'; bg = '#F4F4F6'; summary.voided++;
+    } else if (r.claimed || ['active','expired','suspended'].includes(r.status)) {
+      label = 'CLAIMED  ' + r.status.toUpperCase(); color = '#92400E'; bg = '#FEF3C7'; summary.claimed++;
+    } else if (r.verified) {
+      label = mode === 'verify' ? 'ALREADY VERIFIED' : 'VERIFIED'; color = '#065F46'; bg = '#D1FAE5'; summary.already++;
+    } else {
+      label = mode === 'verify' ? 'JUST VERIFIED' : 'UNVERIFIED'; color = mode === 'verify' ? '#065F46' : '#9A3412'; bg = mode === 'verify' ? '#D1FAE5' : '#FFF3EC'; if (mode === 'verify') summary.ok++; else summary.missing++;
+    }
+    var batch = r.batch_number ? ('Batch ' + r.batch_number) : 'no batch';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:' + bg + ';border-radius:8px;margin-bottom:4px;font-family:Menlo, Consolas, monospace;font-size:11px">' +
+      '<span style="color:#111;font-weight:700">' + r.token + '</span>' +
+      '<span style="display:flex;align-items:center;gap:8px">' +
+        '<span style="color:#6B7280;font-size:10px">' + batch + '</span>' +
+        '<span style="color:' + color + ';font-weight:800;font-size:10px">' + label + '</span>' +
+      '</span>' +
+    '</div>';
+  });
+
+  var summaryRow = '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;padding:10px 12px;background:#F9FAFB;border-radius:10px;font-size:11px;font-weight:700">' +
+    (mode === 'verify' ? '<span style="color:#065F46">Verified: ' + summary.ok + '</span>' : '') +
+    (summary.already ? '<span style="color:#065F46">' + (mode === 'verify' ? 'Already verified' : 'Verified') + ': ' + summary.already + '</span>' : '') +
+    (summary.claimed ? '<span style="color:#92400E">Claimed: ' + summary.claimed + '</span>' : '') +
+    (summary.voided ? '<span style="color:#6B7280">Voided: ' + summary.voided + '</span>' : '') +
+    (summary.missing ? '<span style="color:#7F1D1D">Not found: ' + summary.missing + '</span>' : '') +
+  '</div>';
+
+  box.innerHTML = summaryRow + rows.join('');
+}
+
+async function soloCheck() {
+  var tokens = soloParse();
+  var box = document.getElementById('solo-results');
+  if (!tokens.length) { box.innerHTML = '<div style="color:#9CA3AF">Paste some TMC-XXXXXX tokens above.</div>'; return; }
+  box.innerHTML = '<div style="color:#6B7280">Checking ' + tokens.length + ' token(s)\u2026</div>';
+  try {
+    var res = await fetch('/api/admin-tag-status', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tokens: tokens })
+    });
+    var d = await res.json();
+    if (!res.ok || !d.ok) throw new Error(d.error || 'check failed');
+    soloRenderResults(d.results || [], 'check');
+  } catch (e) {
+    box.innerHTML = '<div style="color:#DC2626">' + (e.message || 'failed') + '</div>';
+  }
+}
+
+async function soloVerify() {
+  var tokens = soloParse();
+  var box = document.getElementById('solo-results');
+  if (!tokens.length) { box.innerHTML = '<div style="color:#9CA3AF">Paste some TMC-XXXXXX tokens above.</div>'; return; }
+  if (!confirm('Verify ' + tokens.length + ' token(s)? Already-verified or claimed tokens will be skipped automatically.')) return;
+  box.innerHTML = '<div style="color:#6B7280">Verifying ' + tokens.length + ' token(s)\u2026</div>';
+  try {
+    // Always verify first, then look up final status of every token to render results.
+    var resV = await fetch('/api/verify-tags', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'verify', tokens: tokens })
+    });
+    var dV = await resV.json();
+    if (!resV.ok || !dV.success) throw new Error(dV.error || 'verify failed');
+
+    // Now fetch status of every token so we can render per-token detail
+    var resS = await fetch('/api/admin-tag-status', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tokens: tokens })
+    });
+    var dS = await resS.json();
+    if (!resS.ok || !dS.ok) throw new Error(dS.error || 'status lookup failed');
+    soloRenderResults(dS.results || [], 'verify');
+  } catch (e) {
+    box.innerHTML = '<div style="color:#DC2626">' + (e.message || 'failed') + '</div>';
+  }
 }
 
 async function finalizeReceive() {
