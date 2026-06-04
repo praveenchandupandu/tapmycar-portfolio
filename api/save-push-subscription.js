@@ -2,12 +2,17 @@
 // and marks the user as push_subscribed on a successful save.
 const { createClient } = require("@supabase/supabase-js");
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+/* TMC_PATCH68 */ const { resolveUser } = require("./_auth");
 
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const { user_id, endpoint, p256dh, auth } = req.body || {};
-  if (!user_id || !endpoint || !p256dh || !auth) {
+  /* TMC_PATCH68: identity from signed session token, not the body. */
+  const _p68authed = resolveUser(req);
+  if (!_p68authed) return res.status(401).json({ error: "Sign in required" });
+  const user_id = _p68authed.userId;
+  const { endpoint, p256dh, auth } = req.body || {};
+  if (!endpoint || !p256dh || !auth) {
     return res.status(400).json({ error: "Missing fields" });
   }
 

@@ -9,14 +9,17 @@ const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
 );
+/* TMC_PATCH68 */ const { resolveUser } = require('./_auth');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { user_id } = req.body;
-  if (!user_id) return res.status(400).json({ error: 'user_id required' });
+  /* TMC_PATCH68: identity comes from the signed session token, not the body. */
+  const _p68authed = resolveUser(req);
+  if (!_p68authed) return res.status(401).json({ error: 'Sign in required' });
+  const user_id = _p68authed.userId;
 
   // TMC_PATCH2_UUID_VALIDATE
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

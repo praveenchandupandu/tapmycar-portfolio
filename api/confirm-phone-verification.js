@@ -5,6 +5,7 @@
 const { createClient } = require('@supabase/supabase-js');
 const twilio = require('twilio');
 const { rateLimit, getClientIp } = require('./_rate-limit');
+/* TMC_PATCH68 */ const { resolveUser } = require('./_auth');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -42,8 +43,15 @@ module.exports = async function handler(req, res) {
   // TMC_PATCH34CFIX3_ALWAYS_SESSION: even if already verified, we still need to mint
   // an activation_session for the tag-claim flow. Branch into two paths
   // that both end at the session-insert block.
+  /* TMC_PATCH68: the no-Twilio shortcut for already-verified users is
+   only safe when the caller proves they ARE that user with a valid
+   signed session token. Without a matching token we ALWAYS require a
+   fresh SMS code (which only the real phone owner can receive). This
+   closes the bypass where knowing a user_id alone minted a session. */
+  const _p68authed = resolveUser(req);
+  const _p68tokenMatches = !!(_p68authed && String(_p68authed.userId) === String(user_id));
   let _alreadyVerifiedShortcut = false;
-  if (user.phone_verified) {
+  if (user.phone_verified && _p68tokenMatches) {
     _alreadyVerifiedShortcut = true;
     /* Skip Twilio Verify check. Fall through to session insert. */
   } else {
