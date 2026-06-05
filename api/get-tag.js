@@ -270,7 +270,7 @@ module.exports = async function handler(req, res) {
       console.error('TMC_PATCH35C1_GIFT_CLAIM: gift trial application failed:', giftErr && giftErr.message);
     }
 
-    return res.json({ success: true, tag: data ? data[0] : null, gift: giftApplied });
+    return res.json({ success: true, tag: data || null, gift: giftApplied });
   }
 
   // â”€â”€ GET â€” fetch tag(s) â”€â”€
