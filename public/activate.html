@@ -586,9 +586,10 @@ async function activatePhysicalSticker(activationSessionId) {
     } catch(e) { console.error('Failed to deactivate old tag:', e); }
   }
 
-  // Activate new physical tag
+  // TMC_ACTIVATE_HONEST: actually check the API response. No more fake success.
+  let _activateOk = false;
   try {
-    await fetch('/api/get-tag', {
+    const _res = await fetch('/api/get-tag', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
@@ -602,7 +603,21 @@ async function activatePhysicalSticker(activationSessionId) {
         car_color: vehicleData.car_color
       })
     });
-  } catch(e) { console.error('Failed to activate new tag:', e); }
+    let _data = {};
+    try { _data = await _res.json(); } catch (_) {}
+    if (_res.ok && _data && _data.tag) {
+      _activateOk = true;
+    } else {
+      console.error('Activate physical sticker failed:', _res.status, _data);
+      tmcShowActivationError(_data && _data.error ? _data.error : ('Activation failed (status ' + _res.status + '). Please try again or contact support.'));
+      return;
+    }
+  } catch(e) {
+    console.error('Failed to activate new tag (network):', e);
+    tmcShowActivationError('Network error  could not reach TapMyCar. Check your connection and try again.');
+    return;
+  }
+  if (!_activateOk) return;
 
   document.getElementById('success-title').textContent = 'New Tag Activated!';
   document.getElementById('success-message').textContent = 'Your physical sticker is now active. Your old eTag has been deactivated. Place the sticker on your vehicle.';
@@ -1083,6 +1098,21 @@ async function activateEtag(activationSessionId) {
     }, 300);
   } catch(e) { /* noop */ }
 })();
+
+/* TMC_ACTIVATE_HONEST: small visible error banner so activation failures stop being silent. */
+function tmcShowActivationError(msg) {
+  try {
+    var existing = document.getElementById('tmc-activation-error');
+    if (existing) existing.remove();
+    var div = document.createElement('div');
+    div.id = 'tmc-activation-error';
+    div.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;background:#7F1D1D;color:#fff;padding:14px 16px;border-radius:12px;font-size:13px;line-height:1.45;box-shadow:0 12px 32px rgba(0,0,0,.3);z-index:99999;font-family:inherit';
+    div.innerHTML = '<div style="font-weight:800;margin-bottom:4px">Activation failed</div><div style="opacity:.92">' + String(msg || 'Unknown error').replace(/</g,'&lt;') + '</div><div style="margin-top:8px;font-size:11px;opacity:.7">Tap this message to dismiss.</div>';
+    div.onclick = function () { div.remove(); };
+    document.body.appendChild(div);
+    setTimeout(function () { try { div.remove(); } catch(_) {} }, 14000);
+  } catch (_) { alert('Activation failed: ' + msg); }
+}
 </script>
 </body>
 </html>
