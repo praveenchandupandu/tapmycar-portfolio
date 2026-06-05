@@ -818,6 +818,7 @@ function maskPhone(p) {
 }
 
 function pvShow(callback) {
+  window.pvCallback = callback;
   pvAfterVerifyCallback = callback;
   // Reset UI
   document.getElementById('pv-send-section').style.display = 'flex';
@@ -852,7 +853,37 @@ async function pvSendCode() {
       showToast(data.error || 'Could not send code. Please try again.');
       return;
     }
-    // Move to code-entry section
+
+    /* TMC_AV_SHORTCUT: already-verified users skip the OTP entry entirely.
+       The backend does NOT send an SMS in this case; we mint a session directly. */
+    if (data.already_verified) {
+      try {
+        const cres = await fetch('/api/confirm-phone-verification', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ user_id: s.token, code: '000000' })
+        });
+        const cdata = await cres.json();
+        if (!cres.ok || !cdata.success || !cdata.activation_session_id) {
+          btn.disabled = false;
+          btn.textContent = 'Send code via SMS';
+          showToast(cdata.error || 'Could not start activation. Please try again.');
+          return;
+        }
+        /* Fire the callback that the activate flow set via pvShow() */
+        if (typeof pvCallback === 'function') {
+          pvCallback(cdata.activation_session_id);
+        }
+        return;
+      } catch (ePV) {
+        btn.disabled = false;
+        btn.textContent = 'Send code via SMS';
+        showToast('Network error. Please try again.');
+        return;
+      }
+    }
+
+    // Move to code-entry section (normal SMS flow)
     document.getElementById('pv-send-section').style.display = 'none';
     document.getElementById('pv-code-section').style.display = 'flex';
     document.getElementById('pv-code-input').focus();
