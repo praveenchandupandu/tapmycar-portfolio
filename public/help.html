@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#FF6B00">
+<title>Help & FAQ — TapMyCar</title>
+<meta name="description" content="Frequently asked questions about TapMyCar — billing, your sticker, calls, privacy, and more.">
+
+<link rel="icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="stylesheet" href="/app.css">
+
+<style>
+.help-page { max-width: 720px; margin: 0 auto; padding: 24px 16px 80px; }
+.help-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.help-h1 { font-size: 28px; font-weight: 800; color: #111; letter-spacing: -.5px; margin: 0 0 6px; }
+.help-sub { font-size: 14px; color: #6B7280; line-height: 1.55; margin: 0 0 22px; }
+.help-search { position: relative; margin: 0 0 24px; }
+.help-search input {
+  width: 100%; padding: 13px 14px 13px 42px; font-size: 14px;
+  border: 1.5px solid #E5E7EB; border-radius: 12px;
+  background: #fff; color: #111; font-family: inherit;
+  -webkit-appearance: none; appearance: none; box-sizing: border-box;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.help-search input:focus { outline: none; border-color: #FF6B00; box-shadow: 0 0 0 4px rgba(255,107,0,.1); }
+.help-search svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #9CA3AF; pointer-events: none; }
+.help-section { margin: 0 0 22px; }
+.help-section-h { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; color: #FF6B00; margin: 0 0 10px; padding: 0 4px; }
+.help-item {
+  background: #fff; border: 1px solid #E5E7EB; border-radius: 12px;
+  margin: 0 0 8px; overflow: hidden;
+  transition: border-color .2s ease, box-shadow .25s ease;
+}
+.help-item:hover { border-color: #FED7AA; }
+.help-item.open { border-color: #FF6B00; box-shadow: 0 6px 18px rgba(255,107,0,.1); }
+.help-q {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px; cursor: pointer;
+  font-size: 14px; font-weight: 700; color: #111; line-height: 1.4;
+  gap: 12px; -webkit-tap-highlight-color: transparent;
+}
+.help-q-chev { width: 18px; height: 18px; color: #FF6B00; flex: 0 0 18px; transition: transform .25s ease; }
+.help-item.open .help-q-chev { transform: rotate(180deg); }
+.help-a {
+  max-height: 0; overflow: hidden;
+  transition: max-height .35s ease, padding .25s ease;
+  padding: 0 16px; font-size: 13px; color: #4B5563; line-height: 1.65;
+}
+.help-item.open .help-a { max-height: 600px; padding: 0 16px 14px; }
+.help-a p { margin: 0 0 8px; }
+.help-a p:last-child { margin: 0; }
+.help-a a { color: #FF6B00; font-weight: 600; text-decoration: none; }
+.help-a a:hover { text-decoration: underline; }
+.help-a ul { margin: 6px 0 8px; padding: 0 0 0 18px; }
+.help-a li { margin: 0 0 4px; }
+.help-a strong { color: #111; font-weight: 700; }
+.help-noresults { text-align: center; padding: 28px 12px; color: #9CA3AF; font-size: 13px; display: none; }
+.help-noresults.show { display: block; }
+
+.help-contact {
+  margin: 28px 0 0; padding: 20px;
+  background: linear-gradient(135deg, #FFF7ED 0%, #FFE4CC 100%);
+  border: 1px solid #FED7AA; border-radius: 14px;
+  text-align: center;
+}
+.help-contact-h { font-size: 15px; font-weight: 800; color: #7C2D12; margin: 0 0 4px; }
+.help-contact-s { font-size: 12px; color: #9A3412; margin: 0 0 14px; line-height: 1.55; }
+.help-contact a {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #FF6B00; color: #fff;
+  font-size: 13px; font-weight: 700;
+  padding: 11px 18px; border-radius: 10px;
+  text-decoration: none;
+  box-shadow: 0 6px 16px rgba(255,107,0,.3);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.help-contact a:active { transform: translateY(1px); box-shadow: 0 3px 8px rgba(255,107,0,.3); }
+</style>
+</head>
+
+<body class="wide-page">
+<div class="help-page">
+
+  <div class="help-hdr">
+    <a href="/" aria-label="TapMyCar"><img src="/logo.png" alt="TapMyCar" style="height:44px;width:auto;display:block"></a>
+    <a href="javascript:void(0)" onclick="tmcSmartBack('/')" class="back-link" style="margin:0">← Back</a>
+  </div>
+
+  <h1 class="help-h1">Help & FAQ</h1>
+  <p class="help-sub">Quick answers about how TapMyCar works, billing, your sticker, and your privacy. Tap any question to expand. Still stuck? Email us — link at the bottom.</p>
+
+  <div class="help-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="search" id="help-q-input" placeholder="Search questions…" autocomplete="off">
+  </div>
+
+  <div id="help-list">
+
+    <!-- GETTING STARTED -->
+    <div class="help-section" data-section="Getting started">
+      <div class="help-section-h">Getting started</div>
+
+      <div class="help-item"><div class="help-q">What is TapMyCar?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>TapMyCar is a privacy-first contact platform for your vehicle. You stick a small NFC + QR sticker on your windshield. If someone needs to reach you about your car — for example to ask you to move it, or to report damage — they tap or scan the sticker and call you through our system. <strong>Your real phone number stays hidden</strong> the entire time.</p></div></div>
+
+      <div class="help-item"><div class="help-q">How do I get started?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>Two ways:</p><ul><li><strong>Free eTag</strong> — sign up, download your digital tag, and try TapMyCar without a card.</li><li><strong>Physical sticker</strong> — pick Standard or Premium on the <a href="/pricing.html">pricing page</a>. Your sticker ships in 2–3 business days.</li></ul></div></div>
+
+      <div class="help-item"><div class="help-q">Do I need an app?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>No. TapMyCar works in any modern phone browser. You manage your tag, calls, and settings from <a href="/dashboard.html">tapmycar.io</a>. Strangers scanning your sticker don't need an app either — the NFC tap or QR scan opens the call page directly.</p></div></div>
+
+      <div class="help-item"><div class="help-q">Does it work on iPhone and Android?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>Yes, both. iPhones (iOS 14 and newer) and Android phones can read the NFC tag with a normal tap. Older devices can still use the QR code printed on every sticker. No app install needed on either side.</p></div></div>
+
+      <div class="help-item"><div class="help-q">Is there a free version?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>Yes — the <strong>eTag</strong> is free to download and works the same way the sticker does: masked calls, screening, your number stays hidden. You can print it or display it however you like. The eTag becomes active for $1 so we can route calls; physical stickers add the actual sticker shipped to your door.</p></div></div>
+    </div>
+
+    <!-- YOUR STICKER -->
+    <div class="help-section" data-section="Your sticker">
+      <div class="help-section-h">Your sticker</div>
+
+      <div class="help-item"><div class="help-q">What's in the sticker?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>Each sticker has a small embedded NFC chip <strong>and</strong> a printed QR code. Both link to your private call page. The sticker is weatherproof, designed to live on the inside of your windshield.</p></div></div>
+
+      <div class="help-item"><div class="help-q">Where should I put the sticker?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>The inside of your windshield, lower passenger-side corner is the most common spot. Some people place it on the driver-side dashboard. The key is that it's visible to anyone standing outside the car and that the QR + NFC area isn't blocked.</p></div></div>
+
+      <div class="help-item"><div class="help-q">How long does shipping take?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>Physical stickers ship within 2–3 business days. We mail in the US only at the moment.</p></div></div>
+
+      <div class="help-item"><div class="help-q">Can I have stickers on more than one car?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>Yes. The <strong>Premium</strong> plan ships 3 stickers — handy if you have multiple vehicles, share a household, or want a spare. Each sticker is linked to your single account so all calls go to you.</p></div></div>
+
+      <div class="help-item"><div class="help-q">What if my sticker is damaged or stolen?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>Email <a href="mailto:support@tapmycar.io">support@tapmycar.io</a> and we'll deactivate the missing tag and send a replacement. Even if someone steals the sticker, your real phone number never goes with it — they only get a routing link that we can revoke.</p></div></div>
+    </div>
+
+    <!-- HOW CALLS WORK -->
+    <div class="help-section" data-section="How calls work">
+      <div class="help-section-h">How calls work</div>
+
+      <div class="help-item"><div class="help-q">What happens when someone scans my sticker?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>The scanner is taken to a simple page on their phone with a "Call owner" button. When they tap it, our system places a masked call through to you. They never see your real number, and you can decide whether to answer.</p></div></div>
+
+      <div class="help-item"><div class="help-q">Does the caller ever see my real phone number?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p><strong>No.</strong> Every call is routed through a TapMyCar number. The other person only sees that intermediate number — never yours. You also can't be reached at your real number by anyone who has just the sticker.</p></div></div>
+
+      <div class="help-item"><div class="help-q">Can I screen calls before answering?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>Yes. Every incoming TapMyCar call lets you screen who's calling before you pick up. You can answer, decline, or let it go to voicemail — your choice, every time.</p></div></div>
+
+      <div class="help-item"><div class="help-q">Do I get notified when someone scans my sticker?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>Yes. Every scan shows up in your dashboard in real time with timestamp and approximate location (if the scanner allows). If they place a call, you also get the call right then. You can review your scan history any time from the <a href="/activity.html">activity page</a>.</p></div></div>
+
+      <div class="help-item"><div class="help-q">What if I'm not available to answer?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>The call simply goes unanswered, like any phone call. The scan still gets logged in your dashboard so you can see who tried to reach you and when. We do not relay text messages to your real phone number.</p></div></div>
+    </div>
+
+    <!-- BILLING -->
+    <div class="help-section" data-section="Billing & plans">
+      <div class="help-section-h">Billing & plans</div>
+
+      <div class="help-item"><div class="help-q">How much does TapMyCar cost?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p><strong>Free eTag:</strong> free to download. $1 activation to enable masked calls.</p><p><strong>Standard:</strong> $9.99 for the sticker (shipped immediately) and then $9.99/year starting on day 30. Renews yearly.</p><p><strong>Premium:</strong> $24.99 for 3 stickers and then $19.99/year starting on day 30. Renews yearly.</p><p>Full details on the <a href="/pricing.html">pricing page</a>.</p></div></div>
+
+      <div class="help-item"><div class="help-q">When does my annual subscription start?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>On day 30 after you pick a paid plan. That gives you a full month to try TapMyCar before the annual fee kicks in. You can cancel any time before day 30 in <a href="/settings.html">Settings</a> and you'll only have paid the sticker fee.</p></div></div>
+
+      <div class="help-item"><div class="help-q">How do I cancel?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>Go to <a href="/billing.html">Plan & Billing</a> in your Settings and tap "Cancel plan." You stay active until the end of the period you've already paid for — no surprise cutoffs.</p></div></div>
+
+      <div class="help-item"><div class="help-q">What's your refund policy?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>Refunds available within 14 days of any annual charge — a $1 service fee is retained. After 14 days the plan is non-refundable for that period. Activation fees and sticker fees are non-refundable. Cancel anytime to stop future charges.</p></div></div>
+
+      <div class="help-item"><div class="help-q">Can I upgrade from Standard to Premium?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>Yes. In <a href="/billing.html">Plan & Billing</a> there's an "Upgrade to Premium" option. You'll be charged for the 2 additional stickers and any prorated difference on the annual plan. Your existing sticker stays active.</p></div></div>
+
+      <div class="help-item"><div class="help-q">Do you accept which payment methods?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>All major credit and debit cards, plus Apple Pay and Google Pay where supported. Payments are processed securely by Stripe — we never see or store your full card details.</p></div></div>
+    </div>
+
+    <!-- PRIVACY & SAFETY -->
+    <div class="help-section" data-section="Privacy & safety">
+      <div class="help-section-h">Privacy & safety</div>
+
+      <div class="help-item"><div class="help-q">Who can see my phone number?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>Only TapMyCar (so we can route calls to you). Not strangers who scan your sticker, not other users, not anyone else. Calls are masked at the carrier level — your number is never transmitted to the caller.</p></div></div>
+
+      <div class="help-item"><div class="help-q">What data do you collect?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>Only what's needed to run the service: your phone number, sign-in email, billing details (handled by Stripe), and a log of scans and calls on your sticker so you can see your activity. Full details in our <a href="/privacy.html">Privacy Policy</a>.</p></div></div>
+
+      <div class="help-item"><div class="help-q">Do you share or sell my information?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>No. We don't sell your data and we don't share it for advertising. The only third parties we share with are the service providers that help us run TapMyCar — Twilio for masked calls, Stripe for payments, etc. See the <a href="/privacy.html">Privacy Policy</a> for the full list.</p></div></div>
+
+      <div class="help-item"><div class="help-q">Is the call recorded?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>No. We do not record or transcribe TapMyCar calls. We log only the call metadata (timestamp, masked number used, duration) so you can see your call history.</p></div></div>
+    </div>
+
+    <!-- ACCOUNT & TROUBLESHOOTING -->
+    <div class="help-section" data-section="Account & troubleshooting">
+      <div class="help-section-h">Account & troubleshooting</div>
+
+      <div class="help-item"><div class="help-q">I changed my phone number — what do I do?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>Go to <a href="/settings.html">Settings</a> and update your phone number. You'll be asked to verify the new number with an SMS code. Once verified, all your existing stickers route calls to the new number automatically — you don't need new stickers.</p></div></div>
+
+      <div class="help-item"><div class="help-q">The NFC tap isn't working — what should I check?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>Make sure the phone's NFC is turned on (on iPhone it's always on; on Android check Settings → Connected devices → NFC). Hold the back of the phone <strong>directly</strong> on the sticker for 1–2 seconds. If the tap still doesn't trigger, the QR code on the same sticker is a 100% reliable fallback — just open your camera and point it at the QR.</p></div></div>
+
+      <div class="help-item"><div class="help-q">I have a referral code — how does it work?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>Each TapMyCar account has a referral code (visible in <a href="/settings.html">Settings</a>). Share it with a friend; when they sign up and activate, both of you get a credit applied to your account. Credits reduce future charges automatically at checkout.</p></div></div>
+
+      <div class="help-item"><div class="help-q">I forgot my password / can't sign in.<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>TapMyCar uses passwordless sign-in. On the <a href="/signin.html">sign-in page</a>, enter your phone number — we'll text you a code to log in. If you can't receive the code, email <a href="mailto:support@tapmycar.io">support@tapmycar.io</a> from the email on your account.</p></div></div>
+
+      <div class="help-item"><div class="help-q">How do I delete my account?<svg class="help-q-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="help-a"><p>Email <a href="mailto:support@tapmycar.io">support@tapmycar.io</a> from your account email and we'll permanently delete your account, stickers, and call history within 7 days. You can request a copy of your data first if you want.</p></div></div>
+    </div>
+
+  </div>
+
+  <div class="help-noresults" id="help-noresults">
+    No questions match your search. Try a different word, or email us below.
+  </div>
+
+  <div class="help-contact">
+    <div class="help-contact-h">Didn't find what you needed?</div>
+    <div class="help-contact-s">We answer every email, usually within one business day.</div>
+    <a href="mailto:support@tapmycar.io">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>
+      Email support@tapmycar.io
+    </a>
+  </div>
+
+</div>
+
+<script>
+/* TMC_SMART_BACK: context-aware back navigation. */
+window.tmcSmartBack = function (fallback) {
+  fallback = fallback || '/dashboard.html';
+  try {
+    if (document.referrer) {
+      var ref = new URL(document.referrer);
+      if (ref.origin === window.location.origin) {
+        var here = window.location.pathname.replace(/\/+$/, '');
+        var refPath = ref.pathname.replace(/\/+$/, '');
+        if (refPath !== here) { window.history.back(); return; }
+      }
+    }
+  } catch (e) {}
+  window.location.href = fallback;
+};
+
+/* FAQ: accordion + search */
+(function () {
+  var items = document.querySelectorAll('.help-item');
+  items.forEach(function (item) {
+    var q = item.querySelector('.help-q');
+    q.addEventListener('click', function () { item.classList.toggle('open'); });
+  });
+
+  var input = document.getElementById('help-q-input');
+  var noResults = document.getElementById('help-noresults');
+  var sections = document.querySelectorAll('.help-section');
+
+  input.addEventListener('input', function () {
+    var q = (input.value || '').trim().toLowerCase();
+    var anyVisible = false;
+    sections.forEach(function (sec) {
+      var sectionHasMatch = false;
+      sec.querySelectorAll('.help-item').forEach(function (item) {
+        var text = item.textContent.toLowerCase();
+        var match = !q || text.indexOf(q) !== -1;
+        item.style.display = match ? '' : 'none';
+        if (match) { sectionHasMatch = true; anyVisible = true; }
+        if (q && match) { item.classList.add('open'); }
+        else if (!q) { item.classList.remove('open'); }
+      });
+      sec.style.display = sectionHasMatch ? '' : 'none';
+    });
+    noResults.classList.toggle('show', q && !anyVisible);
+  });
+})();
+</script>
+</body>
+</html>
