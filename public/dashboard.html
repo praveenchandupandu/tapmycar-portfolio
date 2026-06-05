@@ -149,12 +149,13 @@
     </div>
     <!-- 4. ACTION BUTTONS (2x2 grid) -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
-      <div style="background:#111;border-radius:14px;padding:14px;cursor:pointer" onclick="window.open('https://youtube.com','_blank')">
+      <!-- TMC_HELP_TILE: replaces Demo Video (already shown in section below) -->
+      <div style="background:#111;border-radius:14px;padding:14px;cursor:pointer" onclick="window.location.href='/help.html'">
         <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#FF6B00"/><polygon points="10 8 16 12 10 16 10 8" fill="#fff"/></svg>
-          <div style="font-size:12px;font-weight:700;color:#fff">Demo Video</div>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FF6B00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div style="font-size:12px;font-weight:700;color:#fff">Help & FAQ</div>
         </div>
-        <div style="font-size:10px;color:#9CA3AF;line-height:1.4">See how TapMyCar works</div>
+        <div style="font-size:10px;color:#9CA3AF;line-height:1.4">Quick answers about your account</div>
       </div>
       <div style="background:#FF6B00;border-radius:14px;padding:14px;cursor:pointer" onclick="window.location.href='/pricing.html'">
         <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
@@ -544,11 +545,46 @@ function copyTagURL() {
   navigator.clipboard.writeText(tagURL).then(() => showToast('Tag URL copied!'));
 }
 
-function shareInvite() {
-  if (navigator.share) {
-    navigator.share({ title: 'TapMyCar', text: 'Protect your car privacy with TapMyCar!', url: 'https://tapmycar.io' });
-  } else {
-    navigator.clipboard.writeText('https://tapmycar.io').then(() => showToast('Link copied!'));
+/* TMC_SHARE_INVITE_FIX: fetch the real referral code (same pattern as
+   settings shareRefLink) so the shared link actually credits the user. */
+async function shareInvite() {
+  var s = getSession();
+  if (!s || !s.token) {
+    showToast('Sign in to share your referral');
+    return;
+  }
+  try {
+    var res = await fetch('/api/get-referral?user_id=' + s.token);
+    var data = await res.json();
+    if (data && data.success && !data.referral_code) {
+      await fetch('/api/generate-referral-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: s.token })
+      });
+      res  = await fetch('/api/get-referral?user_id=' + s.token);
+      data = await res.json();
+    }
+    if (!data || !data.success || !data.referral_code) {
+      showToast('Could not load referral code');
+      return;
+    }
+    var link = 'https://tapmycar.io/r/' + data.referral_code;
+    var shareText = "Hey! I'm on TapMyCar  the privacy-first contact tag for your car. Sign up with my referral:";
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'TapMyCar', text: shareText, url: link });
+        return;
+      } catch (e) { /* user cancelled  fall through to clipboard */ }
+    }
+    try {
+      await navigator.clipboard.writeText(shareText + ' ' + link);
+      showToast('Referral link copied!');
+    } catch (e) {
+      showToast('Copy failed  try again');
+    }
+  } catch (e) {
+    showToast('Network error  try again');
   }
 }
 function copyReferral() {
