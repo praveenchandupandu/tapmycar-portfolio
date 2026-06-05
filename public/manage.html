@@ -47,7 +47,7 @@
 <meta name="twitter:image" content="https://tapmycar.io/og-image.png">
 </head>
 <body>
-<div class="nav"><div class="bk" onclick="window.location.href='/dashboard.html'"><div class="bkb"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><span class="bk-label">Manage Tag</span></div><div style="display:flex;align-items:center;gap:0"><a href="/dashboard.html" aria-label="TapMyCar" style="display:flex;align-items:center;text-decoration:none"><img src="/logo.png" alt="TapMyCar" class="nav-logo-img" style="height:36px;width:auto;margin-right:10px"></a><button class="gear" onclick="window.location.href='/settings.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button></div></div>
+<div class="nav"><div class="bk" onclick="tmcSmartBack()"><div class="bkb"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><span class="bk-label">Manage Tag</span></div><div style="display:flex;align-items:center;gap:0"><a href="/dashboard.html" aria-label="TapMyCar" style="display:flex;align-items:center;text-decoration:none"><img src="/logo.png" alt="TapMyCar" class="nav-logo-img" style="height:36px;width:auto;margin-right:10px"></a><button class="gear" onclick="window.location.href='/settings.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button></div></div>
 <div class="chev"></div>
 <div class="page">
 <div class="page-inner">
@@ -307,5 +307,24 @@ loadManage();
   </a>
 </nav>
 <!-- /TMC_FLOATING_NAV -->
+<script>
+/* TMC_SMART_BACK: keep back button context-aware. */
+window.tmcSmartBack = function () {
+  try {
+    if (document.referrer) {
+      var ref = new URL(document.referrer);
+      if (ref.origin === window.location.origin) {
+        var here = window.location.pathname.replace(/\/+$/, '');
+        var refPath = ref.pathname.replace(/\/+$/, '');
+        if (refPath !== here) {
+          window.history.back();
+          return;
+        }
+      }
+    }
+  } catch (e) {}
+  window.location.href = '/dashboard.html';
+};
+</script>
 </body>
 </html>

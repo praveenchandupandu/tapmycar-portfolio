@@ -42,7 +42,7 @@
 <div class="legal-page">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
     <a href="/" aria-label="TapMyCar"><img src="/logo.png" alt="TapMyCar" style="height:48px;width:auto;display:block"></a>
-    <a href="/" class="back-link" style="margin:0">← Back</a>
+    <a href="javascript:void(0)" onclick="tmcSmartBack('/')" class="back-link" style="margin:0">← Back</a>
   </div>
   <h1>Terms of Service</h1>
   <div class="eff">Effective date: April 20, 2026 · Last updated: May 26, 2026</div>
@@ -124,5 +124,22 @@
     <a href="/terms.html">Terms of Service</a> · <a href="/privacy.html">Privacy Policy</a> · © 2026 Praman Tech LLC, operating TapMyCar
   </div>
 </div>
+<script>
+/* TMC_SMART_BACK: context-aware back navigation. */
+window.tmcSmartBack = function (fallback) {
+  fallback = fallback || '/dashboard.html';
+  try {
+    if (document.referrer) {
+      var ref = new URL(document.referrer);
+      if (ref.origin === window.location.origin) {
+        var here = window.location.pathname.replace(/\/+$/, '');
+        var refPath = ref.pathname.replace(/\/+$/, '');
+        if (refPath !== here) { window.history.back(); return; }
+      }
+    }
+  } catch (e) {}
+  window.location.href = fallback;
+};
+</script>
 </body>
 </html>

@@ -34,7 +34,7 @@
 <meta name="description" content="View your TapMyCar plan, renewal, and payment history.">
 </head>
 <body>
-<div class="nav"><div class="bk" onclick="window.location.href='/dashboard.html'"><div class="bkb"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><span class="bk-label">Plan & Billing</span></div><a href="/dashboard.html" aria-label="TapMyCar" style="display:flex;align-items:center;text-decoration:none"><img src="/logo.png" alt="TapMyCar" class="nav-logo-img" style="height:36px;width:auto"></a></div>
+<div class="nav"><div class="bk" onclick="tmcSmartBack()"><div class="bkb"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><span class="bk-label">Plan & Billing</span></div><a href="/dashboard.html" aria-label="TapMyCar" style="display:flex;align-items:center;text-decoration:none"><img src="/logo.png" alt="TapMyCar" class="nav-logo-img" style="height:36px;width:auto"></a></div>
 
 <div class="wrap" style="padding:16px 16px 40px;max-width:480px;margin:0 auto">
 
@@ -207,6 +207,25 @@ async function loadBilling() {
   }
 }
 loadBilling();
+</script>
+<script>
+/* TMC_SMART_BACK: keep back button context-aware. */
+window.tmcSmartBack = function () {
+  try {
+    if (document.referrer) {
+      var ref = new URL(document.referrer);
+      if (ref.origin === window.location.origin) {
+        var here = window.location.pathname.replace(/\/+$/, '');
+        var refPath = ref.pathname.replace(/\/+$/, '');
+        if (refPath !== here) {
+          window.history.back();
+          return;
+        }
+      }
+    }
+  } catch (e) {}
+  window.location.href = '/dashboard.html';
+};
 </script>
 </body>
 </html>

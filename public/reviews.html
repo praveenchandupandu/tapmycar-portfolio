@@ -49,7 +49,7 @@
 <div class="reviews-page">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
     <a href="/" aria-label="TapMyCar"><img src="/logo.png" alt="TapMyCar" style="height:48px;width:auto;display:block"></a>
-    <a href="/" class="back-link" style="margin:0">← Back</a>
+    <a href="javascript:void(0)" onclick="tmcSmartBack('/')" class="back-link" style="margin:0">← Back</a>
   </div>
   <div class="rev-hdr">What people say about TapMyCar</div>
   <div class="rev-sub">Real reviews from verified users.</div>
@@ -113,5 +113,22 @@ function escapeHtml(s) {
 loadReviews();
 </script>
 <script src="/tmc-redesign.js"></script>
+<script>
+/* TMC_SMART_BACK: context-aware back navigation. */
+window.tmcSmartBack = function (fallback) {
+  fallback = fallback || '/dashboard.html';
+  try {
+    if (document.referrer) {
+      var ref = new URL(document.referrer);
+      if (ref.origin === window.location.origin) {
+        var here = window.location.pathname.replace(/\/+$/, '');
+        var refPath = ref.pathname.replace(/\/+$/, '');
+        if (refPath !== here) { window.history.back(); return; }
+      }
+    }
+  } catch (e) {}
+  window.location.href = fallback;
+};
+</script>
 </body>
 </html>
