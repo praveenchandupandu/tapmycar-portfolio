@@ -9,11 +9,19 @@
 
 const crypto = require('crypto');
 const { signAdminSession, adminCookie } = require('./_admin-auth');
+/* TMC_PATCH70_ADMIN_RL_REQUIRE */
+const { rateLimit, getClientIp } = require('./_rate-limit');
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  /* TMC_PATCH70_ADMIN_RL_GATE: throttle admin login attempts. */
+  const _admIp = getClientIp(req);
+  if (!await rateLimit(req, res, [
+    { key: 'admin-login:ip:' + _admIp, max: 10, windowSeconds: 900 }
+  ])) return;
 
   const ADMIN_KEY = process.env.ADMIN_SECRET_KEY || '';
   if (!ADMIN_KEY || !process.env.JWT_SECRET) {

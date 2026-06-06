@@ -8,6 +8,18 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 const { rateLimit, getClientIp } = require('./_rate-limit');
+/* TMC_PATCH70_SANITIZE: escape stranger text for the HTML email and
+   whitelist the photo MIME type so it can't break out of src="...". */
+function _esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+  });
+}
+function _imgMime(t) {
+  t = String(t || '').toLowerCase();
+  return /^image\/(jpeg|jpg|png|gif|webp|heic|heif)$/.test(t) ? t : 'image/jpeg';
+}
+const _MAX_B64 = 8 * 1024 * 1024; /* ~6MB binary; rejects oversized payloads */
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -23,6 +35,12 @@ module.exports = async function handler(req, res) {
 
   const { tag_id, action, message, scan_id } = req.body;
   if (!tag_id) return res.status(400).json({ error: 'tag_id required' });
+
+  /* TMC_PATCH70_SIZE_GUARD: reject oversized media payloads. */
+  if ((req.body.photo_base64 && String(req.body.photo_base64).length > _MAX_B64) ||
+      (req.body.audio_base64 && String(req.body.audio_base64).length > _MAX_B64)) {
+    return res.status(413).json({ error: 'Attachment too large' });
+  }
 
   // TMC_PATCH3_RATE_LIMIT (per-tag limit)
   if (!await rateLimit(req, res, [
@@ -59,7 +77,7 @@ module.exports = async function handler(req, res) {
         <div style="font-size:14px;color:#6B7280;margin-bottom:24px">Privacy for you. Safety for your car.</div>
         <div style="background:#FFF3EC;border:1.5px solid #FFE4CC;border-radius:14px;padding:16px;margin-bottom:20px">
           <div style="font-size:12px;color:#9A3800;font-weight:600;margin-bottom:6px">Quick Message Alert</div>
-          <div style="font-size:20px;font-weight:800;color:#FF6B00;margin-bottom:8px">"${message}"</div>
+          <div style="font-size:20px;font-weight:800;color:#FF6B00;margin-bottom:8px">"${_esc(message)}"</div>${"" /* TMC_PATCH70_ESC_MSG */}
           <div style="font-size:12px;color:#78350F">Someone scanned your tag for <strong>${vehicleLabel}</strong> and sent this alert.</div>
         </div>
         <a href="https://tapmycar.io/dashboard.html" style="display:block;background:#FF6B00;color:#fff;font-size:14px;font-weight:700;padding:14px 0;border-radius:13px;text-align:center;text-decoration:none;margin-bottom:16px">Check Dashboard</a>
@@ -83,7 +101,7 @@ module.exports = async function handler(req, res) {
   } else if (action === "photo") {
     subject = `Someone sent you a photo of your vehicle via TapMyCar`;
     const photoHTML = req.body.photo_base64
-      ? `<img src="data:${req.body.photo_type || "image/jpeg"};base64,${req.body.photo_base64}" style="width:100%;max-width:360px;border-radius:12px;margin-bottom:16px">`
+      ? `<img src="data:${_imgMime(req.body.photo_type)};base64,${req.body.photo_base64}" style="width:100%;max-width:360px;border-radius:12px;margin-bottom:16px">`/* TMC_PATCH70_IMG_MIME_EMAIL */
       : "<p>Photo attached</p>";
     body = `<div style="font-family:Inter,sans-serif;max-width:400px;margin:0 auto;padding:40px 20px">
         <div style="font-size:24px;font-weight:800;color:#111;margin-bottom:8px">TapMyCar<span style="color:#FF6B00">.</span></div>
@@ -241,7 +259,7 @@ module.exports = async function handler(req, res) {
     try {
       const scanUpdate = { contact_action: action };
       if (action === "quick_message" && message) scanUpdate.message_text = message;
-      if (action === "photo" && req.body.photo_base64) scanUpdate.photo_url = "data:" + (req.body.photo_type || "image/jpeg") + ";base64," + req.body.photo_base64;
+      if (action === "photo" && req.body.photo_base64) scanUpdate.photo_url = "data:" + _imgMime(req.body.photo_type) + ";base64," + req.body.photo_base64; /* TMC_PATCH70_IMG_MIME_STORE */
       await supabase.from("scan_logs").update(scanUpdate).eq("id", scan_id);
     } catch(e) { console.error("scan log update error:", e); }
   }

@@ -68,10 +68,19 @@ STYLE
 - Don't end every message by pushing email support. Only mention it when the task truly needs account access.`;
 
 // TMC_PATCH39 - refund policy updated
+/* TMC_PATCH70_CHAT_RL_REQUIRE */
+const { rateLimit, getClientIp } = require('./_rate-limit');
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  /* TMC_PATCH70_CHAT_RL_GATE: throttle the AI endpoint per IP. */
+  const _chatIp = getClientIp(req);
+  if (!await rateLimit(req, res, [
+    { key: 'chat:ip:' + _chatIp, max: 20, windowSeconds: 60 },
+    { key: 'chat:ip-hr:' + _chatIp, max: 200, windowSeconds: 3600 }
+  ])) return;
 
   // --- Parse + sanitise the incoming conversation ---------------------------
   let messages = req.body && req.body.messages;
