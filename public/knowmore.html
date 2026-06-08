@@ -298,6 +298,47 @@ img, svg { display: block; max-width: 100%; }
   text-align: center;
   padding: 10px;
 }
+/* TMC_KNOWMORE_FIX: mini sticker scene inside phone mockup */
+.e-phone-sticker-scene {
+  position: relative;
+  width: 78px; height: 78px;
+  margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.e-phone-sticker-glow {
+  position: absolute; inset: -10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,107,0,.45) 0%, transparent 65%);
+  filter: blur(12px);
+  animation: e-sticker-glow 2.6s ease-in-out infinite alternate;
+}
+@keyframes e-sticker-glow {
+  from { opacity: .55; transform: scale(.92); }
+  to   { opacity: 1;   transform: scale(1.08); }
+}
+.e-phone-sticker-card {
+  position: relative;
+  width: 70px; height: 70px;
+  background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+  border-radius: 14px;
+  box-shadow:
+    0 0 0 2.5px #FF6B00,
+    0 6px 14px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.9);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 6px;
+  animation: e-sticker-float 5s ease-in-out infinite;
+  transform-style: preserve-3d;
+}
+@keyframes e-sticker-float {
+  0%,100% { transform: rotateY(-18deg) rotateX(8deg); }
+  50%     { transform: rotateY(18deg)  rotateX(-6deg); }
+}
+.e-phone-sticker-card svg { width: 26px; height: 26px; }
+.e-phone-sticker-l1 { font-size: 7.5px; font-weight: 900; color: #111; margin-top: 3px; letter-spacing: 1px; }
+.e-phone-sticker-l2 { font-size: 5.5px; color: #FF6B00; font-weight: 700; letter-spacing: 1.2px; margin-top: 1px; }
+
 .e-phone-shield {
   width: 40px; height: 40px;
   background: rgba(255,255,255,0.22);
@@ -521,9 +562,8 @@ img, svg { display: block; max-width: 100%; }
 
   <div class="e-dark">
     <div class="e-brand">
-      <div class="e-brand-logo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      </div>
+      <!-- TMC_KNOWMORE_FIX: real brand logo (was a CSS shield placeholder) -->
+      <img src="/logo.png" alt="TapMyCar" class="e-brand-logo-img" style="height:44px;width:auto;display:block;flex-shrink:0">
       <div class="e-brand-text">Tap<span>My</span>Car</div>
     </div>
 
@@ -543,8 +583,14 @@ img, svg { display: block; max-width: 100%; }
       <div class="e-phone">
         <div class="e-phone-notch"></div>
         <div class="e-phone-screen">
-          <div class="e-phone-shield">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <!-- TMC_KNOWMORE_FIX: mini 3D sticker scene (matches landing hero) -->
+          <div class="e-phone-sticker-scene">
+            <div class="e-phone-sticker-glow"></div>
+            <div class="e-phone-sticker-card">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#FF6B00" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg>
+              <div class="e-phone-sticker-l1">TAPMYCAR</div>
+              <div class="e-phone-sticker-l2">SCAN OR TAP</div>
+            </div>
           </div>
           <div class="e-phone-title">Your car.<br>Protected.</div>
         </div>
