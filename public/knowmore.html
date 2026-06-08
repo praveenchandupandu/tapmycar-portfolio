@@ -13,12 +13,20 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
+/* TMC_KNOWMORE_BLACKFIX: prevent black strip below content
+   (dark-mode browsers and tall content can otherwise show through). */
+html {
+  background: #FFFAF5;
+  color-scheme: light;
+}
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   color: #fff;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   line-height: 1.4;
+  background-color: #FFFAF5;
   /* Split: dark top (55%), light bottom (45%). Light section is short
      to push content to fill the visible viewport (no big empty area below). */
   background:
@@ -162,6 +170,8 @@ img, svg { display: block; max-width: 100%; }
   display: flex; flex-direction: column;
   gap: 14px;
   padding-top: 8px;
+  background: #FFFAF5;
+  flex: 1 0 auto;
 }
 
 /* Brand */
