@@ -298,6 +298,36 @@ img, svg { display: block; max-width: 100%; }
   text-align: center;
   padding: 10px;
 }
+/* TMC_KNOWMORE_TYPO: bigger logo, bigger title, footer cleanup */
+.e-brand { gap: 14px !important; }
+.e-brand-text { font-size: 32px !important; letter-spacing: -0.7px !important; }
+@media (min-height: 800px) {
+  .e-brand-text { font-size: 36px !important; }
+}
+.e-footer {
+  font-size: 13px !important;
+  color: rgba(0,0,0,.7) !important;
+  padding-top: 22px !important;
+  padding-bottom: 18px !important;
+  line-height: 1.7 !important;
+  border-top: 1px solid rgba(0,0,0,.08);
+  margin-top: 12px !important;
+}
+.e-footer a {
+  font-size: 13px !important;
+  padding: 4px 10px;
+  display: inline-block;
+  text-decoration: none;
+}
+.e-footer a:hover { text-decoration: underline; }
+.e-footer-copy {
+  font-size: 11.5px !important;
+  color: rgba(0,0,0,.5) !important;
+  margin-top: 10px !important;
+  letter-spacing: .2px;
+}
+.e-divider.e-hidden { display: none; }
+
 /* TMC_KNOWMORE_V2: mini sticker scene inside phone + has-image overlay */
 .e-phone-sticker-scene {
   position: relative; width: 78px; height: 78px; margin-bottom: 10px;
@@ -587,7 +617,7 @@ img, svg { display: block; max-width: 100%; }
   <div class="e-dark">
     <div class="e-brand">
       <!-- TMC_KNOWMORE_V2: real brand logo -->
-      <img src="/logo.png" alt="TapMyCar" style="height:44px;width:auto;display:block;flex-shrink:0">
+      <img src="/logo.png" alt="TapMyCar" style="height:64px;width:auto;display:block;flex-shrink:0">
       <div class="e-brand-text">Tap<span>My</span>Car</div>
     </div>
 
@@ -675,7 +705,7 @@ img, svg { display: block; max-width: 100%; }
 
     <div class="e-footer">
       <a href="/privacy.html">Privacy</a> &nbsp;·&nbsp; <a href="/terms.html">Terms</a>
-      <div class="e-footer-copy">© 2026 Praman Tech LLC</div>
+      <div class="e-footer-copy">© 2026 Praman Tech LLC · New Britain, Connecticut · USA</div>
     </div>
 
   </div>
@@ -755,6 +785,33 @@ img, svg { display: block; max-width: 100%; }
     img.onload = function () { card.classList.add('has-image'); card.appendChild(img); };
     img.src = d.sticker_url;
   }).catch(function () {});
+})();
+</script>
+<script>
+/* TMC_KNOWMORE_TYPO: hide the empty FOLLOW US divider when no social URLs */
+(function () {
+  function trim() {
+    var fb = document.getElementById('km-fb-link');
+    var ig = document.getElementById('km-ig-link');
+    var fbHidden = !fb || fb.style.display === 'none' || !fb.href || fb.getAttribute('href') === '#';
+    var igHidden = !ig || ig.style.display === 'none' || !ig.href || ig.getAttribute('href') === '#';
+    if (fbHidden && igHidden) {
+      /* find the "FOLLOW US" divider (the one whose text isn't "Get the app") */
+      var dividers = document.querySelectorAll('.e-divider');
+      dividers.forEach(function (d) {
+        var t = d.querySelector('.e-divider-text');
+        if (t && /follow us/i.test(t.textContent)) d.classList.add('e-hidden');
+      });
+      var socials = document.querySelector('.e-socials');
+      if (socials) socials.style.display = 'none';
+    }
+  }
+  /* The settings fetch in the page may swap social hrefs/styles asynchronously.
+     Run once on DOMContentLoaded and again after a short delay to catch it. */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', trim);
+  } else { trim(); }
+  setTimeout(trim, 800);
 })();
 </script>
 </body>
