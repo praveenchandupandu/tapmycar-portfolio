@@ -679,14 +679,6 @@
         <div class="v6-alert-text">Parked illegally</div>
       </button>
     </div>
-    <!-- TMC_TOW_OPERATOR_LINK: small entry point for tow operators -->
-    <div style="margin:14px 18px 0;padding:10px 14px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:11px;display:flex;align-items:center;gap:10px">
-      <div style="width:28px;height:28px;border-radius:8px;background:#FED7AA;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A3412" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9V6a3 3 0 0 1 6 0v3"/><rect x="3" y="9" width="10" height="11" rx="2"/><path d="M13 14h9M22 11v6"/></svg>
-      </div>
-      <div style="flex:1;font-size:11px;color:#7C2D12;line-height:1.4">Towing this car?</div>
-      <a href="javascript:void(0)" onclick="v6OpenTowingPage()" style="background:#9A3412;color:#fff;font-size:11px;font-weight:700;padding:6px 12px;border-radius:8px;text-decoration:none">I'm a tow operator</a>
-    </div>
     <button class="v6-custom" onclick="v6OpenCustom()">
       <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
       <span>Or write your own message…</span>
@@ -795,6 +787,12 @@
       <span style="color:#9CA3AF">›</span>
     </a>
     <div class="v6-foot-company">Praman Tech LLC · CT, USA</div>
+    <!-- TMC_TOW_FOOTER_LINK: public towing lookup, audience is general public -->
+    <a href="/towed.html" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:12px;padding:11px 14px;text-decoration:none;color:#7C2D12">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A3412" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9V6a3 3 0 0 1 6 0v3"/><rect x="3" y="9" width="10" height="11" rx="2"/><path d="M13 14h9M22 11v6"/></svg>
+      <span style="font-size:12px;font-weight:700">About towing  check if your car was towed</span>
+      <span style="color:#9A3412;font-weight:700">›</span>
+    </a>
     <div class="v6-foot-links"><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></div>
   </div>
 </div>
@@ -2246,20 +2244,20 @@ window.sendPhoto = async function() {
     setTimeout(tmcStripChatbot, 2500);
   });
 </script>
-
 <script>
-/* TMC_TOW_OPERATOR_LINK */
+/* TMC_TOW_OPERATOR_LINK_V2: extract token from BOTH path (/tag/TOKEN) and query params */
 function v6OpenTowingPage() {
+  var tok = '';
   try {
-    var tok = (window._token || (typeof token !== 'undefined' && token) || '');
+    var u = new URL(location.href);
+    tok = u.searchParams.get('tag') || u.searchParams.get('t') || u.searchParams.get('token') || '';
     if (!tok) {
-      var u = new URL(location.href);
-      tok = u.searchParams.get('t') || u.searchParams.get('token') || '';
+      var parts = location.pathname.split('/').filter(Boolean);
+      if (parts.length >= 2 && parts[0].toLowerCase() === 'tag') tok = parts[1];
     }
-    location.href = '/towing.html' + (tok ? ('?tag=' + encodeURIComponent(tok)) : '');
-  } catch (e) {
-    location.href = '/towing.html';
-  }
+    if (!tok && typeof currentToken !== 'undefined' && currentToken) tok = currentToken;
+  } catch (e) {}
+  location.href = '/towing.html' + (tok ? ('?tag=' + encodeURIComponent(tok)) : '');
 }
 </script>
 </body>
