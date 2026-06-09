@@ -121,7 +121,7 @@
     <div class="plan-feat"><div class="plan-feat-dot"></div>Unlimited masked calls</div>
     <div class="plan-feat"><div class="plan-feat-dot"></div>Scan location map</div>
     <div class="plan-feat"><div class="plan-feat-dot"></div>Emergency contact feature</div>
-    <button class="btn" id="btn-premium" style="margin-top:12px;font-size:13px;padding:12px 0;background:#1A1A1A" onclick="p36StartUpgrade()">Upgrade to Premium</button>
+    <button class="btn" id="btn-premium" style="margin-top:12px;font-size:13px;padding:12px 0;background:#1A1A1A" onclick="showUpgradeConfirm()">Upgrade to Premium</button>
   </div>
 
   <div style="margin-bottom:14px;background:var(--gbl);border-radius:14px;padding:16px;border:.5px solid var(--bd)">
@@ -325,6 +325,79 @@ window.tmcSmartBack = function () {
   } catch (e) {}
   window.location.href = '/dashboard.html';
 };
+</script>
+<!-- TMC_UPGRADE_CONFIRM: confirm screen before Stripe redirect -->
+<div id="upg-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:flex-end;justify-content:center" onclick="if(event.target===this)closeUpgradeConfirm()">
+  <div style="background:#fff;border-radius:22px 22px 0 0;max-width:500px;width:100%;padding:24px 22px 28px;max-height:92vh;overflow-y:auto;font-family:Inter,sans-serif">
+    <div style="width:42px;height:4px;background:#E5E7EB;border-radius:2px;margin:0 auto 18px"></div>
+    <div style="font-size:11px;font-weight:700;color:#FF6B00;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Upgrade to Premium</div>
+    <div style="font-size:22px;font-weight:800;color:#111;letter-spacing:-.5px;margin-bottom:6px">3 stickers for your household</div>
+    <div style="font-size:13px;color:#6B7280;line-height:1.55;margin-bottom:18px">Protect every car your family drives with the same TapMyCar privacy.</div>
+    <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:14px;padding:14px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#7C2D12;margin-bottom:8px">
+        <span>You have today</span>
+        <span style="font-weight:700">1 Standard sticker</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#7C2D12;margin-bottom:8px">
+        <span>You\'ll receive</span>
+        <span style="font-weight:700">2 more stickers</span>
+      </div>
+      <div style="height:1px;background:#FED7AA;margin:10px 0"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:14px;color:#7C2D12">
+        <span style="font-weight:700">After upgrade</span>
+        <span style="font-weight:800;color:#9A3412">3 Premium stickers</span>
+      </div>
+    </div>
+    <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:14px;padding:14px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#374151;margin-bottom:10px">
+        <span>Charge today (one-time)</span>
+        <span style="font-weight:800;color:#111;font-size:18px">$14.99</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#6B7280;margin-bottom:8px">
+        <span>Current annual plan</span>
+        <span style="text-decoration:line-through;color:#9CA3AF">$9.99/yr</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#6B7280">
+        <span>New annual plan (next renewal)</span>
+        <span style="font-weight:700;color:#111">$19.99/yr</span>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:14px;margin-bottom:18px">
+      <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">What you get</div>
+      <div style="font-size:13px;color:#111;line-height:1.8">
+        <div style="display:flex;align-items:center;gap:8px"><span style="color:#16A34A;font-weight:800">✓</span> 2 extra stickers ship in 2-3 business days</div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="color:#16A34A;font-weight:800">✓</span> Up to 3 family vehicles protected</div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="color:#16A34A;font-weight:800">✓</span> 3 gift codes to share with family</div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="color:#16A34A;font-weight:800">✓</span> Priority support</div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:#9CA3AF;line-height:1.55;margin-bottom:14px">Your card is charged $14.99 today. The new $19.99/year Premium plan begins on your next renewal date, replacing your $9.99/year Standard plan. Refundable within 14 days minus a $1 service fee. Cancel anytime in Settings.</div>
+    <button id="upg-confirm-btn" type="button" onclick="confirmUpgradeAndPay()" style="width:100%;background:#FF6B00;color:#fff;border:0;border-radius:13px;padding:15px 0;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 8px 20px rgba(255,107,0,.35)">Confirm and pay $14.99</button>
+    <button type="button" onclick="closeUpgradeConfirm()" style="width:100%;background:transparent;color:#6B7280;border:0;padding:14px 0 0;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Cancel</button>
+  </div>
+</div>
+<script>
+/* TMC_UPGRADE_CONFIRM */
+function showUpgradeConfirm() {
+  var ov = document.getElementById('upg-overlay');
+  if (!ov) return;
+  ov.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeUpgradeConfirm() {
+  var ov = document.getElementById('upg-overlay');
+  if (!ov) return;
+  ov.style.display = 'none';
+  document.body.style.overflow = '';
+}
+async function confirmUpgradeAndPay() {
+  var btn = document.getElementById('upg-confirm-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Opening checkout…'; }
+  try { if (typeof p36StartUpgrade === 'function') { await p36StartUpgrade(); } }
+  catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Confirm and pay $14.99'; }
+  }
+}
 </script>
 </body>
 </html>

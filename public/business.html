@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- TMC_BUSINESS_INQUIRY -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#FF6B00">
+<title>Business / Fleet — TapMyCar</title>
+<meta name="description" content="Bulk TapMyCar stickers with your business name printed on every tag. Custom branding for fleets, dealerships, rentals, and more.">
+<link rel="icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="stylesheet" href="/app.css">
+<style>
+.biz { max-width: 560px; margin: 0 auto; padding: 22px 16px 80px; }
+.biz-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.biz-h1 { font-size: 28px; font-weight: 800; letter-spacing: -.5px; color: #111; margin: 0 0 6px; }
+.biz-sub { font-size: 14px; color: #6B7280; line-height: 1.6; margin: 0 0 24px; }
+.biz-feat { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin: 0 0 28px; }
+.biz-feat-card { background: #FFF7ED; border: 1px solid #FED7AA; border-radius: 13px; padding: 14px; }
+.biz-feat-card h4 { font-size: 13px; font-weight: 800; color: #7C2D12; margin: 0 0 4px; }
+.biz-feat-card p { font-size: 11px; color: #9A3412; line-height: 1.55; margin: 0; }
+.biz-form { background: #fff; border: 1px solid #E5E7EB; border-radius: 16px; padding: 20px; }
+.biz-form h3 { font-size: 16px; font-weight: 800; color: #111; margin: 0 0 4px; }
+.biz-form p.intro { font-size: 12px; color: #6B7280; margin: 0 0 18px; line-height: 1.55; }
+.biz-row { margin: 0 0 14px; }
+.biz-label { display: block; font-size: 11px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: .04em; margin: 0 0 6px; }
+.biz-input, .biz-textarea {
+  width: 100%; padding: 12px 14px; font-size: 14px;
+  border: 1.5px solid #E5E7EB; border-radius: 11px;
+  background: #fff; color: #111; font-family: inherit;
+  -webkit-appearance: none; appearance: none; box-sizing: border-box;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.biz-input:focus, .biz-textarea:focus { outline: none; border-color: #FF6B00; box-shadow: 0 0 0 4px rgba(255,107,0,.1); }
+.biz-textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
+.biz-help { font-size: 11px; color: #9CA3AF; margin: 6px 0 0; line-height: 1.5; }
+.biz-logo-drop {
+  border: 1.5px dashed #E5E7EB; border-radius: 11px; padding: 18px 14px;
+  text-align: center; cursor: pointer; transition: border-color .2s ease, background .2s ease;
+}
+.biz-logo-drop:hover { border-color: #FF6B00; background: #FFF7ED; }
+.biz-logo-drop.has-file { border-color: #16A34A; background: #F0FDF4; border-style: solid; }
+.biz-logo-drop input { display: none; }
+.biz-logo-drop p { font-size: 12px; color: #6B7280; margin: 0; line-height: 1.55; }
+.biz-logo-preview { display: none; max-width: 140px; max-height: 140px; margin: 8px auto 0; border-radius: 8px; }
+.biz-submit {
+  width: 100%; background: #FF6B00; color: #fff;
+  font-size: 15px; font-weight: 800; padding: 15px 0;
+  border: 0; border-radius: 13px; cursor: pointer;
+  box-shadow: 0 8px 22px rgba(255,107,0,.35);
+  transition: transform .15s ease, box-shadow .15s ease;
+  font-family: inherit;
+}
+.biz-submit:active { transform: translateY(2px); box-shadow: 0 4px 12px rgba(255,107,0,.3); }
+.biz-submit:disabled { opacity: .55; cursor: not-allowed; }
+.biz-err { font-size: 12px; color: #DC2626; margin: 10px 0 0; line-height: 1.5; }
+.biz-ok-card { display: none; background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%); border: 1px solid #BBF7D0; border-radius: 16px; padding: 28px 22px; text-align: center; }
+.biz-ok-card h3 { font-size: 20px; font-weight: 800; color: #166534; margin: 0 0 8px; }
+.biz-ok-card p { font-size: 13px; color: #15803D; line-height: 1.65; margin: 0; }
+</style>
+</head>
+<body class="wide-page">
+<div class="biz">
+  <div class="biz-hdr">
+    <a href="/" aria-label="TapMyCar"><img src="/logo.png" alt="TapMyCar" style="height:44px;width:auto;display:block"></a>
+    <a href="javascript:void(0)" onclick="tmcSmartBack('/pricing.html')" class="back-link" style="margin:0">← Back</a>
+  </div>
+
+  <h1 class="biz-h1">Business / Fleet</h1>
+  <p class="biz-sub">Bulk TapMyCar stickers with <strong>your business name printed on every tag</strong>. Perfect for fleets, dealerships, car rentals, ride-share teams, and corporate vehicle programs.</p>
+
+  <div class="biz-feat">
+    <div class="biz-feat-card"><h4>Custom branding</h4><p>Your business name printed on the sticker face.</p></div>
+    <div class="biz-feat-card"><h4>Bulk discount</h4><p>Lower per-sticker price as your order grows.</p></div>
+    <div class="biz-feat-card"><h4>10 minimum</h4><p>Orders start at 10 stickers.</p></div>
+    <div class="biz-feat-card"><h4>Dedicated support</h4><p>A real person on your account.</p></div>
+  </div>
+
+  <div id="biz-form-wrap" class="biz-form">
+    <h3>Tell us about your fleet</h3>
+    <p class="intro">Fill this out and we'll get back to you within 1 business day with pricing tailored to your order size.</p>
+
+    <div class="biz-row">
+      <label class="biz-label" for="biz-business">Business name *</label>
+      <input class="biz-input" type="text" id="biz-business" maxlength="200" required>
+    </div>
+    <div class="biz-row">
+      <label class="biz-label" for="biz-contact">Your name *</label>
+      <input class="biz-input" type="text" id="biz-contact" maxlength="200" required>
+    </div>
+    <div class="biz-row">
+      <label class="biz-label" for="biz-email">Email *</label>
+      <input class="biz-input" type="email" id="biz-email" maxlength="200" required>
+    </div>
+    <div class="biz-row">
+      <label class="biz-label" for="biz-phone">Phone (optional)</label>
+      <input class="biz-input" type="tel" id="biz-phone" maxlength="60">
+    </div>
+    <div class="biz-row">
+      <label class="biz-label" for="biz-count">How many stickers? * (min 10)</label>
+      <input class="biz-input" type="number" id="biz-count" min="10" max="100000" value="10" required>
+    </div>
+    <div class="biz-row">
+      <label class="biz-label">Upload your logo (optional)</label>
+      <label class="biz-logo-drop" id="biz-drop" for="biz-logo">
+        <input type="file" id="biz-logo" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+        <p id="biz-drop-text">PNG, JPG, WEBP, or SVG · max 3 MB. We'll use this to design your custom branding.</p>
+        <img id="biz-logo-preview" class="biz-logo-preview" alt="logo preview">
+      </label>
+    </div>
+    <div class="biz-row">
+      <label class="biz-label" for="biz-msg">Anything else? (optional)</label>
+      <textarea class="biz-textarea" id="biz-msg" maxlength="2000" placeholder="Timeline, special requirements, etc."></textarea>
+    </div>
+
+    <button type="button" class="biz-submit" id="biz-submit-btn" onclick="bizSubmit()">Send inquiry</button>
+    <div class="biz-err" id="biz-err"></div>
+    <div class="biz-help" style="margin-top:14px">We don't display pricing publicly because every fleet is different. We'll send you a quote tailored to your order size.</div>
+  </div>
+
+  <div id="biz-ok-card" class="biz-ok-card">
+    <h3>Got it. Talk soon.</h3>
+    <p>We'll reply within 1 business day with a quote and next steps. Check your inbox at the email you provided. If you don't see it, look in spam or email <a href="mailto:support@tapmycar.io" style="color:#16A34A;font-weight:700;text-decoration:none">support@tapmycar.io</a>.</p>
+  </div>
+</div>
+
+<script>
+/* TMC_SMART_BACK */
+window.tmcSmartBack = function (fallback) {
+  fallback = fallback || '/';
+  try {
+    if (document.referrer) {
+      var ref = new URL(document.referrer);
+      if (ref.origin === window.location.origin) {
+        var here = window.location.pathname.replace(/\/+$/, '');
+        var refPath = ref.pathname.replace(/\/+$/, '');
+        if (refPath !== here) { window.history.back(); return; }
+      }
+    }
+  } catch (e) {}
+  window.location.href = fallback;
+};
+
+(function () {
+  var fileInput = document.getElementById('biz-logo');
+  var drop      = document.getElementById('biz-drop');
+  var dropText  = document.getElementById('biz-drop-text');
+  var preview   = document.getElementById('biz-logo-preview');
+  var logoData  = null;
+
+  fileInput.addEventListener('change', function (e) {
+    var f = e.target.files && e.target.files[0];
+    if (!f) return;
+    if (f.size > 3 * 1024 * 1024) {
+      document.getElementById('biz-err').textContent = 'Logo file is over 3 MB. Pick a smaller one.';
+      fileInput.value = '';
+      return;
+    }
+    document.getElementById('biz-err').textContent = '';
+    var rdr = new FileReader();
+    rdr.onload = function (ev) {
+      logoData = ev.target.result;
+      preview.src = logoData;
+      preview.style.display = 'block';
+      drop.classList.add('has-file');
+      dropText.textContent = f.name + ' (' + (f.size / 1024).toFixed(0) + ' KB) · click to change';
+    };
+    rdr.readAsDataURL(f);
+  });
+
+  window.bizSubmit = async function () {
+    var btn = document.getElementById('biz-submit-btn');
+    var err = document.getElementById('biz-err');
+    err.textContent = '';
+
+    var business = document.getElementById('biz-business').value.trim();
+    var contact  = document.getElementById('biz-contact').value.trim();
+    var email    = document.getElementById('biz-email').value.trim();
+    var phone    = document.getElementById('biz-phone').value.trim();
+    var count    = parseInt(document.getElementById('biz-count').value, 10) || 0;
+    var message  = document.getElementById('biz-msg').value.trim();
+
+    if (!business || !contact || !email) { err.textContent = 'Business name, your name, and email are required.'; return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = 'Please enter a valid email.'; return; }
+    if (count < 10) { err.textContent = 'Minimum order is 10 stickers.'; return; }
+
+    btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+      var res = await fetch('/api/business-inquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          business_name: business, contact_name: contact, email: email,
+          phone: phone, vehicle_count: count, message: message,
+          logo_data_url: logoData || ''
+        })
+      });
+      var data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || 'Submit failed');
+      document.getElementById('biz-form-wrap').style.display = 'none';
+      document.getElementById('biz-ok-card').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (e) {
+      err.textContent = e.message || 'Something went wrong. Try again or email support@tapmycar.io.';
+      btn.disabled = false; btn.textContent = 'Send inquiry';
+    }
+  };
+})();
+</script>
+</body>
+</html>
