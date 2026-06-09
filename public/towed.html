@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!-- TMC_TOWED_PUBLIC -->
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#FF6B00">
+<title>Is my car towed? — TapMyCar</title>
+<meta name="description" content="Type your license plate to check if your car has been towed in the last 7 days.">
+<link rel="icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/app.css">
+<style>
+.td { max-width: 480px; margin: 0 auto; padding: 22px 16px 60px; }
+.td-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.td-h1 { font-size: 28px; font-weight: 800; color: #111; letter-spacing: -.5px; margin: 0 0 8px; }
+.td-sub { font-size: 14px; color: #6B7280; line-height: 1.6; margin: 0 0 24px; }
+.td-card { background: #fff; border: 1px solid #E5E7EB; border-radius: 16px; padding: 18px; }
+.td-label { display: block; font-size: 11px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: .04em; margin: 0 0 8px; }
+.td-plate {
+  width: 100%; padding: 16px 14px; font-size: 24px; font-weight: 800;
+  border: 2px solid #E5E7EB; border-radius: 12px;
+  background: #fff; color: #111; font-family: inherit;
+  letter-spacing: .18em; text-align: center; text-transform: uppercase;
+  -webkit-appearance: none; appearance: none; box-sizing: border-box;
+}
+.td-plate:focus { outline: none; border-color: #FF6B00; box-shadow: 0 0 0 4px rgba(255,107,0,.1); }
+.td-btn {
+  width: 100%; background: #FF6B00; color: #fff;
+  font-size: 15px; font-weight: 800; padding: 15px 0;
+  border: 0; border-radius: 12px; cursor: pointer;
+  margin-top: 14px; font-family: inherit;
+  box-shadow: 0 6px 16px rgba(255,107,0,.35);
+}
+.td-btn:disabled { opacity: .55; cursor: not-allowed; }
+.td-result { margin-top: 18px; display: none; }
+.td-result.show { display: block; }
+.td-found {
+  background: linear-gradient(135deg, #FFF7ED 0%, #FFE4CC 100%);
+  border: 1.5px solid #FED7AA; border-radius: 14px; padding: 18px;
+  text-align: center;
+}
+.td-found-ic { width: 56px; height: 56px; border-radius: 50%; background: #FED7AA; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
+.td-found-ic svg { width: 26px; height: 26px; stroke: #9A3412; fill: none; stroke-width: 2.5; }
+.td-found h3 { font-size: 18px; font-weight: 800; color: #7C2D12; margin: 0 0 6px; }
+.td-found .who { font-size: 22px; font-weight: 900; color: #7C2D12; letter-spacing: -.4px; margin: 6px 0; }
+.td-found p { font-size: 13px; color: #9A3412; line-height: 1.55; margin: 8px 0 0; }
+.td-found a.call { display: inline-block; background: #FF6B00; color: #fff; font-size: 14px; font-weight: 800; padding: 10px 20px; border-radius: 10px; text-decoration: none; margin-top: 12px; }
+.td-not-found {
+  background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: 14px; padding: 18px;
+  text-align: center;
+}
+.td-not-found-ic { width: 56px; height: 56px; border-radius: 50%; background: #DCFCE7; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
+.td-not-found-ic svg { width: 28px; height: 28px; stroke: #16A34A; fill: none; stroke-width: 3; }
+.td-not-found h3 { font-size: 18px; font-weight: 800; color: #166534; margin: 0 0 6px; }
+.td-not-found p { font-size: 13px; color: #15803D; line-height: 1.55; margin: 0; }
+.td-err { font-size: 12px; color: #DC2626; margin-top: 8px; text-align: center; min-height: 16px; }
+.td-fineprint { font-size: 11px; color: #9CA3AF; line-height: 1.6; margin-top: 22px; text-align: center; }
+</style>
+</head>
+<body class="wide-page">
+<div class="td">
+  <div class="td-hdr">
+    <a href="/" aria-label="TapMyCar"><img src="/logo.png" alt="TapMyCar" style="height:40px;width:auto;display:block"></a>
+    <a href="javascript:void(0)" onclick="tmcSmartBack('/')" class="back-link" style="margin:0">← Back</a>
+  </div>
+
+  <h1 class="td-h1">Is my car towed?</h1>
+  <p class="td-sub">Type your license plate to check if it was reported towed via TapMyCar in the last 7 days.</p>
+
+  <div class="td-card">
+    <label class="td-label" for="td-plate">License plate</label>
+    <input class="td-plate" id="td-plate" maxlength="20" autocomplete="off" autocapitalize="characters" placeholder="ABC 1234">
+    <button class="td-btn" id="td-btn" onclick="tdLookup()">Check status</button>
+    <div class="td-err" id="td-err"></div>
+  </div>
+
+  <div class="td-result" id="td-result"></div>
+
+  <div class="td-fineprint">
+    We only show whether a tow operator reported your vehicle. Exact address and full details go to the owner's email account. If the vehicle is yours and you didn't get the email, check spam or contact <a href="mailto:support@tapmycar.io" style="color:#FF6B00">support@tapmycar.io</a>.
+  </div>
+</div>
+
+<script>
+window.tmcSmartBack = function (fallback) {
+  fallback = fallback || '/';
+  try {
+    if (document.referrer) {
+      var ref = new URL(document.referrer);
+      if (ref.origin === window.location.origin) {
+        var here = window.location.pathname.replace(/\/+$/, '');
+        var refPath = ref.pathname.replace(/\/+$/, '');
+        if (refPath !== here) { window.history.back(); return; }
+      }
+    }
+  } catch (e) {}
+  window.location.href = fallback;
+};
+
+window.tdLookup = async function () {
+  var btn   = document.getElementById('td-btn');
+  var err   = document.getElementById('td-err');
+  var box   = document.getElementById('td-result');
+  var plate = document.getElementById('td-plate').value.trim().toUpperCase();
+  err.textContent = ''; box.classList.remove('show'); box.innerHTML = '';
+  if (!plate || plate.length < 2) { err.textContent = 'Enter your full license plate.'; return; }
+  btn.disabled = true; btn.textContent = 'Checking…';
+  try {
+    var res = await fetch('/api/tow-lookup?plate=' + encodeURIComponent(plate));
+    var d   = await res.json();
+    if (!res.ok || !d.ok) throw new Error(d.error || 'Lookup failed');
+    if (d.found) {
+      var phoneRow = d.company_phone ? '<a class="call" href="tel:' + d.company_phone + '">Call ' + d.company_phone + '</a>' : '';
+      box.innerHTML =
+        '<div class="td-found">' +
+          '<div class="td-found-ic"><svg viewBox="0 0 24 24"><path d="M5 9V6a3 3 0 0 1 6 0v3"/><rect x="3" y="9" width="10" height="11" rx="2"/><path d="M13 14h9M22 11v6"/></svg></div>' +
+          '<h3>Yes  your car was towed</h3>' +
+          '<div class="who">' + (d.company || 'Reported by an operator') + '</div>' +
+          '<p>Reported on TapMyCar. Check the email account on file for the exact lot address. The operator can give you the rest of the details.</p>' +
+          phoneRow +
+        '</div>';
+    } else {
+      box.innerHTML =
+        '<div class="td-not-found">' +
+          '<div class="td-not-found-ic"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>' +
+          '<h3>No tow reported</h3>' +
+          '<p>No tow operator reported this plate via TapMyCar in the last 7 days. If your car is missing, check with local impound, your parking spot, or report it stolen if appropriate.</p>' +
+        '</div>';
+    }
+    box.classList.add('show');
+  } catch (e) {
+    err.textContent = e.message || 'Could not check. Try again.';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Check status';
+  }
+};
+</script>
+</body>
+</html>

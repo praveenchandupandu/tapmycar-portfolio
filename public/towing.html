@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!-- TMC_TOW_OPERATOR_PAGE -->
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#FF6B00">
+<title>Notify owner — TapMyCar for tow operators</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/app.css">
+<style>
+.tw { max-width: 480px; margin: 0 auto; padding: 22px 16px 220px; min-height: 100vh; }
+.tw-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.tw-h1 { font-size: 24px; font-weight: 800; color: #111; letter-spacing: -.5px; margin: 0 0 6px; }
+.tw-sub { font-size: 13px; color: #6B7280; line-height: 1.55; margin: 0 0 22px; }
+.tw-card { background: #fff; border: 1px solid #E5E7EB; border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+.tw-label { display: block; font-size: 11px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: .04em; margin: 0 0 6px; }
+.tw-input, .tw-textarea {
+  width: 100%; padding: 13px 14px; font-size: 16px; font-weight: 600;
+  border: 1.5px solid #E5E7EB; border-radius: 11px;
+  background: #fff; color: #111; font-family: inherit;
+  -webkit-appearance: none; appearance: none; box-sizing: border-box;
+  letter-spacing: .03em;
+}
+.tw-input:focus, .tw-textarea:focus { outline: none; border-color: #FF6B00; box-shadow: 0 0 0 4px rgba(255,107,0,.1); }
+.tw-textarea { font-size: 14px; font-weight: 400; resize: vertical; min-height: 80px; line-height: 1.5; letter-spacing: normal; }
+.tw-plate { text-align: center; font-size: 22px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.tw-templates { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 6px; }
+.tw-template {
+  background: #FFF7ED; color: #9A3412;
+  font-size: 11px; font-weight: 700;
+  padding: 6px 12px; border-radius: 99px;
+  border: 1px solid #FED7AA; cursor: pointer;
+  font-family: inherit;
+}
+.tw-template:active { background: #FED7AA; }
+.tw-from-card {
+  background: linear-gradient(135deg, #FFF7ED 0%, #FFE4CC 100%);
+  border: 1px solid #FED7AA; border-radius: 14px; padding: 14px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.tw-from-l { font-size: 11px; font-weight: 700; color: #7C2D12; text-transform: uppercase; letter-spacing: .04em; }
+.tw-from-name { font-size: 16px; font-weight: 800; color: #7C2D12; margin-top: 2px; }
+.tw-from-addr { font-size: 11px; color: #9A3412; margin-top: 4px; line-height: 1.4; }
+.tw-from-edit {
+  background: #fff; color: #9A3412;
+  font-size: 11px; font-weight: 700;
+  padding: 7px 14px; border-radius: 8px;
+  border: 1px solid #FED7AA; cursor: pointer;
+  font-family: inherit;
+}
+.tw-bar {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  background: #fff; border-top: 1px solid #E5E7EB;
+  padding: 14px 16px calc(14px + env(safe-area-inset-bottom)) 16px;
+  box-shadow: 0 -8px 24px rgba(0,0,0,.06);
+  z-index: 50;
+}
+.tw-bar-inner { max-width: 480px; margin: 0 auto; }
+.tw-send {
+  width: 100%; background: #FF6B00; color: #fff;
+  font-size: 16px; font-weight: 800; padding: 16px 0;
+  border: 0; border-radius: 13px; cursor: pointer;
+  box-shadow: 0 8px 22px rgba(255,107,0,.4);
+  font-family: inherit;
+}
+.tw-send:active { transform: translateY(2px); box-shadow: 0 3px 10px rgba(255,107,0,.3); }
+.tw-send:disabled { opacity: .55; cursor: not-allowed; }
+.tw-err { font-size: 12px; color: #DC2626; margin: 10px 0 0; text-align: center; min-height: 18px; }
+.tw-ok { display: none; text-align: center; padding: 30px 18px; }
+.tw-ok-ic { width: 64px; height: 64px; border-radius: 50%; background: #DCFCE7; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+.tw-ok-ic svg { width: 32px; height: 32px; stroke: #16A34A; fill: none; stroke-width: 3; stroke-linecap: round; }
+.tw-ok h2 { font-size: 22px; font-weight: 800; color: #166534; margin: 0 0 6px; }
+.tw-ok p { font-size: 13px; color: #15803D; line-height: 1.55; margin: 0; }
+
+.tw-setup { display: none; }
+.tw-help { font-size: 11px; color: #9CA3AF; margin: 6px 0 0; line-height: 1.5; }
+</style>
+</head>
+<body class="wide-page">
+<div class="tw">
+  <div class="tw-hdr">
+    <a href="/" aria-label="TapMyCar"><img src="/logo.png" alt="TapMyCar" style="height:38px;width:auto;display:block"></a>
+    <div style="font-size:10px;font-weight:800;color:#9A3412;background:#FFF7ED;border:1px solid #FED7AA;padding:5px 11px;border-radius:99px;letter-spacing:.05em">FOR TOW OPERATORS</div>
+  </div>
+
+  <!-- FIRST-RUN: company setup -->
+  <div id="tw-setup" class="tw-setup">
+    <h1 class="tw-h1">Quick setup</h1>
+    <p class="tw-sub">Enter your tow company info once  it'll be saved on this device so every future tow notification takes just seconds to send.</p>
+    <div class="tw-card">
+      <div style="margin-bottom:14px">
+        <label class="tw-label">Tow company name *</label>
+        <input class="tw-input" id="tw-co-name" maxlength="200" placeholder="e.g. AAA Towing">
+      </div>
+      <div style="margin-bottom:14px">
+        <label class="tw-label">Phone *</label>
+        <input class="tw-input" type="tel" id="tw-co-phone" maxlength="60" placeholder="(555) 555-1234">
+      </div>
+      <div style="margin-bottom:14px">
+        <label class="tw-label">Lot address (where owners can collect)</label>
+        <textarea class="tw-textarea" id="tw-co-address" maxlength="400" placeholder="123 Tow Yard Rd, Springfield CT 06000"></textarea>
+      </div>
+      <button class="tw-send" onclick="twSaveSetup()">Save and continue</button>
+      <div class="tw-err" id="tw-setup-err"></div>
+    </div>
+  </div>
+
+  <!-- MAIN: notification form -->
+  <div id="tw-form" style="display:none">
+    <h1 class="tw-h1">Notify the owner</h1>
+    <p class="tw-sub">The owner gets an email and push notification with your details. Takes 5 seconds.</p>
+
+    <div class="tw-from-card">
+      <div>
+        <div class="tw-from-l">Sending from</div>
+        <div class="tw-from-name" id="tw-from-name"></div>
+        <div class="tw-from-addr" id="tw-from-addr"></div>
+      </div>
+      <button type="button" class="tw-from-edit" onclick="twShowSetup()">Edit</button>
+    </div>
+
+    <div class="tw-card">
+      <label class="tw-label" for="tw-plate">Vehicle license plate *</label>
+      <input class="tw-input tw-plate" id="tw-plate" maxlength="20" autocomplete="off" autocapitalize="characters" placeholder="ABC 1234">
+      <div class="tw-help">Type the plate exactly as printed on the car.</div>
+    </div>
+
+    <div class="tw-card">
+      <label class="tw-label">Quick templates</label>
+      <div class="tw-templates">
+        <button type="button" class="tw-template" onclick="twSetTemplate('Towed to our lot. Please call us to arrange pickup.')">Towed to our lot</button>
+        <button type="button" class="tw-template" onclick="twSetTemplate('Roadside assistance was provided.')">Roadside assist</button>
+        <button type="button" class="tw-template" onclick="twSetTemplate('Vehicle was parked illegally and has been relocated.')">Parked illegally</button>
+        <button type="button" class="tw-template" onclick="twSetTemplate('Vehicle blocked access. We had to move it.')">Blocking access</button>
+      </div>
+      <label class="tw-label" for="tw-msg" style="margin-top:8px">Custom note (optional)</label>
+      <textarea class="tw-textarea" id="tw-msg" maxlength="1000" placeholder="Anything the owner should know..."></textarea>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div id="tw-ok" class="tw-ok">
+    <div class="tw-ok-ic"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <h2>Owner notified</h2>
+    <p>The vehicle owner has been emailed and notified. Thanks for using TapMyCar to keep drivers informed.</p>
+    <button class="tw-send" style="margin-top:24px;max-width:280px" onclick="twNew()">Send another</button>
+  </div>
+</div>
+
+<!-- Sticky send button (only when form visible) -->
+<div class="tw-bar" id="tw-bar" style="display:none">
+  <div class="tw-bar-inner">
+    <button class="tw-send" id="tw-send-btn" onclick="twSend()">Send notification</button>
+    <div class="tw-err" id="tw-send-err"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var SAVE_KEY = 'tmc_tow_company_v1';
+  var token = '';
+  try {
+    var u = new URL(location.href);
+    token = u.searchParams.get('tag') || u.searchParams.get('t') || '';
+  } catch (e) {}
+
+  function getSaved() {
+    try { return JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch (e) { return null; }
+  }
+  function save(c) {
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify(c)); } catch (e) {}
+  }
+
+  function showSetup() {
+    var saved = getSaved();
+    if (saved) {
+      document.getElementById('tw-co-name').value    = saved.name || '';
+      document.getElementById('tw-co-phone').value   = saved.phone || '';
+      document.getElementById('tw-co-address').value = saved.address || '';
+    }
+    document.getElementById('tw-setup').style.display = 'block';
+    document.getElementById('tw-form').style.display = 'none';
+    document.getElementById('tw-bar').style.display = 'none';
+    document.getElementById('tw-ok').style.display = 'none';
+  }
+  function showForm() {
+    var s = getSaved();
+    if (!s || !s.name || !s.phone) { showSetup(); return; }
+    document.getElementById('tw-from-name').textContent = s.name;
+    document.getElementById('tw-from-addr').textContent = (s.phone || '') + (s.address ? '  ' + s.address.split('\n')[0] : '');
+    document.getElementById('tw-setup').style.display = 'none';
+    document.getElementById('tw-form').style.display = 'block';
+    document.getElementById('tw-bar').style.display = 'block';
+    document.getElementById('tw-ok').style.display = 'none';
+  }
+
+  window.twShowSetup = showSetup;
+  window.twSaveSetup = function () {
+    var name    = document.getElementById('tw-co-name').value.trim();
+    var phone   = document.getElementById('tw-co-phone').value.trim();
+    var address = document.getElementById('tw-co-address').value.trim();
+    if (!name || !phone) {
+      document.getElementById('tw-setup-err').textContent = 'Company name and phone are required.';
+      return;
+    }
+    save({ name: name, phone: phone, address: address });
+    document.getElementById('tw-setup-err').textContent = '';
+    showForm();
+  };
+  window.twSetTemplate = function (t) { document.getElementById('tw-msg').value = t; };
+  window.twNew = function () {
+    document.getElementById('tw-plate').value = '';
+    document.getElementById('tw-msg').value = '';
+    showForm();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  window.twSend = async function () {
+    var btn   = document.getElementById('tw-send-btn');
+    var err   = document.getElementById('tw-send-err');
+    var plate = document.getElementById('tw-plate').value.trim().toUpperCase();
+    var msg   = document.getElementById('tw-msg').value.trim();
+    var s     = getSaved();
+    err.textContent = '';
+    if (!token) { err.textContent = 'No tag scanned. Open this page by tapping a sticker.'; return; }
+    if (!plate || plate.length < 2) { err.textContent = 'Enter the license plate.'; return; }
+    if (!s || !s.name) { err.textContent = 'Set up your company info first.'; return; }
+    btn.disabled = true; btn.textContent = 'Sending\u2026';
+    try {
+      var res = await fetch('/api/tow-notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: token,
+          license_plate: plate,
+          tow_company_name: s.name,
+          tow_company_phone: s.phone,
+          tow_company_address: s.address,
+          message: msg
+        })
+      });
+      var data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || 'Send failed');
+      document.getElementById('tw-form').style.display = 'none';
+      document.getElementById('tw-bar').style.display = 'none';
+      document.getElementById('tw-ok').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (e) {
+      err.textContent = e.message || 'Network error. Try again.';
+      btn.disabled = false; btn.textContent = 'Send notification';
+    }
+  };
+
+  // Boot
+  if (!getSaved()) showSetup();
+  else showForm();
+})();
+</script>
+</body>
+</html>
