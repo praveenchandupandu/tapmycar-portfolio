@@ -145,17 +145,16 @@
       <div style="font-size:10px;font-weight:700;color:var(--or);margin-bottom:6px;letter-spacing:.8px;text-transform:uppercase">Protect your whole family</div>
       <div style="font-size:18px;font-weight:800;color:#fff;line-height:1.3;margin-bottom:8px">Your family drives too.<br>Are they protected?</div>
       <div style="font-size:12px;color:#9CA3AF;line-height:1.7;margin-bottom:14px">Every car in your family deserves privacy. With Premium, get multiple tags for family vehicles and advanced protection for everyone you love.<br><br><span style="color:#FFE4CC;font-weight:600">One family. One plan. Complete protection.</span></div>
-      <a href="/pricing.html" style="display:block;background:var(--or);color:#fff;font-size:13px;font-weight:800;padding:12px 24px;border-radius:12px;text-decoration:none;text-align:center">Upgrade to Premium</a>
+      <a href="javascript:void(0)" onclick="dashShowUpgradeConfirm()" style="display:block;background:var(--or);color:#fff;font-size:13px;font-weight:800;padding:12px 24px;border-radius:12px;text-decoration:none;text-align:center;cursor:pointer">Upgrade to Premium</a>
     </div>
     <!-- 4. ACTION BUTTONS (2x2 grid) -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
-      <!-- TMC_HELP_TILE: replaces Demo Video (already shown in section below) -->
-      <div style="background:#111;border-radius:14px;padding:14px;cursor:pointer" onclick="window.location.href='/help.html'">
+      <div style="background:#111;border-radius:14px;padding:14px;cursor:pointer" onclick="window.open('https://youtube.com','_blank')">
         <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FF6B00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          <div style="font-size:12px;font-weight:700;color:#fff">Help & FAQ</div>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#FF6B00"/><polygon points="10 8 16 12 10 16 10 8" fill="#fff"/></svg>
+          <div style="font-size:12px;font-weight:700;color:#fff">Demo Video</div>
         </div>
-        <div style="font-size:10px;color:#9CA3AF;line-height:1.4">Quick answers about your account</div>
+        <div style="font-size:10px;color:#9CA3AF;line-height:1.4">See how TapMyCar works</div>
       </div>
       <div style="background:#FF6B00;border-radius:14px;padding:14px;cursor:pointer" onclick="window.location.href='/pricing.html'">
         <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
@@ -545,46 +544,11 @@ function copyTagURL() {
   navigator.clipboard.writeText(tagURL).then(() => showToast('Tag URL copied!'));
 }
 
-/* TMC_SHARE_INVITE_FIX: fetch the real referral code (same pattern as
-   settings shareRefLink) so the shared link actually credits the user. */
-async function shareInvite() {
-  var s = getSession();
-  if (!s || !s.token) {
-    showToast('Sign in to share your referral');
-    return;
-  }
-  try {
-    var res = await fetch('/api/get-referral?user_id=' + s.token);
-    var data = await res.json();
-    if (data && data.success && !data.referral_code) {
-      await fetch('/api/generate-referral-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: s.token })
-      });
-      res  = await fetch('/api/get-referral?user_id=' + s.token);
-      data = await res.json();
-    }
-    if (!data || !data.success || !data.referral_code) {
-      showToast('Could not load referral code');
-      return;
-    }
-    var link = 'https://tapmycar.io/r/' + data.referral_code;
-    var shareText = "Hey! I'm on TapMyCar  the privacy-first contact tag for your car. Sign up with my referral:";
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: 'TapMyCar', text: shareText, url: link });
-        return;
-      } catch (e) { /* user cancelled  fall through to clipboard */ }
-    }
-    try {
-      await navigator.clipboard.writeText(shareText + ' ' + link);
-      showToast('Referral link copied!');
-    } catch (e) {
-      showToast('Copy failed  try again');
-    }
-  } catch (e) {
-    showToast('Network error  try again');
+function shareInvite() {
+  if (navigator.share) {
+    navigator.share({ title: 'TapMyCar', text: 'Protect your car privacy with TapMyCar!', url: 'https://tapmycar.io' });
+  } else {
+    navigator.clipboard.writeText('https://tapmycar.io').then(() => showToast('Link copied!'));
   }
 }
 function copyReferral() {
@@ -717,6 +681,85 @@ if ('serviceWorker' in navigator) {
 <script src="/app-settings.js" defer>
 </script>
 <script src="/tmc-reels.js"></script>
+<!-- TMC_DASH_UPGRADE_MODAL: same upgrade confirm flow as manage.html -->
+<div id="dash-upg-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:flex-end;justify-content:center" onclick="if(event.target===this)dashCloseUpgradeConfirm()">
+  <div style="background:#fff;border-radius:22px 22px 0 0;max-width:500px;width:100%;padding:24px 22px 28px;max-height:92vh;overflow-y:auto;font-family:Inter,sans-serif">
+    <div style="width:42px;height:4px;background:#E5E7EB;border-radius:2px;margin:0 auto 18px"></div>
+    <div style="font-size:11px;font-weight:700;color:#FF6B00;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Upgrade to Premium</div>
+    <div style="font-size:22px;font-weight:800;color:#111;letter-spacing:-.5px;margin-bottom:6px">3 stickers for your household</div>
+    <div style="font-size:13px;color:#6B7280;line-height:1.55;margin-bottom:18px">Protect every car your family drives with the same TapMyCar privacy.</div>
+    <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:14px;padding:14px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#7C2D12;margin-bottom:8px">
+        <span>You have today</span><span style="font-weight:700">1 Standard sticker</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#7C2D12;margin-bottom:8px">
+        <span>You’ll receive</span><span style="font-weight:700">2 more stickers</span>
+      </div>
+      <div style="height:1px;background:#FED7AA;margin:10px 0"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:14px;color:#7C2D12">
+        <span style="font-weight:700">After upgrade</span><span style="font-weight:800;color:#9A3412">3 Premium stickers</span>
+      </div>
+    </div>
+    <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:14px;padding:14px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#374151;margin-bottom:10px">
+        <span>Charge today (one-time)</span><span style="font-weight:800;color:#111;font-size:18px">$14.99</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#6B7280;margin-bottom:8px">
+        <span>Current annual plan</span><span style="text-decoration:line-through;color:#9CA3AF">$9.99/yr</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#6B7280">
+        <span>New annual plan (next renewal)</span><span style="font-weight:700;color:#111">$19.99/yr</span>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:14px;margin-bottom:18px">
+      <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">What you get</div>
+      <div style="font-size:13px;color:#111;line-height:1.8">
+        <div style="display:flex;align-items:center;gap:8px"><span style="color:#16A34A;font-weight:800">✓</span> 2 extra stickers ship in 2-3 business days</div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="color:#16A34A;font-weight:800">✓</span> Up to 3 family vehicles protected</div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="color:#16A34A;font-weight:800">✓</span> 3 gift codes to share with family</div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="color:#16A34A;font-weight:800">✓</span> Priority support</div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:#9CA3AF;line-height:1.55;margin-bottom:14px">Your card is charged $14.99 today. The new $19.99/year Premium plan begins on your next renewal date, replacing your $9.99/year Standard plan. Refundable within 14 days minus a $1 service fee. Cancel anytime in Settings.</div>
+    <button id="dash-upg-confirm-btn" type="button" onclick="dashConfirmUpgradeAndPay()" style="width:100%;background:#FF6B00;color:#fff;border:0;border-radius:13px;padding:15px 0;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 8px 20px rgba(255,107,0,.35)">Confirm and pay $14.99</button>
+    <button type="button" onclick="dashCloseUpgradeConfirm()" style="width:100%;background:transparent;color:#6B7280;border:0;padding:14px 0 0;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Cancel</button>
+  </div>
+</div>
+<script>
+/* TMC_DASH_UPGRADE_MODAL: open the same upgrade confirmation modal as manage.html */
+function dashShowUpgradeConfirm() {
+  var ov = document.getElementById('dash-upg-overlay');
+  if (!ov) return;
+  ov.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function dashCloseUpgradeConfirm() {
+  var ov = document.getElementById('dash-upg-overlay');
+  if (!ov) return;
+  ov.style.display = 'none';
+  document.body.style.overflow = '';
+}
+async function dashConfirmUpgradeAndPay() {
+  var btn = document.getElementById('dash-upg-confirm-btn');
+  var token = (typeof s !== 'undefined' && s && s.token) ? s.token : (localStorage.getItem('tmc_token') || '');
+  if (!token) { window.location.href = '/signin.html'; return; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Opening checkout…'; }
+  try {
+    var res = await fetch('/api/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: token, flow: 'upgrade', plan: 'premium' })
+    });
+    var data = await res.json();
+    if (data && data.url) { window.location.href = data.url; return; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Confirm and pay $14.99'; }
+    alert((data && data.error) || 'Could not start the upgrade. Please try again.');
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Confirm and pay $14.99'; }
+    alert('Network error. Please try again.');
+  }
+}
+</script>
 </body>
 </html>
 
