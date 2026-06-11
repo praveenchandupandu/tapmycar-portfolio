@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!-- TMC_TOW_SIGNIN_PAGE -->
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#FF6B00">
+<title>Sign in — TapMyCar for tow companies</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/app.css">
+<style>
+.si { max-width: 460px; margin: 0 auto; padding: 28px 18px 60px; }
+.si-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; }
+.si-eyebrow { display: inline-block; background: #FFF7ED; border: 1px solid #FED7AA; color: #9A3412; font-size: 10px; font-weight: 800; padding: 5px 11px; border-radius: 99px; letter-spacing: .05em; }
+.si-h1 { font-size: 28px; font-weight: 800; letter-spacing: -.5px; color: #111; margin: 0 0 8px; line-height: 1.15; }
+.si-sub { font-size: 14px; color: #6B7280; line-height: 1.6; margin: 0 0 24px; }
+.si-card { background: #fff; border: 1px solid #E5E7EB; border-radius: 16px; padding: 22px; margin-bottom: 14px; }
+.si-label { display: block; font-size: 11px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: .04em; margin: 0 0 6px; }
+.si-input {
+  width: 100%; padding: 13px 14px; font-size: 15px;
+  border: 1.5px solid #E5E7EB; border-radius: 11px;
+  background: #fff; color: #111; font-family: inherit;
+  -webkit-appearance: none; appearance: none; box-sizing: border-box;
+}
+.si-input:focus { outline: none; border-color: #FF6B00; box-shadow: 0 0 0 4px rgba(255,107,0,.1); }
+.si-submit {
+  width: 100%; background: #FF6B00; color: #fff;
+  font-size: 15px; font-weight: 800; padding: 15px 0;
+  border: 0; border-radius: 13px; cursor: pointer;
+  margin-top: 12px; font-family: inherit;
+  box-shadow: 0 8px 22px rgba(255,107,0,.35);
+}
+.si-submit:active { transform: translateY(2px); }
+.si-submit:disabled { opacity: .55; cursor: not-allowed; }
+.si-err { font-size: 12px; color: #DC2626; margin: 10px 0 0; min-height: 18px; }
+.si-fineprint { font-size: 11px; color: #9CA3AF; line-height: 1.6; text-align: center; margin-top: 14px; }
+.si-fineprint a { color: #FF6B00; text-decoration: none; font-weight: 600; }
+
+.si-state { display: none; }
+.si-state.show { display: block; }
+
+.si-sent-ic, .si-loading-ic { width: 76px; height: 76px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 24px auto 18px; }
+.si-sent-ic { background: linear-gradient(135deg, #FFF7ED, #FFE4CC); box-shadow: 0 12px 30px rgba(255,107,0,.25); }
+.si-sent-ic svg { width: 36px; height: 36px; fill: none; stroke: #FF6B00; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.si-loading-ic { background: #F4F4F6; }
+.si-spinner { width: 36px; height: 36px; border: 3px solid #FED7AA; border-top-color: #FF6B00; border-radius: 50%; animation: sisp 0.9s linear infinite; }
+@keyframes sisp { to { transform: rotate(360deg); } }
+.si-err-ic { background: #FEF2F2; }
+.si-err-ic svg { stroke: #DC2626; }
+</style>
+</head>
+<body class="wide-page">
+<div class="si">
+  <div class="si-hdr">
+    <a href="/" aria-label="TapMyCar"><img src="/logo.png" alt="TapMyCar" style="height:42px;width:auto;display:block"></a>
+    <div class="si-eyebrow">FOR TOW COMPANIES</div>
+  </div>
+
+  <!-- FORM state: enter email -->
+  <div id="si-form" class="si-state">
+    <h1 class="si-h1">Sign in to your dashboard</h1>
+    <p class="si-sub">Enter the email you used when you set up your towing company. We will send you a one-tap sign-in link.</p>
+
+    <div class="si-card">
+      <div style="margin-bottom:6px"><label class="si-label" for="si-email">Your email</label><input class="si-input" type="email" id="si-email" maxlength="200" placeholder="manager@yourtowing.com" autocomplete="email"></div>
+      <button type="button" class="si-submit" id="si-submit-btn" onclick="siSubmit()">Send me a sign-in link</button>
+      <div class="si-err" id="si-err"></div>
+    </div>
+
+    <p class="si-fineprint">First time here? <a href="/for-tow-companies.html">Set up your towing company &rarr;</a></p>
+  </div>
+
+  <!-- SENT state: check your email -->
+  <div id="si-sent" class="si-state">
+    <div class="si-sent-ic"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+    <h1 class="si-h1" style="text-align:center">Check your email</h1>
+    <p class="si-sub" style="text-align:center">If your email is registered, we just sent you a sign-in link. Tap it from your phone to land on your dashboard. The link is valid for 30 minutes.</p>
+    <div class="si-card" style="text-align:center;padding:18px">
+      <p style="font-size:12px;color:#6B7280;line-height:1.6;margin:0 0 8px">Did not get it?</p>
+      <ul style="font-size:12px;color:#6B7280;line-height:1.7;text-align:left;padding-left:20px;margin:0 0 12px">
+        <li>Check your spam / promotions folder</li>
+        <li>Double-check the email you entered is correct</li>
+        <li>Wait 60 seconds and request again</li>
+      </ul>
+      <button type="button" class="si-submit" style="background:#fff;color:#FF6B00;border:1.5px solid #FED7AA;box-shadow:none" onclick="siBackToForm()">Try a different email</button>
+    </div>
+  </div>
+
+  <!-- LOADING state: validating magic link -->
+  <div id="si-loading" class="si-state" style="text-align:center;padding-top:40px">
+    <div class="si-loading-ic"><div class="si-spinner"></div></div>
+    <p style="font-size:13px;color:#6B7280">Signing you in&hellip;</p>
+  </div>
+
+  <!-- ERROR state: invalid/expired link -->
+  <div id="si-link-err" class="si-state">
+    <div class="si-sent-ic si-err-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+    <h1 class="si-h1" style="text-align:center">This link is no longer valid</h1>
+    <p class="si-sub" style="text-align:center" id="si-link-err-msg">The link may have expired or already been used. Request a fresh one below.</p>
+    <button type="button" class="si-submit" onclick="siBackToForm()">Request a new sign-in link</button>
+  </div>
+</div>
+
+<script>
+function show(id) {
+  ['si-form','si-sent','si-loading','si-link-err'].forEach(function (x) {
+    var el = document.getElementById(x);
+    if (!el) return;
+    if (x === id) el.classList.add('show');
+    else el.classList.remove('show');
+  });
+}
+
+window.siSubmit = async function () {
+  var btn = document.getElementById('si-submit-btn');
+  var err = document.getElementById('si-err');
+  var email = document.getElementById('si-email').value.trim();
+  err.textContent = '';
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    err.textContent = 'Please enter a valid email.'; return;
+  }
+  btn.disabled = true; btn.textContent = 'Sending\u2026';
+  try {
+    var res = await fetch('/api/tow-company-signin', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email })
+    });
+    var data = await res.json();
+    if (!res.ok || !data.ok) throw new Error(data.error || 'Failed to send link');
+    show('si-sent');
+  } catch (e) {
+    err.textContent = e.message || 'Network error. Try again.';
+    btn.disabled = false; btn.textContent = 'Send me a sign-in link';
+  }
+};
+
+window.siBackToForm = function () {
+  document.getElementById('si-email').value = '';
+  document.getElementById('si-submit-btn').disabled = false;
+  document.getElementById('si-submit-btn').textContent = 'Send me a sign-in link';
+  // Strip any token from URL
+  try { history.replaceState(null, '', '/towing-signin.html'); } catch (e) {}
+  show('si-form');
+};
+
+(function () {
+  var token = '';
+  try { token = new URL(location.href).searchParams.get('t') || ''; } catch (e) {}
+  if (!token) { show('si-form'); return; }
+
+  show('si-loading');
+  fetch('/api/tow-company-verify-token?t=' + encodeURIComponent(token), { credentials: 'include' })
+    .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+    .then(function (resp) {
+      if (!resp.ok || !resp.d.ok) {
+        document.getElementById('si-link-err-msg').textContent = (resp.d && resp.d.error) || 'Link not valid.';
+        show('si-link-err'); return;
+      }
+      window.location.href = '/towing-dashboard.html';
+    })
+    .catch(function () {
+      document.getElementById('si-link-err-msg').textContent = 'Network error. Check your connection and try the link again.';
+      show('si-link-err');
+    });
+})();
+</script>
+</body>
+</html>

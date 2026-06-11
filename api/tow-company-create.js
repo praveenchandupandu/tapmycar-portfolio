@@ -41,12 +41,26 @@ module.exports = async function handler(req, res) {
   }
   if (!code) return res.status(500).json({ error: 'Could not generate unique code' });
 
+  // Generate admin session token so they auto-land on the dashboard
+  const adminSession = require('crypto').randomBytes(32).toString('hex');
+  const adminExpires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
   const { data, error } = await supabase
     .from('tow_companies')
-    .insert({ code, company_name, phone, address: address || null, admin_email, active: true })
+    .insert({
+      code, company_name, phone, address: address || null, admin_email, active: true,
+      admin_session_token: adminSession, admin_session_expires: adminExpires
+    })
     .select('code')
     .single();
   if (error) return res.status(500).json({ error: 'Failed to create company' });
+
+  // Set HttpOnly admin session cookie  manager is auto-signed-in
+  const host = String(req.headers.host || '');
+  const isProd = !host.includes('localhost') && !host.includes('127.0.0.1');
+  const cookieParts = ['tmc_tow_admin=' + adminSession, 'HttpOnly', 'SameSite=Lax', 'Path=/', 'Max-Age=2592000'];
+  if (isProd) cookieParts.push('Secure');
+  res.setHeader('Set-Cookie', cookieParts.join('; '));
 
   const driverUrl = 'https://tapmycar.io/join.html?co=' + code;
 
@@ -65,7 +79,7 @@ module.exports = async function handler(req, res) {
         '<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:12px;padding:14px;font-size:12px;color:#1E40AF;line-height:1.6">' +
           '<b>Save this email.</b> It is your record of the URL. If a driver leaves or the link gets shared too widely, email <a href="mailto:support@tapmycar.io" style="color:#1E40AF">support@tapmycar.io</a> and we will rotate the code.' +
         '</div>' +
-        '<div style="font-size:11px;color:#9CA3AF;text-align:center;margin-top:22px">Praman Tech LLC \u00b7 Connecticut, USA</div>' +
+        '<div style="font-size:11px;color:#9CA3AF;text-align:center;margin-top:22px">Praman Tech LLC · Connecticut, USA</div>' +
       '</div>';
     await resend.emails.send({
       from: 'TapMyCar <noreply@tapmycar.io>',
