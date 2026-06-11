@@ -59,7 +59,18 @@ module.exports = async function handler(req, res) {
     towPhone   = String(b.tow_company_phone   || '').trim().slice(0, 60);
     towAddress = String(b.tow_company_address || '').trim().slice(0, 400);
   }
-  if (!towName) return res.status(403).json({ error: 'Not linked to a towing company. Open your team driver link first.' });
+  if (!towName) {
+    // TMC_HARDEN_CLEAR: clear any lingering stale cookie so the device immediately
+    // reverts to "Not linked yet" state on next visit
+    if (cookieCode) {
+      const host = String(req.headers.host || '');
+      const isProd = !host.includes('localhost') && !host.includes('127.0.0.1');
+      const clearParts = ['tmc_tow_co=', 'HttpOnly', 'SameSite=Lax', 'Path=/', 'Max-Age=0'];
+      if (isProd) clearParts.push('Secure');
+      res.setHeader('Set-Cookie', clearParts.join('; '));
+    }
+    return res.status(403).json({ error: 'Not linked to a towing company. Open your team driver link first.' });
+  }
 
   // Lookup tag + owner
   const { data: tag, error: tagErr } = await supabase

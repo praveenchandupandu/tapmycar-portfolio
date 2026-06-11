@@ -166,7 +166,7 @@ window.dbCopy = function () {
 };
 
 window.dbRotate = async function () {
-  if (!confirm('Rotate your driver link?\n\nThe current link will stop working immediately. Every driver will need the new link.')) return;
+  if (!confirm('Rotate your driver link?\n\nThe OLD link stops working immediately. Every driver using the old link will see "Not linked yet" the next time they scan a sticker, and will need the NEW link from you.')) return;
   try {
     var res = await fetch('/api/tow-company-rotate', { method: 'POST', credentials: 'include' });
     var data = await res.json();
@@ -174,6 +174,18 @@ window.dbRotate = async function () {
     COMPANY.driver_url = data.url;
     COMPANY.code = data.code;
     paint(COMPANY);
+    /* TMC_ROTATE_BANNER: persistent banner after rotation */
+    var banner = document.getElementById('db-rotate-banner');
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.id = 'db-rotate-banner';
+      banner.style.cssText = 'background:#FEF3C7;border:1px solid #FCD34D;border-radius:14px;padding:14px 16px;margin-bottom:14px;font-size:12px;color:#78350F;line-height:1.6';
+      banner.innerHTML = '<b>✓ New link generated.</b><br>Forward this new link to every driver. The old link is disabled - any driver still using it will see "Not linked yet" the next time they scan a sticker.';
+      var content = document.getElementById('db-content');
+      var firstCard = content.querySelector('.db-url-card');
+      content.insertBefore(banner, firstCard);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
     toast('New link generated');
   } catch (e) {
     alert(e.message || 'Could not rotate. Try again.');

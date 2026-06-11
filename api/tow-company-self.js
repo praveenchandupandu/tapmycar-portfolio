@@ -31,7 +31,12 @@ module.exports = async function handler(req, res) {
 
   if (error || !data) {
     // Stale or revoked cookie -> clear it so /towing.html doesn't loop
-    res.setHeader('Set-Cookie', 'tmc_tow_co=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0');
+    // TMC_HARDEN_CLEAR
+    const host = String(req.headers.host || '');
+    const isProd = !host.includes('localhost') && !host.includes('127.0.0.1');
+    const clearParts = ['tmc_tow_co=', 'HttpOnly', 'SameSite=Lax', 'Path=/', 'Max-Age=0'];
+    if (isProd) clearParts.push('Secure');
+    res.setHeader('Set-Cookie', clearParts.join('; '));
     res.setHeader('Cache-Control', 'no-store');
     return res.json({ ok: true, linked: false, revoked: true });
   }
