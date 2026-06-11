@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!-- TMC_TOW_JOIN_PAGE -->
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#FF6B00">
+<title>Linking your phone  TapMyCar</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/app.css">
+<style>
+.jn { max-width: 480px; margin: 0 auto; padding: 26px 18px 80px; min-height: 100vh; display: flex; flex-direction: column; }
+.jn-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
+.jn-eyebrow { display: inline-block; background: #FFF7ED; border: 1px solid #FED7AA; color: #9A3412; font-size: 10px; font-weight: 800; padding: 5px 11px; border-radius: 99px; letter-spacing: .05em; }
+.jn-body { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: 20px; }
+.jn-spinner { width: 56px; height: 56px; border: 4px solid #FED7AA; border-top-color: #FF6B00; border-radius: 50%; animation: jnspin 0.9s linear infinite; margin-bottom: 18px; }
+@keyframes jnspin { to { transform: rotate(360deg); } }
+.jn-state { width: 100%; display: none; }
+.jn-state.show { display: block; }
+.jn-ic { width: 84px; height: 84px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; }
+.jn-ic.ok { background: linear-gradient(135deg, #FFF7ED, #FFE4CC); box-shadow: 0 12px 30px rgba(255,107,0,.25); }
+.jn-ic.bad { background: #FEF2F2; }
+.jn-ic svg { width: 38px; height: 38px; fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.jn-ic.ok svg { stroke: #FF6B00; }
+.jn-ic.bad svg { stroke: #DC2626; }
+.jn-h1 { font-size: 28px; font-weight: 800; letter-spacing: -.5px; color: #111; margin: 0 0 8px; line-height: 1.15; }
+.jn-co { font-size: 24px; font-weight: 900; color: #FF6B00; margin: 0 0 18px; }
+.jn-p { font-size: 14px; color: #6B7280; line-height: 1.6; margin: 0 0 22px; max-width: 360px; }
+.jn-howto { background: #FFF7ED; border: 1px solid #FED7AA; border-radius: 14px; padding: 16px; margin: 0 0 22px; text-align: left; }
+.jn-howto h4 { font-size: 11px; font-weight: 800; color: #9A3412; text-transform: uppercase; letter-spacing: .05em; margin: 0 0 10px; }
+.jn-howto ol { margin: 0; padding-left: 20px; font-size: 12px; color: #7C2D12; line-height: 1.75; }
+.jn-cta { background: #FF6B00; color: #fff; font-size: 15px; font-weight: 800; padding: 14px 28px; border: 0; border-radius: 12px; text-decoration: none; cursor: pointer; box-shadow: 0 8px 22px rgba(255,107,0,.35); font-family: inherit; display: inline-block; }
+.jn-cta:active { transform: translateY(2px); }
+.jn-err-detail { font-size: 12px; color: #DC2626; margin: 10px 0; }
+</style>
+</head>
+<body class="wide-page">
+<div class="jn">
+  <div class="jn-hdr">
+    <a href="/" aria-label="TapMyCar"><img src="/logo.png" alt="TapMyCar" style="height:42px;width:auto;display:block"></a>
+    <div class="jn-eyebrow">FOR TOW DRIVERS</div>
+  </div>
+
+  <div class="jn-body">
+    <div id="jn-loading">
+      <div class="jn-spinner"></div>
+      <div style="font-size:13px;color:#6B7280">Linking this phone\u2026</div>
+    </div>
+
+    <div id="jn-success" class="jn-state">
+      <div class="jn-ic ok"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <h1 class="jn-h1">You\u2019re linked.</h1>
+      <div class="jn-co" id="jn-co-name"></div>
+      <p class="jn-p">From now on, just tap any TapMyCar sticker on a car you tow. The owner will be notified instantly with this company's contact info.</p>
+
+      <div class="jn-howto">
+        <h4>What happens next</h4>
+        <ol>
+          <li>You tow a car with a TapMyCar sticker</li>
+          <li>Tap your phone on the sticker (or scan the QR code)</li>
+          <li>Pick a template, hit Send. Owner gets notified in seconds.</li>
+        </ol>
+      </div>
+
+      <a href="/" class="jn-cta">Got it</a>
+    </div>
+
+    <div id="jn-error" class="jn-state">
+      <div class="jn-ic bad"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+      <h1 class="jn-h1">This link doesn\u2019t work</h1>
+      <p class="jn-p" id="jn-err-msg">The link your manager shared with you is either expired or was revoked. Ask them for the latest one.</p>
+      <a href="/for-tow-companies.html" class="jn-cta">Set up a new company</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var co = '';
+  try {
+    var u = new URL(location.href);
+    co = u.searchParams.get('co') || '';
+  } catch (e) {}
+  if (!co) {
+    document.getElementById('jn-loading').style.display = 'none';
+    document.getElementById('jn-err-msg').textContent = 'No company code in the link. Make sure you tapped the full link your manager sent you.';
+    document.getElementById('jn-error').classList.add('show');
+    return;
+  }
+  fetch('/api/tow-join?co=' + encodeURIComponent(co), { credentials: 'include' })
+    .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+    .then(function (resp) {
+      document.getElementById('jn-loading').style.display = 'none';
+      if (!resp.ok || !resp.d.ok) {
+        document.getElementById('jn-err-msg').textContent = (resp.d && resp.d.error) || 'Link not valid.';
+        document.getElementById('jn-error').classList.add('show');
+        return;
+      }
+      document.getElementById('jn-co-name').textContent = resp.d.company_name;
+      document.getElementById('jn-success').classList.add('show');
+    })
+    .catch(function () {
+      document.getElementById('jn-loading').style.display = 'none';
+      document.getElementById('jn-err-msg').textContent = 'Network error. Check your connection and try the link again.';
+      document.getElementById('jn-error').classList.add('show');
+    });
+})();
+</script>
+</body>
+</html>
