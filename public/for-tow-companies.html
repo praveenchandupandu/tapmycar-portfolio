@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<!-- TMC_TOW_COMPANY_SETUP -->
+<!-- TMC_UNICODE_OK
+     TMC_TOW_COMPANY_SETUP -->
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#FF6B00">
 <title>Set up your towing company  TapMyCar</title>
@@ -62,7 +63,7 @@
 <div class="ft">
   <div class="ft-hdr">
     <a href="/" aria-label="TapMyCar"><img src="/logo.png" alt="TapMyCar" style="height:42px;width:auto;display:block"></a>
-    <a href="javascript:void(0)" onclick="tmcSmartBack('/')" class="back-link" style="margin:0">\u2190 Back</a>
+    <a href="javascript:void(0)" onclick="tmcSmartBack('/')" class="back-link" style="margin:0">← Back</a>
   </div>
 
   <div class="ft-eyebrow">For towing companies</div>
@@ -91,7 +92,7 @@
   </div>
 
   <div id="ft-success" class="ft-success">
-    <h3>\u2713 You're set up</h3>
+    <h3>✓ You're set up</h3>
     <p class="lead"><strong id="ft-success-name"></strong> is now connected to TapMyCar. We also emailed this link to you.</p>
     <div class="ft-label" style="color:#9A3412">Driver link  share with every driver</div>
     <div class="ft-url-box" id="ft-url-box"></div>
@@ -140,7 +141,7 @@ window.ftSubmit = async function () {
   if (!company || !phone || !email) { err.textContent = 'Company name, phone, and email are required.'; return; }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = 'Please enter a valid email.'; return; }
 
-  btn.disabled = true; btn.textContent = 'Setting up\u2026';
+  btn.disabled = true; btn.textContent = 'Setting up…';
   try {
     var res = await fetch('/api/tow-company-create', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -168,7 +169,7 @@ window.ftCopyUrl = function () {
   var btn = document.getElementById('ft-copy-btn');
   try {
     navigator.clipboard.writeText(url).then(function () {
-      btn.textContent = '\u2713 Copied';
+      btn.textContent = '✓ Copied';
       setTimeout(function () { btn.textContent = 'Copy link'; }, 2000);
     });
   } catch (e) {
@@ -176,7 +177,7 @@ window.ftCopyUrl = function () {
     ta.value = url; document.body.appendChild(ta);
     ta.select(); document.execCommand('copy');
     document.body.removeChild(ta);
-    btn.textContent = '\u2713 Copied';
+    btn.textContent = '✓ Copied';
     setTimeout(function () { btn.textContent = 'Copy link'; }, 2000);
   }
 };

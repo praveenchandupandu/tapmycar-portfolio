@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<!-- TMC_TOW_OPERATOR_PAGE TMC_TOW_COOKIE_V2 -->
+<!-- TMC_UNICODE_OK
+     TMC_TOW_OPERATOR_PAGE TMC_TOW_COOKIE_V2 -->
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#FF6B00">
 <title>Send tow alert  TapMyCar</title>
@@ -87,13 +88,13 @@
   <!-- LOADING -->
   <div id="tw-loading" class="tw-loading">
     <div class="tw-spinner"></div>
-    Checking your link\u2026
+    Checking your link…
   </div>
 
   <!-- NOT LINKED state -->
   <div id="tw-nolink" class="tw-state">
     <div class="tw-nolink-ic"><svg viewBox="0 0 24 24"><path d="M9 12 l2 2 l4 -4"/><circle cx="12" cy="12" r="10"/></svg></div>
-    <h1 class="tw-nolink-h1">This phone isn\u2019t linked yet</h1>
+    <h1 class="tw-nolink-h1">This phone isn’t linked yet</h1>
     <p class="tw-nolink-p">Before you can send tow alerts, your manager needs to share your team's driver link with you.</p>
     <div class="tw-nolink-card">
       <h4>What to do</h4>
@@ -258,7 +259,7 @@
     err.textContent = '';
     if (!token) { err.textContent = 'No sticker scanned. Tap a TapMyCar sticker first.'; return; }
     if (!plate || plate.length < 2) { err.textContent = 'Enter the license plate.'; return; }
-    btn.disabled = true; btn.textContent = 'Sending\u2026';
+    btn.disabled = true; btn.textContent = 'Sending…';
     try {
       var res = await fetch('/api/tow-notify', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
