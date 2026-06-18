@@ -1,6 +1,7 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="/tmc-api-base.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Sign in to TapMyCar</title>
@@ -129,9 +130,18 @@ async function signIn() {
     });
     const data = await res.json();
     if (data.token) {
-      saveSession(data.token, data.phone || '', data.name || '');
+      saveSession(data.token, data.phone || '', data.name || '', data.session_token); /* TMC_PATCH38S3 */
       localStorage.setItem('tmc_email', email);
-      window.location.href = '/dashboard.html';
+      /* TMC_PATCH34B_CONTINUE: honor ?continue= if present and safe (relative path) */
+      var _p34bDest = '/dashboard.html';
+      try {
+        var _p34bUrl = new URL(window.location.href);
+        var _p34bCont = _p34bUrl.searchParams.get('continue');
+        if (_p34bCont && _p34bCont.indexOf('/') === 0 && _p34bCont.indexOf('//') !== 0 && _p34bCont.indexOf('://') === -1) {
+          _p34bDest = _p34bCont;
+        }
+      } catch (e) {}
+      window.location.href = _p34bDest;
     } else {
       showToast(data.error || 'Wrong code  try again');
     }
@@ -141,5 +151,25 @@ async function signIn() {
 
 
 
+<script>
+/* TMC_PATCH17_IDLE_LOGOUT: show idle-signout note if redirected with ?reason=idle */
+(function() {
+  try {
+    var url = new URL(window.location.href);
+    if (url.searchParams.get('reason') !== 'idle') return;
+    var n = document.createElement('div');
+    n.style.cssText = 'position:fixed;top:14px;left:50%;transform:translateX(-50%);background:#FFF3EC;border:1.5px solid #FFD7BA;color:#7C2D12;font-size:12.5px;font-weight:600;padding:10px 16px;border-radius:99px;z-index:9999;box-shadow:0 6px 16px rgba(0,0,0,.08);font-family:inherit';
+    n.textContent = 'You were signed out for inactivity. Sign in to continue.';
+    document.addEventListener('DOMContentLoaded', function() { document.body.appendChild(n); });
+    if (document.readyState !== 'loading') document.body.appendChild(n);
+    // Clean the URL so reload doesn't keep the banner
+    url.searchParams.delete('reason');
+    history.replaceState(null, '', url.pathname + (url.search ? url.search : ''));
+  } catch (e) {}
+})();
+</script>
+<!-- TMC_PATCH26_APP_SETTINGS: signin.footer slot -->
+<div data-tmc-slot="signin.footer" style="padding:12px 24px 24px;text-align:center"></div>
+<script src="/app-settings.js" defer></script>
 </body>
 </html>

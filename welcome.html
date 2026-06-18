@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="manifest" href="/manifest.json">
+    <script src="/tmc-api-base.js"></script>
+<link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#FF6B00">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -10,6 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Activating your code — TapMyCar</title>
 <link rel="stylesheet" href="/app.css">
+<link rel="stylesheet" href="/tmc-redesign.css">
 <style>
 .page-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100dvh - 12px);padding:32px 24px;text-align:center}
 .spin-ring{width:54px;height:54px;border:4px solid #FFE4CC;border-top-color:#FF6B00;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:18px}
@@ -145,8 +147,19 @@ async function redeemCode(code) {
     if (data && data.success) {
       // Clear pending code so we don't redeem it again on dashboard load
       localStorage.removeItem('tmc_pending_code');
-      // Customize success message for the alreadyRedeemed case (idempotency)
-      if (data.alreadyRedeemed) {
+      if (data.type === 'referral') {
+        /* TMC_PATCH44: simpler welcoming wording. No mention of reward. */
+        var refName = data.referrer_name || 'your friend';
+        if (data.alreadyRedeemed) {
+          document.getElementById('success-title').textContent = 'Already applied';
+          document.getElementById('success-message').textContent =
+            "You've already used " + refName + "'s referral code on this account.";
+        } else {
+          document.getElementById('success-title').textContent = 'Referral applied';
+          document.getElementById('success-message').textContent =
+            "Thanks for using " + refName + "'s referral code! Welcome to TapMyCar.";
+        }
+      } else if (data.alreadyRedeemed) {
         document.getElementById('success-title').textContent = 'Already activated';
         document.getElementById('success-message').textContent = "You've already redeemed this code. Scan your sticker to activate it on your account.";
       }
@@ -181,5 +194,6 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js');
 }
 </script>
+<script src="/tmc-redesign.js"></script>
 </body>
 </html>

@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="manifest" href="/manifest.json">
+    <script src="/tmc-api-base.js"></script>
+<link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#FF6B00">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -10,6 +11,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>Dashboard — TapMyCar</title>
   <link rel="stylesheet" href="/app.css">
+<link rel="stylesheet" href="/tmc-redesign.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.75)}}
@@ -82,6 +84,13 @@
       </div>
     </div>
 
+    <!-- TMC_PATCH47_CD: renewal countdown card (hidden by default) -->
+    <div id="renewal-card" style="display:none;border-radius:14px;padding:14px 16px;margin-bottom:14px;font-family:Inter,system-ui,sans-serif">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px" id="renewal-card-label">Subscription renewal</div>
+      <div style="font-size:15px;font-weight:800;line-height:1.3" id="renewal-card-title">Renews in 7 days</div>
+      <div style="font-size:12px;margin-top:4px" id="renewal-card-sub">$9.99 will be charged to your card on file.</div>
+    </div>
+
     <!-- 3. STATS ROW -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
       <div class="card" style="text-align:center;padding:14px 8px">
@@ -106,7 +115,7 @@
           <div style="font-size:16px;font-weight:700;color:var(--bk)" id="vehicle-label">My Vehicle</div>
           <div style="font-size:11px;color:var(--gy);margin-top:2px" id="tag-token">Loading...</div>
         </div>
-        <span class="sp sp-on">Active</span>
+        <span class="sp sp-on" id="tag-status-pill">Active</span>
       </div>
       <div class="qr-wrap" id="qr-container"></div>
       <div style="text-align:center;font-size:10px;color:var(--gy);margin-bottom:14px;word-break:break-all" id="tag-url">Generating your tag URL...</div>
@@ -125,12 +134,19 @@
       <div style="font-size:12px;color:rgba(255,255,255,.85);line-height:1.7;margin-bottom:14px">With Standard plan you get a real physical tag shipped to you plus privacy tools that actually work.<br><br><span style="color:#FFE4CC;font-weight:600">Know where your car was scanned. Screen every call. Stay protected.</span></div>
       <a href="/pricing.html" style="display:block;background:#fff;color:#FF6B00;font-size:13px;font-weight:800;padding:12px 24px;border-radius:12px;text-decoration:none;text-align:center">Upgrade to Standard</a>
     </div>
+    <!-- TMC_PATCH35C2_GIFT_LIFECYCLE: gift trial-ending banner -->
+    <div id="gift-expiry-banner" style="display:none;background:linear-gradient(135deg,#FF6B00,#C2410C);border-radius:18px;padding:18px 16px;margin-bottom:14px;position:relative;overflow:hidden">
+      <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:4px" id="gift-expiry-title">Your free trial is ending soon</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.9);line-height:1.5;margin-bottom:12px" id="gift-expiry-text">Subscribe to keep your tag active.</div>
+      <!-- TMC_PATCH35DRENEW_GIFT_RENEWAL: renew checkout, not the full pricing page -->
+      <button onclick="p35dStartRenew()" id="gift-renew-btn" style="background:#fff;color:#C2410C;font-weight:700;font-size:13px;padding:9px 18px;border-radius:10px;border:0;cursor:pointer">Subscribe now</button>
+    </div>
     <div id="upgrade-banner-standard" style="display:none;background:linear-gradient(135deg,#1A1A1A,#2d1a00);border-radius:18px;padding:18px 16px;margin-bottom:14px;position:relative;overflow:hidden">
       <div style="position:absolute;width:120px;height:120px;border-radius:50%;background:rgba(255,107,0,.12);right:-20px;top:-30px"></div>
       <div style="font-size:10px;font-weight:700;color:var(--or);margin-bottom:6px;letter-spacing:.8px;text-transform:uppercase">Protect your whole family</div>
       <div style="font-size:18px;font-weight:800;color:#fff;line-height:1.3;margin-bottom:8px">Your family drives too.<br>Are they protected?</div>
       <div style="font-size:12px;color:#9CA3AF;line-height:1.7;margin-bottom:14px">Every car in your family deserves privacy. With Premium, get multiple tags for family vehicles and advanced protection for everyone you love.<br><br><span style="color:#FFE4CC;font-weight:600">One family. One plan. Complete protection.</span></div>
-      <a href="/pricing.html" style="display:block;background:var(--or);color:#fff;font-size:13px;font-weight:800;padding:12px 24px;border-radius:12px;text-decoration:none;text-align:center">Upgrade to Premium</a>
+      <a href="javascript:void(0)" onclick="dashShowUpgradeConfirm()" style="display:block;background:var(--or);color:#fff;font-size:13px;font-weight:800;padding:12px 24px;border-radius:12px;text-decoration:none;text-align:center;cursor:pointer">Upgrade to Premium</a>
     </div>
     <!-- 4. ACTION BUTTONS (2x2 grid) -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
@@ -174,6 +190,10 @@
       <div id="family-codes-list"></div>
     </div>
 
+    <!-- TMC_VIDEOS reels (Patch Videos B) -->
+    <div data-tmc-reel="demo"  data-tmc-label="Demo videos"      style="margin-bottom:18px"></div>
+    <div data-tmc-reel="review" data-tmc-label="Customer reviews" style="margin-bottom:18px"></div>
+
     <!-- 6. RECENT ACTIVITY -->
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <div style="font-size:15px;font-weight:700;color:var(--bk)">Recent Activity</div>
@@ -201,23 +221,12 @@
 <div style="background:rgba(255,255,255,.08);border-radius:99px;padding:4px 10px;font-size:10px;color:#fff;font-weight:500">Scan location</div>
 <div style="background:rgba(255,255,255,.08);border-radius:99px;padding:4px 10px;font-size:10px;color:#fff;font-weight:500">Privacy first</div>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-    <a href="https://apps.apple.com/app/tapmycar" target="_blank" style="background:#fff;border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:8px;text-decoration:none">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="#111"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-      <div>
-        <div style="font-size:8px;color:#666;font-weight:500">Download on the</div>
-        <div style="font-size:12px;font-weight:800;color:#111">App Store</div>
-      </div>
-    </a>
-    <a href="https://play.google.com/store/apps/tapmycar" target="_blank" style="background:#fff;border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:8px;text-decoration:none">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 20.5v-17c0-.83 1-.83 1.5-.5l14 8.5-14 8.5c-.5.33-1.5.33-1.5-.5z" fill="#34A853"/><path d="M3 3.5l8.5 8.5L3 20.5V3.5z" fill="#4285F4"/><path d="M11.5 12l5.5 3.5-3-3 3-3-5.5 3.5z" fill="#FBBC05"/><path d="M17 15.5l-5.5-3.5 5.5-3.5 2 2.1c.7.7.7 2.3 0 3l-2 2z" fill="#EA4335"/></svg>
-      <div>
-        <div style="font-size:8px;color:#666;font-weight:500">Get it on</div>
-        <div style="font-size:12px;font-weight:800;color:#111">Google Play</div>
-      </div>
-    </a>
-  </div>
+  <!-- TMC_PATCH26_APP_SETTINGS: dashboard.banner slot (replaces hardcoded App Store / Play Store) -->
+  <div data-tmc-slot="dashboard.banner"></div>
 </div>
+
+<!-- TMC_PATCH26_APP_SETTINGS: dashboard.help slot (support email/phone) -->
+<div data-tmc-slot="dashboard.help" style="padding:0 24px 14px;display:flex;justify-content:center"></div>
 
 <!-- BOTTOM NAV -->
 <nav class="bnav">
@@ -234,6 +243,22 @@
 <script>
 requireAuth();
 const s = getSession();
+/* TMC_PATCH17_IDLE_LOGOUT */
+if (typeof installIdleLogout === 'function') {
+  installIdleLogout({
+    minutes: 10,
+    warningSeconds: 60,
+    onLogout: function() {
+      try {
+        localStorage.removeItem('tmc_token');
+        localStorage.removeItem('tmc_phone');
+        localStorage.removeItem('tmc_name');
+        localStorage.removeItem('tmc_session_token'); /* TMC_PATCH38S3 */
+      } catch (e) {}
+      window.location.href = '/signin.html?reason=idle';
+    }
+  });
+}
 if (s.name) {
   document.getElementById('greeting-name').textContent = s.name;
   document.getElementById('av-btn').textContent = s.name[0].toUpperCase();
@@ -296,28 +321,115 @@ async function loadDashboard() {
     const res = await fetch(`/api/get-dashboard?user_id=${s.token}`);
     const data = await res.json();
 
+    /* TMC_PATCH29_PLAN_BADGE_FIX: plan-badge + banner logic — run regardless of scanCount.
+       scanCount can be a number (including 0). Plan-related UI shouldn't
+       depend on scan presence. */
     if (data.scanCount !== undefined) {
       document.getElementById('stat-scans').textContent = data.scanCount;
       document.getElementById('stat-week').textContent = data.weekCount;
-      // Show upgrade banner based on plan
-      const userPlan = data.user ? (data.user.plan || 'etag') : 'etag';
-      // Update plan badge label dynamically
-      const badge = document.getElementById('plan-badge');
-      if (badge) {
-        const label = userPlan === 'etag' ? 'Free' : userPlan === 'standard' ? 'Standard' : userPlan === 'premium' ? 'Premium' : userPlan;
-        badge.textContent = label;
-      }
-      // TMC_FAMILY_CODES_LOADER
-      renderFamilyCodes(userPlan, data.premiumCodes || []);
-      if (userPlan === 'etag' || userPlan === 'free') {
-        document.getElementById('upgrade-banner-etag').style.display = 'block';
-      } else if (userPlan === 'standard') {
-        document.getElementById('upgrade-banner-standard').style.display = 'block';
+    }
+
+    /* TMC_PATCH29_PLAN_BADGE_FIX: derive plan ONCE, then apply to badge + banners. */
+    var _userPlan = 'etag';
+    if (data && data.user && typeof data.user.plan === 'string' && data.user.plan) {
+      _userPlan = data.user.plan.toLowerCase().trim();
+    }
+    console.log('[dashboard] userPlan=' + _userPlan + ' (raw=' + JSON.stringify(data && data.user && data.user.plan) + ')');
+
+    var _planLabels = { etag: 'Free', free: 'Free', standard: 'Standard', premium: 'Premium', business: 'Business' };
+
+    /* TMC_PATCH35G2_BADGE_FIX: if the user has an expired gift tag, the badge should
+       show the real gift plan (e.g. "Standard"), not "Free". The user's
+       plan column is 'etag' after expiry, but the tag still carries
+       gift_expired + gift_plan. */
+    var _giftExpiredTag = null;
+    if (data && data.tags && data.tags.length) {
+      for (var _gx = 0; _gx < data.tags.length; _gx++) {
+        if (data.tags[_gx] && data.tags[_gx].gift_expired === true) {
+          _giftExpiredTag = data.tags[_gx];
+          break;
+        }
       }
     }
 
+    var _badge = document.getElementById('plan-badge');
+    if (_badge) {
+      if (_giftExpiredTag) {
+        var _gxPlan = (_giftExpiredTag.gift_plan || 'standard');
+        _badge.textContent = _planLabels[_gxPlan] || (_gxPlan.charAt(0).toUpperCase() + _gxPlan.slice(1));
+      } else {
+        _badge.textContent = _planLabels[_userPlan] || (_userPlan.charAt(0).toUpperCase() + _userPlan.slice(1));
+      }
+    }
+
+    /* TMC_PATCH29_PLAN_BADGE_FIX: Reset BOTH banners to hidden, then decide. */
+    var _bEtag = document.getElementById('upgrade-banner-etag');
+    var _bStd = document.getElementById('upgrade-banner-standard');
+    if (_bEtag) _bEtag.style.display = 'none';
+    if (_bStd) _bStd.style.display = 'none';
+
+    /* TMC_PATCH29_PLAN_BADGE_FIX: Only free/etag users see "Upgrade to Standard".
+       Only standard users see "Upgrade to Premium".
+       Premium/business users see no upgrade banner. */
+    if (_userPlan === 'etag' || _userPlan === 'free' || !_userPlan) {
+      if (_bEtag) _bEtag.style.display = 'block';
+    } else if (_userPlan === 'standard') {
+      if (_bStd) _bStd.style.display = 'block';
+    }
+    /* premium / business / anything else: no banner shown */
+
+    /* TMC_PATCH35C2_GIFT_LIFECYCLE: gift trial-ending banner — shows within 10 days of expiry.
+       Overrides the upgrade banners (a gift user does not need an upgrade
+       nag, they need a renewal nag). */
+    try {
+      var _giftExp = data && data.user && data.user.gift_plan_expires_at;
+      var _giftBanner = document.getElementById('gift-expiry-banner');
+      if (_giftExp && _giftBanner) {
+        var _expDate = new Date(_giftExp);
+        var _msLeft = _expDate.getTime() - Date.now();
+        var _daysLeft = Math.ceil(_msLeft / 86400000);
+        if (_daysLeft <= 10) {
+          /* hide the upgrade banners; the renewal banner takes priority */
+          if (_bEtag) _bEtag.style.display = 'none';
+          if (_bStd) _bStd.style.display = 'none';
+          var _t = document.getElementById('gift-expiry-title');
+          var _x = document.getElementById('gift-expiry-text');
+          if (_daysLeft <= 0) {
+            if (_t) _t.textContent = 'Your free trial ends today';
+            if (_x) _x.textContent = 'Subscribe now to keep your tag active and your car protected.';
+          } else if (_daysLeft === 1) {
+            if (_t) _t.textContent = 'Your free trial ends tomorrow';
+            if (_x) _x.textContent = 'Subscribe now so your tag keeps working without interruption.';
+          } else {
+            if (_t) _t.textContent = 'Your free trial ends in ' + _daysLeft + ' days';
+            if (_x) _x.textContent = 'Subscribe any time to keep your tag active after the trial.';
+          }
+          _giftBanner.style.display = 'block';
+        }
+      }
+    } catch (e) { console.warn('TMC_PATCH35C2_GIFT_LIFECYCLE: banner error', e); }
+
+    // TMC_FAMILY_CODES_LOADER
+    renderFamilyCodes(_userPlan, data.premiumCodes || []);
+
+    /* TMC_PATCH35DRENEW_GIFT_RENEWAL: remember the user's plan for the renew button */
+    window.__tmcRenewPlan = (_userPlan === 'premium') ? 'premium' : 'standard';
+
     if (data.tags && data.tags.length > 0) {
-      const tag = data.tags[0];
+      // TMC_PICK_BEST_TAG: prefer active physical sticker over eTag.
+      // Token rule: physical = token does NOT start with "TMC-ET",
+      //             eTag     = token starts with "TMC-ET".
+      // Sort priority: active physical > active eTag > other.
+      function isPhysical(t) {
+        return t && t.token && !t.token.toUpperCase().startsWith('TMC-ET');
+      }
+      function tagScore(t) {
+        const active = (t.status === 'active') ? 2 : (t.status === 'paused' ? 1 : 0);
+        const physical = isPhysical(t) ? 4 : 0;
+        return active + physical;
+      }
+      const sortedTags = [...data.tags].sort((a, b) => tagScore(b) - tagScore(a));
+      const tag = sortedTags[0];
       tagToken = tag.token;
       currentTagToken = tag.token;
       currentTagStatus = tag.status || "active";
@@ -327,9 +439,27 @@ async function loadDashboard() {
         document.getElementById("stat-status").textContent = "OFF";
         document.getElementById("stat-status").style.color = "var(--rd,#DC2626)";
       }
-      const tok = tag.token; // DB token already in TMC-XXXXXX format
+      /* TMC_PATCH35G_EXPIRED_DISPLAY: reflect inactive / disabled tags on the card + stat */
+      if (currentTagStatus === "inactive" || currentTagStatus === "disabled") {
+        var _pill = document.getElementById("tag-status-pill");
+        if (_pill) {
+          _pill.textContent = "Inactive";
+          _pill.className = "sp sp-am";
+        }
+        var _stat = document.getElementById("stat-status");
+        if (_stat) {
+          _stat.textContent = "OFF";
+          _stat.style.color = "var(--rd,#DC2626)";
+        }
+      }
+            // Normalize token to TMC-XXXXXX format (in case DB has it without hyphen)
+      function formatTagToken(t) {
+        if (!t) return '';
+        return t.includes('-') ? t : ('TMC-' + t.replace(/^TMC[-.]?/, ''));
+      }
+      const tok = formatTagToken(tag.token);
       tagURL = `https://tapmycar.io/tag/${tok}`;
-      const displayToken = tag.token; // DB token already in TMC-XXXXXX format
+      const displayToken = tok;
 
       document.getElementById('vehicle-label').textContent = tag.vehicle_label || 'My Vehicle';
       document.getElementById('tag-token').textContent = displayToken;
@@ -346,6 +476,43 @@ async function loadDashboard() {
         correctLevel: QRCode.CorrectLevel.M
       });
     }
+
+    /* TMC_PATCH47_CD: renewal countdown card. Show only when
+       renewal_iso is set AND <= 7 days away. Three tiers (yellow / orange / red). */
+    (function () {
+      var card = document.getElementById('renewal-card');
+      if (!card) return;
+      var iso = data.renewal_iso;
+      if (!iso) { card.style.display = 'none'; return; }
+      var ms = new Date(iso).getTime() - Date.now();
+      var days = Math.ceil(ms / 86400000);
+      if (days > 7 || days < 0) { card.style.display = 'none'; return; }
+
+      var title = document.getElementById('renewal-card-title');
+      var sub   = document.getElementById('renewal-card-sub');
+      var label = document.getElementById('renewal-card-label');
+      var amt   = (data.next_amount_cents != null) ? ('$' + (data.next_amount_cents/100).toFixed(2)) : '';
+
+      var bg, border, txt, accent;
+      if (days === 0) {
+        bg = '#FEF2F2'; border = '#FCA5A5'; txt = '#7F1D1D'; accent = '#B91C1C';
+        title.textContent = 'Renews today';
+      } else if (days === 1) {
+        bg = '#FFF7ED'; border = '#FDBA74'; txt = '#7C2D12'; accent = '#C2410C';
+        title.textContent = 'Renews tomorrow';
+      } else {
+        bg = '#FEFCE8'; border = '#FCD34D'; txt = '#713F12'; accent = '#92400E';
+        title.textContent = 'Renews in ' + days + ' days';
+      }
+      card.style.background    = bg;
+      card.style.border        = '1px solid ' + border;
+      card.style.color         = txt;
+      label.style.color        = accent;
+      sub.textContent = amt ? (amt + ' will be charged to your card on file.') : 'Will be charged to your card on file.';
+      card.style.display = 'block';
+      card.style.cursor  = 'pointer';
+      card.onclick = function () { window.location.href = '/billing.html'; };
+    })();
 
     if (data.recentScans && data.recentScans.length > 0) {
       const items = data.recentScans.slice(0, 5).map(scan => {
@@ -436,6 +603,34 @@ async function togglePause() {
 
 loadDashboard();
 registerPush();
+
+/* TMC_PATCH35DRENEWFIX_PLACEMENT: p35dStartRenew — placed inside the executing inline script. */
+async function p35dStartRenew() {
+  var btn = document.getElementById('gift-renew-btn');
+  var session = (typeof getSession === 'function') ? getSession() : null;
+  var token = session && session.token ? session.token : (localStorage.getItem('tmc_token') || '');
+  if (!token) { window.location.href = '/signin.html'; return; }
+  var plan = window.__tmcRenewPlan || 'standard';
+  if (btn) { btn.disabled = true; btn.textContent = 'Loading...'; }
+  try {
+    var res = await fetch('/api/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: token, flow: 'renew', plan: plan })
+    });
+    var data = await res.json();
+    if (data && data.url) {
+      window.location.href = data.url;
+      return;
+    }
+    if (btn) { btn.disabled = false; btn.textContent = 'Subscribe now'; }
+    alert((data && data.error) || 'Could not start checkout. Please try again.');
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Subscribe now'; }
+    alert('Network error. Please try again.');
+  }
+}
+
 </script>
 <script>
 if ('serviceWorker' in navigator) {
@@ -454,6 +649,118 @@ if ('serviceWorker' in navigator) {
   <p style="font-size:11px;color:#9CA3AF;margin:0">© 2026 Praman Tech LLC</p>
 </div>
 
+<script src="/tmc-redesign.js"></script>
+
+<!-- TMC_FLOATING_NAV -->
+<nav class="tmc-fnav" aria-label="Main navigation">
+  <a href="/dashboard.html" class="tmc-fnav-item" data-match="/dashboard">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+    <span class="tmc-fnav-label">Home</span>
+  </a>
+  <a href="/manage.html" class="tmc-fnav-item" data-match="/manage">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+    <span class="tmc-fnav-label">Tag</span>
+  </a>
+  <a href="/verify.html" class="tmc-fnav-item" data-match="/verify">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+    <span class="tmc-fnav-label">Verify</span>
+  </a>
+  <a href="/activity.html" class="tmc-fnav-item" data-match="/activity">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+    <span class="tmc-fnav-label">Activity</span>
+  </a>
+  <a href="/settings.html" class="tmc-fnav-item" data-match="/settings">
+    <div class="tmc-fnav-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+    <span class="tmc-fnav-label">Profile</span>
+  </a>
+</nav>
+<!-- /TMC_FLOATING_NAV -->
+<!-- TMC_PATCH26_APP_SETTINGS -->
+<!-- TMC_PATCH46 renewal prompt -->
+<script>window.__tmcShowRenewalModal = true;</script>
+<script src="/app-renewal-prompt.js" defer></script>
+<script src="/app-settings.js" defer>
+</script>
+<script src="/tmc-reels.js"></script>
+<!-- TMC_DASH_UPGRADE_MODAL: same upgrade confirm flow as manage.html -->
+<div id="dash-upg-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:flex-end;justify-content:center" onclick="if(event.target===this)dashCloseUpgradeConfirm()">
+  <div style="background:#fff;border-radius:22px 22px 0 0;max-width:500px;width:100%;padding:24px 22px 28px;max-height:92vh;overflow-y:auto;font-family:Inter,sans-serif">
+    <div style="width:42px;height:4px;background:#E5E7EB;border-radius:2px;margin:0 auto 18px"></div>
+    <div style="font-size:11px;font-weight:700;color:#FF6B00;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Upgrade to Premium</div>
+    <div style="font-size:22px;font-weight:800;color:#111;letter-spacing:-.5px;margin-bottom:6px">3 stickers for your household</div>
+    <div style="font-size:13px;color:#6B7280;line-height:1.55;margin-bottom:18px">Protect every car your family drives with the same TapMyCar privacy.</div>
+    <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:14px;padding:14px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#7C2D12;margin-bottom:8px">
+        <span>You have today</span><span style="font-weight:700">1 Standard sticker</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#7C2D12;margin-bottom:8px">
+        <span>You’ll receive</span><span style="font-weight:700">2 more stickers</span>
+      </div>
+      <div style="height:1px;background:#FED7AA;margin:10px 0"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:14px;color:#7C2D12">
+        <span style="font-weight:700">After upgrade</span><span style="font-weight:800;color:#9A3412">3 Premium stickers</span>
+      </div>
+    </div>
+    <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:14px;padding:14px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#374151;margin-bottom:10px">
+        <span>Charge today (one-time)</span><span style="font-weight:800;color:#111;font-size:18px">$14.99</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#6B7280;margin-bottom:8px">
+        <span>Current annual plan</span><span style="text-decoration:line-through;color:#9CA3AF">$9.99/yr</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#6B7280">
+        <span>New annual plan (next renewal)</span><span style="font-weight:700;color:#111">$19.99/yr</span>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:14px;margin-bottom:18px">
+      <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">What you get</div>
+      <div style="font-size:13px;color:#111;line-height:1.8">
+        <div style="display:flex;align-items:center;gap:8px"><span style="color:#16A34A;font-weight:800">✓</span> 2 extra stickers ship in 2-3 business days</div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="color:#16A34A;font-weight:800">✓</span> Up to 3 family vehicles protected</div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="color:#16A34A;font-weight:800">✓</span> 3 gift codes to share with family</div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="color:#16A34A;font-weight:800">✓</span> Priority support</div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:#9CA3AF;line-height:1.55;margin-bottom:14px">Your card is charged $14.99 today. The new $19.99/year Premium plan begins on your next renewal date, replacing your $9.99/year Standard plan. Refundable within 14 days minus a $1 service fee. Cancel anytime in Settings.</div>
+    <button id="dash-upg-confirm-btn" type="button" onclick="dashConfirmUpgradeAndPay()" style="width:100%;background:#FF6B00;color:#fff;border:0;border-radius:13px;padding:15px 0;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 8px 20px rgba(255,107,0,.35)">Confirm and pay $14.99</button>
+    <button type="button" onclick="dashCloseUpgradeConfirm()" style="width:100%;background:transparent;color:#6B7280;border:0;padding:14px 0 0;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Cancel</button>
+  </div>
+</div>
+<script>
+/* TMC_DASH_UPGRADE_MODAL: open the same upgrade confirmation modal as manage.html */
+function dashShowUpgradeConfirm() {
+  var ov = document.getElementById('dash-upg-overlay');
+  if (!ov) return;
+  ov.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function dashCloseUpgradeConfirm() {
+  var ov = document.getElementById('dash-upg-overlay');
+  if (!ov) return;
+  ov.style.display = 'none';
+  document.body.style.overflow = '';
+}
+async function dashConfirmUpgradeAndPay() {
+  var btn = document.getElementById('dash-upg-confirm-btn');
+  var token = (typeof s !== 'undefined' && s && s.token) ? s.token : (localStorage.getItem('tmc_token') || '');
+  if (!token) { window.location.href = '/signin.html'; return; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Opening checkout…'; }
+  try {
+    var res = await fetch('/api/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: token, flow: 'upgrade', plan: 'premium' })
+    });
+    var data = await res.json();
+    if (data && data.url) { window.location.href = data.url; return; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Confirm and pay $14.99'; }
+    alert((data && data.error) || 'Could not start the upgrade. Please try again.');
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Confirm and pay $14.99'; }
+    alert('Network error. Please try again.');
+  }
+}
+</script>
 </body>
 </html>
 

@@ -2,7 +2,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="manifest" href="/manifest.json">
+    <script src="/tmc-api-base.js"></script>
+<link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#FF6B00">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta charset="UTF-8">
@@ -58,6 +59,232 @@
 <meta name="twitter:title" content="Pricing — Free, Standard, Premium plans | TapMyCar">
 <meta name="twitter:description" content="Simple pricing for TapMyCar. Free eTag, $9.99 Standard sticker, $24.99 Premium with 3 stickers for family. No hidden fees.">
 <meta name="twitter:image" content="https://tapmycar.io/og-image.png">
+<script>
+/* TMC_PATCH45B_FIX: pricing-page referral-credit banner + apply checkbox.
+   Fetches the user's available credit on load. If > 0, inserts a banner
+   into its OWN strip below the header (not into the header itself).
+   Checkbox is default UNCHECKED  user has to opt in to applying credit.
+   The pre-existing 'discount-banner' is also tied to this checkbox: when
+   the user ticks the box we show it; when unticked we hide it, so both
+   banners reflect the same intent. */
+(function () {
+  /* TMC_PATCH45C_PRICING_V2: dynamic per-plan price/button/note updates
+     with a re-entry guard. v1 had infinite recursion between
+     updateCreditDisplay() and our wrapped updateButtonLabels(); v2 fixes
+     it with window.__tmcUpdating, and never calls updateButtonLabels()
+     from updateCreditDisplay() (restore path uses the cached originals). */
+  window.__tmcCreditDollars = 0;
+  window.__tmcUpdating = false;
+
+  function setApplied(on, dollars) {
+    try {
+      window.__refDiscount = on ? (dollars || 0) : 0;
+      window.__tmcApply = !!on;
+      if (typeof dollars === 'number') window.__tmcCreditDollars = dollars;
+      var legacy = document.getElementById('discount-banner');
+      if (legacy) legacy.style.display = on ? 'block' : 'none';
+      updateCreditDisplay();
+    } catch (e) {}
+  }
+
+  function updateCreditDisplay() {
+    if (window.__tmcUpdating) return; /* guard against re-entry */
+    window.__tmcUpdating = true;
+    try {
+      var apply = !!window.__tmcApply;
+      var creditCents = Math.round((window.__tmcCreditDollars || 0) * 100);
+      ['standard','premium'].forEach(function (plan) {
+        var prefix = plan === 'standard' ? 'std' : 'prem';
+        var priceEl  = document.getElementById(prefix + '-price');
+        var btnAmtEl = document.getElementById(prefix + '-btn-amt');
+        var btnEl    = document.getElementById(prefix + '-btn');
+        if (!priceEl || !btnAmtEl || !btnEl) return;
+
+        /* Save the originals once so we can restore them on untick. */
+        if (typeof priceEl.dataset.tmcOriginal === 'undefined') {
+          priceEl.dataset.tmcOriginal = priceEl.innerHTML;
+        }
+        /* btnAmtEl is rewritten by the page's updateButtonLabels() on prepay
+           toggle. We read its CURRENT text to know the prepay-aware base
+           price, then either keep it (untick) or override it (tick). */
+        var btnText = (btnAmtEl.textContent || '').trim();
+        var todayMatch = btnText.match(/\$([0-9]+(?:\.[0-9]+)?)/);
+        if (!todayMatch) return;
+        var todayDollars = parseFloat(todayMatch[1]);
+        var todayCents = Math.round(todayDollars * 100);
+
+        var noteId = prefix + '-credit-note';
+        var noteEl = document.getElementById(noteId);
+
+        if (!apply || creditCents <= 0) {
+          /* Restore the price card to its original. Leave btnAmtEl alone
+             because the page's own updateButtonLabels() owns it. Hide the
+             credit note if present. NO cross-function call here  this is
+             what fixes the v1 recursion. */
+          priceEl.innerHTML = priceEl.dataset.tmcOriginal;
+          if (noteEl) noteEl.style.display = 'none';
+          return;
+        }
+
+        /* $1 minimum for direct flow (server-side enforced). */
+        var maxApplyCents = Math.max(0, todayCents - 100);
+        var discountCents = Math.min(creditCents, maxApplyCents);
+        if (discountCents <= 0) {
+          if (noteEl) noteEl.style.display = 'none';
+          return;
+        }
+
+        var finalCents     = todayCents - discountCents;
+        var finalDollars   = (finalCents     / 100).toFixed(2);
+        var discountDollars= (discountCents  / 100).toFixed(2);
+        var remainingCents = creditCents - discountCents;
+        var remainingDolls = (remainingCents / 100).toFixed(2);
+
+        /* Update the on-card price. Preserve the '/yr' sub-span. */
+        var orig = priceEl.dataset.tmcOriginal;
+        var subMatch = orig.match(/<span[\s\S]*?<\/span>/i);
+        var subSpan = subMatch ? subMatch[0] : '';
+        priceEl.innerHTML = '$' + finalDollars + ' ' + subSpan;
+
+        btnAmtEl.textContent = '$' + finalDollars;
+
+        if (!noteEl) {
+          noteEl = document.createElement('div');
+          noteEl.id = noteId;
+          noteEl.style.cssText = 'background:#F0FDF4;border-left:3px solid #16A34A;padding:10px 12px;margin:10px 0 0;font-size:11px;color:#166534;line-height:1.55;border-radius:8px';
+          var parent = btnEl.parentNode;
+          if (parent) parent.insertBefore(noteEl, btnEl.nextSibling);
+        }
+        noteEl.style.display = 'block';
+        if (remainingCents > 0) {
+          noteEl.textContent =
+            '$' + discountDollars + ' applied. $' + finalDollars +
+            ' minimum charge today (saves your card for annual renewal as we accept autopay). $' +
+            remainingDolls + ' remains in your account, can use for future transactions.';
+        } else {
+          noteEl.textContent = '$' + discountDollars + ' referral credit applied.';
+        }
+      });
+    } finally {
+      window.__tmcUpdating = false;
+    }
+  }
+
+  /* Wrap the page's own updateButtonLabels so OUR display refreshes any
+     time a prepay checkbox toggles. The guard prevents recursion: if
+     updateCreditDisplay() is currently running, the wrapper just calls
+     the original and returns without re-triggering our logic. */
+  function hookUpdateButtonLabels() {
+    if (window.__tmcUblHooked) return;
+    if (typeof window.updateButtonLabels !== 'function') return;
+    window.__tmcUblHooked = true;
+    var orig = window.updateButtonLabels;
+    window.updateButtonLabels = function () {
+      try { orig.apply(this, arguments); } catch (e) {}
+      if (!window.__tmcUpdating) {
+        try { updateCreditDisplay(); } catch (e) {}
+      }
+    };
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () {
+      hookUpdateButtonLabels();
+      setTimeout(hookUpdateButtonLabels, 50);
+      setTimeout(hookUpdateButtonLabels, 200);
+      setTimeout(updateCreditDisplay, 250);
+    });
+  } else {
+    hookUpdateButtonLabels();
+    setTimeout(hookUpdateButtonLabels, 50);
+    setTimeout(updateCreditDisplay, 100);
+  }
+  function inject(creditDollars) {
+    if (creditDollars <= 0) return;
+    /* Place the banner in its own dedicated strip between the header
+       and the main content. Anchor: find an element whose next sibling
+       is the 'Simple pricing' heading, OR fall back to the main wrap. */
+    var bar = document.createElement('div');
+    bar.id = 'tmc-refbar';
+    bar.style.cssText = 'background:linear-gradient(90deg,#DCFCE7,#BBF7D0);border:1px solid #86EFAC;border-radius:12px;padding:12px 14px;margin:8px 16px 12px;font-family:Inter,system-ui,sans-serif';
+    bar.innerHTML =
+        '<div style="font-size:13px;font-weight:800;color:#166534">You have $' + creditDollars.toFixed(2) + ' in referral credit</div>' +
+        '<label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:#15803D;font-weight:600;cursor:pointer;user-select:none">' +
+          '<input type="checkbox" id="tmc-apply-credit" style="width:16px;height:16px;cursor:pointer;accent-color:#16A34A">' +
+          'Tick to apply $' + creditDollars.toFixed(2) + ' discount to your purchase' +
+        '</label>';
+    /* Find a good place: AFTER the header strip, BEFORE the main pricing
+       cards. The discount-banner div (id='discount-banner') is a great
+       anchor  it lives exactly where we want to be. */
+    var legacy = document.getElementById('discount-banner');
+    if (legacy && legacy.parentNode) {
+      legacy.parentNode.insertBefore(bar, legacy);
+    } else {
+      var mainEl = document.querySelector('main') || document.body;
+      mainEl.insertBefore(bar, mainEl.firstChild);
+    }
+    /* Hook the checkbox: when ticked, show the legacy banner + set the
+       discount value; when unticked, hide it. Default state: UNCHECKED. */
+    var cb = document.getElementById('tmc-apply-credit');
+    if (cb) {
+      setApplied(false, creditDollars); /* default state */
+      cb.addEventListener('change', function () {
+        setApplied(cb.checked, creditDollars);
+      });
+    }
+  }
+  function load() {
+    try {
+      var raw = localStorage.getItem('tmc_session_token') || localStorage.getItem('tmc_token');
+      if (!raw) return;
+      fetch('/api/get-referral', { headers: { 'Authorization': 'Bearer ' + raw } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (!d || !d.success) return;
+          var c = (typeof d.credit_available === 'number') ? d.credit_available : 0;
+          inject(c);
+        })
+        .catch(function () {});
+    } catch (e) {}
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', load);
+  } else { load(); }
+
+  /* Wrap fetch so any POST to /api/create-checkout automatically carries
+     apply_referral_credit based on the checkbox, AND any { free:true,
+     redirect } response is honored as a window.location.href redirect
+     (the existing handlers expect { url } from Stripe; they wouldn't
+     know what to do with free:true otherwise). */
+  var origFetch = window.fetch && window.fetch.bind(window);
+  if (!origFetch || window.__tmcCheckoutWrapped) return;
+  window.__tmcCheckoutWrapped = true;
+  window.fetch = function (input, init) {
+    try {
+      var url = (typeof input === 'string') ? input : (input && input.url) || '';
+      if (url && url.indexOf('/api/create-checkout') !== -1 && init && init.method === 'POST') {
+        var cb = document.getElementById('tmc-apply-credit');
+        var apply = cb ? !!cb.checked : true;
+        try {
+          var b = init.body ? JSON.parse(init.body) : {};
+          if (typeof b.apply_referral_credit === 'undefined') b.apply_referral_credit = apply;
+          init = Object.assign({}, init, { body: JSON.stringify(b) });
+        } catch (e) { /* if body isn't JSON, leave it alone */ }
+        return origFetch(input, init).then(function (resp) {
+          /* clone so existing handlers can still read it */
+          var cloned = resp.clone();
+          cloned.json().then(function (d) {
+            if (d && d.free === true && d.redirect) {
+              window.location.href = d.redirect;
+            }
+          }).catch(function () {});
+          return resp;
+        });
+      }
+    } catch (e) {}
+    return origFetch(input, init);
+  };
+})();
+</script>
 </head>
 <body class="wide-page">
 <div class="nav">
@@ -89,10 +316,11 @@
       <div id="std-price" class="plan-price">$9.99 <span class="plan-sub">today, then $9.99/yr</span></div>
     </div>
     <div class="plan-tagline">Physical NFC + QR sticker for your car. 30-day free trial before annual plan begins.</div>
-    <div class="bullets">
-      <div class="bullet"><div class="bullet-dot"></div>Premium NFC + QR sticker ships to your door</div>
+    <div class="bullets"><!-- TMC_PRICING_REFRESH -->
+      <div class="bullet"><div class="bullet-dot"></div>Weatherproof NFC + QR sticker ships to your door</div>
       <div class="bullet"><div class="bullet-dot"></div>Unlimited masked calls · your number never shared</div>
       <div class="bullet"><div class="bullet-dot"></div>Email + push alerts on every scan</div>
+      <div class="bullet"><div class="bullet-dot"></div>Emergency contact auto-forward after 3 missed calls</div>
       <div class="bullet"><div class="bullet-dot"></div>Full scan history with location map</div>
     </div>
     <div class="prepay-row" id="std-prepay" onclick="togglePrepay('std')">
@@ -113,11 +341,11 @@
       <div class="plan-name">Premium</div>
       <div id="prem-price" class="plan-price">$24.99 <span class="plan-sub">today, then $19.99/yr</span></div>
     </div>
-    <div class="plan-tagline">Premium sticker + emergency contact system + location map. For families and frequent parkers.</div>
+    <div class="plan-tagline">3 stickers for your whole household  same TapMyCar privacy across every car you drive.</div>
     <div class="bullets">
       <div class="bullet"><div class="bullet-dot"></div>Everything in Standard</div>
-      <div class="bullet"><div class="bullet-dot"></div>Emergency contact system (auto-forward after 3 missed calls)</div>
-      <div class="bullet"><div class="bullet-dot"></div>Premium sticker with reinforced backing</div>
+      <div class="bullet"><div class="bullet-dot"></div>3 stickers (one for each family vehicle)</div>
+      <div class="bullet"><div class="bullet-dot"></div>3 gift codes to share with family</div>
       <div class="bullet"><div class="bullet-dot"></div>Priority support</div>
     </div>
     <div class="prepay-row" id="prem-prepay" onclick="togglePrepay('prem')">
@@ -155,7 +383,7 @@
       <div class="plan-price">$49 <span class="plan-sub">/month</span></div>
     </div>
     <div class="plan-tagline">Bulk stickers with your logo, fleet dashboard, dedicated support.</div>
-    <button class="btn-o" onclick="window.location.href='mailto:support@tapmycar.io?subject=Business Plan Inquiry'">Contact us</button>
+    <button class="btn-o" onclick="window.location.href='/business.html'">Contact us</button>
   </div>
 
   <div style="padding:16px 0 8px;text-align:center;font-size:11px;color:#9CA3AF;line-height:1.6">
@@ -278,10 +506,14 @@ async function loadReferralDiscount() {
     if (data.referral_reward_pending === 'choice') {
       document.getElementById('reward-banner').style.display = 'block';
     }
-    if (data.referral_credits >= 3) {
-      window.__refDiscount = parseFloat(data.referral_credits);
-      document.getElementById('discount-banner').style.display = 'block';
-    }
+    /* TMC_PATCH45B_FIX2: this block used to unconditionally show the
+       discount-banner and set window.__refDiscount on every page load,
+       racing with Patch 45b-fix's checkbox handler. The checkbox now
+       owns both bits of state, so this block is intentionally disabled. */
+    /* if (data.referral_credits >= 3) {
+         window.__refDiscount = parseFloat(data.referral_credits);
+         document.getElementById('discount-banner').style.display = 'block';
+       } */
   } catch(e) { console.error(e); }
 }
 loadReferralDiscount();

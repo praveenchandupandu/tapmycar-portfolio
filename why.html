@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="manifest" href="/manifest.json">
+    <script src="/tmc-api-base.js"></script>
+<link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#FF6B00">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -246,9 +247,16 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#111;max-width:430px;m
   <div class="cta-box">
     <h3>It's a precaution.</h3>
     <p>Like insurance. Like a dashcam. Like locking your doors. You don't wait for something bad to happen — you prepare for it.</p>
-    <a href="/register.html" class="cta-btn">Get your free eTag →</a>
+    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:12px;padding:12px 14px;margin-bottom:14px;text-align:left;backdrop-filter:blur(8px)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <span style="background:#fff;color:#FF6B00;font-size:9px;font-weight:800;padding:2px 8px;border-radius:99px;letter-spacing:.04em">RECOMMENDED</span>
+        <span style="font-size:14px;font-weight:800;color:#fff">Standard plan</span>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,.85);line-height:1.5">Physical NFC + QR sticker shipped to your door · masked calling · scan-location tracking · SMS alerts</div>
+    </div>
+    <a href="/pricing.html" class="cta-btn">See all plans →</a>
   </div>
-  <div style="text-align:center;font-size:12px;color:#6B7280;margin-bottom:16px">Free to start · Takes 2 minutes · No credit card needed</div>
+  <div style="text-align:center;font-size:12px;color:#6B7280;margin-bottom:16px">Standard from $9.99 · or <a href="/register.html" style="color:#FF6B00;text-decoration:none;font-weight:600">sign up free</a> for a digital eTag · No credit card to start</div>
 </div>
 
 <!-- APP DOWNLOAD -->
@@ -261,6 +269,7 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#111;max-width:430px;m
 <!-- FOOTER -->
 <div style="padding:20px 24px;border-top:.5px solid #E5E7EB;text-align:center">
   <p style="font-size:11px;color:#9CA3AF;margin-bottom:6px"><a href="/register.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Sign up</a> · <a href="/signin.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Sign in</a> · <a href="/pricing.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Pricing</a> · <a href="/landing.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Home</a></p>
+  <p style="font-size:11px;color:#9CA3AF;margin-bottom:6px"><a href="/privacy.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Privacy Policy</a> · <a href="/terms.html" style="color:#FF6B00;text-decoration:none;font-weight:600">Terms of Service</a></p>
   <p style="font-size:11px;color:#9CA3AF">© 2026 Praman Tech LLC · New Britain, CT · <a href="mailto:support@tapmycar.io" style="color:#FF6B00;text-decoration:none">Contact</a></p>
 </div>
 

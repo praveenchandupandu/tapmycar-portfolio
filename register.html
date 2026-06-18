@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="manifest" href="/manifest.json">
+    <script src="/tmc-api-base.js"></script>
+<link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#FF6B00">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -163,19 +164,25 @@ function togglePromoCode() {
     setTimeout(function(){ const inp = document.getElementById('gift-code'); if (inp) inp.focus(); }, 250);
   }
 }
+// TMC_PATCH2FIX_REGISTER_FLOW
+function tmcIsValidEmail(s) {
+  if (typeof s !== 'string') return false;
+  if (s.length < 5 || s.length > 254) return false;
+  return /^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$/.test(s);
+}
+
 async function sendOTP() {
   const email = document.getElementById('email').value.trim();
   const name = document.getElementById('name').value.trim();
   const countryCode = document.getElementById('country-code').value.replace('-CA',''); const phoneRaw = document.getElementById('phone').value.trim().replace(/[^0-9]/g,''); const phone = phoneRaw ? countryCode + phoneRaw : '';
   if (!name) { showToast('Please enter your name'); return; }
   if (!email) { showToast('Please enter your email'); return; }
+  if (!tmcIsValidEmail(email)) { showToast('Please enter a valid email address'); return; }
   if (!phone) { showToast('Please enter your phone number'); return; }
 
-  document.getElementById('step1').style.display = 'none';
-  document.getElementById('step2').style.display = 'flex';
-  document.getElementById('step2').style.flexDirection = 'column';
-  document.getElementById('otp-subtitle').textContent = 'Sent to ' + email;
-  startCountdown('resend-btn');
+  // Disable the button so users don't double-tap while we wait
+  const btn = document.querySelector('button[onclick="sendOTP()"]') || document.querySelector('.send-otp-btn');
+  if (btn) { btn.disabled = true; btn.dataset.tmcOrig = btn.textContent; btn.textContent = 'Sending...'; }
 
   try {
     const res = await fetch('/api/send-otp', {
@@ -184,8 +191,25 @@ async function sendOTP() {
       body: JSON.stringify({ email, name, phone })
     });
     const data = await res.json();
-    if (!data.success) showToast(data.error || 'Failed to send code');
-  } catch(e) { showToast('Network error'); }
+
+    if (!res.ok || !data.success) {
+      // Failure — stay on step 1, show the error
+      showToast(data.error || 'Failed to send code');
+      if (btn) { btn.disabled = false; btn.textContent = btn.dataset.tmcOrig || 'Send code'; }
+      return;
+    }
+
+    // Success — NOW we navigate to the OTP screen
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step2').style.display = 'flex';
+    document.getElementById('step2').style.flexDirection = 'column';
+    document.getElementById('otp-subtitle').textContent = 'Sent to ' + email;
+    startCountdown('resend-btn');
+    if (btn) { btn.disabled = false; btn.textContent = btn.dataset.tmcOrig || 'Send code'; }
+  } catch(e) {
+    showToast('Network error');
+    if (btn) { btn.disabled = false; btn.textContent = btn.dataset.tmcOrig || 'Send code'; }
+  }
 }
 
 function backToStep1() {
@@ -209,7 +233,7 @@ async function verifyOTP() {
     });
     const data = await res.json();
     if (data.token) {
-      saveSession(data.token, data.phone || phone, data.name || name);
+      saveSession(data.token, data.phone || phone, data.name || name, data.session_token); /* TMC_PATCH38S3 */
       localStorage.setItem('tmc_email', email);
       // TMC_STORE_AND_REDIRECT
       const giftEl = document.getElementById('gift-code');
@@ -219,7 +243,16 @@ async function verifyOTP() {
         localStorage.setItem('tmc_pending_code', giftCode);
         window.location.href = '/welcome.html';
       } else {
-        window.location.href = '/dashboard.html';
+        /* TMC_PATCH34B_CONTINUE: honor ?continue= if present and safe */
+        var _p34bDest = '/dashboard.html';
+        try {
+          var _p34bUrl = new URL(window.location.href);
+          var _p34bCont = _p34bUrl.searchParams.get('continue');
+          if (_p34bCont && _p34bCont.indexOf('/') === 0 && _p34bCont.indexOf('//') !== 0 && _p34bCont.indexOf('://') === -1) {
+            _p34bDest = _p34bCont;
+          }
+        } catch (e) {}
+        window.location.href = _p34bDest;
       }
     } else {
       showToast(data.error || 'Wrong code  try again');
@@ -235,6 +268,19 @@ if ('serviceWorker' in navigator) {
 
 
 
+<script>
+/* TMC_PATCH44: prefill the gift-code input from ?ref= so the short URL
+   (e.g. /r/TMC-492TZD) lands the user with the code already filled in. */
+(function () {
+  try {
+    var ref = new URL(window.location.href).searchParams.get('ref');
+    if (ref) {
+      var input = document.getElementById('gift-code');
+      if (input && !input.value) input.value = ref.trim().toUpperCase();
+    }
+  } catch (e) { /* non-fatal */ }
+})();
+</script>
 </body>
 </html>
 
