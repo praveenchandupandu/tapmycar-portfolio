@@ -259,7 +259,7 @@ async function p36StartUpgrade() {
       body: JSON.stringify({ user_id: token, flow: 'upgrade', plan: 'premium' })
     });
     var data = await res.json();
-    if (data && data.url) { window.location.href = data.url; return; }
+    if (data && data.url) { await window.tmcStartCheckout(data.url); return; }
     if (btn) { btn.disabled = false; btn.textContent = 'Upgrade to Premium'; }
     alert((data && data.error) || 'Could not start the upgrade. Please try again.');
   } catch (e) {

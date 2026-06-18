@@ -475,7 +475,7 @@ async function checkout(flow, plan) {
 
     if (data.url) {
       // Stripe checkout — redirect to Stripe
-      window.location.href = data.url;
+      await window.tmcStartCheckout(data.url);
       return;
     }
 

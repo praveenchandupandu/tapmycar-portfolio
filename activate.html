@@ -667,7 +667,7 @@ async function processPayment() {
     });
     const data = await res.json();
     if (data.url) {
-      window.location.href = data.url;
+      await window.tmcStartCheckout(data.url);
     } else {
       showToast(data.error || 'Payment failed');
       btn.disabled = false;

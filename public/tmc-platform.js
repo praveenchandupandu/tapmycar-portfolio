@@ -72,3 +72,40 @@
     window.location.href = url;
   };
 })();
+
+// TMC_PATCH68 — Platform-aware Stripe checkout helper
+//
+// Use this anywhere you would have done window.location.href = stripeUrl.
+// On web: identical behavior (window.location.href = url).
+// In app: opens URL in external browser via @capacitor/browser plugin.
+// Falls back to window.location.href if Browser plugin not available.
+
+(function () {
+  if (typeof window === 'undefined') return;
+
+  window.tmcStartCheckout = async function (checkoutUrl) {
+    if (!checkoutUrl || typeof checkoutUrl !== 'string') {
+      console.error('tmcStartCheckout: invalid url', checkoutUrl);
+      return;
+    }
+
+    // On web: normal redirect
+    if (!window.tmcIsInApp) {
+      window.location.href = checkoutUrl;
+      return;
+    }
+
+    // In app: open in external browser (Safari/Chrome)
+    try {
+      if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser) {
+        await window.Capacitor.Plugins.Browser.open({ url: checkoutUrl });
+        return;
+      }
+    } catch (e) {
+      console.error('Browser plugin failed, falling back:', e);
+    }
+
+    // Fallback if Browser plugin unavailable
+    window.location.href = checkoutUrl;
+  };
+})();
