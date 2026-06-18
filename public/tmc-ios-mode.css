@@ -1,0 +1,31 @@
+/* TMC_PATCH69 — Platform-targeted display rules */
+/*
+ *  Use these classes to show/hide elements per platform.
+ *  Body classes (.tmc-platform-ios | .tmc-platform-android | .tmc-platform-web)
+ *  are added by tmc-platform.js (Patch 67) on DOMContentLoaded.
+ */
+
+/* Hide by default — shown only in iOS app */
+.tmc-ios-only { display: none !important; }
+body.tmc-platform-ios .tmc-ios-only { display: block !important; }
+
+/* Hide by default — shown only in Android app */
+.tmc-android-only { display: none !important; }
+body.tmc-platform-android .tmc-android-only { display: block !important; }
+
+/* Hide by default — shown only in web (no Capacitor) */
+.tmc-web-only { display: none !important; }
+body.tmc-in-web .tmc-web-only { display: block !important; }
+
+/* Hide only in iOS app (visible everywhere else) */
+body.tmc-platform-ios .tmc-hide-on-ios { display: none !important; }
+
+/* Hide only in Android app (visible everywhere else) */
+body.tmc-platform-android .tmc-hide-on-android { display: none !important; }
+
+/* Hide only in native apps — visible only on web */
+body.tmc-in-app .tmc-hide-in-app { display: none !important; }
+
+/* Show only in native apps — hidden on web */
+.tmc-app-only { display: none !important; }
+body.tmc-in-app .tmc-app-only { display: block !important; }
