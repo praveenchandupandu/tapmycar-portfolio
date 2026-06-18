@@ -10,11 +10,20 @@
   "author": "Praman Tech LLC",
   "license": "ISC",
   "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/app": "^6.0.1",
+    "@capacitor/browser": "^6.0.3",
+    "@capacitor/core": "^6.1.2",
+    "@capacitor/ios": "^6.1.2",
+    "@capacitor/push-notifications": "^6.0.2",
     "@supabase/supabase-js": "^2.101.1",
     "qrcode": "^1.5.4",
     "resend": "^6.10.0",
     "stripe": "^22.0.0",
     "twilio": "^5.13.1",
     "web-push": "^3.6.7"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2"
   }
 }
