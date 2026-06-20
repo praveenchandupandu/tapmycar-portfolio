@@ -83,9 +83,10 @@
       </div>
       <h2>Your tag is live</h2>
       <p id="hero-sub">Loading...</p>
-      <div style="background:#fff;color:var(--or);font-size:12px;font-weight:700;padding:8px 16px;border-radius:99px;display:inline-flex;align-items:center;gap:5px">
+      <!-- TMC_PATCH73_RIGHT_ALIGN_TOP_MANAGE -->
+      <div style="text-align:right"><div style="background:#fff;color:var(--or);font-size:12px;font-weight:700;padding:8px 16px;border-radius:99px;display:inline-flex;align-items:center;gap:5px">
         Manage <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>
+      </div></div>
     </div>
 
     <!-- TMC_PATCH47_CD: renewal countdown card (hidden by default) -->
@@ -100,7 +101,7 @@
           <div style="font-size:11px;color:#6B7280;line-height:1.4">Subscription details and account settings are managed at tapmycar.io.</div>
         </div>
       </div>
-      <a href="javascript:void(0)" onclick="window.tmcOpenWeb('/billing')" style="display:inline-flex;align-items:center;gap:4px;background:#F3F4F6;color:#111;font-weight:600;font-size:12px;padding:7px 14px;border-radius:8px;text-decoration:none">Account Settings</a>
+      <!-- TMC_PATCH73_RIGHT_ALIGN_ACCOUNT --><div style="text-align:right"><a href="javascript:void(0)" onclick="window.tmcOpenWeb('/billing')" style="display:inline-flex;align-items:center;gap:4px;background:#F3F4F6;color:#111;font-weight:600;font-size:12px;padding:7px 14px;border-radius:8px;text-decoration:none">Account Settings</a></div>
     </div>
     <div class="tmc-hide-on-ios" id="renewal-card" style="display:none;border-radius:14px;padding:14px 16px;margin-bottom:14px;font-family:Inter,system-ui,sans-serif">
       <div style="font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px" id="renewal-card-label">Subscription renewal</div>
