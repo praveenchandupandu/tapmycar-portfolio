@@ -17,7 +17,7 @@
 
   if (!isCapacitor()) return; // browser path: do nothing
 
-  var API_BASE = "https://tapmycar.io";
+  var API_BASE = "https://www.tapmycar.io";
 
   function rewrite(url) {
     if (typeof url !== "string") return url;

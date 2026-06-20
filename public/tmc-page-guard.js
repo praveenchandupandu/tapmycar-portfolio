@@ -48,7 +48,7 @@
     var webPath = BLOCKED_IN_IOS[path];
     if (!webPath) return;
 
-    var webUrl = 'https://tapmycar.io' + webPath + (window.location.search || '') + (window.location.hash || '');
+    var webUrl = 'https://www.tapmycar.io' + webPath + (window.location.search || '') + (window.location.hash || '');
     console.log('[tmc-page-guard] iOS — redirecting blocked page ' + path + ' → ' + webUrl);
 
     // Open the web equivalent in external Safari
