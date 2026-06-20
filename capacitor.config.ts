@@ -21,6 +21,12 @@ const config: CapacitorConfig = {
     ]
   },
   plugins: {
+    CapacitorHttp: {
+      // TMC_PATCH76 — bypasses CORS by using native HTTP
+      // (Java OkHttp on Android, URLSession on iOS).
+      // Browser CORS rules don't apply to native requests.
+      enabled: true
+    },
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert']
     },
