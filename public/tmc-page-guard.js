@@ -10,14 +10,21 @@
 
   // Pages to block in iOS mode. Map: app-page → web-page.
   // Add more paths here as we identify payment-only pages.
-  var BLOCKED_IN_IOS = {
-    '/pricing.html':  '/pricing',
-    '/renew.html':    '/renew',
-    '/billing.html':  '/billing',
-    '/pricing':       '/pricing',
-    '/renew':         '/renew',
-    '/billing':       '/billing'
-  };
+  // TMC_PATCH75 — expanded list + query/hash preservation
+    var BLOCKED_IN_IOS = {
+      '/pricing.html':           '/pricing',
+      '/renew.html':             '/renew',
+      '/billing.html':           '/billing',
+      '/activate.html':          '/activate',
+      '/business.html':          '/business',
+      '/for-tow-companies.html': '/for-tow-companies',
+      '/pricing':       '/pricing',
+      '/renew':         '/renew',
+      '/billing':       '/billing',
+      '/activate':      '/activate',
+      '/business':      '/business',
+      '/for-tow-companies': '/for-tow-companies'
+    };
 
   function isIOS() {
     try {
@@ -41,7 +48,7 @@
     var webPath = BLOCKED_IN_IOS[path];
     if (!webPath) return;
 
-    var webUrl = 'https://tapmycar.io' + webPath;
+    var webUrl = 'https://tapmycar.io' + webPath + (window.location.search || '') + (window.location.hash || '');
     console.log('[tmc-page-guard] iOS — redirecting blocked page ' + path + ' → ' + webUrl);
 
     // Open the web equivalent in external Safari
