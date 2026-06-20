@@ -8,7 +8,8 @@
 <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#FF6B00">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="TapMyCar">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
@@ -88,7 +89,13 @@
     </div>
 
     <!-- TMC_PATCH47_CD: renewal countdown card (hidden by default) -->
-    <div id="renewal-card" style="display:none;border-radius:14px;padding:14px 16px;margin-bottom:14px;font-family:Inter,system-ui,sans-serif">
+    <!-- TMC_PATCH70_IOS_BANNER -->
+    <div class="tmc-ios-only" style="background:#1A1A1A;color:#fff;border-radius:14px;padding:16px;margin-bottom:14px;text-align:center;font-family:Inter,system-ui,sans-serif">
+      <div style="font-size:14px;font-weight:700;margin-bottom:6px">Subscription &amp; Billing</div>
+      <div style="font-size:12px;color:#9CA3AF;margin-bottom:12px;line-height:1.4">Manage your plan, renewals, and payment methods on the web</div>
+      <button onclick="window.tmcOpenWeb('/billing')" style="background:#fff;color:#1A1A1A;border:0;font-weight:700;font-size:13px;padding:10px 20px;border-radius:10px;cursor:pointer">Open tapmycar.io →</button>
+    </div>
+    <div class="tmc-hide-on-ios" id="renewal-card" style="display:none;border-radius:14px;padding:14px 16px;margin-bottom:14px;font-family:Inter,system-ui,sans-serif">
       <div style="font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px" id="renewal-card-label">Subscription renewal</div>
       <div style="font-size:15px;font-weight:800;line-height:1.3" id="renewal-card-title">Renews in 7 days</div>
       <div style="font-size:12px;margin-top:4px" id="renewal-card-sub">$9.99 will be charged to your card on file.</div>
@@ -130,7 +137,7 @@
 
     
     <!-- UPGRADE BANNERS -->
-    <div id="upgrade-banner-etag" style="display:none;background:linear-gradient(135deg,#FF6B00,#D21209);border-radius:18px;padding:18px 16px;margin-bottom:14px;position:relative;overflow:hidden">
+    <div class="tmc-hide-on-ios" id="upgrade-banner-etag" style="display:none;background:linear-gradient(135deg,#FF6B00,#D21209);border-radius:18px;padding:18px 16px;margin-bottom:14px;position:relative;overflow:hidden">
       <div style="position:absolute;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.08);right:-20px;top:-30px"></div>
       <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.75);margin-bottom:6px;letter-spacing:.8px;text-transform:uppercase">Your car needs real protection</div>
       <div style="font-size:18px;font-weight:800;color:#fff;line-height:1.3;margin-bottom:8px">What if your car gets hit<br>while you're away?</div>
@@ -144,7 +151,7 @@
       <!-- TMC_PATCH35DRENEW_GIFT_RENEWAL: renew checkout, not the full pricing page -->
       <button onclick="p35dStartRenew()" id="gift-renew-btn" style="background:#fff;color:#C2410C;font-weight:700;font-size:13px;padding:9px 18px;border-radius:10px;border:0;cursor:pointer">Subscribe now</button>
     </div>
-    <div id="upgrade-banner-standard" style="display:none;background:linear-gradient(135deg,#1A1A1A,#2d1a00);border-radius:18px;padding:18px 16px;margin-bottom:14px;position:relative;overflow:hidden">
+    <div class="tmc-hide-on-ios" id="upgrade-banner-standard" style="display:none;background:linear-gradient(135deg,#1A1A1A,#2d1a00);border-radius:18px;padding:18px 16px;margin-bottom:14px;position:relative;overflow:hidden">
       <div style="position:absolute;width:120px;height:120px;border-radius:50%;background:rgba(255,107,0,.12);right:-20px;top:-30px"></div>
       <div style="font-size:10px;font-weight:700;color:var(--or);margin-bottom:6px;letter-spacing:.8px;text-transform:uppercase">Protect your whole family</div>
       <div style="font-size:18px;font-weight:800;color:#fff;line-height:1.3;margin-bottom:8px">Your family drives too.<br>Are they protected?</div>
