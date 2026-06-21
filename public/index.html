@@ -3,6 +3,26 @@
 <head>
     <script src="/tmc-api-base.js"></script>
   <script src="/tmc-platform.js"></script>
+  <script>
+  // TMC_PATCH79_ENTRY_REDIRECT — skip landing page when running inside the app.
+  // Web users (no Capacitor) see the landing page normally.
+  (function () {
+    try {
+      var inApp = !!(window.Capacitor &&
+                     typeof window.Capacitor.isNativePlatform === "function" &&
+                     window.Capacitor.isNativePlatform());
+      if (!inApp) return;
+      // Hide body immediately to prevent flash of landing page content
+      var styleEl = document.createElement("style");
+      styleEl.textContent = "body{visibility:hidden!important;background:#FF6B00!important}";
+      (document.head || document.documentElement).appendChild(styleEl);
+      var token = localStorage.getItem("tmc_token") ||
+                  localStorage.getItem("tmc_session_token");
+      var dest = token ? "/dashboard.html" : "/signin.html";
+      window.location.replace(dest);
+    } catch (e) { /* fall through to normal rendering */ }
+  })();
+</script>
   <link rel="stylesheet" href="/tmc-ios-mode.css">
   <script src="/tmc-page-guard.js"></script>
 <link rel="manifest" href="/manifest.json">
