@@ -84,7 +84,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#FF6B00;font-family:
     <div class="tape"></div>
     <!-- TMC_PATCH88: clean onboarding content -->
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 28px;text-align:center">
-      <div id="tmc-onboarding-tag-wrapper"><img id="tmc-onboarding-tag" src="/tapmycarintialstage.png" alt="TapMyCar Tag"
+      <div id="tmc-onboarding-tag-wrapper"><img id="tmc-onboarding-tag" src="/tag-example.png" alt="TapMyCar Tag"
            style="display:block;width:130px;height:130px;object-fit:contain;border-radius:18px;box-shadow:0 8px 24px rgba(0,0,0,.12);"></div>
       <div style="font-size:22px;font-weight:800;color:#111;line-height:1.25;margin-bottom:14px;max-width:300px">
         Like leaving your number<br>— but you don't.
@@ -211,6 +211,45 @@ html,body{width:100%;height:100%;overflow:hidden;background:#FF6B00;font-family:
       }
     }, 4020);
   }
+  // TMC_PATCH92_HERO_STICKER — load the landing-page tag image dynamically
+  (function loadHeroSticker(){
+    try {
+      var img = document.getElementById("tmc-onboarding-tag");
+      if (!img) return;
+      var STORAGE_KEY = "tmc_hero_sticker_url";
+      // Try the sessionStorage cache first (fast)
+      try {
+        var cached = sessionStorage.getItem(STORAGE_KEY);
+        if (cached && cached !== "null") {
+          var test1 = new Image();
+          test1.onload = function(){ img.src = cached; };
+          test1.src = cached;
+        }
+      } catch(e){}
+      // Fetch fresh URL from API
+      fetch("/api/get-branding")
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(data){
+          if (data && data.ok && data.sticker_url) {
+            var url = data.sticker_url;
+            // Preload to verify the URL works before swapping
+            var test2 = new Image();
+            test2.onload = function(){
+              img.src = url;
+              try { sessionStorage.setItem(STORAGE_KEY, url); } catch(e){}
+            };
+            test2.onerror = function(){
+              // keep static fallback — API URL failed to load
+              try { sessionStorage.removeItem(STORAGE_KEY); } catch(e){}
+            };
+            test2.src = url;
+          }
+        })
+        .catch(function(){ /* keep static fallback */ });
+    } catch(e){ /* never throw */ }
+  })();
+
+
 
     // TMC_PATCH91 start animation IMMEDIATELY
   if (document.readyState === "loading") {
