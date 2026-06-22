@@ -75,27 +75,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#FF6B00;font-family:
 </style>
 </head>
 <body style="background:#FF6B00" data-tmc-patch91="1">
-  <script>
-    // TMC_PATCH94_SPLASH_HIDE — kill the system splash IMMEDIATELY
-    (function(){
-      function hide(){
-        try {
-          if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.SplashScreen) {
-            window.Capacitor.Plugins.SplashScreen.hide({ fadeOutDuration: 0 });
-          }
-        } catch(e) {}
-      }
-      hide();
-      setTimeout(hide, 0);
-      setTimeout(hide, 50);
-      setTimeout(hide, 150);
-      if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", hide);
-      }
-      window.addEventListener("load", hide);
-    })();
-  </script>
-
 <div class="vp" id="vp">
 
   <!-- ONBOARDING (initially hidden, shown after animation for not-signed-in users) -->
