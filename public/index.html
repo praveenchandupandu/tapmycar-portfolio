@@ -18,7 +18,7 @@
       (document.head || document.documentElement).appendChild(styleEl);
       var token = localStorage.getItem("tmc_token") ||
                   localStorage.getItem("tmc_session_token");
-      var dest = token ? "/dashboard.html" : "/signin.html";
+      var dest = "/splash.html";  // TMC_PATCH80: routed via splash
       window.location.replace(dest);
     } catch (e) { /* fall through to normal rendering */ }
   })();
