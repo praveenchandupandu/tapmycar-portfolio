@@ -10,8 +10,6 @@
     </style>
 
     <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
-        <!-- TMC_PATCH91_WINDOW_BG kill white flash -->
-        <item name="android:windowBackground">#FF6B00</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:background">@null</item>

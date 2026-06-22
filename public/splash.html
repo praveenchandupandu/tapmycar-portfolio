@@ -1,156 +1,263 @@
 <!DOCTYPE html>
-<!-- TMC_PATCH94_FRESH -->
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>TapMyCar+</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#FF6B00">
+<title>TapMyCar</title>
+<script src="/tmc-api-base.js"></script>
+<script src="/tmc-platform.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  html,body{width:100%;height:100%;overflow:hidden;background:#FF6B00;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#111;-webkit-font-smoothing:antialiased}
-  img{display:block;max-width:100%}
-  button{font-family:inherit;cursor:pointer;border:none}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;background:#FF6B00;font-family:'Inter','Segoe UI',system-ui,sans-serif;-webkit-user-select:none;user-select:none}
+.vp{width:100vw;height:100vh;position:relative;background:#FF6B00;overflow:hidden}
 
-  /* ================ SPLASH SCREEN ================ */
-  #splash{
-    position:fixed;inset:0;z-index:10;background:#FF6B00;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    animation:splashOut 0.45s ease-out 1.85s forwards;
-  }
-  #splash .logo{
-    width:140px;height:140px;
-    opacity:0;transform:scale(0.45);
-    animation:logoIn 0.55s cubic-bezier(0.34,1.56,0.64,1) 0s forwards;
-  }
-  #splash .wordmark{
-    margin-top:18px;font-size:34px;font-weight:900;color:#fff;letter-spacing:-0.5px;
-    opacity:0;transform:translateY(14px);
-    animation:textUp 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.4s forwards;
-  }
-  #splash .tagline{
-    margin-top:8px;font-size:13px;color:rgba(255,255,255,0.85);letter-spacing:0.3px;
-    opacity:0;
-    animation:fadeIn 0.4s ease-out 0.75s forwards;
-  }
+/* LOGO — centered, slightly above middle */
+#logo{position:absolute;top:43%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:20;opacity:0;transition:none;width:80%;max-width:280px}
+#logo.in{animation:lin .65s ease .2s forwards}
+#logo.out{animation:lout .75s cubic-bezier(.4,0,.6,.2) forwards}
+@keyframes lin{from{opacity:0;transform:translate(-50%,-50%) translateY(12px)}to{opacity:1;transform:translate(-50%,-50%) translateY(0)}}
+@keyframes lout{from{opacity:1;transform:translate(-50%,-50%) translateY(0)}to{opacity:0;transform:translate(-50%,-50%) translateY(-260px)}}
+.shield{width:84px;height:84px;background:rgba(255,255,255,.2);border-radius:22px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
+.bname{font-size:38px;font-weight:800;color:#fff;letter-spacing:-.4px;margin-bottom:8px}
+.bname s{color:rgba(255,255,255,.72);text-decoration:none;font-style:normal}
+.bdot{display:inline-block;width:8px;height:8px;background:rgba(255,255,255,.7);border-radius:50%;margin-left:2px;vertical-align:middle;margin-bottom:7px}
+.logo-img{width:180px;height:180px;display:block;margin:0 auto 18px;filter:drop-shadow(0 6px 20px rgba(0,0,0,.18))}
+.btag{font-size:15px;color:#fff;letter-spacing:.02em;font-weight:600;text-align:center}
 
-  @keyframes logoIn{to{opacity:1;transform:scale(1)}}
-  @keyframes textUp{to{opacity:1;transform:translateY(0)}}
-  @keyframes fadeIn{to{opacity:1}}
-  @keyframes splashOut{to{opacity:0;visibility:hidden}}
+/* CAR — drives up from below */
+#car{position:absolute;left:50%;bottom:-100px;transform:translateX(-50%);z-index:30;transition:none}
+#car.in{animation:cin .9s cubic-bezier(.2,.85,.32,1.15) .65s forwards}
+#car.out{animation:cout .72s cubic-bezier(.4,0,.65,.2) forwards}
+@keyframes cin{from{bottom:-100px}to{bottom:14%}}
+@keyframes cout{from{bottom:14%}to{bottom:120%}}
 
-  /* ================ ONBOARDING ================ */
-  #ob{
-    position:fixed;inset:0;z-index:5;background:#fff;
-    display:flex;flex-direction:column;
-    opacity:0;
-    animation:fadeIn 0.4s ease-out 2.15s forwards;
-  }
-  .chev{
-    height:14px;flex-shrink:0;
-    background:repeating-linear-gradient(45deg,#FF6B00,#FF6B00 8px,#111 8px,#111 16px);
-  }
-  .ob-content{
-    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:32px 28px;text-align:center;
-  }
-  .tag-wrapper{perspective:1000px;display:inline-block;margin:0 auto 26px;transform-style:preserve-3d}
-  .ob-tag{
-    width:140px;height:140px;object-fit:contain;border-radius:18px;
-    box-shadow:0 8px 24px rgba(0,0,0,0.12);background:#fff;
-    animation:tagFloat 5s ease-in-out infinite;transform-origin:center;
-  }
-  @keyframes tagFloat{
-    0%,100%{transform:rotateY(-8deg) rotateX(4deg) translateY(0)}
-    50%{transform:rotateY(8deg) rotateX(-3deg) translateY(-6px)}
-  }
-  .ob-headline{
-    font-size:22px;font-weight:800;color:#111;line-height:1.25;margin-bottom:12px;max-width:300px;
-  }
-  .ob-subtitle{
-    font-size:14px;color:#666;line-height:1.55;max-width:300px;
-  }
-  .ob-cta{
-    padding:0 28px calc(env(safe-area-inset-bottom,0px) + 24px);
-    display:flex;flex-direction:column;gap:10px;
-  }
-  .ob-button{
-    padding:16px;background:#FF6B00;color:#fff;font-weight:700;font-size:16px;
-    border-radius:14px;width:100%;
-  }
-  .ob-button:active{background:#E55D00}
-  .ob-signin-row{display:flex;justify-content:center;gap:6px;font-size:13px;align-items:center}
-  .ob-signin-row span{color:#666}
-  .ob-signin-row button{background:none;color:#FF6B00;font-weight:600;padding:0;font-size:13px}
+/* PHONE — rises up, taps car, retreats */
+#phone{position:absolute;left:50%;bottom:-260px;transform:translateX(-50%);z-index:40;transition:none;pointer-events:none}
+#phone.in{animation:phin .6s cubic-bezier(.2,.85,.3,1) forwards}
+#phone.tap{animation:phtap .16s cubic-bezier(.5,0,.3,1) forwards}
+#phone.bounce{animation:phbounce .2s cubic-bezier(.2,.85,.3,1.1) forwards}
+#phone.out{animation:phout .52s cubic-bezier(.4,0,.8,.4) forwards}
+@keyframes phin{from{bottom:-260px}to{bottom:5%}}
+@keyframes phtap{from{bottom:5%}to{bottom:1%}}
+@keyframes phbounce{from{bottom:1%}to{bottom:6%}}
+@keyframes phout{from{bottom:6%}to{bottom:-260px}}
+
+/* RIPPLES — fire when phone taps car */
+#r1,#r2{position:absolute;left:50%;bottom:20%;transform:translateX(-50%) scale(0);border-radius:50%;z-index:25;opacity:0;pointer-events:none}
+#r1{width:60px;height:60px;border:3px solid rgba(255,255,255,.85)}
+#r2{width:32px;height:32px;background:rgba(255,255,255,.25)}
+.rp1{animation:ra .6s ease-out forwards !important}
+.rp2{animation:rb .42s ease-out forwards !important}
+@keyframes ra{0%{transform:translateX(-50%) scale(0);opacity:.9}100%{transform:translateX(-50%) scale(2.8);opacity:0}}
+@keyframes rb{0%{transform:translateX(-50%) scale(0);opacity:.75}55%{transform:translateX(-50%) scale(1.1);opacity:.35}100%{transform:translateX(-50%) scale(1.9);opacity:0}}
+
+/* ONBOARDING — fades in after animation, shown only when not signed in */
+#ob{position:absolute;inset:0;background:#fff;z-index:5;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .55s ease}
+#ob.show{opacity:1;pointer-events:all}
+.chev{height:6px;background:repeating-linear-gradient(-45deg,#FF6B00 0,#FF6B00 4px,#111 4px,#111 8px);flex-shrink:0}
+.tape{height:3px;background:repeating-linear-gradient(90deg,#FCD34D 0,#FCD34D 9px,#D1D5DB 9px,#D1D5DB 18px);flex-shrink:0}
+.cta-primary{background:#FF6B00;color:#fff;font-size:15px;font-weight:700;padding:16px 0;border-radius:14px;text-align:center;border:none;cursor:pointer;width:100%;font-family:inherit}
+.cta-primary:active{transform:scale(.98);background:#E65A00}
+.cta-link{color:#FF6B00;font-size:14px;font-weight:700;padding:6px 0;background:transparent;border:none;cursor:pointer;font-family:inherit}
+.signin-row{display:flex;justify-content:center;align-items:center;gap:6px;padding:6px 0}
+.signin-text{color:#777;font-size:14px;font-weight:500}
+.cta-link:active{opacity:.7}
+
+
+/* TMC_PATCH91_TAG_ANIM restore 3D float animation on onboarding tag */
+#tmc-onboarding-tag-wrapper{perspective:1000px;display:inline-block;margin:0 auto 28px;transform-style:preserve-3d}
+#tmc-onboarding-tag{animation:tmcTagFloat91 5s ease-in-out infinite;transform-origin:center;display:block}
+@keyframes tmcTagFloat91{0%,100%{transform:rotateY(-8deg) rotateX(4deg) translateY(0)}50%{transform:rotateY(8deg) rotateX(-3deg) translateY(-6px)}}
 </style>
 </head>
-<body style="background:#FF6B00">
+<body style="background:#FF6B00" data-tmc-patch91="1">
+<div class="vp" id="vp">
 
-  <!-- ============== SPLASH ============== -->
-  <div id="splash">
-    <img class="logo" src="/icon-512.png" alt="TapMyCar" />
-    <div class="wordmark">TapMyCar</div>
-    <div class="tagline">Privacy for you. Safety for your Car.</div>
-  </div>
-
-  <!-- ============== ONBOARDING ============== -->
+  <!-- ONBOARDING (initially hidden, shown after animation for not-signed-in users) -->
   <div id="ob">
+    <div style="height:env(safe-area-inset-top,0px);flex-shrink:0"></div>
     <div class="chev"></div>
-    <div class="ob-content">
-      <div class="tag-wrapper">
-        <img id="tmc-onboarding-tag" class="ob-tag" src="/tapmycarintialstage.png" alt="TapMyCar Tag" />
+    <div class="tape"></div>
+    <!-- TMC_PATCH88: clean onboarding content -->
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 28px;text-align:center">
+      <div id="tmc-onboarding-tag-wrapper"><img id="tmc-onboarding-tag" src="/tag-example.png" alt="TapMyCar Tag"
+           style="display:block;width:130px;height:130px;object-fit:contain;border-radius:18px;box-shadow:0 8px 24px rgba(0,0,0,.12);"></div>
+      <div style="font-size:22px;font-weight:800;color:#111;line-height:1.25;margin-bottom:14px;max-width:300px">
+        Like leaving your number<br>— but you don't.
       </div>
-      <div class="ob-headline">Like leaving your number<br>— but you don't.</div>
-      <div class="ob-subtitle">TapMyCar tags let people reach you about your car. Your real number stays hidden.</div>
-    </div>
-    <div class="ob-cta">
-      <button class="ob-button" onclick="location.href='/register.html'">Sign Up</button>
-      <div class="ob-signin-row">
-        <span>Already have an account?</span>
-        <button onclick="location.href='/signin.html'">Sign in</button>
+      <div style="font-size:14px;color:#666;line-height:1.55;max-width:300px">
+        TapMyCar tags let people reach you about your car. Your real number stays hidden.
       </div>
     </div>
+    <div style="padding:0 28px calc(env(safe-area-inset-bottom,0px) + 32px);display:flex;flex-direction:column;gap:10px">
+      <!-- TMC_PATCH81 buttons -->
+      <button class="cta-primary" id="ob-cta">Sign Up</button>
+      <div class="signin-row">
+        <span class="signin-text">Already have an account?</span>
+        <button class="cta-link" id="ob-signin">Sign in</button>
+      </div>
+    </div>
+    <div class="tape"></div>
     <div class="chev"></div>
   </div>
+
+  <div id="r1"></div><div id="r2"></div>
+
+  <!-- LOGO -->
+  <div id="logo">
+    <!-- TMC_PATCH81 logo image -->
+    <img class="logo-img" src="/icon-512.png" alt="TapMyCar">
+    <div class="btag">Privacy for you. Safety for your Car.</div>
+  </div>
+
+  <!-- CAR -->
+  <div id="car">
+    <svg width="54" height="108" viewBox="0 0 36 72" fill="none">
+      <ellipse cx="18" cy="69" rx="11" ry="2.5" fill="rgba(0,0,0,.18)"/>
+      <path d="M8 62 Q18 67 28 62 L29 69 Q18 72 7 69Z" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.55)" stroke-width="1.4" stroke-linejoin="round"/>
+      <path d="M10 14 Q7 24 6 34 Q5 46 7 56 Q9 62 18 64 Q27 62 29 56 Q31 46 30 34 Q29 24 26 14 Q23 5 18 4 Q13 5 10 14Z" fill="rgba(255,255,255,.1)" stroke="rgba(255,255,255,.85)" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M12 18 Q18 15 24 18 Q25 28 24 39 Q18 42 12 39 Q11 28 12 18Z" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.38)" stroke-width="1.4" stroke-linejoin="round"/>
+      <path d="M10 13 Q18 9 26 13 L28 5 Q18 2 8 5Z" fill="rgba(255,255,255,.1)" stroke="rgba(255,255,255,.6)" stroke-width="1.4" stroke-linejoin="round"/>
+      <rect x="6" y="2.5" width="3.5" height="11" rx="1.8" fill="rgba(255,255,255,.08)" stroke="rgba(255,255,255,.5)" stroke-width="1.3"/>
+      <rect x="26.5" y="2.5" width="3.5" height="11" rx="1.8" fill="rgba(255,255,255,.08)" stroke="rgba(255,255,255,.5)" stroke-width="1.3"/>
+      <path d="M6 30 Q3 28 3 33 Q3 37 6 36" stroke="rgba(255,255,255,.48)" stroke-width="1.4" fill="rgba(255,255,255,.05)" stroke-linecap="round"/>
+      <path d="M30 30 Q33 28 33 33 Q33 37 30 36" stroke="rgba(255,255,255,.48)" stroke-width="1.4" fill="rgba(255,255,255,.05)" stroke-linecap="round"/>
+      <path d="M10 14 Q12 10 15 11 L14.5 14.5 Q12.5 13.5 10.5 15Z" fill="rgba(255,245,120,.6)" stroke="rgba(255,255,255,.5)" stroke-width="1"/>
+      <path d="M26 14 Q24 10 21 11 L21.5 14.5 Q23.5 13.5 25.5 15Z" fill="rgba(255,245,120,.6)" stroke="rgba(255,255,255,.5)" stroke-width="1"/>
+      <path d="M10 56 Q12 60 15 59 L14.5 62 Q11.5 63 9 60.5Z" fill="rgba(255,50,50,.55)" stroke="rgba(255,110,110,.65)" stroke-width="1"/>
+      <path d="M26 56 Q24 60 21 59 L21.5 62 Q24.5 63 27 60.5Z" fill="rgba(255,50,50,.55)" stroke="rgba(255,110,110,.65)" stroke-width="1"/>
+      <rect x="0" y="8" width="8" height="13" rx="3" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.68)" stroke-width="1.5"/>
+      <rect x="28" y="8" width="8" height="13" rx="3" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.68)" stroke-width="1.5"/>
+      <rect x="-1" y="47" width="9" height="14" rx="3.5" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.68)" stroke-width="1.5"/>
+      <rect x="28" y="47" width="9" height="14" rx="3.5" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.68)" stroke-width="1.5"/>
+      <circle cx="18" cy="28" r="4.5" fill="rgba(255,255,255,.14)" stroke="rgba(255,255,255,.95)" stroke-width="1.6"/>
+      <circle cx="18" cy="28" r="1.8" fill="#fff"/>
+    </svg>
+  </div>
+
+  <!-- PHONE -->
+  <div id="phone">
+    <svg width="48" height="82" viewBox="0 0 54 92" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="2" width="50" height="88" rx="11" fill="rgba(255,255,255,.1)" stroke="rgba(255,255,255,.95)" stroke-width="5" stroke-linejoin="round"/>
+      <rect x="7" y="8" width="40" height="72" rx="7" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>
+      <rect x="17" y="13" width="20" height="6" rx="3" fill="rgba(80,210,160,.9)"/>
+      <circle cx="27" cy="48" r="10" fill="rgba(255,107,0,.15)" stroke="rgba(255,107,0,.4)" stroke-width="1.5"/>
+      <circle cx="27" cy="48" r="5" fill="rgba(255,107,0,.25)" stroke="rgba(255,107,0,.6)" stroke-width="1.5"/>
+      <circle cx="27" cy="48" r="2" fill="rgba(255,107,0,.8)"/>
+      <rect x="19" y="80" width="16" height="3" rx="1.5" fill="rgba(255,255,255,.4)"/>
+      <rect x="52" y="24" width="4" height="14" rx="2" fill="rgba(255,255,255,.5)" stroke="rgba(255,255,255,.7)" stroke-width="1"/>
+      <rect x="-2" y="22" width="4" height="10" rx="2" fill="rgba(255,255,255,.5)" stroke="rgba(255,255,255,.7)" stroke-width="1"/>
+      <rect x="-2" y="36" width="4" height="10" rx="2" fill="rgba(255,255,255,.5)" stroke="rgba(255,255,255,.7)" stroke-width="1"/>
+    </svg>
+  </div>
+
+</div>
 
 <script>
-  // Load the EXACT landing-page hero sticker from /api/get-branding
+  // Check auth state up front
+  function isSignedIn() {
+    try {
+      return !!(localStorage.getItem('tmc_token') || localStorage.getItem('tmc_session_token'));
+    } catch (e) { return false; }
+  }
+
+  // Wire up onboarding buttons
+  document.getElementById('ob-cta').addEventListener('click', function () {
+    window.location.replace('/register.html');  // TMC_PATCH81: Sign Up -> register
+  });
+  document.getElementById('ob-signin').addEventListener('click', function () {
+    window.location.replace('/signin.html');
+  });
+
+  function run() {
+    var logo = document.getElementById('logo');
+    var car  = document.getElementById('car');
+    var phone= document.getElementById('phone');
+    var r1   = document.getElementById('r1');
+    var r2   = document.getElementById('r2');
+    var ob   = document.getElementById('ob');
+    var signedIn = isSignedIn();
+
+    // Step 1 — logo fades in
+    setTimeout(function(){ logo.className = 'in'; }, 250);
+    // Step 2 — car drives up
+    setTimeout(function(){ car.className = 'in'; }, 620);
+    // Step 3 — phone rises
+    setTimeout(function(){ phone.className = 'in'; }, 1900);
+    // Step 4 — phone taps car
+    setTimeout(function(){ phone.className = 'tap'; }, 2580);
+    // Step 5 — ripple fires
+    setTimeout(function(){
+      void r1.offsetWidth; void r2.offsetWidth;
+      r1.className = 'rp1'; r2.className = 'rp2';
+    }, 2680);
+    // Step 6 — phone bounces
+    setTimeout(function(){ phone.className = 'bounce'; }, 2760);
+    // Step 7 — phone retreats
+    setTimeout(function(){ phone.className = 'out'; }, 3080);
+    // Step 8 — car + logo fly up
+    setTimeout(function(){ car.className = 'out'; logo.className = 'out'; }, 3280);
+    // Step 9 — either redirect to dashboard (signed in) or show onboarding (not signed in)
+    setTimeout(function() {
+      if (signedIn) {
+        window.location.replace('/dashboard.html');
+      } else {
+        ob.classList.add('show');
+        ob.style.pointerEvents = 'all';
+      }
+    }, 4020);
+  }
+  // TMC_PATCH92_HERO_STICKER — load the landing-page tag image dynamically
   (function loadHeroSticker(){
     try {
-      var img = document.getElementById('tmc-onboarding-tag');
+      var img = document.getElementById("tmc-onboarding-tag");
       if (!img) return;
-      var KEY = 'tmc_hero_sticker_url';
-      // Use cached URL first (instant on subsequent loads)
+      var STORAGE_KEY = "tmc_hero_sticker_url";
+      // Try the sessionStorage cache first (fast)
       try {
-        var cached = sessionStorage.getItem(KEY);
-        if (cached && cached !== 'null') {
-          var t1 = new Image();
-          t1.onload = function(){ img.src = cached; };
-          t1.src = cached;
+        var cached = sessionStorage.getItem(STORAGE_KEY);
+        if (cached && cached !== "null") {
+          var test1 = new Image();
+          test1.onload = function(){ img.src = cached; };
+          test1.src = cached;
         }
       } catch(e){}
       // Fetch fresh URL from API
-      fetch('/api/get-branding')
+      fetch("/api/get-branding")
         .then(function(r){ return r.ok ? r.json() : null; })
-        .then(function(d){
-          if (d && d.ok && d.sticker_url) {
-            var t2 = new Image();
-            t2.onload = function(){
-              img.src = d.sticker_url;
-              try { sessionStorage.setItem(KEY, d.sticker_url); } catch(e){}
+        .then(function(data){
+          if (data && data.ok && data.sticker_url) {
+            var url = data.sticker_url;
+            // Preload to verify the URL works before swapping
+            var test2 = new Image();
+            test2.onload = function(){
+              img.src = url;
+              try { sessionStorage.setItem(STORAGE_KEY, url); } catch(e){}
             };
-            t2.src = d.sticker_url;
+            test2.onerror = function(){
+              // keep static fallback — API URL failed to load
+              try { sessionStorage.removeItem(STORAGE_KEY); } catch(e){}
+            };
+            test2.src = url;
           }
         })
-        .catch(function(){});
-    } catch(e){}
+        .catch(function(){ /* keep static fallback */ });
+    } catch(e){ /* never throw */ }
   })();
 
-  // If user is signed in, skip onboarding → go to dashboard
-  setTimeout(function(){
-    var token = null;
-    try { token = localStorage.getItem('tmc_token'); } catch(e){}
-    if (token) location.replace('/dashboard.html');
-  }, 2200);
+
+
+    // TMC_PATCH91 start animation IMMEDIATELY
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function(){ run(); });
+  } else {
+    run();
+  }
 </script>
+
 </body>
 </html>
