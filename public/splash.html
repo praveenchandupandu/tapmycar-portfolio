@@ -25,7 +25,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#FF6B00;font-family:
 .bname{font-size:38px;font-weight:800;color:#fff;letter-spacing:-.4px;margin-bottom:8px}
 .bname s{color:rgba(255,255,255,.72);text-decoration:none;font-style:normal}
 .bdot{display:inline-block;width:8px;height:8px;background:rgba(255,255,255,.7);border-radius:50%;margin-left:2px;vertical-align:middle;margin-bottom:7px}
-.btag{font-size:14px;color:rgba(255,255,255,.7);letter-spacing:.05em;font-weight:500}
+.logo-img{width:180px;height:180px;display:block;margin:0 auto 18px;filter:drop-shadow(0 6px 20px rgba(0,0,0,.18))}
+.btag{font-size:15px;color:#fff;letter-spacing:.02em;font-weight:600;text-align:center}
 
 /* CAR — drives up from below */
 #car{position:absolute;left:50%;bottom:-100px;transform:translateX(-50%);z-index:30;transition:none}
@@ -61,7 +62,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#FF6B00;font-family:
 .tape{height:3px;background:repeating-linear-gradient(90deg,#FCD34D 0,#FCD34D 9px,#D1D5DB 9px,#D1D5DB 18px);flex-shrink:0}
 .cta-primary{background:#FF6B00;color:#fff;font-size:15px;font-weight:700;padding:16px 0;border-radius:14px;text-align:center;border:none;cursor:pointer;width:100%;font-family:inherit}
 .cta-primary:active{transform:scale(.98);background:#E65A00}
-.cta-link{color:#FF6B00;font-size:13px;font-weight:600;padding:12px 0;text-align:center;background:transparent;border:none;cursor:pointer;width:100%;font-family:inherit}
+.cta-link{color:#FF6B00;font-size:14px;font-weight:700;padding:6px 0;background:transparent;border:none;cursor:pointer;font-family:inherit}
+.signin-row{display:flex;justify-content:center;align-items:center;gap:6px;padding:6px 0}
+.signin-text{color:#777;font-size:14px;font-weight:500}
 .cta-link:active{opacity:.7}
 </style>
 </head>
@@ -74,20 +77,20 @@ html,body{width:100%;height:100%;overflow:hidden;background:#FF6B00;font-family:
     <div class="chev"></div>
     <div class="tape"></div>
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 32px;gap:28px">
-      <div style="width:130px;height:130px;border-radius:32px;background:#FFF3EC;display:flex;align-items:center;justify-content:center">
-        <svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="#FF6B00" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-          <path d="M14 14h.01M14 18h.01M18 14h.01M18 18h.01"/>
-        </svg>
-      </div>
+      <!-- TMC_PATCH81 tag image -->
+      <img src="/tapmycarintialstage.png" alt="TapMyCar Tag" style="width:220px;height:220px;border-radius:24px;box-shadow:0 8px 28px rgba(0,0,0,.12);object-fit:contain;background:#fff">
       <div style="text-align:center">
         <div style="font-size:30px;font-weight:800;color:#111;margin-bottom:12px;line-height:1.2">Scan to reach<br>the owner</div>
         <div style="font-size:15px;color:#777;line-height:1.6">No app needed for strangers. Scan QR or tap NFC.</div>
       </div>
     </div>
     <div style="padding:0 28px calc(env(safe-area-inset-bottom,0px) + 32px);display:flex;flex-direction:column;gap:10px">
-      <button class="cta-primary" id="ob-cta">Get started free</button>
-      <button class="cta-link" id="ob-signin">Already have an account? Sign in</button>
+      <!-- TMC_PATCH81 buttons -->
+      <button class="cta-primary" id="ob-cta">Sign Up</button>
+      <div class="signin-row">
+        <span class="signin-text">Already have an account?</span>
+        <button class="cta-link" id="ob-signin">Sign in</button>
+      </div>
     </div>
     <div class="tape"></div>
     <div class="chev"></div>
@@ -97,14 +100,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#FF6B00;font-family:
 
   <!-- LOGO -->
   <div id="logo">
-    <div class="shield">
-      <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        <path d="M9 12l2 2 4-4"/>
-      </svg>
-    </div>
-    <div class="bname">Tap<s>My</s>Car<span class="bdot"></span></div>
-    <div class="btag">Privacy-first vehicle contact</div>
+    <!-- TMC_PATCH81 logo image -->
+    <img class="logo-img" src="/icon-512.png" alt="TapMyCar">
+    <div class="btag">Privacy for you. Safety for your Car.</div>
   </div>
 
   <!-- CAR -->
@@ -160,7 +158,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#FF6B00;font-family:
 
   // Wire up onboarding buttons
   document.getElementById('ob-cta').addEventListener('click', function () {
-    window.location.replace('/signin.html');
+    window.location.replace('/register.html');  // TMC_PATCH81: Sign Up -> register
   });
   document.getElementById('ob-signin').addEventListener('click', function () {
     window.location.replace('/signin.html');
