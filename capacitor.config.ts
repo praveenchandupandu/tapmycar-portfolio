@@ -20,6 +20,9 @@ const config: CapacitorConfig = {
       'checkout.stripe.com'
     ]
   },
+  android: {
+    backgroundColor: "#FF6B00" // TMC_PATCH91
+  },
   plugins: {
     CapacitorHttp: {
       // TMC_PATCH76 — bypasses CORS by using native HTTP
