@@ -5,11 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="theme-color" content="#FF6B00">
 <title>TapMyCar</title>
-<script src="/tmc-api-base.js"></script>
-<script src="/tmc-platform.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;overflow:hidden;background:#FF6B00;font-family:'Inter','Segoe UI',system-ui,sans-serif;-webkit-user-select:none;user-select:none}
@@ -17,7 +12,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#FF6B00;font-family:
 
 /* LOGO — centered, slightly above middle */
 #logo{position:absolute;top:43%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:20;opacity:0;transition:none;width:80%;max-width:280px}
-#logo.in{animation:lin .65s ease .2s forwards}
+#logo.in{animation:lin .4s ease 0s forwards}
 #logo.out{animation:lout .75s cubic-bezier(.4,0,.6,.2) forwards}
 @keyframes lin{from{opacity:0;transform:translate(-50%,-50%) translateY(12px)}to{opacity:1;transform:translate(-50%,-50%) translateY(0)}}
 @keyframes lout{from{opacity:1;transform:translate(-50%,-50%) translateY(0)}to{opacity:0;transform:translate(-50%,-50%) translateY(-260px)}}
