@@ -17,6 +17,8 @@
 
 
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+        <!-- TMC_PATCH88 system splash background -->
+        <item name="windowSplashScreenBackground">#FF6B00</item>
         <item name="android:background">@drawable/splash</item>
     </style>
 </resources>

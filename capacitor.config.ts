@@ -27,6 +27,17 @@ const config: CapacitorConfig = {
       // Browser CORS rules don't apply to native requests.
       enabled: true
     },
+    SplashScreen: {
+      // TMC_PATCH88: hide system splash immediately
+      launchShowDuration: 0,
+      launchAutoHide: true,
+      backgroundColor: "#FF6B00",
+      showSpinner: false,
+      androidSplashResourceName: "splash",
+      androidScaleType: "CENTER_CROP",
+      splashFullScreen: true,
+      splashImmersive: true
+    },
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert']
     },

@@ -21,7 +21,8 @@
     "resend": "^6.10.0",
     "stripe": "^22.0.0",
     "twilio": "^5.13.1",
-    "web-push": "^3.6.7"
+    "web-push": "^3.6.7",
+    "@capacitor/splash-screen": "^6.0.0"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
