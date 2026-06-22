@@ -19,6 +19,9 @@
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <!-- TMC_PATCH88 system splash background -->
         <item name="windowSplashScreenBackground">#FF6B00</item>
+        <!-- TMC_PATCH89: transparent icon hides the launcher icon during system splash -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/transparent_splash_icon</item>
+        <item name="windowSplashScreenIconBackgroundColor">#FF6B00</item>
         <item name="android:background">@drawable/splash</item>
     </style>
 </resources>

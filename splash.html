@@ -79,7 +79,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#FF6B00;font-family:
     <div class="tape"></div>
     <!-- TMC_PATCH88: clean onboarding content -->
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 28px;text-align:center">
-      <img id="tmc-onboarding-tag" src="/tag-example.png" alt="TapMyCar Tag"
+      <img id="tmc-onboarding-tag" src="/tapmycarintialstage.png" alt="TapMyCar Tag"
            style="display:block;width:130px;height:130px;object-fit:contain;border-radius:18px;box-shadow:0 8px 24px rgba(0,0,0,.12);margin:0 auto 28px">
       <div style="font-size:22px;font-weight:800;color:#111;line-height:1.25;margin-bottom:14px;max-width:300px">
         Like leaving your number<br>— but you don't.
@@ -206,27 +206,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#FF6B00;font-family:
       }
     }, 4020);
   }
-
-// TMC_PATCH83_DYNAMIC_STICKER — fetch the actual landing-page tag image
-  (function loadHeroSticker(){
-    var tagImg = document.getElementById('tmc-onboarding-tag');
-    if (!tagImg) return;
-    var STORAGE_KEY = 'tmc_hero_sticker_url';
-    // Use cached URL first (matches landing.html pattern)
-    try {
-      var cached = sessionStorage.getItem(STORAGE_KEY);
-      if (cached && cached !== 'null') tagImg.src = cached;
-    } catch(e){}
-    // Fetch fresh from API (in-flight while splash animation plays)
-    fetch('/api/get-branding')
-      .then(function(r){ return r.json(); })
-      .then(function(d){
-        var url = (d && d.ok && d.sticker_url) ? d.sticker_url : null;
-        try { sessionStorage.setItem(STORAGE_KEY, url == null ? 'null' : url); } catch(e){}
-        if (url && tagImg.src !== url) tagImg.src = url;
-      })
-      .catch(function(){ /* keep fallback */ });
-  })();
 
     window.addEventListener('load', function(){ setTimeout(run, 250); });
 </script>
