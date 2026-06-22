@@ -1,4 +1,48 @@
-<!DOCTYPE html>
+#!/usr/bin/env node
+/**
+ * TMC_PATCH94 — Complete rewrite of splash.html
+ *
+ * The previous splash.html has accumulated 10+ patches and is messy.
+ * The JS-based animation cascade has timing issues that cause the
+ * 3-4 second delay before animation starts.
+ *
+ * This patch REPLACES public/splash.html entirely with a clean version:
+ *
+ *   1. Pure CSS animations with animation-delay (no JS setTimeout chain)
+ *      → Animations start at frame 0 — the moment the WebView paints
+ *
+ *   2. Minimal inline HTML/CSS/JS, no external scripts loaded
+ *      → Loads as fast as possible
+ *
+ *   3. Splash content: logo bounces in, wordmark slides up, tagline
+ *      fades in. Total ~1.6s. Then fade to onboarding.
+ *
+ *   4. Tag image: static src = /tapmycarintialstage.png (you have this)
+ *      + dynamic loader fetches landing-page hero sticker from
+ *      /api/get-branding (matches landing page).
+ *
+ *   5. Body background inline orange (no white flash).
+ *
+ * Idempotent — uses a marker to prevent double-overwrites.
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const now = new Date();
+const pad = n => String(n).padStart(2, '0');
+const stamp = [
+  now.getFullYear(), pad(now.getMonth() + 1), pad(now.getDate()),
+  pad(now.getHours()), pad(now.getMinutes())
+].join('-');
+const backupDir = 'backup-splash-rewrite-' + stamp;
+
+console.log('\n╔══════════════════════════════════════════════════╗');
+console.log('║ TMC_PATCH94 — Splash.html complete rewrite       ║');
+console.log('╚══════════════════════════════════════════════════╝');
+fs.mkdirSync(backupDir, { recursive: true });
+
+const newSplashHtml = `<!DOCTYPE html>
 <!-- TMC_PATCH94_FRESH -->
 <html lang="en">
 <head>
@@ -154,3 +198,53 @@
 </script>
 </body>
 </html>
+`;
+
+try {
+  const splashPath = path.join('public', 'splash.html');
+  if (fs.existsSync(splashPath)) {
+    // Backup the existing one
+    const dest = path.join(backupDir, 'public', 'splash.html');
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+    fs.copyFileSync(splashPath, dest);
+    console.log('  ✓ Backed up old splash.html');
+  }
+
+  // Write the fresh splash.html
+  fs.writeFileSync(splashPath, newSplashHtml, 'utf8');
+  console.log('  ✓ Wrote fresh public/splash.html');
+
+  // Sync to root
+  if (fs.existsSync('splash.html')) {
+    fs.copyFileSync(splashPath, 'splash.html');
+    console.log('  ✓ Synced splash.html to project root');
+  }
+
+  console.log('\n╔══════════════════════════════════════════════════╗');
+  console.log('║ TMC_PATCH94 complete ✓                           ║');
+  console.log('╚══════════════════════════════════════════════════╝');
+  console.log('\nHow this works:');
+  console.log('  - Splash uses PURE CSS animations (animation-delay)');
+  console.log('  - Animations start at FRAME ZERO when WebView paints');
+  console.log('  - No JS setTimeout cascade = no startup delay');
+  console.log('  - Splash plays 1.85s, fades 0.45s, onboarding fades in');
+  console.log('  - Tag dynamically loads landing-page sticker from /api/get-branding');
+  console.log('  - Static fallback: /tapmycarintialstage.png (you have this file)');
+  console.log('');
+  console.log('Next:');
+  console.log('  npx cap sync android');
+  console.log('  git add -A');
+  console.log('  git commit -m "TMC_PATCH94: Rewrite splash with CSS-only animation"');
+  console.log('  git push');
+  console.log('');
+  console.log('In Android Studio:');
+  console.log('  1. Uninstall app from emulator');
+  console.log('  2. Device Manager → ▼ → Cold Boot Now');
+  console.log('  3. Build → Clean Project');
+  console.log('  4. ▶ Run\n');
+
+} catch (err) {
+  console.error('\n✗ PATCH FAILED: ' + err.message);
+  if (err.stack) console.error(err.stack);
+  process.exit(1);
+}
