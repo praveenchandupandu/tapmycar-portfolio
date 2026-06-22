@@ -78,7 +78,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#FF6B00;font-family:
     <div class="tape"></div>
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 32px;gap:28px">
       <!-- TMC_PATCH81 tag image -->
-      <img src="/tapmycarintialstage.png" alt="TapMyCar Tag" style="width:220px;height:220px;border-radius:24px;box-shadow:0 8px 28px rgba(0,0,0,.12);object-fit:contain;background:#fff">
+      <img id="tmc-onboarding-tag" src="/tag-example.png" alt="TapMyCar Tag" style="width:220px;height:220px;border-radius:24px;box-shadow:0 8px 28px rgba(0,0,0,.12);object-fit:contain;background:#fff">
       <div style="text-align:center">
         <div style="font-size:30px;font-weight:800;color:#111;margin-bottom:12px;line-height:1.2">Scan to reach<br>the owner</div>
         <div style="font-size:15px;color:#777;line-height:1.6">No app needed for strangers. Scan QR or tap NFC.</div>
@@ -203,7 +203,28 @@ html,body{width:100%;height:100%;overflow:hidden;background:#FF6B00;font-family:
     }, 4020);
   }
 
-  window.addEventListener('load', function(){ setTimeout(run, 250); });
+// TMC_PATCH83_DYNAMIC_STICKER — fetch the actual landing-page tag image
+  (function loadHeroSticker(){
+    var tagImg = document.getElementById('tmc-onboarding-tag');
+    if (!tagImg) return;
+    var STORAGE_KEY = 'tmc_hero_sticker_url';
+    // Use cached URL first (matches landing.html pattern)
+    try {
+      var cached = sessionStorage.getItem(STORAGE_KEY);
+      if (cached && cached !== 'null') tagImg.src = cached;
+    } catch(e){}
+    // Fetch fresh from API (in-flight while splash animation plays)
+    fetch('/api/get-branding')
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        var url = (d && d.ok && d.sticker_url) ? d.sticker_url : null;
+        try { sessionStorage.setItem(STORAGE_KEY, url == null ? 'null' : url); } catch(e){}
+        if (url && tagImg.src !== url) tagImg.src = url;
+      })
+      .catch(function(){ /* keep fallback */ });
+  })();
+
+    window.addEventListener('load', function(){ setTimeout(run, 250); });
 </script>
 
 </body>
