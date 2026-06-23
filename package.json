@@ -16,13 +16,14 @@
     "@capacitor/core": "^6.1.2",
     "@capacitor/ios": "^6.1.2",
     "@capacitor/push-notifications": "^6.0.2",
+    "@capacitor/splash-screen": "^6.0.0",
     "@supabase/supabase-js": "^2.101.1",
+    "firebase-admin": "^13.10.0",
     "qrcode": "^1.5.4",
     "resend": "^6.10.0",
     "stripe": "^22.0.0",
     "twilio": "^5.13.1",
-    "web-push": "^3.6.7",
-    "@capacitor/splash-screen": "^6.0.0"
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
