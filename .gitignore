@@ -48,3 +48,8 @@ ios/App/Podfile.lock
 ios/DerivedData/
 ios/.xcode.env.local
 .DS_Store
+
+# Local-only legacy artifacts (TapMyCar)
+tapmycar-patch*.js
+backup-*/
+
