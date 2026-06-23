@@ -1,11 +1,15 @@
 // TMC_TOW_MINE: signed-in user fetches their own tow notifications.
 const { createClient } = require('@supabase/supabase-js');
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+/* TMC_PATCH_SEC1: replace trust-the-client with signed-token auth */
+const { resolveUser } = require('./_auth');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
-  const user_id = String(req.query.user_id || '').trim();
-  if (!user_id) return res.status(400).json({ error: 'user_id required' });
+  /* TMC_PATCH_SEC1: use server-verified user id, not query param */
+  const _auth = resolveUser(req);
+  if (!_auth) return res.status(401).json({ error: 'Sign in required' });
+  const user_id = _auth.userId;
 
   const { data, error } = await supabase
     .from('tow_notifications')

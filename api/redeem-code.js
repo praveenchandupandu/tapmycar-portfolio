@@ -20,6 +20,8 @@ const supabase = createClient(
 const CODE_FORMAT = /^TMC-PREM-[A-HJ-NP-Z2-9]{6}$/;
 const REFERRAL_FORMAT = /^TMC-[A-HJ-NP-Z2-9]{6}$/; /* TMC_PATCH43_REFERRALS */
 const { rateLimit, getClientIp } = require('./_rate-limit');
+/* TMC_PATCH_SEC1: signed-token auth */
+const { resolveUser } = require('./_auth');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -34,16 +36,13 @@ module.exports = async function handler(req, res) {
   if (!await rateLimit(req, res, _tmcRateRules)) return;
 
 
-  const { user_id, code } = req.body || {};
+  const { code } = req.body || {};
 
-  if (!user_id) return res.status(400).json({ error: 'user_id required' });
+  /* TMC_PATCH_SEC1: user identity from signed token, never from body */
+  const _auth = resolveUser(req);
+  if (!_auth) return res.status(401).json({ error: 'Sign in required' });
+  const user_id = _auth.userId;
   if (!code) return res.status(400).json({ error: 'code required' });
-
-  // TMC_PATCH2_UUID_VALIDATE
-  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  if (!UUID_RE.test(String(user_id))) {
-    return res.status(400).json({ error: 'Invalid user_id format' });
-  }
 
   const normalized = String(code).trim().toUpperCase();
 

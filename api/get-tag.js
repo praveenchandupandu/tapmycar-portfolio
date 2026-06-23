@@ -1,5 +1,7 @@
 const { createClient } = require('@supabase/supabase-js');
 const { resolveAdmin: _tmcResolveAdminCookie } = require('./_admin-auth'); /* TMC_PATCH40S3 */
+/* TMC_PATCH_SEC1: signed-token user auth */
+const { resolveUser: _tmcResolveUser } = require('./_auth');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
