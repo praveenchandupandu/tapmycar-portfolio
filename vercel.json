@@ -71,10 +71,21 @@
     },
     {
       "source": "/api/(.*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "origin",
+          "value": "https://www.tapmycar.io"
+        }
+      ],
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "*"
+          "value": "https://www.tapmycar.io"
+        },
+        {
+          "key": "Access-Control-Allow-Credentials",
+          "value": "true"
         },
         {
           "key": "Access-Control-Allow-Methods",
@@ -87,6 +98,118 @@
         {
           "key": "Access-Control-Max-Age",
           "value": "86400"
+        },
+        {
+          "key": "Vary",
+          "value": "Origin"
+        }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "origin",
+          "value": "https://tapmycar.io"
+        }
+      ],
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://tapmycar.io"
+        },
+        {
+          "key": "Access-Control-Allow-Credentials",
+          "value": "true"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization, X-Requested-With"
+        },
+        {
+          "key": "Access-Control-Max-Age",
+          "value": "86400"
+        },
+        {
+          "key": "Vary",
+          "value": "Origin"
+        }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "origin",
+          "value": "https://localhost"
+        }
+      ],
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://localhost"
+        },
+        {
+          "key": "Access-Control-Allow-Credentials",
+          "value": "true"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization, X-Requested-With"
+        },
+        {
+          "key": "Access-Control-Max-Age",
+          "value": "86400"
+        },
+        {
+          "key": "Vary",
+          "value": "Origin"
+        }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "origin",
+          "value": "capacitor://localhost"
+        }
+      ],
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "capacitor://localhost"
+        },
+        {
+          "key": "Access-Control-Allow-Credentials",
+          "value": "true"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization, X-Requested-With"
+        },
+        {
+          "key": "Access-Control-Max-Age",
+          "value": "86400"
+        },
+        {
+          "key": "Vary",
+          "value": "Origin"
         }
       ]
     }
