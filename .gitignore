@@ -53,3 +53,8 @@ ios/.xcode.env.local
 tapmycar-patch*.js
 backup-*/
 
+
+# Local patch scripts (run-once tools, not part of the app)
+patch-*.js
+*.bak-*
+
