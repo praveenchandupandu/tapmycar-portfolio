@@ -134,6 +134,12 @@ function requireAuth() {
 //     refreshes its in-memory copy.
 /* TMC_PATCH27_IDLE_FIX: rewrite installIdleLogout to fix Stay-button race */
 window.installIdleLogout = function(opts) {
+  // IDLE_LOGOUT_DISABLED_IN_APP: in the Capacitor mobile app, do not
+  // auto-log out on inactivity. The 90-day JWT governs session length
+  // there. Web users keep the original idle-logout behavior.
+  if (typeof window !== 'undefined' && window.tmcIsInApp === true) {
+    return;
+  }
   opts = opts || {};
   var minutes = opts.minutes || 10;
   var warningSeconds = opts.warningSeconds || 60;
