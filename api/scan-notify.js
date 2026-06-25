@@ -7,6 +7,7 @@ const webpush = require('web-push');
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 const resend = new Resend(process.env.RESEND_API_KEY);
+const { sendPushToUser } = require('./_push-send');
 
 try {
   webpush.setVapidDetails(
@@ -62,7 +63,7 @@ module.exports = async function handler(req, res) {
   // --- PUSH (if the owner has any subscription) ---
   try {
     const { data: subs } = await supabase
-      .from('push_subscriptions').select('*').eq('user_id', owner.id);
+      .from('push_subscriptions').select('*').eq('user_id', owner.id).not('endpoint', 'is', null);
     if (subs && subs.length) {
       const payload = JSON.stringify({ title: title, body: text, url: '/activity.html' });
       for (const s of subs) {
@@ -85,6 +86,16 @@ module.exports = async function handler(req, res) {
       });
     }
   } catch (e) { console.error('scan-notify push error:', e && e.message); }
+
+  // --- MOBILE PUSH (FCM) ---
+  try {
+    const pushResult = await sendPushToUser(owner.id, {
+      title: title,
+      body: text,
+      data: { type: 'scan', url: '/activity.html' }
+    });
+    if (pushResult && pushResult.success) pushed += pushResult.success;
+  } catch (e) { console.error('scan-notify FCM push error:', e && e.message); }
 
   // --- EMAIL (unless globally opted out) ---
   if (owner.email && !owner.email_opt_out) {

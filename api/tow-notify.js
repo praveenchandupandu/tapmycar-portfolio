@@ -5,6 +5,7 @@
 const { Resend } = require('resend');
 const { createClient } = require('@supabase/supabase-js');
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+const { sendPushToUser } = require('./_push-send');
 const resend   = new Resend(process.env.RESEND_API_KEY);
 const { rateLimit, getClientIp } = require('./_rate-limit');
 
@@ -132,12 +133,21 @@ module.exports = async function handler(req, res) {
       html
     });
   } catch (e) { console.error('tow email failed:', e && e.message); }
+  // --- MOBILE PUSH (FCM) ---
+  try {
+    await sendPushToUser(tag.owner_id, {
+      title: 'Tow alert: ' + towName,
+      body: 'Your car (' + plate + ') was towed. Tap to view.',
+      data: { type: 'tow', url: '/my-tows.html' }
+    });
+  } catch (e) { console.error('tow FCM push error:', e && e.message); }
+
 
   // Push (best-effort)
   try {
     const webpush = require('web-push');
     webpush.setVapidDetails(process.env.VAPID_EMAIL, process.env.VAPID_PUBLIC_KEY, process.env.VAPID_PRIVATE_KEY);
-    const { data: subs } = await supabase.from('push_subscriptions').select('*').eq('user_id', tag.owner_id);
+    const { data: subs } = await supabase.from('push_subscriptions').select('*').eq('user_id', tag.owner_id).not('endpoint', 'is', null);
     if (subs && subs.length) {
       const payload = JSON.stringify({ title: 'Tow alert  ' + towName, body: 'Your car (' + plate + ') was towed. Tap to view.', url: '/my-tows.html' });
       for (const sub of subs) {

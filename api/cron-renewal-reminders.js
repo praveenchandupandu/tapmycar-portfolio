@@ -9,6 +9,7 @@ const stripe           = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 const resend   = new Resend(process.env.RESEND_API_KEY);
+const { sendPushToUser } = require('./_push-send');
 
 const FROM = 'TapMyCar <noreply@tapmycar.io>';
 const SITE = 'https://tapmycar.io';
@@ -137,6 +138,16 @@ module.exports = async function handler(req, res) {
         'Your TapMyCar plan renews tomorrow';
       try {
         await resend.emails.send({ from: FROM, to: u.email, subject, html });
+        // Mobile push for the 1-day reminder only (not 7d - too noisy)
+        if (r.key === '1d') {
+          try {
+            await sendPushToUser(u.id, {
+              title: 'Renews tomorrow',
+              body: 'Your TapMyCar plan renews ' + info.dateStr + '.',
+              data: { type: 'billing', url: '/billing.html' }
+            });
+          } catch (e) { console.error('renewal-1d push error:', e && e.message); }
+        }
         const update = {}; update[r.column] = periodEnd.toISOString();
         await supabase.from('users').update(update).eq('id', u.id);
         sent++;

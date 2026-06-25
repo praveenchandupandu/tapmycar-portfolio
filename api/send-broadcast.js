@@ -113,7 +113,7 @@ async function getPushSubs(userIds) {
   const map = {};
   if (!userIds.length) return map;
   const { data, error } = await supabase
-    .from('push_subscriptions').select('*').in('user_id', userIds);
+    .from('push_subscriptions').select('*').in('user_id', userIds).not('endpoint', 'is', null);
   if (error) { console.error('push subs query failed:', error.message); return map; }
   (data || []).forEach(function (s) {
     if (!map[s.user_id]) map[s.user_id] = [];
