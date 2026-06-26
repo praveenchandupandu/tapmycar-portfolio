@@ -1,3 +1,4 @@
+// TMC_REEL_SUBLABEL: data-tmc-sublabel support added
 // TMC_VIDEOS_REELS v2  inline+expand reels player with real share.
 (function () {
   if (window.__tmcReelsInit) return;
@@ -6,6 +7,8 @@
   var STYLE = '\
 .tmc-r-sec-head{display:flex;align-items:center;justify-content:space-between;padding:4px 0 8px}\
 .tmc-r-sec-title{font-size:16px;font-weight:800;color:#111;letter-spacing:-.3px}\
+.tmc-r-sec-sublabel{font-size:12px;color:#6B7280;margin-top:2px;font-weight:500}\
+.tmc-r-sec.dark .tmc-r-sec-sublabel{color:#9CA3AF}\
 .tmc-r-sec.dark .tmc-r-sec-title{color:#fff}\
 .tmc-r-sec.dark{background:#0B0B0F;border-radius:18px;padding:18px 12px 22px;margin:0 -6px 18px}\
 .tmc-r-sec.dark .tmc-r-sec-head{padding-left:6px;padding-right:6px}\
@@ -298,13 +301,16 @@
   }
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
 
-  function mountSection(anchor, kind, label) {
+  function mountSection(anchor, kind, label, sublabel) {
     fetch('/api/get-videos?kind=' + kind).then(function (r) { return r.json(); }).then(function (d) {
       var list = (d && d.videos) || [];
       if (!list.length) { anchor.style.display = 'none'; return; }
       var sectionClass = 'tmc-r-sec';
       anchor.innerHTML = '<div class="' + sectionClass + '">' +
-        '<div class="tmc-r-sec-head"><div class="tmc-r-sec-title">' + label + '</div></div>' +
+        '<div class="tmc-r-sec-head"><div>' +
+          '<div class="tmc-r-sec-title">' + label + '</div>' +
+          (sublabel ? '<div class="tmc-r-sec-sublabel">' + esc(sublabel) + '</div>' : '') +
+        '</div></div>' +
         '<div class="tmc-r-row"></div>' +
       '</div>';
       var row = anchor.querySelector('.tmc-r-row');
@@ -325,6 +331,7 @@
   document.querySelectorAll('[data-tmc-reel]').forEach(function (el) {
     var kind = el.dataset.tmcReel;
     var label = el.dataset.tmcLabel || (kind === 'demo' ? 'Demo videos' : 'Customer reviews');
-    if (['demo','review'].includes(kind)) mountSection(el, kind, label);
+    var sublabel = el.dataset.tmcSublabel || '';
+    if (['demo','review'].includes(kind)) mountSection(el, kind, label, sublabel);
   });
 })();

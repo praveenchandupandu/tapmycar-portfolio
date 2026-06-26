@@ -169,12 +169,15 @@
     </div>
     <!-- 4. ACTION BUTTONS (2x2 grid) -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
-      <div style="background:#111;border-radius:14px;padding:14px;cursor:pointer" onclick="window.open('https://youtube.com','_blank')">
+      <div id="tmc-visit-website-tile" style="background:#111;border-radius:14px;padding:14px;cursor:pointer" onclick="(function(){
+          if (window.tmcIsInApp && typeof window.tmcOpenWeb === 'function') { window.tmcOpenWeb('https://tapmycar.io'); }
+          else { window.location.href = 'https://tapmycar.io'; }
+        })()">
         <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#FF6B00"/><polygon points="10 8 16 12 10 16 10 8" fill="#fff"/></svg>
-          <div style="font-size:12px;font-weight:700;color:#fff">Demo Video</div>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FF6B00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <div id="tmc-visit-website-title" style="font-size:12px;font-weight:700;color:#fff">Our Story</div>
         </div>
-        <div style="font-size:10px;color:#9CA3AF;line-height:1.4">See how TapMyCar works</div>
+        <div id="tmc-visit-website-sub" style="font-size:10px;color:#9CA3AF;line-height:1.4">Learn what makes TapMyCar different</div>
       </div>
       <div class="tmc-hide-on-ios" style="background:#FF6B00;border-radius:14px;padding:14px;cursor:pointer" onclick="window.location.href='/pricing.html'">
         <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
@@ -218,7 +221,7 @@
     </div>
 
     <!-- TMC_VIDEOS reels (Patch Videos B) -->
-    <div data-tmc-reel="demo"  data-tmc-label="Demo videos"      style="margin-bottom:18px"></div>
+    <div data-tmc-reel="demo"  data-tmc-label="Demo videos" data-tmc-sublabel="See how TapMyCar works"      style="margin-bottom:18px"></div>
     <div data-tmc-reel="review" data-tmc-label="Customer reviews" style="margin-bottom:18px"></div>
 
     <!-- 6. RECENT ACTIVITY -->
@@ -788,6 +791,20 @@ async function dashConfirmUpgradeAndPay() {
   }
 }
 </script>
+<script>/* TMC_VISIT_WEBSITE_INIT */ (function () {
+  function applyVisitText() {
+    if (!window.tmcIsInApp) return;
+    var t = document.getElementById('tmc-visit-website-title');
+    var s = document.getElementById('tmc-visit-website-sub');
+    if (t) t.textContent = 'Visit Website';
+    if (s) s.textContent = 'Explore everything TapMyCar offers';
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyVisitText);
+  } else {
+    applyVisitText();
+  }
+})();</script>
 </body>
 </html>
 
