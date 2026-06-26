@@ -13,6 +13,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="TapMyCar">
 <meta charset="UTF-8">
+<!-- TMC_STICKER_PRECONNECT: warm storage CDN connection -->
+<link rel="dns-prefetch" href="//supabase.co">
+<link rel="dns-prefetch" href="//supabase.in">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>TapMyCar — Privacy-first vehicle contact | Praman Tech LLC</title>
 <link rel="stylesheet" href="/app.css">
@@ -940,24 +944,37 @@ if ('serviceWorker' in navigator) {
 <script>
 /* TMC_BRANDING_PRELOAD: avoid fallback flash via sessionStorage cache */
 (function(){
+  /* TMC_STICKER_LOCALSTORAGE_TTL: 24h cache, faster repeat visits */
   var KEY = 'tmc_hero_sticker_url';
+  var TS_KEY = 'tmc_hero_sticker_ts';
+  var TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
   var el = document.getElementById('tmc-hero-sticker');
   if (!el) return;
+  var cached = null;
   try {
-    var cached = sessionStorage.getItem(KEY);
+    var rawUrl = localStorage.getItem(KEY);
+    var rawTs  = parseInt(localStorage.getItem(TS_KEY) || '0', 10);
+    if (rawUrl && rawTs && (Date.now() - rawTs) < TTL_MS) {
+      cached = rawUrl;
+    }
     if (cached && cached !== 'null') {
-      el.innerHTML = '<img src="' + cached + '" alt="TapMyCar sticker">';
+      el.innerHTML = '<img src="' + cached + '" alt="TapMyCar sticker" fetchpriority="high" loading="eager">';
+      el.style.visibility = '';
+      el.classList.remove('tmc-pre-hidden');
     } else if (cached !== 'null') {
       el.style.visibility = 'hidden';
     }
   } catch (e) {}
   fetch('/api/get-branding').then(function(r){ return r.json(); }).then(function(d){
     var url = (d && d.ok && d.sticker_url) ? d.sticker_url : null;
-    try { sessionStorage.setItem(KEY, url == null ? 'null' : url); } catch (e) {}
+    try {
+      localStorage.setItem(KEY, url == null ? 'null' : url);
+      localStorage.setItem(TS_KEY, String(Date.now()));
+    } catch (e) {}
     el.style.visibility = ''; el.classList.remove('tmc-pre-hidden');
     if (url) {
       var cur = el.querySelector('img');
-      if (!cur || cur.src !== url) el.innerHTML = '<img src="' + url + '" alt="TapMyCar sticker">';
+      /* TMC_STICKER_FETCHPRIORITY */ if (!cur || cur.src !== url) el.innerHTML = '<img src="' + url + '" alt="TapMyCar sticker" fetchpriority="high" loading="eager">';
     }
   }).catch(function(){ el.style.visibility = ''; el.classList.remove('tmc-pre-hidden'); });
 
