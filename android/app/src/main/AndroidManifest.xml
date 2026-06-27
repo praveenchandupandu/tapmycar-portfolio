@@ -27,7 +27,12 @@
             android:grantUriPermissions="true">
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths" />
         </provider>
-    </application>
+    
+        <!-- TapMyCar: status-bar notification icon (white silhouette) -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_icon" />
+</application>
 
     <!-- Permissions -->
 

@@ -129,7 +129,10 @@ async function _sendOneToken(messaging, token, payload) {
         notification: {
           // Use the app's default icon and color from the manifest.
           sound: 'default',
-          channelId: payload.channelId || 'default'
+          channelId: payload.channelId || 'default',
+          icon: 'ic_stat_icon',
+          color: '#FF6B00',
+          imageUrl: payload.imageUrl || 'https://www.tapmycar.io/icon-512.png'
         }
       },
       apns: {
