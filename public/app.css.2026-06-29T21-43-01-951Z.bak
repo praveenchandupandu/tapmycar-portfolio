@@ -143,25 +143,3 @@ input, textarea, select, [contenteditable="true"], .selectable,
 .hero-card:active { filter: brightness(.96); }
 @media (prefers-reduced-motion: reduce) { body { animation: none; } }
 /* TMC_NATIVE_FEEL_END */
-
-/* TMC_GLOW_START */
-/* Ambient brand glow behind app screens (not legal/wide pages) */
-body:not(.wide-page)::before {
-  content: "";
-  position: fixed;
-  top: 0; left: 0; right: 0; height: 420px;
-  z-index: -1; pointer-events: none;
-  background: radial-gradient(120% 100% at 50% -10%, rgba(255,107,0,.18) 0%, rgba(255,107,0,.07) 38%, rgba(255,255,255,0) 72%);
-  animation: tmcGlowIn .55s ease-out both;
-}
-@keyframes tmcGlowIn { from { opacity: 0 } to { opacity: 1 } }
-/* Elevated, glassy bottom nav */
-.bnav {
-  background: rgba(255,255,255,.82);
-  -webkit-backdrop-filter: saturate(180%) blur(14px);
-  backdrop-filter: saturate(180%) blur(14px);
-  border-top: none;
-  box-shadow: 0 -6px 24px rgba(17,17,17,.07);
-}
-@media (prefers-reduced-motion: reduce) { body:not(.wide-page)::before { animation: none } }
-/* TMC_GLOW_END */
