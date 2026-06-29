@@ -125,24 +125,3 @@ input[type="text"],input[type="email"],input[type="tel"],input[type="number"],in
 html{scroll-behavior:smooth;-webkit-overflow-scrolling:touch;}
 /* Safe area for notch phones */
 .bnav{padding-bottom:max(20px,env(safe-area-inset-bottom));}
-
-/* TMC_APPFEEL_START */
-/* Ambient brand glow on app screens — stays for the whole page; removed on legal/wide pages. */
-body:not(.wide-page) {
-  background-color: var(--wh);
-  background-image: radial-gradient(120% 130% at 50% -10%, rgba(255,107,0,.18) 0%, rgba(255,107,0,.06) 40%, rgba(255,255,255,0) 72%);
-  background-repeat: no-repeat;
-  background-position: top center;
-  background-size: 100% 460px;
-  animation: tmcFadeIn .2s ease-out both;
-}
-@keyframes tmcFadeIn { from { opacity: 0 } to { opacity: 1 } }
-/* Native feel: stop long-press from selecting text / dragging UI / showing the web callout */
-* { -webkit-touch-callout: none; -webkit-user-drag: none; }
-body { -webkit-user-select: none; user-select: none; }
-img, a, button, svg { -webkit-user-drag: none; }
-/* Keep real inputs and readable legal text fully selectable */
-input, textarea, select, [contenteditable="true"], .selectable,
-.legal-page, .legal-page * { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }
-@media (prefers-reduced-motion: reduce) { body:not(.wide-page) { animation: none } }
-/* TMC_APPFEEL_END */
