@@ -20,7 +20,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.75)}}
-    #plan-badge:empty{display:none}
     .qr-wrap{background:#fff;border:2px solid var(--or);border-radius:14px;width:130px;height:130px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 4px 16px rgba(255,107,0,.15);}
     .qr-wrap canvas{width:114px !important;height:114px !important;}
     .act-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:.5px solid var(--bd);}
@@ -71,7 +70,7 @@
       <div style="font-size:11px;color:var(--gy);margin-bottom:3px">Welcome back</div>
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div style="font-size:22px;font-weight:800;color:var(--bk)" id="greeting-name">...</div>
-        <div style="background:var(--orl);border:.5px solid var(--orl2);border-radius:99px;padding:5px 12px;font-size:10px;font-weight:700;color:var(--or);text-transform:capitalize" id="plan-badge"></div>
+        <div style="background:var(--orl);border:.5px solid var(--orl2);border-radius:99px;padding:5px 12px;font-size:10px;font-weight:700;color:var(--or);text-transform:capitalize" id="plan-badge">Free</div>
       </div>
       <div style="font-size:11px;color:var(--gy);margin-top:2px">Privacy for you. Safety for your car.</div>
     </div>
@@ -114,11 +113,11 @@
     <!-- 3. STATS ROW -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
       <div class="card" style="text-align:center;padding:14px 8px">
-        <div style="font-size:26px;font-weight:800;color:var(--or);line-height:1" id="stat-scans">&#8211;</div>
+        <div style="font-size:26px;font-weight:800;color:var(--or);line-height:1" id="stat-scans">0</div>
         <div style="font-size:9px;color:var(--gy);margin-top:4px">Scans</div>
       </div>
       <div class="card" style="text-align:center;padding:14px 8px">
-        <div style="font-size:26px;font-weight:800;color:var(--or);line-height:1" id="stat-week">&#8211;</div>
+        <div style="font-size:26px;font-weight:800;color:var(--or);line-height:1" id="stat-week">0</div>
         <div style="font-size:9px;color:var(--gy);margin-top:4px">This week</div>
       </div>
       <div class="card" style="text-align:center;padding:14px 8px">
