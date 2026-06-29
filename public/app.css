@@ -125,3 +125,21 @@ input[type="text"],input[type="email"],input[type="tel"],input[type="number"],in
 html{scroll-behavior:smooth;-webkit-overflow-scrolling:touch;}
 /* Safe area for notch phones */
 .bnav{padding-bottom:max(20px,env(safe-area-inset-bottom));}
+
+/* TMC_NATIVE_FEEL_START */
+/* Smooth cross-page transitions where supported (no-op on older WebViews) */
+@view-transition { navigation: auto; }
+@keyframes tmcPageIn { from { opacity: 0 } to { opacity: 1 } }
+body { animation: tmcPageIn .18s ease-out both; }
+/* Native feel: suppress long-press callout / text selection / drag on app UI */
+* { -webkit-touch-callout: none; -webkit-user-drag: none; }
+body { -webkit-user-select: none; user-select: none; }
+img, a, button, svg { -webkit-user-drag: none; }
+/* Keep real inputs and readable legal text fully selectable */
+input, textarea, select, [contenteditable="true"], .selectable,
+.legal-page, .legal-page * { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }
+/* Instant tap feedback so navigation feels responsive */
+.bni:active { opacity: .55; }
+.hero-card:active { filter: brightness(.96); }
+@media (prefers-reduced-motion: reduce) { body { animation: none; } }
+/* TMC_NATIVE_FEEL_END */
