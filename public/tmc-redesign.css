@@ -263,3 +263,8 @@ body.tmc-redesign #tmc-chat-window {
 body.tmc-redesign {
   animation: tmc-page-fade-in .2s ease-out;
 }
+
+/* TMC_TAB_POLISH: gentle page fade-in to soften tab switches (claude-patch-03) */
+@keyframes tmcFadeIn { from { opacity: 0; } to { opacity: 1; } }
+body { animation: tmcFadeIn 0.18s ease-out both; }
+@media (prefers-reduced-motion: reduce) { body { animation: none; } }

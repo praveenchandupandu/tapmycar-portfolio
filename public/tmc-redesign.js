@@ -59,3 +59,25 @@
     setActiveNavItem();
   });
 })();
+
+/* TMC_TAB_POLISH: prefetch sibling tab pages so switching is faster (claude-patch-03) */
+;(function(){
+  if (window.__tmcTabPrefetch) return;
+  window.__tmcTabPrefetch = true;
+  var tabs = ['/dashboard.html','/manage.html','/verify.html','/activity.html','/settings.html'];
+  function warm(){
+    try {
+      var here = location.pathname;
+      for (var i = 0; i < tabs.length; i++) {
+        var base = tabs[i].replace('.html','');
+        if (here.indexOf(base) !== -1) continue;
+        var l = document.createElement('link');
+        l.rel = 'prefetch';
+        l.href = tabs[i];
+        document.head.appendChild(l);
+      }
+    } catch (e) {}
+  }
+  if ('requestIdleCallback' in window) { requestIdleCallback(warm, { timeout: 2000 }); }
+  else { setTimeout(warm, 1200); }
+})();
