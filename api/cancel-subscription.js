@@ -82,6 +82,7 @@ async function findLastAnnualInvoice(subscriptionId, customerId, plan) {
     return {
       invoice: inv,
       charge_id: inv.charge,
+      payment_intent: inv.payment_intent, // TMC_PATCH06 fallback when charge is empty
       amount_paid: inv.amount_paid,
       paid_at: (inv.status_transitions && inv.status_transitions.paid_at) || inv.created,
       plan
@@ -136,6 +137,7 @@ async function computeEligibility(user) {
     last_invoice: {
       invoice_id: last.invoice.id,
       charge_id: last.charge_id,
+      payment_intent: last.payment_intent, // TMC_PATCH06
       amount_paid: last.amount_paid,
       paid_at: last.paid_at
     },
@@ -183,10 +185,11 @@ module.exports = async function handler(req, res) {
     let refundId = null;
 
     // 2. If eligible, issue partial refund BEFORE canceling
-    if (elig.eligible && elig.refund_cents > 0 && elig.last_invoice && elig.last_invoice.charge_id) {
+    if (elig.eligible && elig.refund_cents > 0 && elig.last_invoice && (elig.last_invoice.charge_id || elig.last_invoice.payment_intent)) { // TMC_PATCH06
       try {
-        const refund = await stripe.refunds.create({
-          charge: elig.last_invoice.charge_id,
+        // TMC_PATCH06: refund by charge when present, else by payment_intent
+        // (newer Stripe API versions often leave invoice.charge empty).
+        const __refundParams = {
           amount: elig.refund_cents,
           reason: 'requested_by_customer',
           metadata: {
@@ -195,7 +198,10 @@ module.exports = async function handler(req, res) {
             service_fee_cents: String(SERVICE_FEE_CENTS),
             invoice_id: elig.last_invoice.invoice_id
           }
-        });
+        };
+        if (elig.last_invoice.charge_id) __refundParams.charge = elig.last_invoice.charge_id;
+        else __refundParams.payment_intent = elig.last_invoice.payment_intent;
+        const refund = await stripe.refunds.create(__refundParams);
         refundIssued = true;
         refundAmountCents = refund.amount;
         refundId = refund.id;
