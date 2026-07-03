@@ -642,6 +642,12 @@ async function handler(req, res) {
         break;
       }
 
+
+      // TMC_PATCH_REFUND_LOG: record every refund (automatic OR manual-in-Stripe)
+      case "charge.refunded": {
+        await logRefundFromCharge(event.data.object);
+        break;
+      }
       default:
         break;
     }
@@ -651,6 +657,52 @@ async function handler(req, res) {
   } catch (err) {
     console.error(`Webhook handler error on ${event.type}:`, err);
     return res.status(200).json({ received: true, handler_error: err.message });
+  }
+}
+
+// TMC_PATCH_REFUND_LOG: write every refund into refund_log (survives account
+// deletion; also captures manual Dashboard refunds). Best-effort, never throws.
+async function logRefundFromCharge(charge) {
+  try {
+    if (!charge) return;
+    const refund = (charge.refunds && charge.refunds.data && charge.refunds.data[0]) || null;
+    const refundId = refund ? refund.id : null;
+    if (refundId) {
+      const { data: existing } = await supabase.from('refund_log').select('id').eq('stripe_refund_id', refundId).maybeSingle();
+      if (existing) return; // already logged (dedupe)
+    }
+    const md = (refund && refund.metadata) || {};
+    let source = 'manual_stripe';
+    if (md.path === 'delete_account') source = 'auto_delete';
+    else if (md.policy === '14_day_annual_refund') source = 'auto_cancel';
+    let u = null;
+    if (md.user_id) {
+      const r = await supabase.from('users').select('id,email,name,plan').eq('id', md.user_id).maybeSingle();
+      u = r.data || null;
+    }
+    if (!u && charge.customer) {
+      const r = await supabase.from('users').select('id,email,name,plan').eq('stripe_customer_id', charge.customer).maybeSingle();
+      u = r.data || null;
+    }
+    await supabase.from('refund_log').insert({
+      source,
+      status: (refund && refund.status) || (charge.refunded ? 'succeeded' : 'unknown'),
+      amount_cents: refund ? refund.amount : charge.amount_refunded,
+      currency: (refund && refund.currency) || charge.currency || 'usd',
+      user_id: (u && u.id) || md.user_id || null,
+      user_email: u ? u.email : null,
+      user_name: u ? u.name : null,
+      plan: u ? u.plan : null,
+      stripe_refund_id: refundId,
+      stripe_charge_id: charge.id || null,
+      stripe_payment_intent: charge.payment_intent || null,
+      stripe_customer_id: charge.customer || null,
+      error_message: null,
+      raw: refund || { charge_id: charge.id, amount_refunded: charge.amount_refunded }
+    });
+    console.log('refund_log: recorded ' + (refundId || charge.id) + ' source=' + source);
+  } catch (e) {
+    console.warn('refund_log insert failed (non-fatal):', e && e.message);
   }
 }
 
