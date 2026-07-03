@@ -158,7 +158,15 @@
           return;
         }
         if (d && d.url) {
-          window.location.href = d.url;
+          /* TMC_APP_CHECKOUT: in the app, open Stripe in the phone browser so the app stays on the dashboard (logged in). */
+      if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+        var _tmcOpened = false;
+        try { window.Capacitor.Plugins.Browser.open({ url: d.url }); _tmcOpened = true; } catch (e) {}
+        if (_tmcOpened) { setTimeout(function(){ window.location.replace('/dashboard.html'); }, 400); }
+        else { window.location.href = d.url; }
+      } else {
+        window.location.href = d.url;
+      }
           return;
         }
         btn.disabled = false; btn.textContent = 'Renew now';
