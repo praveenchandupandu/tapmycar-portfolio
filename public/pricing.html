@@ -293,8 +293,8 @@
 </head>
 <body class="wide-page">
 <div class="nav">
-  <div class="bk" onclick="history.back()"><div class="bkb"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><span class="bk-label">Pricing</span></div>
-<a href="/dashboard.html" aria-label="TapMyCar" style="display:flex;align-items:center;text-decoration:none"><img src="/logo.png" alt="TapMyCar" class="nav-logo-img" style="height:36px;width:auto"></a></div>
+  <div class="bk" onclick="tmcSafeBack()"><div class="bkb"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><span class="bk-label">Pricing</span></div>
+<a href="/dashboard.html" onclick="return tmcGoHome(event)" aria-label="TapMyCar" style="display:flex;align-items:center;text-decoration:none"><img src="/logo.png" alt="TapMyCar" class="nav-logo-img" style="height:36px;width:auto"></a></div>
 <div class="chev"></div>
 <div class="page"><div class="page-inner">
 
@@ -526,5 +526,23 @@ updateButtonLabels();
 </script>
 <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }</script>
 <script src="/tmc-redesign.js?v=3"></script>
+<script>
+/* TMC_NAV_SAFE: keep back + logo from looping into checkout or dead-ending at sign-in */
+(function(){
+  if (window.__tmcNavSafe) return; window.__tmcNavSafe = true;
+  function loggedIn(){ try { return !!(localStorage.getItem('tmc_session_token') || localStorage.getItem('tmc_token')); } catch(e){ return false; } }
+  function home(){ return loggedIn() ? '/dashboard.html' : '/'; }
+  window.tmcSafeBack = function(){
+    try {
+      var ref = document.referrer || '';
+      var sameSite = ref.indexOf(window.location.origin) === 0;
+      var bad = /\/(renew|pricing)\.html/.test(ref) || /stripe\.com/.test(ref);
+      if (sameSite && !bad && history.length > 1) { history.back(); return; }
+    } catch(e){}
+    window.location.href = home();
+  };
+  window.tmcGoHome = function(ev){ if (ev && ev.preventDefault) ev.preventDefault(); window.location.href = home(); return false; };
+})();
+</script>
 </body>
 </html>

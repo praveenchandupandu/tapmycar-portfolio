@@ -40,7 +40,7 @@
 <body>
   <div class="wrap">
     <div class="header">
-      <button type="button" class="back" onclick="history.back()" aria-label="Back">&lsaquo;</button>
+      <button type="button" class="back" onclick="tmcSafeBack()" aria-label="Back">&lsaquo;</button>
       <h1>Renew your subscription</h1>
     </div>
 
@@ -175,6 +175,24 @@
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', loadCredit);
   } else { loadCredit(); }
+})();
+</script>
+<script>
+/* TMC_NAV_SAFE: keep back + logo from looping into checkout or dead-ending at sign-in */
+(function(){
+  if (window.__tmcNavSafe) return; window.__tmcNavSafe = true;
+  function loggedIn(){ try { return !!(localStorage.getItem('tmc_session_token') || localStorage.getItem('tmc_token')); } catch(e){ return false; } }
+  function home(){ return loggedIn() ? '/dashboard.html' : '/'; }
+  window.tmcSafeBack = function(){
+    try {
+      var ref = document.referrer || '';
+      var sameSite = ref.indexOf(window.location.origin) === 0;
+      var bad = /\/(renew|pricing)\.html/.test(ref) || /stripe\.com/.test(ref);
+      if (sameSite && !bad && history.length > 1) { history.back(); return; }
+    } catch(e){}
+    window.location.href = home();
+  };
+  window.tmcGoHome = function(ev){ if (ev && ev.preventDefault) ev.preventDefault(); window.location.href = home(); return false; };
 })();
 </script>
 </body>
