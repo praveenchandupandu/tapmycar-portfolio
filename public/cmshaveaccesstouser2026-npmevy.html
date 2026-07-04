@@ -1865,6 +1865,50 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 
           <div id="refunds-failed-wrap" style="margin-bottom:18px"></div>
           <div id="refunds-success-wrap"></div>
+          <!-- TMC_PATCH08_LEDGER: complete refund ledger (all sources) -->
+          <div class="section-title" style="margin-top:24px">Complete ledger — all refunds</div>
+          <span class="section-link" onclick="loadRefundLedger()" style="cursor:pointer">Refresh</span>
+          <div style="font-size:12px;color:#6B7280;margin:6px 0 14px;line-height:1.5">Every refund recorded from Stripe — Cancel button, account deletion, and manual Stripe refunds. Includes deleted accounts.</div>
+          <div id="refunds-ledger-wrap"></div>
+          <script>
+          /* TMC_PATCH08_LEDGER */
+          (function(){
+            if (window.__tmcLedgerInit) return; window.__tmcLedgerInit = true;
+            async function loadRefundLedger(){
+              var wrap = document.getElementById('refunds-ledger-wrap');
+              if(!wrap) return;
+              wrap.innerHTML = '<div style="padding:16px;font-size:13px;color:#6B7280;text-align:center">Loading ledger...</div>';
+              try{
+                var res = await fetch('/api/admin-refund-log?limit=200', { credentials:'include' });
+                var data = await res.json();
+                var rows = (data && data.refunds) || [];
+                if(!rows.length){ wrap.innerHTML = '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:18px;font-size:13px;color:#6B7280;text-align:center">No refunds recorded yet.</div>'; return; }
+                var html = '';
+                for(var i=0;i<rows.length;i++){
+                  var r = rows[i];
+                  var amt = '$' + (((r.amount_cents||0))/100).toFixed(2);
+                  var when = r.created_at ? new Date(r.created_at).toLocaleString() : '';
+                  var who = (r.user_email || r.user_name || (r.user_id ? ('user ' + String(r.user_id).slice(0,8)) : 'deleted user'));
+                  var srcLabel = r.source==='auto_cancel' ? 'Cancel button' : r.source==='auto_delete' ? 'Account deletion' : r.source==='manual_stripe' ? 'Manual (Stripe)' : (r.source||'other');
+                  var ok = (r.status==='succeeded');
+                  var badge = '<span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;background:'+(ok?'#DCFCE7':'#FEE2E2')+';color:'+(ok?'#065F46':'#991B1B')+'">'+(r.status||'?')+'</span>';
+                  html += '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px">'
+                    + '<div style="min-width:0"><div style="font-size:13px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+who+'</div>'
+                    + '<div style="font-size:11px;color:#6B7280">'+srcLabel+' &middot; '+when+(r.stripe_refund_id?(' &middot; '+r.stripe_refund_id):'')+'</div></div>'
+                    + '<div style="text-align:right;white-space:nowrap"><div style="font-size:14px;font-weight:800;color:'+(ok?'#065F46':'#991B1B')+'">-'+amt+'</div>'+badge+'</div>'
+                    + '</div>';
+                }
+                wrap.innerHTML = html;
+              }catch(e){ wrap.innerHTML = '<div style="padding:16px;font-size:13px;color:#DC2626;text-align:center">Could not load ledger.</div>'; }
+            }
+            window.loadRefundLedger = loadRefundLedger;
+            document.addEventListener('click', function(e){
+              var btn = e.target.closest && e.target.closest('[data-tab="refunds"]');
+              if(btn) setTimeout(loadRefundLedger, 40);
+            });
+            setTimeout(loadRefundLedger, 1400);
+          })();
+          </script>
         </div>
       </div>
 
