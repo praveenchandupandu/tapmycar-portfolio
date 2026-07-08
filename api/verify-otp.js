@@ -165,6 +165,37 @@ module.exports = async function handler(req, res) {
   if (type === 'email' || email) {
     if (!email || !code) return res.status(400).json({ error: 'Email and code required' });
 
+    /* TMC_PATCH_REVIEW_LOGIN: fixed-code demo login for app-store review ONLY.
+       Fires only for the exact review email AND the exact review code below.
+       Any other email - or this email with any other code - falls straight
+       through to the normal OTP flow untouched. Remove after approval. */
+    {
+      const _TMC_REVIEW_EMAIL = 'review@tapmycar.io';
+      const _TMC_REVIEW_CODE  = '284619';
+      if (String(email).trim().toLowerCase() === _TMC_REVIEW_EMAIL &&
+          String(code).trim() === _TMC_REVIEW_CODE) {
+        let { data: rUser } = await supabase.from('users').select('*').eq('email', _TMC_REVIEW_EMAIL).single();
+        let rNew = false;
+        if (!rUser) {
+          const { data: created } = await supabase.from('users')
+            .insert({ email: _TMC_REVIEW_EMAIL, name: 'App Reviewer' })
+            .select().single();
+          rUser = created;
+          rNew = true;
+        }
+        if (rNew && rUser) { try { await assignFreeTag(rUser.id); } catch (e) {} }
+        if (!rUser) return res.status(500).json({ error: 'Account error. Please try again.' });
+        return res.json({
+          token: rUser.id,
+          session_token: _tmcSafeSign(rUser.id),
+          name: rUser.name,
+          email: rUser.email,
+          phone: rUser.phone || '',
+          isNewUser: rNew
+        });
+      }
+    }
+
     // ─── Per-email lockout check (before any DB work) ────────────
     try {
       const { data: lockRow } = await supabase
