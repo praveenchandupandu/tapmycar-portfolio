@@ -172,7 +172,8 @@ module.exports = async function handler(req, res) {
     {
       const _TMC_REVIEW_EMAIL = 'review@tapmycar.io';
       const _TMC_REVIEW_CODE  = '284619';
-      if (String(email).trim().toLowerCase() === _TMC_REVIEW_EMAIL &&
+      if (process.env.REVIEW_BYPASS === 'on' &&
+          String(email).trim().toLowerCase() === _TMC_REVIEW_EMAIL &&
           String(code).trim() === _TMC_REVIEW_CODE) {
         let { data: rUser } = await supabase.from('users').select('*').eq('email', _TMC_REVIEW_EMAIL).single();
         let rNew = false;
