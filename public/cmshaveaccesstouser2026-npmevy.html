@@ -4538,12 +4538,24 @@ async function vidUpload() {
   pl.textContent = 'Extracting thumbnail\u2026'; pb.style.width = '5%';
 
   try {
-    /* __tmcThumbRequired: insist on a usable thumbnail before proceeding. */
-    var thumbBlob = await extractThumb(file);
+    /* __tmcThumbFix: use a manually chosen thumbnail if present; else try to
+       auto-extract from the first frame; if neither works, upload WITHOUT a
+       thumbnail instead of blocking. */
+    var _manualThumb = null;
+    try { _manualThumb = (document.getElementById('vid-thumb-file').files || [])[0] || null; } catch (e) { _manualThumb = null; }
+    var thumbBlob = _manualThumb;
     if (!thumbBlob) {
-      throw new Error('Could not read a thumbnail from this video. Please upload a thumbnail image (jpg/png) in the field above and try again.');
+      try { thumbBlob = await extractThumb(file); } catch (e) { thumbBlob = null; }
     }
-    var thumbExt = thumbBlob ? 'jpg' : null;
+    var thumbExt = null;
+    if (thumbBlob) {
+      thumbExt = 'jpg';
+      if (_manualThumb && _manualThumb.name && _manualThumb.name.indexOf('.') !== -1) {
+        var _me = _manualThumb.name.split('.').pop().toLowerCase();
+        if (_me === 'jpeg') _me = 'jpg';
+        if (['jpg', 'png', 'webp'].indexOf(_me) !== -1) thumbExt = _me;
+      }
+    }
 
     pl.textContent = 'Preparing upload\u2026'; pb.style.width = '15%';
     var prepRes = await fetch('/api/admin-video-prepare-upload', {
