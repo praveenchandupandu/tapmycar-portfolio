@@ -9,7 +9,7 @@
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0A0F1E">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>Admin · TapMyCar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1077,6 +1077,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
      secret filename is deliberately never written into app.js (a public
      file). -->
 <script>window.__tmcNoChat = true;</script>
+<style>/* TMC_SAFEAREA edge-to-edge fix */ body{padding-top:env(safe-area-inset-top) !important;}</style>
 </head>
 <body>
 
