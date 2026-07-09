@@ -9,7 +9,7 @@
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0A0F1E">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>Admin · TapMyCar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1077,6 +1077,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
      secret filename is deliberately never written into app.js (a public
      file). -->
 <script>window.__tmcNoChat = true;</script>
+<style>/* TMC_SAFEAREA edge-to-edge fix */ body{padding-top:env(safe-area-inset-top) !important;}</style>
 </head>
 <body>
 
@@ -4543,6 +4544,7 @@ async function vidUpload() {
        thumbnail instead of blocking. */
     var _manualThumb = null;
     try { _manualThumb = (document.getElementById('vid-thumb-file').files || [])[0] || null; } catch (e) { _manualThumb = null; }
+    if (_manualThumb) { try { _manualThumb = await autoFit916(_manualThumb); } catch (e) {} }
     var thumbBlob = _manualThumb;
     if (!thumbBlob) {
       try { thumbBlob = await extractThumb(file); } catch (e) { thumbBlob = null; }
@@ -4671,7 +4673,7 @@ document.addEventListener('change', function (e) {
     var f = e.target.files[0];
     var img = document.getElementById('vid-thumb-preview');
     if (!f || !img) { if (img) img.style.display='none'; return; }
-    img.src = URL.createObjectURL(f); img.style.display='';
+    img.style.display=''; autoFit916(f).then(function(b){ try { img.src = URL.createObjectURL(b); } catch(e){ try{ img.src = URL.createObjectURL(f); }catch(_){}} });
   }
 });
 
@@ -4718,19 +4720,53 @@ function vidCancelEdit() {
   var c = document.getElementById('vid-cancel-edit'); if (c) c.remove();
 }
 
+function autoFit916(file) {
+  /* TMC_AUTOFIT916: format a thumbnail to full 9:16 with blurred fill; unchanged if already 9:16; original on error */
+  return new Promise(function (resolve) {
+    try {
+      var img = new Image();
+      img.onload = function () {
+        var iw = img.naturalWidth, ih = img.naturalHeight;
+        if (!iw || !ih) { resolve(file); return; }
+        var target = 1080 / 1920;
+        if (Math.abs((iw / ih) - target) < 0.02) { resolve(file); return; }
+        var TW = 1080, TH = 1920;
+        var c = document.createElement('canvas');
+        c.width = TW; c.height = TH;
+        var ctx = c.getContext('2d');
+        var bs = Math.max(TW / iw, TH / ih), bw = iw * bs, bh = ih * bs;
+        try { ctx.filter = 'blur(28px)'; } catch (e) {}
+        ctx.drawImage(img, (TW - bw) / 2, (TH - bh) / 2, bw, bh);
+        try { ctx.filter = 'none'; } catch (e) {}
+        ctx.fillStyle = 'rgba(0,0,0,0.45)';
+        ctx.fillRect(0, 0, TW, TH);
+        var fs = Math.min(TW / iw, TH / ih), fw = iw * fs, fh = ih * fs;
+        ctx.drawImage(img, (TW - fw) / 2, (TH - fh) / 2, fw, fh);
+        c.toBlob(function (blob) { resolve(blob || file); }, 'image/jpeg', 0.9);
+      };
+      img.onerror = function () { resolve(file); };
+      img.src = URL.createObjectURL(file);
+    } catch (e) { resolve(file); }
+  });
+}
+
 async function uploadManualThumb() {
   var f = document.getElementById('vid-thumb-file').files[0];
   if (!f) return null;
-  var ext = (f.name.split('.').pop() || 'jpg').toLowerCase();
-  if (ext === 'jpeg') ext = 'jpg';
-  if (!['jpg','png','webp'].includes(ext)) ext = 'jpg';
+  var fitted = await autoFit916(f);
+  var ext = 'jpg';
+  if (fitted === f) {
+    ext = (f.name.split('.').pop() || 'jpg').toLowerCase();
+    if (ext === 'jpeg') ext = 'jpg';
+    if (!['jpg','png','webp'].includes(ext)) ext = 'jpg';
+  }
   var prep = await fetch('/api/admin-thumb-prepare-upload', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ thumb_ext: ext })
   });
   var pd = await prep.json();
   if (!prep.ok || !pd.ok) throw new Error(pd.error || 'thumb prepare failed');
-  await uploadToSignedUrl(pd.thumb.signed_url, f, function () {});
+  await uploadToSignedUrl(pd.thumb.signed_url, fitted, function () {});
   return pd.thumb.public_url;
 }
 
