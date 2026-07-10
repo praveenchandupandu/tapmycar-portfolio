@@ -16,9 +16,9 @@
 .tmc-r-row::-webkit-scrollbar{display:none}.tmc-r-row{scrollbar-width:none}\
 \
 /* DEMO  cinematic */\
-.tmc-r-thumb{flex:0 0 auto;width:168px;height:280px;border-radius:18px;position:relative;overflow:hidden;cursor:pointer;box-shadow:0 12px 28px rgba(0,0,0,.18),0 2px 6px rgba(0,0,0,.12);scroll-snap-align:start;transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s ease;background:#222}\
+.tmc-r-thumb{flex:0 0 auto;width:168px;height:299px;border-radius:18px;position:relative;overflow:hidden;cursor:pointer;box-shadow:0 12px 28px rgba(0,0,0,.18),0 2px 6px rgba(0,0,0,.12);scroll-snap-align:start;transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s ease;background:#222}\
 .tmc-r-thumb:hover{transform:translateY(-6px) scale(1.04);box-shadow:0 22px 44px rgba(255,107,0,.3),0 4px 10px rgba(0,0,0,.15)}\
-.tmc-r-thumb img,.tmc-r-thumb .tmc-r-bg{position:absolute;inset:-10%;width:120%;height:120%;object-fit:cover;animation:tmcBgDrift 14s ease-in-out infinite alternate;will-change:transform}\
+.tmc-r-thumb img,.tmc-r-thumb .tmc-r-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}\
 .tmc-r-thumb:nth-child(2) img,.tmc-r-thumb:nth-child(2) .tmc-r-bg{animation-delay:-2s}\
 .tmc-r-thumb:nth-child(3) img,.tmc-r-thumb:nth-child(3) .tmc-r-bg{animation-delay:-5s}\
 .tmc-r-thumb:nth-child(4) img,.tmc-r-thumb:nth-child(4) .tmc-r-bg{animation-delay:-8s}\
