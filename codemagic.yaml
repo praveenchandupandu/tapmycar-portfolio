@@ -5,10 +5,12 @@ workflows:
     integrations:
       app_store_connect: Codemagic
     environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: io.tapmycar.app
       vars:
         XCODE_WORKSPACE: "ios/App/App.xcworkspace"
         XCODE_SCHEME: "App"
-        BUNDLE_ID: "io.tapmycar.app"
       xcode: latest
       cocoapods: default
       node: latest
@@ -17,13 +19,6 @@ workflows:
         script: npm install
       - name: Install CocoaPods dependencies
         script: cd ios/App && pod install
-      - name: Fetch signing files
-        script: |
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_STORE \
-            --create
-      - name: Set up signing certificate in keychain
-        script: keychain add-certificates
       - name: Set up code signing settings on Xcode project
         script: xcode-project use-profiles
       - name: Build ipa for distribution
