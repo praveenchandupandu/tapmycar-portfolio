@@ -54,7 +54,7 @@
       'gap:10px',
       'cursor:pointer',
       'position:sticky',
-      'top:0',
+      'top:env(safe-area-inset-top)',
       'z-index:50',
       'box-shadow:0 1px 2px rgba(0,0,0,0.04)'
     ].join(';');
