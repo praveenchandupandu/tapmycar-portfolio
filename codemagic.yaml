@@ -6,8 +6,10 @@ workflows:
       app_store_connect: Codemagic
     environment:
       ios_signing:
-        distribution_type: app_store
-        bundle_identifier: io.tapmycar.app
+        provisioning_profiles:
+          - tapmycar_app_store_profile
+        certificates:
+          - tapmycar-ios-distribution
       vars:
         XCODE_WORKSPACE: "ios/App/App.xcworkspace"
         XCODE_SCHEME: "App"
