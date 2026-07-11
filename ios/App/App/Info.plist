@@ -47,5 +47,9 @@
 	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>TapMyCar needs camera access to scan your vehicle's QR code and NFC tag.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>TapMyCar needs microphone access to record voice messages for masked calls.</string>
 </dict>
 </plist>

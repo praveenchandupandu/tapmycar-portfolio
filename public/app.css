@@ -146,3 +146,6 @@ input, textarea, select, [contenteditable="true"], .selectable,
 .legal-page, .legal-page * { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }
 @media (prefers-reduced-motion: reduce) { body:not(.wide-page) { animation: none } }
 /* TMC_APPFEEL_END */
+
+/* TMC_PATCH101_SAFE_AREA_TOP */
+body.tmc-platform-ios{padding-top:env(safe-area-inset-top);}
