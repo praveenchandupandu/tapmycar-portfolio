@@ -1,4 +1,4 @@
-﻿workflows:
+workflows:
   ios-workflow:
     name: TapMyCar iOS Build
     max_build_duration: 60
@@ -11,6 +11,7 @@
       vars:
         XCODE_WORKSPACE: "ios/App/App.xcworkspace"
         XCODE_SCHEME: "App"
+        BUNDLE_ID: "io.tapmycar.app"
       xcode: latest
       cocoapods: default
       node: latest
@@ -19,6 +20,13 @@
         script: npm install
       - name: Install CocoaPods dependencies
         script: cd ios/App && pod install
+      - name: Fetch signing files
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+      - name: Set up signing certificate in keychain
+        script: keychain add-certificates
       - name: Set up code signing settings on Xcode project
         script: xcode-project use-profiles
       - name: Build ipa for distribution
