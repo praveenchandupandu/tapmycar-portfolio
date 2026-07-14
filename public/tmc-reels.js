@@ -158,8 +158,14 @@
         videoEl.play().catch(function () {});
       });
     }
-    picEl.textContent  = (v.poster_initial || (v.creator_name || 'T').charAt(0)).toUpperCase();
-    picEl.style.background = v.poster_color || '#FF6B00';
+    // TMC_PATCH108_LOGO_AVATAR
+    if (!v.creator_name || v.creator_name === 'TapMyCar') {
+      picEl.innerHTML = '<img src="/shield-icon.png" alt="TapMyCar" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+      picEl.style.background = 'transparent';
+    } else {
+      picEl.textContent = (v.poster_initial || (v.creator_name || 'T').charAt(0)).toUpperCase();
+      picEl.style.background = v.poster_color || '#FF6B00';
+    }
     cNameEl.textContent = v.creator_name || 'TapMyCar';
     cSubEl.textContent  = v.creator_sub  || '';
     capEl.textContent   = v.caption || v.title || '';
