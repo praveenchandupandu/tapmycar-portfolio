@@ -55,6 +55,18 @@
       url = 'https://tapmycar.io/' + pathOrUrl;
     }
 
+    // TMC_PATCH107_EMAIL_HANDOFF
+    // Pass along the signed-in user's email so the external browser
+    // (separate storage from the app) can pre-fill sign-in instead of
+    // asking for it from scratch.
+    try {
+      var tmcSavedEmail = localStorage.getItem('tmc_email');
+      if (tmcSavedEmail) {
+        var sep = url.indexOf('?') === -1 ? '?' : '&';
+        url = url + sep + 'tmc_email=' + encodeURIComponent(tmcSavedEmail);
+      }
+    } catch (e) { /* localStorage unavailable - ignore */ }
+
     if (!inApp) {
       window.location.href = url;
       return;

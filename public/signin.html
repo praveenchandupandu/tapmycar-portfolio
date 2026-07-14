@@ -42,6 +42,22 @@
 <style>/* TMC_SAFEAREA edge-to-edge fix */ body{padding-top:env(safe-area-inset-top) !important;}</style>
 </head>
 <body>
+<script>
+// TMC_PATCH107_PREFILL_EMAIL
+(function () {
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var handoffEmail = params.get('tmc_email');
+    if (handoffEmail) {
+      document.addEventListener('DOMContentLoaded', function () {
+        var emailInput = document.getElementById('email');
+        if (emailInput) { emailInput.value = handoffEmail; }
+      });
+    }
+  } catch (e) { /* URLSearchParams unavailable - ignore */ }
+})();
+</script>
+
 <div class="chev"></div>
 
 <div id="step1" style="display:flex;flex-direction:column;min-height:calc(100dvh - 6px);padding:16px 20px 0">
