@@ -848,7 +848,7 @@ loadReferrals();
 
 <script>
 function openReviewModal() {
-  if (!s || !s.token) { window.location.href = '/signin.html'; return; }
+  if (!s || !s.token) { window.location.href = '/signin.html' + window.location.search; return; }
   document.getElementById('rev-name').value = (localStorage.getItem('tmc_name') || '').slice(0, 60);
   document.getElementById('rev-modal-update-count')();
   document.getElementById('review-modal').style.display = 'flex';
@@ -899,7 +899,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // Patch openReviewModal call to safely update
   const realOpen = openReviewModal;
   window.openReviewModal = function() {
-    if (!s || !s.token) { window.location.href = '/signin.html'; return; }
+    if (!s || !s.token) { window.location.href = '/signin.html' + window.location.search; return; }
     document.getElementById('rev-name').value = (localStorage.getItem('tmc_name') || '').slice(0, 60);
     updateCount();
     document.getElementById('review-modal').style.display = 'flex';

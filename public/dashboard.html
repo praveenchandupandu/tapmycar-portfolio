@@ -641,7 +641,7 @@ async function p35dStartRenew() {
   var btn = document.getElementById('gift-renew-btn');
   var session = (typeof getSession === 'function') ? getSession() : null;
   var token = session && session.token ? session.token : (localStorage.getItem('tmc_token') || '');
-  if (!token) { window.location.href = '/signin.html'; return; }
+  if (!token) { window.location.href = '/signin.html' + window.location.search; return; }
   var plan = window.__tmcRenewPlan || 'standard';
   if (btn) { btn.disabled = true; btn.textContent = 'Loading...'; }
   try {
@@ -775,7 +775,7 @@ function dashCloseUpgradeConfirm() {
 async function dashConfirmUpgradeAndPay() {
   var btn = document.getElementById('dash-upg-confirm-btn');
   var token = (typeof s !== 'undefined' && s && s.token) ? s.token : (localStorage.getItem('tmc_token') || '');
-  if (!token) { window.location.href = '/signin.html'; return; }
+  if (!token) { window.location.href = '/signin.html' + window.location.search; return; }
   if (btn) { btn.disabled = true; btn.textContent = 'Opening checkout…'; }
   try {
     var res = await fetch('/api/create-checkout', {

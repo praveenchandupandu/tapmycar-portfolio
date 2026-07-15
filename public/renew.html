@@ -135,7 +135,7 @@
 
   window.doRenew = function () {
     var token = getToken();
-    if (!token) { window.location.href = '/signin.html'; return; }
+    if (!token) { window.location.href = '/signin.html' + window.location.search; return; }
     var apply = document.getElementById('apply-credit').checked;
     var btn = document.getElementById('renew-btn');
     var err = document.getElementById('err');

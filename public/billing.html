@@ -83,7 +83,7 @@ function getSessionSafe() {
   return t ? { token: t } : null;
 }
 var s = getSessionSafe();
-if (!s || !s.token) { window.location.href = '/signin.html'; }
+if (!s || !s.token) { window.location.href = '/signin.html' + window.location.search; }
 
 var PLAN_NAMES = { etag: 'eTag (Free)', standard: 'Standard', premium: 'Premium', business: 'Business' };
 
