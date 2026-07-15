@@ -170,8 +170,12 @@ function getSession() {
 })();
 
 function requireAuth() {
+  // TMC_PATCH110_PRESERVE_QUERY_ON_AUTH_REDIRECT
   const { token } = getSession();
-  if (!token) window.location.href = '/signin.html';
+  if (!token) {
+    var qs = window.location.search;
+    window.location.href = '/signin.html' + qs;
+  }
   return token;
 }
 
