@@ -48,13 +48,20 @@
     var webPath = BLOCKED_IN_IOS[path];
     if (!webPath) return;
 
-    var webUrl = 'https://www.tapmycar.io' + webPath + (window.location.search || '') + (window.location.hash || '');
-    console.log('[tmc-page-guard] iOS — redirecting blocked page ' + path + ' → ' + webUrl);
+    console.log('[tmc-page-guard] iOS — redirecting blocked page ' + path + ' → ' + webPath);
 
-    // Open the web equivalent in external Safari
+    // TMC_PATCH112_USE_TMCOPENWEB
+    // Route through tmcOpenWeb (same function every button uses) instead of
+    // building the URL and opening Safari directly here - this ensures the
+    // signed-in user's email is always fetched and attached consistently,
+    // regardless of whether the redirect was triggered by a button tap or by
+    // this automatic page-guard.
     try {
-      if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser) {
-        window.Capacitor.Plugins.Browser.open({ url: webUrl });
+      if (window.tmcOpenWeb) {
+        window.tmcOpenWeb(webPath + (window.location.search || '') + (window.location.hash || ''));
+      } else if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser) {
+        var fallbackUrl = 'https://www.tapmycar.io' + webPath + (window.location.search || '') + (window.location.hash || '');
+        window.Capacitor.Plugins.Browser.open({ url: fallbackUrl });
       }
     } catch (e) { /* swallow */ }
 
