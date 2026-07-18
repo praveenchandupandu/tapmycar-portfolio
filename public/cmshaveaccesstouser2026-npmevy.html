@@ -1871,6 +1871,55 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
           <span class="section-link" onclick="loadRefundLedger()" style="cursor:pointer">Refresh</span>
           <div style="font-size:12px;color:#6B7280;margin:6px 0 14px;line-height:1.5">Every refund recorded from Stripe — Cancel button, account deletion, and manual Stripe refunds. Includes deleted accounts.</div>
           <div id="refunds-ledger-wrap"></div>
+          <!-- TMC_CALL_HISTORY: who called through each tag -->
+          <div class="section-title" style="margin-top:28px">Call history</div>
+          <span class="section-link" onclick="loadCallHistory()" style="cursor:pointer">Refresh</span>
+          <div style="font-size:12px;color:#6B7280;margin:6px 0 10px;line-height:1.5">Every masked call, newest first — caller number, tag, owner, time, duration. Search a tag to pull all its calls (e.g. for a police request). Share numbers only via a lawful request.</div>
+          <input id="callhist-token" type="text" placeholder="Filter by tag token e.g. TMC-XXXXXX (blank = all)" style="width:100%;max-width:360px;padding:9px 12px;border:1px solid #E5E7EB;border-radius:10px;font-size:13px;margin-bottom:12px" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')loadCallHistory()">
+          <div id="callhist-wrap"></div>
+          <script>
+          /* TMC_CALL_HISTORY */
+          (function(){
+            if (window.__tmcCallHistInit) return; window.__tmcCallHistInit = true;
+            function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+            async function loadCallHistory(){
+              var wrap = document.getElementById('callhist-wrap');
+              if(!wrap) return;
+              var tok = (document.getElementById('callhist-token')||{}).value || '';
+              wrap.innerHTML = '<div style="padding:16px;font-size:13px;color:#6B7280;text-align:center">Loading calls...</div>';
+              try{
+                var url = '/api/admin-call-log?limit=200' + (tok.trim() ? '&token=' + encodeURIComponent(tok.trim()) : '');
+                var res = await fetch(url, { credentials:'include' });
+                var data = await res.json();
+                var rows = (data && data.calls) || [];
+                if(!rows.length){ wrap.innerHTML = '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:18px;font-size:13px;color:#6B7280;text-align:center">No calls found.</div>'; return; }
+                var html = '';
+                for(var i=0;i<rows.length;i++){
+                  var r = rows[i];
+                  var when = r.created_at ? new Date(r.created_at).toLocaleString() : '';
+                  var dur = (r.duration_seconds!=null) ? (r.duration_seconds + 's') : '—';
+                  var st = r.status || '?';
+                  var ok = (st==='completed' || st==='bridged');
+                  var badge = '<span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;background:'+(ok?'#DCFCE7':'#F3F4F6')+';color:'+(ok?'#065F46':'#374151')+'">'+esc(st)+'</span>';
+                  html += '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:12px 14px;margin-bottom:8px">'
+                    + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">'
+                    + '<div style="font-size:14px;font-weight:800;color:#111">'+esc(r.stranger_phone||'unknown caller')+'</div>'
+                    + '<div style="text-align:right">'+badge+'<div style="font-size:11px;color:#6B7280;margin-top:2px">'+esc(dur)+'</div></div>'
+                    + '</div>'
+                    + '<div style="font-size:11px;color:#6B7280;margin-top:6px">Tag <b>'+esc(r.tag_token||'')+'</b> &middot; owner '+esc(r.owner_phone||'')+' &middot; '+esc(when)+'</div>'
+                    + '</div>';
+                }
+                wrap.innerHTML = html;
+              }catch(e){ wrap.innerHTML = '<div style="padding:16px;font-size:13px;color:#DC2626;text-align:center">Could not load call history.</div>'; }
+            }
+            window.loadCallHistory = loadCallHistory;
+            document.addEventListener('click', function(e){
+              var btn = e.target.closest && e.target.closest('[data-tab="refunds"]');
+              if(btn) setTimeout(loadCallHistory, 60);
+            });
+            setTimeout(loadCallHistory, 1500);
+          })();
+          </script>
           <script>
           /* TMC_PATCH08_LEDGER */
           (function(){
