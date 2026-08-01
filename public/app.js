@@ -882,11 +882,21 @@ function askQuestion(q) {
   sendChatMessage();
 }
 
+// TMC_PATCH119_MARKDOWN_RENDER
+function tmcFormatBotMessage(text) {
+  var escaped = String(text)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  escaped = escaped.replace(/\n/g, '<br>');
+  return escaped;
+}
+
 function addChatMessage(text, isUser) {
   const msgs = document.getElementById('tmc-chat-messages');
   const div = document.createElement('div');
   div.className = 'tmc-msg ' + (isUser ? 'tmc-msg-user' : 'tmc-msg-bot');
-  div.innerHTML = `<div class="tmc-msg-bubble">${text}</div>`;
+  var rendered = isUser ? text : tmcFormatBotMessage(text);
+  div.innerHTML = `<div class="tmc-msg-bubble">${rendered}</div>`;
   msgs.appendChild(div);
   msgs.scrollTop = msgs.scrollHeight;
 }
