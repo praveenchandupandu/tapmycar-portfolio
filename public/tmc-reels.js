@@ -1,3 +1,15 @@
+// TMC_PATCH123_IMG_RETRY
+function tmcRetryImg(imgEl) {
+  var attempts = parseInt(imgEl.getAttribute('data-tmc-retry') || '0', 10);
+  if (attempts >= 2) { imgEl.onerror = null; imgEl.style.display = 'none'; return; }
+  imgEl.setAttribute('data-tmc-retry', String(attempts + 1));
+  var baseUrl = imgEl.getAttribute('data-tmc-src') || imgEl.src.split('?')[0];
+  imgEl.setAttribute('data-tmc-src', baseUrl);
+  setTimeout(function () {
+    imgEl.src = baseUrl + '?retry=' + Date.now();
+  }, 600 * (attempts + 1));
+}
+
 // TMC_REEL_SUBLABEL: data-tmc-sublabel support added
 // TMC_VIDEOS_REELS v2  inline+expand reels player with real share.
 (function () {
@@ -244,7 +256,7 @@
 
   function thumbHtml(v, kind) {
     var bg = v.thumbnail_url
-      ? '<img loading="lazy" src="' + v.thumbnail_url + '" alt="">'
+      ? '<img loading="lazy" src="' + v.thumbnail_url + '" alt="" onerror="tmcRetryImg(this)">'
       : '<div class="tmc-r-bg" style="background:' + (v.poster_color || '#FF6B00') + '"></div>';
     var play = '<svg viewBox="0 0 24 24" width="11" height="11" fill="#fff"><polygon points="6,4 20,12 6,20"/></svg>';
     if (kind === 'review') {
@@ -254,7 +266,7 @@
         stars += '<svg viewBox="0 0 24 24"><path d="M12 2L9.5 7.5 4 8l4.5 4-1 6L12 15l4.5 3-1-6L20 8l-5.5-.5z"/></svg>';
       }
       var bgReview = v.thumbnail_url
-        ? '<img loading="lazy" src="' + v.thumbnail_url + '" alt="">'
+        ? '<img loading="lazy" src="' + v.thumbnail_url + '" alt="" onerror="tmcRetryImg(this)">'
         : '<div class="tmc-r-bg" style="background:' + (v.poster_color || '#FF6B00') + '"></div>';
       var verifiedIcon = '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L9.5 7.5 4 8l4.5 4-1 6L12 15l4.5 3-1-6L20 8l-5.5-.5z"/></svg>';
       var ctaIcon = '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="9,6 15,12 9,18"/></svg>';
