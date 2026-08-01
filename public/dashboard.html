@@ -348,7 +348,29 @@ function copyCode(code) {
   }
 }
 
-async function loadDashboard() {
+
+    // TMC_PATCH122_SAFE_QRCODE
+    function tmcSafeQRCode(containerId, options, retriesLeft) {
+      retriesLeft = typeof retriesLeft === 'number' ? retriesLeft : 20;
+      var container = document.getElementById(containerId);
+      if (!container) return;
+      var tryAgain = function () {
+        if (retriesLeft > 0) {
+          setTimeout(function () { tmcSafeQRCode(containerId, options, retriesLeft - 1); }, 150);
+        } else {
+          container.innerHTML = '<div style="cursor:pointer;font-size:11px;color:#DC2626;text-align:center;padding:10px;line-height:1.4" onclick="location.reload()">Couldn\'t load QR<br>Tap to retry</div>';
+        }
+      };
+      if (typeof QRCode === 'undefined') { tryAgain(); return; }
+      try {
+        container.innerHTML = '';
+        new QRCode(container, options);
+      } catch (e) {
+        tryAgain();
+      }
+    }
+
+    async function loadDashboard() {
   try {
     const res = await fetch(`/api/get-dashboard?user_id=${s.token}`);
     const data = await res.json();
@@ -498,8 +520,7 @@ async function loadDashboard() {
       document.getElementById('tag-url').textContent = tagURL;
       document.getElementById('hero-sub').textContent = `${displayToken} | Scanned ${data.scanCount} times`;
 
-      document.getElementById('qr-container').innerHTML = '';
-      new QRCode(document.getElementById('qr-container'), {
+      tmcSafeQRCode('qr-container', {
         text: tagURL,
         width: 114,
         height: 114,

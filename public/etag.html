@@ -126,7 +126,29 @@ function goActivateEtag() {
 }
 let tagURL = '';
 
-async function loadTagData() {
+
+    // TMC_PATCH122_SAFE_QRCODE
+    function tmcSafeQRCode(containerId, options, retriesLeft) {
+      retriesLeft = typeof retriesLeft === 'number' ? retriesLeft : 20;
+      var container = document.getElementById(containerId);
+      if (!container) return;
+      var tryAgain = function () {
+        if (retriesLeft > 0) {
+          setTimeout(function () { tmcSafeQRCode(containerId, options, retriesLeft - 1); }, 150);
+        } else {
+          container.innerHTML = '<div style="cursor:pointer;font-size:11px;color:#DC2626;text-align:center;padding:10px;line-height:1.4" onclick="location.reload()">Couldn\'t load QR<br>Tap to retry</div>';
+        }
+      };
+      if (typeof QRCode === 'undefined') { tryAgain(); return; }
+      try {
+        container.innerHTML = '';
+        new QRCode(container, options);
+      } catch (e) {
+        tryAgain();
+      }
+    }
+
+    async function loadTagData() {
   // TMC_ETAG_PICKER
   try {
     const res = await fetch('/api/get-dashboard?user_id=' + s.token);
@@ -158,22 +180,19 @@ async function loadTagData() {
     document.getElementById('tag-name').textContent = label + '  #' + tagToken;
     document.getElementById('sticker-token').textContent = '#' + tagToken;
 
-    document.getElementById('qr-preview').innerHTML = '';
-    new QRCode(document.getElementById('qr-preview'), {
+    tmcSafeQRCode('qr-preview', {
       text: tagURL, width: 90, height: 90,
       colorDark: '#111111', colorLight: '#ffffff',
       correctLevel: QRCode.CorrectLevel.M
     });
 
-    document.getElementById('qr-hidden').innerHTML = '';
-    new QRCode(document.getElementById('qr-hidden'), {
+    tmcSafeQRCode('qr-hidden', {
       text: tagURL, width: 400, height: 400,
       colorDark: '#111111', colorLight: '#ffffff',
       correctLevel: QRCode.CorrectLevel.H
     });
 
-    document.getElementById('qr-app').innerHTML = '';
-    new QRCode(document.getElementById('qr-app'), {
+    tmcSafeQRCode('qr-app', {
       text: 'https://tapmycar.io', width: 300, height: 300,
       colorDark: '#111111', colorLight: '#ffffff',
       correctLevel: QRCode.CorrectLevel.H
