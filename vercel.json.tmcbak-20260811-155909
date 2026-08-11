@@ -10,15 +10,15 @@
   "rewrites": [
     {
       "source": "/knowmore",
-      "destination": "/knowmore"
+      "destination": "/knowmore.html"
     },
     {
       "source": "/tag/:token",
-      "destination": "/contact"
+      "destination": "/contact.html"
     },
     {
       "source": "/r/:code",
-      "destination": "/register?ref=:code"
+      "destination": "/register.html?ref=:code"
     },
     {
       "source": "/v/:id",
