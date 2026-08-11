@@ -129,39 +129,6 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    /* TMC_PATCH30_COMP_ADMIN: expire timed comped plans.
-       Deliberately NOT the gift path: gifts set tags to status='inactive',
-       which would kill the user's QR code. A comp ending just clears the
-       flag and leaves the plan column alone, so the user looks lapsed and
-       the renewal prompt asks them to renew while their tag keeps working. */
-    try {
-      const { data: expiredComps, error: compErr } = await supabase
-        .from('users')
-        .select('id, email, comped_plan_expires_at')
-        .eq('comped_plan', true)
-        .not('comped_plan_expires_at', 'is', null)
-        .lt('comped_plan_expires_at', now.toISOString());
-
-      if (compErr) {
-        console.error('TMC_PATCH30_COMP_ADMIN: comped query failed:', compErr.message);
-      } else {
-        summary.compsExpired = 0;
-        for (const cu of (expiredComps || [])) {
-          try {
-            await supabase
-              .from('users')
-              .update({ comped_plan: false, comped_plan_expires_at: null })
-              .eq('id', cu.id);
-            summary.compsExpired++;
-          } catch (ce) {
-            console.error('TMC_PATCH30_COMP_ADMIN: comp expiry failed for', cu.id, ce && ce.message);
-          }
-        }
-      }
-    } catch (compFatal) {
-      console.error('TMC_PATCH30_COMP_ADMIN: comp expiry pass failed:', compFatal && compFatal.message);
-    }
-
     return res.json({ success: true, ran_at: now.toISOString(), ...summary });
   } catch (e) {
     console.error('TMC_PATCH35C2_GIFT_LIFECYCLE: fatal', e && e.message);
