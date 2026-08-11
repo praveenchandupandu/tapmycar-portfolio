@@ -152,13 +152,6 @@ async function loadBilling() {
         rs += ' Next charge: ' + fmtMoney(data.nextAmountCents) + '.';
       }
       document.getElementById('b-renewal-sub').textContent = rs;
-    } else if (!data.subStatus && data.plan && data.plan !== 'etag' && data.plan !== 'free') {
-      /* TMC_PATCH28_GIFTED_LABEL: a paid tier with no Stripe subscription at all means
-         the plan was gifted or comped. 'No active subscription' reads as a
-         billing error to these users. The !data.subStatus guard keeps
-         genuinely cancelled or past-due customers on the original message. */
-      document.getElementById('b-renewal').textContent = 'Gifted Tag';
-      document.getElementById('b-renewal-sub').textContent = 'This plan was gifted to you. There is nothing to pay and no renewal date.';
     } else {
       document.getElementById('b-renewal').textContent = 'No active subscription';
       document.getElementById('b-renewal-sub').textContent = 'You do not have a recurring plan right now.';
