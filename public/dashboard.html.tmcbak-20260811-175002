@@ -255,43 +255,6 @@
   </div>
   <!-- TMC_PATCH26_APP_SETTINGS: dashboard.banner slot (replaces hardcoded App Store / Play Store) -->
   <div data-tmc-slot="dashboard.banner"></div>
-
-  <!-- TMC_PATCH27_SAVE_CONTACT: save-our-number prompt. Shown at most 3 times ever.
-       Deliberately NOT a push notification - the push channel carries
-       'someone is at your car right now' and must not be diluted. -->
-  <div id="tmc-savecontact-card" style="display:none;background:#fff;border:1px solid #ffd9bf;border-radius:18px;padding:16px;margin-bottom:14px;position:relative">
-    <button id="tmc-sc-x" aria-label="Dismiss" style="position:absolute;top:10px;right:10px;width:28px;height:28px;border:0;background:transparent;color:#9a9a9a;font-size:20px;line-height:1;cursor:pointer">&times;</button>
-    <div style="font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:4px;padding-right:28px">Know when it&#39;s us calling</div>
-    <div style="font-size:13px;color:#666;line-height:1.45;margin-bottom:12px">Save our number so calls and scan alerts show <strong>TapMyCar</strong> instead of an unknown number.</div>
-    <button id="tmc-sc-save" style="display:inline-block;background:#FF6B00;color:#fff;border:0;font-size:14px;font-weight:700;padding:11px 20px;border-radius:12px;cursor:pointer">Save contact</button>
-  </div>
-  <script>
-  (function(){
-    /* TMC_PATCH27_SAVE_CONTACT */
-    var KEY = 'tmc_savecontact_v1';
-    var card = document.getElementById('tmc-savecontact-card');
-    if (!card) return;
-    var state;
-    try { state = localStorage.getItem(KEY); } catch(e) { return; }
-    if (state === 'done') return;
-    var shown = parseInt(state, 10);
-    if (!(shown >= 0)) shown = 0;
-    if (shown >= 3) return;
-    try { localStorage.setItem(KEY, String(shown + 1)); } catch(e) {}
-    card.style.display = 'block';
-    function finish(){
-      try { localStorage.setItem(KEY, 'done'); } catch(e) {}
-      card.style.display = 'none';
-    }
-    document.getElementById('tmc-sc-save').addEventListener('click', function(){
-      finish();
-      window.location.href = '/api/contact-card';
-    });
-    document.getElementById('tmc-sc-x').addEventListener('click', function(){
-      card.style.display = 'none';
-    });
-  })();
-  </script>
 </div>
 
 <!-- TMC_PATCH26_APP_SETTINGS: dashboard.help slot (support email/phone) -->
