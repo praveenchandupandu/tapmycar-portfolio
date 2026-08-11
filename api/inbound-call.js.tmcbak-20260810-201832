@@ -56,87 +56,21 @@ module.exports = async function handler(req, res) {
   // Twilio sends application/x-www-form-urlencoded. CallSid + From + To available.
   const callSid = (req.body && req.body.CallSid) || (req.query && req.query.CallSid) || '';
   const strangerNumber = (req.body && req.body.From) || (req.query && req.query.From) || '';
-  // TMC_PATCH24_POOL: the number the stranger actually dialled.
-  const dialedNumber = (req.body && req.body.To) || (req.query && req.query.To) || '';
 
   res.setHeader('Content-Type', 'text/xml');
 
-  // TMC_PATCH24_POOL: EXACT MATCH. Look up who reserved the dialled number.
-  // This is the whole point of the pool -- the number carries the identity,
-  // so there is no window, no ordering and no guessing.
-  let pending = null;
-  let matchSource = 'none';
-
-  if (dialedNumber) {
-    try {
-      const { data: slot } = await supabase
-        .from('call_numbers')
-        .select('id, reserved_tag_id, reserved_tag_token, reserved_owner_user_id, reserved_owner_phone, reserved_until')
-        .eq('phone_number', dialedNumber)
-        .maybeSingle();
-
-      const live = slot && slot.reserved_until &&
-                   new Date(slot.reserved_until).getTime() > Date.now() &&
-                   slot.reserved_owner_phone;
-
-      if (live) {
-        pending = {
-          id: null,
-          tag_id: slot.reserved_tag_id,
-          tag_token: slot.reserved_tag_token,
-          owner_user_id: slot.reserved_owner_user_id,
-          owner_phone: slot.reserved_owner_phone
-        };
-        matchSource = 'pool';
-
-        // Release straight away so the number is reusable for the next tap.
-        await supabase.from('call_numbers').update({
-          reserved_tag_id: null,
-          reserved_tag_token: null,
-          reserved_owner_user_id: null,
-          reserved_owner_phone: null,
-          reserved_at: null,
-          reserved_until: null
-        }).eq('id', slot.id);
-      }
-    } catch (e) {
-      console.error('call_numbers lookup error:', e && e.message);
-    }
-  }
-
-  // FALLBACK: main number, or pool was exhausted when they tapped. Uses the
-  // old recency match. Not exact, but only reached when the pool did not
-  // hand out a number for this call.
-  if (!pending) {
-    const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-    const { data: recent } = await supabase
-      .from('pending_calls')
-      .select('id, tag_id, tag_token, owner_user_id, owner_phone')
-      .eq('consumed', false)
-      .gte('created_at', fiveMinAgo)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (recent) { pending = recent; matchSource = 'pending_recent'; }
-  }
-
-  console.log('inbound-call match source: ' + matchSource + ' to=' + dialedNumber);
+  // Look up the most recent pending_calls row from the last 5 minutes.
+  // (No way to match by caller ID since stranger never gave it to us.)
+  const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+  const { data: pending } = await supabase
+    .from('pending_calls')
+    .select('id, tag_id, tag_token, owner_user_id, owner_phone')
+    .gte('created_at', fiveMinAgo)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
   if (!pending) {
-    // TMC_PATCH24_POOL: log EVERY inbound call, including unmatched ones, so
-    // the caller's number is never lost. tag/owner columns are nullable.
-    try {
-      const { error: logErr } = await supabase
-        .from('call_logs')
-        .insert({
-          stranger_phone: strangerNumber,
-          owner_phone: dialedNumber,
-          twilio_call_sid: callSid,
-          status: 'no_pending_match'
-        });
-      if (logErr) console.error('call_logs unmatched insert error:', logErr.message);
-    } catch (e) { console.error('call_logs unmatched insert threw:', e && e.message); }
-
     // Nobody recently tapped Call. Refuse politely.
     return res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
@@ -171,11 +105,8 @@ module.exports = async function handler(req, res) {
     .select('id')
     .single();
 
-  // TMC_PATCH24_POOL: only the fallback path has a pending_calls row to close.
-  // Pool matches were released the moment they were claimed.
-  if (pending.id) {
-    await supabase.from('pending_calls').update({ consumed: true }).eq('id', pending.id);
-  }
+  // Mark pending consumed (so a second concurrent call doesn't pick this up)
+  await supabase.from('pending_calls').update({ consumed: true }).eq('id', pending.id);
 
   // Build the TwiML: greet stranger briefly, then dial owner with IVR script.
   const baseUrl = `https://${req.headers.host}`;
