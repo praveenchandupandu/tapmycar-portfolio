@@ -86,17 +86,8 @@ module.exports = async function handler(req, res) {
     /* if a gift trial is active, surface its expiry as the renewal-equivalent */
     let giftExpiresAt = user.gift_plan_expires_at || null;
 
-    /* TMC_PATCH29_COMPED: comped_plan is the ONLY reliable way to tell an
-       admin-granted plan from a lapsed subscription - both otherwise look
-       like plan='standard' with no Stripe record. Optional chaining is
-       avoided so this stays safe if the column has not been added yet. */
-    const comped = (user.comped_plan === true);
-    const compedExpiresAt = comped ? (user.comped_plan_expires_at || null) : null;
-
     return res.json({
       plan: user.plan || 'etag',
-      comped,
-      compedExpiresAt,
       subStatus,
       renewal,
       giftExpiresAt,

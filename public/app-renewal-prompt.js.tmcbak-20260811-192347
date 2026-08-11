@@ -22,16 +22,6 @@
 
   function shouldShow(user) {
     if (!user) return false;
-    /* TMC_PATCH29_COMPED: never nag someone who was GIVEN their plan. Without
-       this a comped or gift-trial user is told their subscription is
-       overdue 30 days in, for a plan they never paid for. Both checks are
-       positive signals, so a genuinely lapsed customer is unaffected and
-       still sees the renewal prompt. */
-    if (user.comped_plan === true) return false;
-    if (user.gift_plan_expires_at) {
-      var giftEnds = new Date(user.gift_plan_expires_at).getTime();
-      if (giftEnds && giftEnds > Date.now()) return false;
-    }
     /* Must be on a paid plan. */
     if (user.plan !== 'standard' && user.plan !== 'premium') return false;
     /* If there's an active subscription, we're fine. */

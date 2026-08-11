@@ -152,10 +152,7 @@ async function loadBilling() {
         rs += ' Next charge: ' + fmtMoney(data.nextAmountCents) + '.';
       }
       document.getElementById('b-renewal-sub').textContent = rs;
-    } else if (data.comped) {
-      /* TMC_PATCH29_COMPED: driven by the real comped_plan flag now, not by the
-         absence of a Stripe subscription. Patch 28 inferred this, which also
-         caught lapsed customers and mislabelled them as gifted. */
+    } else if (!data.subStatus && data.plan && data.plan !== 'etag' && data.plan !== 'free') {
       /* TMC_PATCH28_GIFTED_LABEL: a paid tier with no Stripe subscription at all means
          the plan was gifted or comped. 'No active subscription' reads as a
          billing error to these users. The !data.subStatus guard keeps
