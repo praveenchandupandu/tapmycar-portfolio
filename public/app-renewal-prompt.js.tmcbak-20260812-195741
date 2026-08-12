@@ -20,32 +20,8 @@
     } catch (e) { return null; }
   }
 
-  /* TMC_PATCH32_NO_INAPP_RENEWAL: the renewal banner and modal are PURCHASE UI - the
-     button navigates to /renew.html. App Store Guideline 3.1.1 forbids that
-     inside the app, and this app was already rejected once for in-app
-     payment UI. Billing is Path A: external Safari only. So the prompt never
-     renders in the app. Website behaviour is completely unchanged.
-
-     Both signals are checked because tmc-platform.js sets window.tmcIsInApp
-     asynchronously and may not have run yet when this initialises; reading
-     window.Capacitor directly covers that race. */
-  function tmcIsNativeApp() {
-    try {
-      if (typeof window === 'undefined') return false;
-      if (window.tmcIsInApp === true) return true;
-      if (window.Capacitor && typeof window.Capacitor === 'object') {
-        if (window.Capacitor.isNativePlatform === true) return true;
-        if (typeof window.Capacitor.isNativePlatform === 'function' &&
-            window.Capacitor.isNativePlatform()) return true;
-        if (window.Capacitor.platform && window.Capacitor.platform !== 'web') return true;
-      }
-    } catch (e) {}
-    return false;
-  }
-
   function shouldShow(user) {
     if (!user) return false;
-    if (tmcIsNativeApp()) return false; /* TMC_PATCH32_NO_INAPP_RENEWAL */
     /* TMC_PATCH29_COMPED: never nag someone who was GIVEN their plan. Without
        this a comped or gift-trial user is told their subscription is
        overdue 30 days in, for a plan they never paid for. Both checks are
