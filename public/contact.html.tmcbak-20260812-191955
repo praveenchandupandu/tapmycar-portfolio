@@ -879,41 +879,18 @@ async function saveLocation(lat,lng){
   try{await fetch('/api/update-scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scan_id:currentScanId,latitude:lat,longitude:lng})});}catch(e){}
 }
 // TMC_PATCH9_CALL_FLOW
-/* TMC_PATCH26_POOL_DIAL: dial the pool number reserved for THIS tag. */
-// Only these numbers can ever be dialled. Belt and braces: even a
-// compromised or tampered API response cannot redirect a caller to an
-// attacker-controlled line (premium-rate fraud / vishing).
-var TMC_MAIN_NUMBER = '+18605158987';
-var TMC_ALLOWED_NUMBERS = ['+18605158987','+18603214391','+18604487273','+18607462665','+18608544555'];
-function tmcSafeDialNumber(n){
-  if (typeof n !== 'string') return TMC_MAIN_NUMBER;
-  var t = n.trim();
-  if (!/^\+[1-9][0-9]{7,14}$/.test(t)) return TMC_MAIN_NUMBER; // strict E.164
-  if (TMC_ALLOWED_NUMBERS.indexOf(t) === -1) return TMC_MAIN_NUMBER; // not ours
-  return t;
-}
 async function handleCall(){
   updateScanAction('call');
   showFeedback();
-  // Reserve a pool number for this tag. The number we dial identifies the
-  // tag exactly, so the inbound webhook never has to guess which owner.
-  var dial = TMC_MAIN_NUMBER;
+  // Register intent server-side so the inbound webhook knows which owner to ring.
   try {
-    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-    var timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, 6000) : null;
-    var resp = await fetch('/api/register-pending-call', {
+    await fetch('/api/register-pending-call', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ token: currentToken }),
-      signal: ctrl ? ctrl.signal : undefined
+      body: JSON.stringify({ token: currentToken })
     });
-    if (timer) clearTimeout(timer);
-    if (resp && resp.ok) {
-      var data = await resp.json();
-      if (data && data.dial_number) dial = tmcSafeDialNumber(data.dial_number);
-    }
-  } catch(e) { /* don't block the dial on a network hiccup - use main line */ }
-  window.location.href = 'tel:' + dial;
+  } catch(e) { /* don't block the dial on a network hiccup */ }
+  window.location.href = 'tel:+18605158987';
 }
 function handleText(){updateScanAction("text");showToast("Text messaging coming soon");}
 function handlePhotoSelected(input) {
