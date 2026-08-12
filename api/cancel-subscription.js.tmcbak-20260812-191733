@@ -42,64 +42,6 @@ function checkOrigin(req) {
 }
 
 /**
- * TMC_PATCH22_TAX: tolerant matching for "is this the annual subscription charge?"
- *
- * Checkout runs Stripe Tax, so a taxed customer pays base price + sales tax.
- * The old exact match (amount_paid === 999) never matched those invoices, so
- * taxed customers were wrongly told they had no refundable charge.
- */
-const MAX_TAX_RATE = 0.20; // 20% ceiling -- above any US sales tax, below the next plan up
-
-// Total tax on an invoice. Older Stripe API versions expose inv.tax; newer
-// ones use an array (total_tax_amounts / total_taxes). Handle all shapes.
-function invoiceTaxCents(inv) {
-  if (!inv) return 0;
-  if (typeof inv.tax === 'number' && inv.tax >= 0) return inv.tax;
-  const buckets = [inv.total_tax_amounts, inv.total_taxes];
-  for (let b = 0; b < buckets.length; b++) {
-    const arr = buckets[b];
-    if (Array.isArray(arr) && arr.length) {
-      return arr.reduce(function (t, x) {
-        return t + ((x && typeof x.amount === 'number') ? x.amount : 0);
-      }, 0);
-    }
-  }
-  return 0;
-}
-
-// True if a line on this invoice is the plan itself, priced at the base
-// annual price. Line amounts are pre-tax, so this is the most reliable test.
-function hasAnnualLineItem(inv, annualCents) {
-  const lines = (inv && inv.lines && Array.isArray(inv.lines.data)) ? inv.lines.data : [];
-  for (let i = 0; i < lines.length; i++) {
-    const li = lines[i];
-    if (!li) continue;
-    if (typeof li.amount === 'number' && li.amount === annualCents) return true;
-    if (li.price && typeof li.price.unit_amount === 'number' && li.price.unit_amount === annualCents) return true;
-    if (li.plan && typeof li.plan.amount === 'number' && li.plan.amount === annualCents) return true;
-  }
-  return false;
-}
-
-function isAnnualCharge(inv, annualCents) {
-  if (!inv || !annualCents) return false;
-  const paid = (typeof inv.amount_paid === 'number') ? inv.amount_paid : 0;
-
-  // 1. Untaxed customer -- exactly the base price (original behaviour).
-  if (paid === annualCents) return true;
-
-  // 2. A line item priced at the base annual price (pre-tax, pre-credit).
-  if (hasAnnualLineItem(inv, annualCents)) return true;
-
-  // 3. Strip the invoice-level tax and see if the base price is left.
-  if (paid - invoiceTaxCents(inv) === annualCents) return true;
-
-  // 4. Safety net: base price plus a plausible amount of sales tax.
-  const maxTax = Math.ceil(annualCents * MAX_TAX_RATE);
-  return paid > annualCents && paid <= annualCents + maxTax;
-}
-
-/**
  * Find the most recent paid invoice on a subscription that is an
  * annual-subscription charge. Returns null if none, or { invoice, charge_id,
  * amount_paid, paid_at, plan } if found.
@@ -124,10 +66,9 @@ async function findLastAnnualInvoice(subscriptionId, customerId, plan) {
         // Only annual subscription charges count.
         const reason = inv.billing_reason || '';
         if (reason !== 'subscription_create' && reason !== 'subscription_cycle') return false;
-        // TMC_PATCH22_TAX: tolerant match -- base price, or base price + sales tax
-        // (Stripe Tax), or the plan's own line item. Still rules out partial
-        // charges, prepay bundles and sticker-only charges.
-        return isAnnualCharge(inv, annualCents);
+        // Amount must match annual price exactly (rules out partial charges,
+        // prepay bundles, sticker-only charges, etc).
+        return inv.amount_paid === annualCents;
       })
       .sort((a, b) => {
         const pa = (a.status_transitions && a.status_transitions.paid_at) || a.created || 0;
