@@ -8,8 +8,6 @@ const webpush = require('web-push');
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 const resend = new Resend(process.env.RESEND_API_KEY);
 const { sendPushToUser } = require('./_push-send');
-/* TMC_PATCH33_SCAN_RATE_LIMIT */
-const { rateLimit, getClientIp } = require('./_rate-limit');
 
 try {
   webpush.setVapidDetails(
@@ -32,27 +30,6 @@ module.exports = async function handler(req, res) {
 
   const tag_id = req.body && req.body.tag_id;
   if (!tag_id) return res.status(400).json({ error: 'tag_id required' });
-
-  /* TMC_PATCH33_SCAN_RATE_LIMIT: abuse ceiling.
-     The tag UUID is public - it is written into window._tagId on every
-     contact page - so anyone can POST here and make the owner's phone buzz
-     and their inbox fill. These limits sit far above real-world scanning so
-     genuine alerts are never dropped; COOLDOWN_MS stays 0 and owners still
-     hear about every real scan.
-
-     Runs BEFORE the tag lookup so a flood costs no DB, email or push work.
-
-     Fail-open: if the limiter itself errors we still send. Losing a real
-     scan alert is worse than losing a rate limit. */
-  try {
-    const _tmcIp = getClientIp(req);
-    if (!await rateLimit(req, res, [
-      { key: 'scan-notify:tag:' + String(tag_id), max: 20, windowSeconds: 3600 },
-      { key: 'scan-notify:ip:' + _tmcIp, max: 10, windowSeconds: 3600 }
-    ])) return;
-  } catch (rlErr) {
-    console.error('TMC_PATCH33_SCAN_RATE_LIMIT: limiter unavailable, allowing through:', rlErr && rlErr.message);
-  }
 
   // --- look up the tag + its owner ---
   const { data: tag, error: tagErr } = await supabase
