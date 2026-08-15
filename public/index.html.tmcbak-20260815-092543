@@ -59,36 +59,16 @@ body{background:#FF6B00;display:flex;flex-direction:column;align-items:center;ju
 <!-- Open Graph -->
 <meta property="og:title" content="TapMyCar — Privacy for you. Safety for your car.">
 <meta property="og:description" content="Privacy-first vehicle contact. NFC + QR sticker. Just TapMyCar.">
-<meta property="og:image" content="https://www.tapmycar.io/og-image.png">
-<meta property="og:url" content="https://www.tapmycar.io/">
+<meta property="og:image" content="https://tapmycar.io/og-image.png">
+<meta property="og:url" content="https://tapmycar.io/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="TapMyCar">
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="TapMyCar — Privacy for you. Safety for your car.">
 <meta name="twitter:description" content="Privacy-first vehicle contact. NFC + QR sticker. Just TapMyCar.">
-<meta name="twitter:image" content="https://www.tapmycar.io/og-image.png">
-<!-- TMC_PATCH34_SEO -->
-<link rel="canonical" href="https://www.tapmycar.io/">
-<meta name="robots" content="index, follow, max-image-preview:large">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "TapMyCar",
-  "legalName": "Praman Tech LLC",
-  "url": "https://www.tapmycar.io",
-  "logo": "https://www.tapmycar.io/sticker-hero.png",
-  "description": "Privacy-first vehicle contact. A NFC and QR sticker for your car that lets anyone reach you about your parked vehicle without ever seeing your real phone number.",
-  "email": "support@tapmycar.io",
-  "address": {
-    "@type": "PostalAddress",
-    "addressRegion": "CT",
-    "addressCountry": "US"
-  },
-  "sameAs": []
-}
-</script></head>
+<meta name="twitter:image" content="https://tapmycar.io/og-image.png">
+</head>
 <body style="background:#FF6B00" data-tmc-patch91="1">
 <div class="splash">
   <div class="shield">

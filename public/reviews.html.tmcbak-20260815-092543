@@ -40,15 +40,15 @@
 <!-- Open Graph -->
 <meta property="og:title" content="Customer reviews — TapMyCar">
 <meta property="og:description" content="Real reviews from verified TapMyCar customers.">
-<meta property="og:image" content="https://www.tapmycar.io/og-image.png">
-<meta property="og:url" content="https://www.tapmycar.io/reviews.html">
+<meta property="og:image" content="https://tapmycar.io/og-image.png">
+<meta property="og:url" content="https://tapmycar.io/reviews.html">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="TapMyCar">
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Customer reviews — TapMyCar">
 <meta name="twitter:description" content="Real reviews from verified TapMyCar customers.">
-<meta name="twitter:image" content="https://www.tapmycar.io/og-image.png">
+<meta name="twitter:image" content="https://tapmycar.io/og-image.png">
 <style>/* TMC_SAFEAREA edge-to-edge fix */ body{padding-top:env(safe-area-inset-top) !important;}</style>
 </head>
 <body class="wide-page">

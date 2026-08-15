@@ -1,0 +1,32 @@
+# TMC_PATCH34_SEO
+# TapMyCar - Praman Tech LLC
+
+User-agent: *
+
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /billing
+Disallow: /renew
+Disallow: /activate
+Disallow: /activity
+Disallow: /manage
+Disallow: /my-tows
+Disallow: /claim
+Disallow: /reset
+Disallow: /verify
+Disallow: /payment-success
+Disallow: /delete-account
+Disallow: /unsubscribe
+Disallow: /towing-signin
+Disallow: /splash
+Disallow: /voice
+Disallow: /tag/
+Disallow: /contact
+Disallow: /r/
+Disallow: /api/
+Disallow: /cmshaveaccesstouser2026-npmevy.html
+
+Allow: /
+
+# Sitemap tells crawlers about every page worth indexing.
+Sitemap: https://www.tapmycar.io/sitemap.xml

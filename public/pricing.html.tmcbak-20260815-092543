@@ -55,15 +55,15 @@
 <!-- Open Graph -->
 <meta property="og:title" content="Pricing — Free, Standard, Premium plans | TapMyCar">
 <meta property="og:description" content="Simple pricing for TapMyCar. Free eTag, $9.99 Standard sticker, $24.99 Premium with 3 stickers for family. No hidden fees.">
-<meta property="og:image" content="https://www.tapmycar.io/og-image.png">
-<meta property="og:url" content="https://www.tapmycar.io/pricing.html">
+<meta property="og:image" content="https://tapmycar.io/og-image.png">
+<meta property="og:url" content="https://tapmycar.io/pricing.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="TapMyCar">
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Pricing — Free, Standard, Premium plans | TapMyCar">
 <meta name="twitter:description" content="Simple pricing for TapMyCar. Free eTag, $9.99 Standard sticker, $24.99 Premium with 3 stickers for family. No hidden fees.">
-<meta name="twitter:image" content="https://www.tapmycar.io/og-image.png">
+<meta name="twitter:image" content="https://tapmycar.io/og-image.png">
 <script>
 /* TMC_PATCH45B_FIX: pricing-page referral-credit banner + apply checkbox.
    Fetches the user's available credit on load. If > 0, inserts a banner
@@ -291,23 +291,7 @@
 })();
 </script>
 <style>/* TMC_SAFEAREA edge-to-edge fix */ .nav{padding-top:calc(12px + env(safe-area-inset-top)) !important;}</style>
-<!-- TMC_PATCH34_SEO -->
-<link rel="canonical" href="https://www.tapmycar.io/pricing">
-<meta name="robots" content="index, follow, max-image-preview:large">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Product",
-  "name": "TapMyCar Vehicle Contact Tag",
-  "description": "NFC and QR sticker for your car. Strangers can call you about your parked vehicle through a masked number, so your real phone number stays private. Instant scan alerts to your phone.",
-  "brand": {
-    "@type": "Brand",
-    "name": "TapMyCar"
-  },
-  "category": "Vehicle Accessories",
-  "url": "https://www.tapmycar.io/pricing"
-}
-</script></head>
+</head>
 <body class="wide-page">
 <div class="nav">
   <div class="bk" onclick="window.location.href='/dashboard.html'"><div class="bkb"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><span class="bk-label">Pricing</span></div>
