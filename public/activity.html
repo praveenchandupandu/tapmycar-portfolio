@@ -98,7 +98,7 @@
     .p13-lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:300;align-items:center;justify-content:center;padding:20px}
     .p13-lightbox.show{display:flex}
     .p13-lightbox img{max-width:100%;max-height:80vh;border-radius:12px}
-    .p13-lightbox-close{position:absolute;top:18px;right:18px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;border:none;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .p13-lightbox-close{position:absolute;top:calc(18px + env(safe-area-inset-top));right:18px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;border:none;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center}
     .p13-lightbox-meta{position:absolute;left:0;right:0;bottom:24px;text-align:center;color:#fff;font-size:13px;font-weight:600;padding:0 20px}
   </style>
 <!-- Favicon -->

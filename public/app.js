@@ -29,69 +29,76 @@ function showToast(message) {
 }
 
 function initOTP() {
-  const boxes = document.querySelectorAll('.otp-box');
-  if (!boxes.length) return;
+  /* TMC_PATCH36_OTP_PASTE: wire each .otp-row group on its own. contact.html
+     stacks THREE 6-box code fields on one page; the old code grabbed all 18
+     boxes as a single strip, so a paste could land in the wrong field. Also
+     strips maxlength at runtime: on iOS the clipboard paste event is
+     unreliable, but the input-event spread path IS reliable - and
+     maxlength="1" was silently truncating the pasted value before that path
+     could see it. Single-digit-per-box is still enforced in JS below. */
+  var rows = document.querySelectorAll('.otp-row');
+  var groups = rows.length
+    ? Array.prototype.map.call(rows, function (r) { return r.querySelectorAll('.otp-box'); })
+    : [document.querySelectorAll('.otp-box')];
 
-  // Detect which submit to trigger (signin vs register)
-  function submitOTP() {
-    if (typeof window.signIn === 'function') window.signIn();
-    else if (typeof window.verifyOTP === 'function') window.verifyOTP();
-  }
+  groups.forEach(function (boxes) {
+    if (!boxes.length) return;
 
-  // Spread a 6-digit string across the 6 boxes
-  function fillBoxes(digits) {
-    const clean = String(digits || '').replace(/\D/g, '').slice(0, boxes.length);
-    if (!clean) return;
-    for (let i = 0; i < boxes.length; i++) {
-      boxes[i].value = clean[i] || '';
-      if (clean[i]) boxes[i].classList.add('filled');
-      else boxes[i].classList.remove('filled');
+    function submitOTP() {
+      if (typeof window.signIn === 'function') window.signIn();
+      else if (typeof window.verifyOTP === 'function') window.verifyOTP();
     }
-    const lastFilled = Math.min(clean.length, boxes.length) - 1;
-    if (lastFilled >= 0) boxes[lastFilled].focus();
-    // Auto-submit when all 6 are filled (great UX for iOS autofill)
-    if (clean.length === boxes.length) setTimeout(submitOTP, 200);
-  }
 
-  boxes.forEach((box, i) => {
-    box.addEventListener('input', (e) => {
-      const val = e.target.value;
-      // If iOS autofill or paste dumped multiple digits into this box, spread them
-      if (val.length > 1) {
-        fillBoxes(val);
-        return;
+    function fillBoxes(digits) {
+      var clean = String(digits || '').replace(/\D/g, '').slice(0, boxes.length);
+      if (!clean) return;
+      for (var i = 0; i < boxes.length; i++) {
+        boxes[i].value = clean[i] || '';
+        if (clean[i]) boxes[i].classList.add('filled');
+        else boxes[i].classList.remove('filled');
       }
-      if (val.length >= 1) {
-        box.value = val[val.length - 1];
-        box.classList.add('filled');
-        if (i < boxes.length - 1) boxes[i + 1].focus();
-      } else {
-        box.classList.remove('filled');
-      }
-    });
-    box.addEventListener('keydown', (e) => {
-      if (e.key === 'Backspace' && !box.value && i > 0) {
-        boxes[i - 1].focus();
-        boxes[i - 1].classList.remove('filled');
-      }
-      // Enter on any OTP box = submit (as long as all 6 are filled)
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        const full = Array.from(boxes).map(b => b.value).join('');
-        if (full.length === boxes.length) submitOTP();
-      }
-    });
-    // Handle paste into any box
-    box.addEventListener('paste', (e) => {
-      const pasted = (e.clipboardData || window.clipboardData).getData('text');
-      if (pasted && /\d/.test(pasted)) {
-        e.preventDefault();
-        fillBoxes(pasted);
-      }
+      var lastFilled = Math.min(clean.length, boxes.length) - 1;
+      if (lastFilled >= 0) boxes[lastFilled].focus();
+      if (clean.length === boxes.length) setTimeout(submitOTP, 200);
+    }
+
+    Array.prototype.forEach.call(boxes, function (box, i) {
+      box.removeAttribute('maxlength');
+
+      box.addEventListener('input', function (e) {
+        var val = e.target.value;
+        if (val.length > 1) { fillBoxes(val); return; }
+        if (val.length >= 1) {
+          box.value = val[val.length - 1];
+          box.classList.add('filled');
+          if (i < boxes.length - 1) boxes[i + 1].focus();
+        } else {
+          box.classList.remove('filled');
+        }
+      });
+
+      box.addEventListener('keydown', function (e) {
+        if (e.key === 'Backspace' && !box.value && i > 0) {
+          boxes[i - 1].focus();
+          boxes[i - 1].classList.remove('filled');
+        }
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          var full = Array.prototype.map.call(boxes, function (b) { return b.value; }).join('');
+          if (full.length === boxes.length) submitOTP();
+        }
+      });
+
+      box.addEventListener('paste', function (e) {
+        var pasted = (e.clipboardData || window.clipboardData).getData('text');
+        if (pasted && /\d/.test(pasted)) {
+          e.preventDefault();
+          fillBoxes(pasted);
+        }
+      });
     });
   });
 }
-
 function getOTPValue() {
   return Array.from(document.querySelectorAll('.otp-box')).map(b => b.value).join('');
 }
