@@ -300,44 +300,15 @@
   "@type": "Product",
   "name": "TapMyCar Vehicle Contact Tag",
   "description": "NFC and QR sticker for your car. Strangers can call you about your parked vehicle through a masked number, so your real phone number stays private. Instant scan alerts to your phone.",
-  "image": "https://www.tapmycar.io/sticker-hero.png",
   "brand": {
     "@type": "Brand",
     "name": "TapMyCar"
   },
   "category": "Vehicle Accessories",
-  "url": "https://www.tapmycar.io/pricing",
-  "offers": {
-    "@type": "AggregateOffer",
-    "priceCurrency": "USD",
-    "lowPrice": "9.99",
-    "highPrice": "24.99",
-    "offerCount": "2",
-    "availability": "https://schema.org/InStock",
-    "url": "https://www.tapmycar.io/pricing"
-  }
+  "url": "https://www.tapmycar.io/pricing"
 }
-</script><style>/* TMC_LAUNCH_OFFER */
-@keyframes tmcOfferShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
-@keyframes tmcOfferPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
-@keyframes tmcPricePop{0%{transform:scale(.7);opacity:0}60%{transform:scale(1.14)}100%{transform:scale(1);opacity:1}}
-@keyframes tmcBannerGlow{0%,100%{box-shadow:0 3px 16px rgba(255,107,0,.45)}50%{box-shadow:0 3px 30px rgba(255,107,0,.85)}}
-@keyframes tmcFlameWiggle{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
-.tmc-offer-banner{position:relative;overflow:hidden;background:linear-gradient(90deg,#E85D00,#FF6B00,#FFB067,#FF6B00,#E85D00);background-size:250% 100%;animation:tmcOfferShimmer 4s linear infinite, tmcBannerGlow 2.2s ease-in-out infinite;color:#fff;text-align:center;padding:16px 14px 18px;border-bottom:3px solid #C24E00}
-.tmc-offer-top{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
-.tmc-offer-pill{display:inline-flex;align-items:center;gap:6px;background:#111;color:#FFD84D;font-size:12px;font-weight:900;letter-spacing:1px;padding:5px 12px;border-radius:30px;text-transform:uppercase;animation:tmcOfferPulse 1.3s ease-in-out infinite;box-shadow:0 2px 8px rgba(0,0,0,.35)}
-.tmc-offer-flame{display:inline-block;animation:tmcFlameWiggle .6s ease-in-out infinite}
-.tmc-offer-headline{font-size:22px;font-weight:900;letter-spacing:-.3px;line-height:1.1;text-shadow:0 2px 6px rgba(0,0,0,.25)}
-.tmc-offer-sub{font-size:13.5px;font-weight:600;margin-top:6px;opacity:.97}
-.tmc-offer-sub b{font-weight:900;background:rgba(255,255,255,.22);padding:1px 7px;border-radius:6px}
-@media(max-width:520px){.tmc-offer-headline{font-size:18px}}
-.tmc-was{color:#9CA3AF;text-decoration:line-through;font-weight:600;font-size:.62em;margin-right:7px}
-.tmc-offer-badge{display:inline-block;background:#DC2626;color:#fff;font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;margin-left:8px;vertical-align:middle;animation:tmcOfferPulse 1.5s ease-in-out infinite;letter-spacing:.3px;white-space:nowrap}
-.tmc-offer-line{font-size:13px;margin-bottom:3px;line-height:1.2}
-</style>
-</head>
+</script></head>
 <body class="wide-page">
-<div class="tmc-offer-banner"><div class="tmc-offer-top"><span class="tmc-offer-pill"><span class="tmc-offer-flame">&#128293;</span> Limited Time</span><span class="tmc-offer-headline">Launch Offer is LIVE &mdash; up to 37% OFF!</span></div><div class="tmc-offer-sub">Get your privacy tag now &middot; Standard <b>$9.99</b> &middot; Premium <b>$24.99</b> &middot; before it ends!</div></div>
 <div class="nav">
   <div class="bk" onclick="window.location.href='/dashboard.html'"><div class="bkb"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><span class="bk-label">Pricing</span></div>
 <a href="/settings.html" aria-label="TapMyCar" style="display:flex;align-items:center;text-decoration:none"><img src="/logo.png" alt="TapMyCar" class="nav-logo-img" style="height:36px;width:auto"></a></div>
@@ -364,7 +335,6 @@
     <div class="hero-badge">Most Popular</div>
     <div class="plan-top">
       <div class="plan-name">Standard</div>
-      <div class="tmc-offer-line"><span class="tmc-was">$15.99</span><span class="tmc-offer-badge">LAUNCH OFFER &middot; SAVE $6</span></div>
       <div id="std-price" class="plan-price">$9.99 <span class="plan-sub">today, then $9.99/yr</span></div>
     </div>
     <div class="plan-tagline">Physical NFC + QR sticker for your car. 30-day free trial before annual plan begins.</div>
@@ -391,7 +361,6 @@
   <div class="plan-card">
     <div class="plan-top">
       <div class="plan-name">Premium</div>
-      <div class="tmc-offer-line"><span class="tmc-was">$39.99</span><span class="tmc-offer-badge">LAUNCH OFFER &middot; SAVE $15</span></div>
       <div id="prem-price" class="plan-price">$24.99 <span class="plan-sub">today, then $19.99/yr</span></div>
     </div>
     <div class="plan-tagline">3 stickers for your whole household  same TapMyCar privacy across every car you drive.</div>
