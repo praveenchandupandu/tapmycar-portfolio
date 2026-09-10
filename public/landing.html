@@ -518,27 +518,27 @@ body { font-family: 'Inter', sans-serif; background: #fff; color: #111; max-widt
     "url": "https://www.tapmycar.io/pricing"
   }
 }
-</script><style>/* TMC_LAUNCH_OFFER */
-@keyframes tmcOfferShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
-@keyframes tmcOfferPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
-@keyframes tmcPricePop{0%{transform:scale(.7);opacity:0}60%{transform:scale(1.14)}100%{transform:scale(1);opacity:1}}
-@keyframes tmcBannerGlow{0%,100%{box-shadow:0 3px 16px rgba(255,107,0,.45)}50%{box-shadow:0 3px 30px rgba(255,107,0,.85)}}
+</script><style>/* TMC_LAUNCH_OFFER TMC_OFFER_V3 */
+@keyframes tmcOfferPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
 @keyframes tmcFlameWiggle{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
-.tmc-offer-banner{position:relative;overflow:hidden;background:linear-gradient(90deg,#E85D00,#FF6B00,#FFB067,#FF6B00,#E85D00);background-size:250% 100%;animation:tmcOfferShimmer 4s linear infinite, tmcBannerGlow 2.2s ease-in-out infinite;color:#fff;text-align:center;padding:16px 14px 18px;border-bottom:3px solid #C24E00}
-.tmc-offer-top{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
-.tmc-offer-pill{display:inline-flex;align-items:center;gap:6px;background:#111;color:#FFD84D;font-size:12px;font-weight:900;letter-spacing:1px;padding:5px 12px;border-radius:30px;text-transform:uppercase;animation:tmcOfferPulse 1.3s ease-in-out infinite;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+@keyframes tmcCardGlow{0%,100%{box-shadow:0 8px 22px rgba(0,0,0,.28)}50%{box-shadow:0 8px 34px rgba(0,0,0,.45)}}
+@keyframes tmcShine{0%{left:-60%}100%{left:130%}}
+@keyframes tmcOfferBadgePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.tmc-offer-card{position:relative;overflow:hidden;display:block;max-width:520px;width:100%;background:#111;color:#fff;border-radius:16px;padding:14px 18px;margin:0 auto 22px;border:2px solid #FFD84D;animation:tmcCardGlow 2.4s ease-in-out infinite;text-align:center;box-sizing:border-box}
+.tmc-offer-card::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(115deg,transparent,rgba(255,255,255,.18),transparent);transform:skewX(-18deg);animation:tmcShine 3.2s ease-in-out infinite;pointer-events:none}
+.tmc-offer-top{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;position:relative;z-index:1}
+.tmc-offer-pill{display:inline-flex;align-items:center;gap:6px;background:#FF6B00;color:#fff;font-size:11px;font-weight:900;letter-spacing:1px;padding:4px 11px;border-radius:30px;text-transform:uppercase;animation:tmcOfferPulse 1.3s ease-in-out infinite}
 .tmc-offer-flame{display:inline-block;animation:tmcFlameWiggle .6s ease-in-out infinite}
-.tmc-offer-headline{font-size:22px;font-weight:900;letter-spacing:-.3px;line-height:1.1;text-shadow:0 2px 6px rgba(0,0,0,.25)}
-.tmc-offer-sub{font-size:13.5px;font-weight:600;margin-top:6px;opacity:.97}
-.tmc-offer-sub b{font-weight:900;background:rgba(255,255,255,.22);padding:1px 7px;border-radius:6px}
-@media(max-width:520px){.tmc-offer-headline{font-size:18px}}
+.tmc-offer-headline{font-size:18px;font-weight:900;letter-spacing:-.2px;color:#FFD84D}
+.tmc-offer-sub{font-size:13px;font-weight:600;margin-top:6px;color:rgba(255,255,255,.9);position:relative;z-index:1}
+.tmc-offer-sub b{color:#fff;font-weight:900;background:#FF6B00;padding:1px 7px;border-radius:6px}
+@media(max-width:520px){.tmc-offer-headline{font-size:16px}}
 .tmc-was{color:#9CA3AF;text-decoration:line-through;font-weight:600;font-size:.62em;margin-right:7px}
-.tmc-offer-badge{display:inline-block;background:#DC2626;color:#fff;font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;margin-left:8px;vertical-align:middle;animation:tmcOfferPulse 1.5s ease-in-out infinite;letter-spacing:.3px;white-space:nowrap}
+.tmc-offer-badge{display:inline-block;background:#DC2626;color:#fff;font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;margin-left:8px;vertical-align:middle;animation:tmcOfferBadgePulse 1.5s ease-in-out infinite;letter-spacing:.3px;white-space:nowrap}
 .tmc-offer-line{font-size:13px;margin-bottom:3px;line-height:1.2}
 </style>
 </head>
 <body class="wide-page">
-<div class="tmc-offer-banner"><div class="tmc-offer-top"><span class="tmc-offer-pill"><span class="tmc-offer-flame">&#128293;</span> Limited Time</span><span class="tmc-offer-headline">Launch Offer is LIVE &mdash; up to 37% OFF!</span></div><div class="tmc-offer-sub">Get your privacy tag now &middot; Standard <b>$9.99</b> &middot; Premium <b>$24.99</b> &middot; before it ends!</div></div>
 <!-- NAV -->
 <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:.5px solid #E5E7EB;position:sticky;top:env(safe-area-inset-top);background:#fff;z-index:100">
   <a href="/landing.html" aria-label="TapMyCar" style="display:flex;align-items:center;gap:12px;text-decoration:none;font-size:30px;font-weight:900;color:#111;letter-spacing:-2.5px;line-height:1"><img src="/logo.png" alt="" style="height:52px;width:auto;display:block"><span style="white-space:nowrap;display:inline-block">Tap<span style="color:#FF6B00">My</span>Car</span></a>
@@ -549,6 +549,7 @@ body { font-family: 'Inter', sans-serif; background: #fff; color: #111; max-widt
 <div class="hero">
   <div class="hero-ring1"></div>
   <div class="hero-ring2"></div>
+  <div class="tmc-offer-card"><div class="tmc-offer-top"><span class="tmc-offer-pill"><span class="tmc-offer-flame">&#128293;</span> Limited Time</span><span class="tmc-offer-headline">Launch Offer is LIVE &mdash; up to 37% OFF!</span></div><div class="tmc-offer-sub">Get your tag now &middot; Standard <b>$9.99</b> &middot; Premium <b>$24.99</b> &middot; before it ends!</div></div>
   <div class="hero-badge"><div class="hero-badge-dot"></div>Privacy + Safety  No app needed to contact</div>
   <h1>Privacy for you.<br><span>Safety</span> for your car.</h1>
   <p>Your car is always protected. Your identity is never exposed. Anyone can reach you  without ever seeing your real number.</p>
