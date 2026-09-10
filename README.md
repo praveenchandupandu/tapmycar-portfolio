@@ -9,7 +9,7 @@
 
 TapMyCar is a complete privacy-first vehicle contact platform enabling strangers to reach vehicle owners through masked phone calls without either party exchanging real phone numbers. Users scan an NFC sticker or QR code on a vehicle to initiate a secure, anonymous connection via Twilio.
 
-**Status:** Live production app on Google Play (Android), iOS App Store (US, Canada, UK, Australia), and website deployment on Vercel.
+**Status:** Live production app on Google Play (Android), iOS App Store (US), and website deployment on Vercel.
 
 \---
 
