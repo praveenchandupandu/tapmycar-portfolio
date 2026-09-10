@@ -45,7 +45,7 @@ TapMyCar is a complete privacy-first vehicle contact platform enabling strangers
 * **Three Tiers:**
 
   * **eTag:** Free (NFC sticker only, no Twilio calls)
-  * **Standard:** $9.99 + $9.99/year (1 Twilio call per vehicle, email alerts)
+  * **Standard:** $9.99 + $9.99/year (Unlimited calls as per the designated time, email alerts)
   * **Premium:** $24.99 + $19.99/year (Unlimited calls, premium features, family gifting)
 * **Billing Logic:**
 
