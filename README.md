@@ -1,168 +1,136 @@
 ﻿# TapMyCar: Privacy-First Vehicle Contact Platform
 
-**Production SaaS Application** | Mar 2026 – Present
-**Live:** https://tapmycar.io | Google Play | iOS App Store
+Self-Directed SaaS Learning Project | Mar 2026 – Present
 
-## Executive Summary
+## Overview
 
-TapMyCar is a production-grade SaaS platform enabling privacy-preserving communication between vehicle owners and third parties through NFC/QR-based contact initiation and Twilio-mediated masked calling.
+TapMyCar is a complete end-to-end SaaS platform I designed and built to demonstrate full-stack product development. The platform enables privacy-preserving communication between vehicle owners and third parties through NFC/QR-based contact initiation and Twilio-mediated masked calling.
 
-**Key Metrics:**
-- 30+ PostgreSQL tables with normalized schema
-- 44 REST API endpoints (authentication, payments, analytics, webhooks)
-- Event-driven logging system: 100K+ daily event captures
-- Production payment processing via Stripe (live keys)
-- 200+ verified Twilio masked call sessions
-- Deployed across iOS, Android, and web (Vercel)
+Status: Functional prototype in development. Not yet public release.
 
-## Technical Architecture
+## What I Built
 
-### 1. Database Design & Analytics Infrastructure
+### 1. Database Architecture (30+ Tables)
 
-Designed normalized relational database optimized for both transactional consistency and analytical querying.
+Designed complete normalized PostgreSQL schema:
+- Core: users, vehicles, calls, payments, subscriptions, orders
+- Analytics: analytics_events, call_logs, notifications_log, user_segments
+- Features: referrals, gift_codes, promo_codes, risk_tiers
 
-**Core Entities:**
-- users (30K+ records: verification_status, signup_source, geographic_location)
-- vehicles (vehicle_id, owner_id, created_at, subscription_tier)
-- calls (caller_id, callee_id, call_duration, status, timestamp)
-- subscriptions (plan_type, activation_date, renewal_date, billing_status)
-- orders (order_id, user_id, amount_paid, tax, currency, processor)
+Design Decisions:
+- Normalized structure for data integrity
+- ACID compliance for payment processing
+- Event-driven logging for analytics
+- Strategic indexing for query performance
 
-**Analytics Tables:**
-- analytics_events (event_type, user_id, timestamp, event_properties JSON)
-- call_logs (audit trail with attempt status, failure reasons)
-- notifications_log (push, email, SMS delivery tracking)
-- user_segments (risk_tier assignment, cohort_id, segment_date)
+### 2. Analytics Infrastructure
 
-### 2. Analytics & Data Science Applications
+Built event-logging system tracking user actions:
+- Event schema: taps, scans, calls, verifications, payments
+- SQL queries for cohort analysis and retention calculation
+- User lifecycle tracking by signup cohort
+- Performance metrics: DAU, activation rate, churn rate
 
-#### A. Cohort Analysis & Retention Modeling
+### 3. User Segmentation via K-Means Clustering
 
-**Key Findings:**
-- Users completing first call on Day 1: 42% Day-7 retention
-- Users with no first-call completion: 8% Day-7 retention
-- First-call completion is #1 driver of user retention (5.25x multiplier)
+Applied unsupervised learning to segment users:
+- Engineered 12 behavioral features (verification, calls, engagement, payment history)
+- K-means clustering with k=5 (determined via elbow method)
+- Mapped clusters to risk tiers for dynamic pricing strategy
+- Use case: customer support prioritization, churn prediction
 
-#### B. User Segmentation via K-Means Clustering
+### 4. A/B Testing Framework
 
-**Features Engineered (12 behavioral features):**
-1. Verification score
-2. Call completion count
-3. First-call latency
-4. Geographic concentration
-5. Device consistency
-6. Signup source value
-7. Engagement frequency
-8. Payment history score
-9. Subscription tier trajectory
-10. Churn risk indicators
-11. NPS proxy
-12. Lifetime value proxy
+Designed statistical experiments:
+- Power analysis to calculate proper sample sizes
+- Hypothesis testing (SMS vs. Email verification)
+- T-tests for significance
+- Effect size calculation
+- Proper experiment design with control groups
 
-**Segmentation Results:**
-- Low Risk: 2,847 users, .50 avg LTV, 3% churn
-- Med-Low: 5,123 users, .20 avg LTV, 8% churn
-- Medium: 8,934 users, .50 avg LTV, 15% churn
-- Med-High: 6,712 users, .30 avg LTV, 28% churn
-- High Risk: 3,821 users, .10 avg LTV, 52% churn
+### 5. Production Payment System
 
-#### C. A/B Testing & Statistical Hypothesis Testing
+Integrated Stripe production API:
+- Subscription management (free tier, Standard .99, Premium .99)
+- Complex billing flows: activation charge → trial → recurring
+- Prorated calculations for upgrades
+- Webhook handling for payment events
+- Tax calculation integration
+- Refund logic with edge case handling
 
-**Experiment: SMS vs. Email Verification**
+### 6. Twilio Integration
 
-**Results:**
-- SMS arm: 347 users, 289 completions (83.3%)
-- Email arm: 352 users, 247 completions (70.2%)
-- χ² = 18.42, p < 0.001 (highly significant)
-- Cramér's V = 0.16 (medium effect size)
-- Odds Ratio = 2.15 (SMS users 2.15x more likely to verify)
-- Lift: +13.1 percentage points
+Built masked calling system:
+- Users scan NFC sticker → initiates call
+- Twilio routes call through masked number
+- Real phone numbers never exposed to either party
+- Call logging and metadata tracking
+- Test calls verified through Twilio dashboard
 
-### 3. Payment Systems & Subscription Billing
+### 7. Mobile Apps (iOS/Android)
 
-**Stripe Integration (Production API)**
+Built with Capacitor:
+- iOS app on App Store (Bundle ID: io.tapmycar.app)
+- Android app on Google Play
+- Navigated Apple Guideline 3.1.1 (pricing on website, not in-app)
+- Regional availability management (US, Canada, UK, Australia)
 
-**Billing Architecture:**
-- Day 0:  activation charge
-- Days 1-30: Trial period
-- Day 30: Sticker ships + .99 charge
-- Day 60: Annual renewal (.99/year) auto-renews
+### 8. Deployment Pipeline
 
-**Implemented Flows:**
-- Initial Checkout: Stripe.js payment collection
-- Upgrades: Prorated calculation for tier changes
-- Gift Renewals: Special renewal path charging annual fee only
-- Cancellations: 14-day refund window from sticker shipment
+Complete CI/CD setup:
+- GitHub source control
+- Vercel serverless deployment (auto-deploy on push)
+- Codemagic for iOS cloud builds
+- Environment variable management for secrets
+- Automated testing and linting
 
-### 4. Twilio Integration & Call Routing
+## Technical Skills Demonstrated
 
-**Masked Call Architecture:**
-- User scans NFC sticker → captures vehicle_id
-- API endpoint /api/initiate-call queries encrypted owner phone
-- Twilio routes: User phone → masked gateway → owner's real phone
-- Call logged with caller_id, callee_id, timestamp, status, duration
+Database Design: Normalized PostgreSQL, ACID compliance, indexing strategy
+SQL & Analytics: Cohort analysis, retention queries, event logging
+Statistical Analysis: A/B test design, hypothesis testing, power analysis
+Machine Learning: K-means clustering, feature engineering, unsupervised learning
+Backend: Node.js, REST APIs, webhook handling, database queries
+Payments: Stripe API integration, subscription logic, tax handling
+Communications: Twilio API, Firebase notifications, Resend email
+Mobile Development: Capacitor, iOS/Android apps, App Store compliance
+DevOps: GitHub, Vercel, Codemagic, CI/CD pipelines
+Architecture: Full-stack SaaS design, scalability considerations
 
-**Real-World Testing Results (200+ sessions):**
-- Connection success rate: 94.3%
-- Average call duration: 3m 47s
-- Voicemail to live ratio: 2.1:1
-- Caller hangup before connect: 8.2%
+## Key Technologies
 
-### 5. Infrastructure & Deployment
+Backend: Node.js, Express, Vercel Serverless
+Database: PostgreSQL (Supabase)
+Payments: Stripe (production API)
+Communications: Twilio, Firebase, Resend, Cloudflare
+Frontend: React, Capacitor
+DevOps: GitHub, Vercel, Codemagic
+Analytics: SQL, Python (K-means), Statistical testing
 
-**Technology Stack:**
-- Compute: Node.js + Vercel (serverless APIs, auto-scaling)
-- Database: PostgreSQL (Supabase) - ACID transactions, analytics
-- Payments: Stripe API (production subscriptions)
-- Calling: Twilio REST API (masked call routing)
-- Notifications: Firebase Cloud Messaging (push notifications)
-- Email: Resend API (transactional emails)
-- CI/CD: Codemagic + GitHub (iOS builds, deployments)
-- Mobile: Capacitor + React (iOS/Android apps)
+## What This Project Demonstrates
 
-## Key Results & Metrics
+This is NOT a tutorial project. It shows:
 
-**Product:**
-- 44 API endpoints in production
-- 30+ normalized database tables
-- 19 user-facing pages
-- iOS + Android apps on major app stores
+1. System Design Thinking - architected complete SaaS from user problem to production
+2. Technical Depth - database design, APIs, analytics, payments, communications
+3. Data Science Skills - cohort analysis, clustering, A/B testing with rigor
+4. Production Experience - real API integrations, edge case handling, debugging
+5. Problem Solving - navigated platform constraints, tax complexity, payment logic
+6. End-to-End Ownership - from product vision through deployment
 
-**Analytics:**
-- Event logging: 100K+ daily captures
-- Retention model: 5.25x difference (high vs. low first-call cohorts)
-- K-means segmentation: 5 user tiers with LTV range -
-- A/B testing: SMS verification 2.15x odds improvement
+## Learning & Next Steps
 
-**Operations:**
-- Live Stripe: 200+ real transactions
-- Real Twilio calls: 200+ sessions verified
-- Production debugging: Tax edge cases, webhook timing issues resolved
+This project taught me:
+- Payment systems are complex (edge cases, tax, refunds)
+- Analytics infrastructure requires careful design
+- Product decisions should be data-driven
+- Mobile platform compliance is non-trivial
+- Real products require attention to details tutorials skip
 
-## Skills Demonstrated
-
-✓ Database Design - Normalized PostgreSQL for transactional + analytical workloads
-✓ SQL Analytics - Cohort analysis, retention calculations, user lifecycle tracking
-✓ Statistical Modeling - K-means clustering, feature engineering, risk segmentation
-✓ Hypothesis Testing - A/B test design, power analysis, χ² tests, effect sizes
-✓ Payment Systems - Stripe API, subscriptions, prorated calculations, tax handling
-✓ Third-Party APIs - Twilio, Firebase, Resend, Cloudflare Email Routing
-✓ Backend Development - Node.js, REST APIs, webhooks, database optimization
-✓ DevOps - GitHub, Vercel, Codemagic, CI/CD pipelines
-✓ Mobile Development - Capacitor for iOS/Android, App Store compliance
-✓ Data Engineering - Event-driven logging, real-time analytics pipeline
+Next: Public release with real user testing, refining retention metrics
 
 ## Repository Note
 
-This is a sanitized portfolio version emphasizing data science, analytics, and technical architecture. The production repository (private) contains live API keys, database credentials, and payment logic.
+This is a sanitized portfolio version showing architecture, design decisions, and technical implementation. The production repository (private) contains live API credentials and payment processing logic.
 
-This version demonstrates:
-- Complete normalized database schema and design rationale
-- Production analytics queries and implementations
-- Statistical rigor in experimentation (power analysis, hypothesis testing)
-- Real payment system complexity (prorated calculations, tax handling)
-- End-to-end SaaS infrastructure (Stripe, Twilio, Firebase, Vercel)
-
----
-
-**SaaS platform showcasing data-driven product development through database design for analytics, cohort analysis, statistical hypothesis testing, customer segmentation via K-means clustering, and production payment/communication systems.**
+Demonstrates: database design for analytics, cohort analysis, statistical testing, customer segmentation, production SaaS infrastructure.
